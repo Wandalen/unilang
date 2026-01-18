@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+
+members = [
+  "module/core/unilang",
+  "module/core/unilang_parser",
+  "module/core/unilang_meta",
+  "module/core/cargo_unilang",
+]
+
+[workspace.metadata]
+repo_url = "https://github.com/Wandalen/unilang"
+discord_url = "https://discord.gg/m3yKnHRAGr"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+strip = true
