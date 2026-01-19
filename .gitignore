@@ -1,0 +1,94 @@
+# Rust build artifacts
+/target/
+**/target/
+
+# Cargo.lock files
+# Keep: Workspace root Cargo.lock (needed for reproducible builds with binary crates)
+# Ignore: Individual crate Cargo.lock files (library crates should not have lock files)
+# Pattern: Ignore Cargo.lock anywhere under module/ subdirectories
+module/**/Cargo.lock
+
+# Debug and release builds
+debug/
+release/
+
+# Temporary files (hyphen-prefix convention)
+# CRITICAL: All temporary files MUST use hyphen prefix per CLAUDE.md
+-*
+**/- *
+
+# Backup files (forbidden per CLAUDE.md - should never be created)
+*_backup*
+*_old*
+*_v[0-9]*
+*.bak
+*.orig
+*.swp
+*.swo
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and editor files
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+*.userprefs
+.project
+.classpath
+.settings/
+*.sublime-*
+
+# Rust-specific
+*.pdb
+*.rlib
+*.rmeta
+*.so
+*.dylib
+*.dll
+
+# Testing and coverage
+*.profraw
+*.profdata
+lcov.info
+coverage/
+tarpaulin-report.html
+
+# Documentation build
+/target/doc/
+book/
+
+# Benchmarking
+criterion/
+flamegraph.svg
+perf.data
+perf.data.old
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+secret/
+**/.persistent/**/-.  *
+**/.transient/
+
+# Rust analyzer
+.rust-analyzer/
+
+# Nextest cache
+.nextest/
+
+# Git conflict markers (should be resolved, not committed)
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*_BACKUP_*.txt
+*_BASE_*.txt
+*_LOCAL_*.txt
+*_REMOTE_*.txt
