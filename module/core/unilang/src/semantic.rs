@@ -355,11 +355,21 @@ impl< 'a > SemanticAnalyzer< 'a >
   /// Binds the arguments from a statement to the command definition.
   /// This function checks for the correct number and types of arguments,
   /// returning an error if validation fails.
+  ///
+  /// ## Validation Order (Critical for UX)
+  /// 1. Try to bind all arguments (collect missing, but don't error yet)
+  /// 2. Check for unknown parameters FIRST → provides "Did you mean" suggestions
+  /// 3. Then check for missing required arguments
+  ///
+  /// This ordering ensures users get helpful typo suggestions instead of
+  /// generic "missing argument" errors when they make typos.
   fn bind_arguments( instruction : &GenericInstruction, command_def : &CommandDefinition ) -> Result< HashMap< String, Value >, Error >
   {
     let mut bound_arguments = HashMap::new();
     let mut positional_idx = 0;
+    let mut missing_args = Vec::new();
 
+    // Pass 1: Try to bind all arguments, collect which ones are missing
     for arg_def in command_def.arguments()
     {
       let value_found = Self::try_bind_named_argument( instruction, arg_def, &mut bound_arguments )?
@@ -371,12 +381,20 @@ impl< 'a > SemanticAnalyzer< 'a >
       }
       else
       {
-        Self::handle_missing_argument( arg_def, &mut bound_arguments )?;
+        missing_args.push( arg_def );
       }
     }
 
-    Self::check_excess_positional_arguments( instruction, positional_idx )?;
+    // Pass 2: Check for unknown parameters FIRST (provides helpful typo suggestions)
     Self::check_unknown_named_arguments( instruction, command_def )?;
+    Self::check_excess_positional_arguments( instruction, positional_idx )?;
+
+    // Pass 3: Now handle missing arguments (after unknown parameters are checked)
+    for arg_def in missing_args
+    {
+      Self::handle_missing_argument( arg_def, &mut bound_arguments )?;
+    }
+
     Ok( bound_arguments )
   }
 

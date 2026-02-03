@@ -587,7 +587,7 @@ impl MultiYamlAggregator
   pub fn generate_static_registry_source( &self ) -> String
   {
     let mut source_code = String::new();
-    source_code.push_str( "use phf::{phf_map, Map};\n" );
+    source_code.push_str( "use unilang::phf::{phf_map, Map};\n" );
     source_code.push_str( "use unilang::static_data::{StaticCommandDefinition, StaticArgumentDefinition, StaticArgumentAttributes, StaticKind};\n\n" );
 
     // Generate each command

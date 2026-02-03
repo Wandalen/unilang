@@ -818,6 +818,132 @@ unilang = { version = "0.10", default-features = false, features = ["enabled"] }
 - **`enhanced_repl`** - Advanced REPL with history, completion, secure input
 - **`repl`** - Basic REPL functionality
 - **`on_unknown_suggest`** - Fuzzy command suggestions
+- **`static_registry`** - Static command registry with PHF (Perfect Hash Functions)
+
+## PHF Re-export (Static Registry Feature)
+
+When using the `static_registry` feature, unilang generates code that uses Perfect Hash Functions (PHF) for compile-time command lookup. To simplify dependency management, unilang re-exports PHF types publicly.
+
+### Usage
+
+Enable the feature in Cargo.toml:
+```toml
+[dependencies]
+unilang = { version = "0.46", features = ["static_registry"] }
+```
+
+Use PHF types via unilang::phf:
+```rust,ignore
+// Import both the module (self) and types
+use unilang::phf::{self, Map};
+
+// Use module-qualified macro calls
+static COMMANDS: Map<&str, u32> = phf::phf_map! {
+  "help" => 1,
+  "version" => 2,
+};
+```
+
+**Important**: Import the `phf` module itself with `self` and use qualified macro calls (`phf::phf_map!`), not `phf_map!` directly. This ensures the macro's internal references resolve correctly.
+
+### Migration from Direct PHF Dependency
+
+If you previously added `phf` as a direct dependency, follow these steps to migrate:
+
+#### Step 1: Update Cargo.toml
+
+**Before** (with direct PHF dependency):
+```toml
+[dependencies]
+unilang = { version = "0.45", features = ["static_registry"] }
+phf = "0.11"  # Direct dependency - REMOVE THIS
+```
+
+**After** (using unilang's re-export):
+```toml
+[dependencies]
+unilang = { version = "0.46", features = ["static_registry"] }
+# No phf dependency needed - it's re-exported by unilang
+```
+
+#### Step 2: Update Import Statements
+
+**Before** (direct import):
+```rust
+use phf::{phf_map, Map};
+
+static MAP: Map<&str, i32> = phf_map! { "key" => 1 };
+```
+
+**After** (import from unilang):
+```rust
+use unilang::phf::{self, Map};  // Import module + types
+
+static MAP: Map<&str, i32> = phf::phf_map! { "key" => 1 };  // Qualified macro call
+```
+
+**Note**: You must import the `phf` module itself (`self`) and use `phf::phf_map!` (not `phf_map!` directly).
+
+#### Step 3: Verify Migration
+
+```bash
+# Remove unused dependency
+cargo clean
+cargo build --features static_registry
+
+# Should build successfully without direct phf dependency
+```
+
+### Why Re-export?
+
+- **Simplified Dependencies**: No need to add `phf` to your `Cargo.toml`
+- **Version Compatibility**: Unilang manages PHF version, avoiding conflicts
+- **Zero Runtime Cost**: PHF provides O(1) lookup at compile time
+- **Future-Proof**: Unilang can update PHF version without breaking your code
+
+### Troubleshooting
+
+#### Error: "unresolved import `unilang::phf`"
+
+**Cause**: The `static_registry` feature is not enabled.
+
+**Solution**: Add the feature to your dependency:
+```toml
+[dependencies]
+unilang = { version = "0.46", features = ["static_registry"] }
+```
+
+#### Error: "multiple candidates for `Map`"
+
+**Cause**: You have both `phf` as a direct dependency and are using `unilang::phf`.
+
+**Solution**: Remove the direct `phf` dependency from your `Cargo.toml`. Use `unilang::phf::Map` exclusively:
+```rust
+use unilang::phf::Map;  // Only import from unilang
+// Remove: use phf::Map;
+```
+
+#### Warning: "unused dependency: `phf`"
+
+**Cause**: You have `phf` in your `Cargo.toml` but are now using `unilang::phf`.
+
+**Solution**: Remove the unused dependency:
+```bash
+# Edit Cargo.toml and remove the line: phf = "0.11"
+```
+
+#### Error: "error: cannot find macro `phf_map` in this scope"
+
+**Cause**: You're trying to use `phf_map!` macro without importing it.
+
+**Solution**: Import both the macro and types:
+```rust
+use unilang::phf::{phf_map, Map};  // Import macro AND type
+
+static MY_MAP: Map<&str, i32> = phf_map! {
+  "key" => 42,
+};
+```
 
 ## Examples and Learning Path
 

@@ -569,7 +569,7 @@ fn generate_empty_phf(dest_path: &Path)
   let mut f = BufWriter::new(File::create(dest_path).unwrap());
 
   writeln!(f, "// Generated static commands (empty)").unwrap();
-  writeln!(f, "use phf::phf_map;").unwrap();
+  writeln!(f, "use unilang::phf::phf_map;").unwrap();
   writeln!(f, "use ::unilang::static_data::{{StaticCommandDefinition, StaticCommandMap}};").unwrap();
   writeln!(f).unwrap();
   writeln!(f, "/// Static command registry (compile-time generated).").unwrap();
@@ -594,7 +594,7 @@ fn generate_static_commands(dest_path: &Path, command_definitions: &[serde_yaml:
 
   // Write header and imports
   writeln!(f, "// Generated static commands").unwrap();
-  writeln!(f, "use phf::phf_map;").unwrap();
+  writeln!(f, "use unilang::phf::phf_map;").unwrap();
 
   // Import StaticCommandMap wrapper (absolute path works in both library and examples)
   writeln!(f, "use ::unilang::static_data::StaticCommandMap;").unwrap();

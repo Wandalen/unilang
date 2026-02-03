@@ -232,3 +232,92 @@ mod_interface::mod_interface!
 /// use unilang::parser::cli_parser::{parse_cli_args, CliParams};
 /// ```
 pub use unilang_parser as parser;
+
+/// Re-export of PHF (Perfect Hash Function) types for generated code.
+///
+/// # Purpose
+///
+/// When unilang's build script generates static command registries, the generated
+/// code uses PHF maps for compile-time perfect hashing. To prevent forcing downstream
+/// crates to add `phf` as a direct dependency, unilang re-exports these types.
+///
+/// # Generated Code Pattern
+///
+/// The build script generates code like:
+/// ```rust,ignore
+/// use unilang::phf::{self, Map};
+///
+/// static COMMANDS: Map<&'static str, CommandDefinition> = phf::phf_map! {
+///   ".help" => help_cmd,
+///   ".version" => version_cmd,
+/// };
+/// ```
+///
+/// # Usage Example
+///
+/// ```rust,ignore
+/// // In your crate's Cargo.toml:
+/// [dependencies]
+/// unilang = { version = "0.46", features = ["static_registry"] }
+///
+/// // In your crate's code:
+/// use unilang::phf::{self, Map};  // Import module + types
+///
+/// static MY_COMMANDS: Map<&str, u32> = phf::phf_map! {  // Qualified call
+///   "help" => 1,
+///   "version" => 2,
+/// };
+/// ```
+///
+/// **Important**: Always import the `phf` module itself with `self` and use
+/// qualified macro calls (`phf::phf_map!`), not `phf_map!` directly. This ensures
+/// the macro's internal `$crate` references resolve correctly.
+///
+/// # Important: Do NOT Add PHF as Direct Dependency
+///
+/// ❌ **WRONG**:
+/// ```toml,ignore
+/// [dependencies]
+/// unilang = { version = "0.46", features = ["static_registry"] }
+/// phf = "0.11"  # ← DO NOT ADD THIS
+/// ```
+///
+/// ✅ **CORRECT**:
+/// ```toml,ignore
+/// [dependencies]
+/// unilang = { version = "0.46", features = ["static_registry"] }
+/// # PHF types available via unilang::phf - no need to add phf
+/// ```
+///
+/// # Feature Gate
+///
+/// This re-export is only available when the `static_registry` feature is enabled.
+/// This matches the feature that enables build script code generation.
+///
+/// # Version Control
+///
+/// Unilang controls the PHF version to ensure compatibility. The re-exported PHF
+/// matches the version used internally by unilang (currently phf ^0.11).
+///
+/// # Migration Guide
+///
+/// If you previously added `phf` as a direct dependency, see the readme.md
+/// "Migration from Direct PHF Dependency" section for upgrade instructions.
+#[cfg(feature = "static_registry")]
+pub use phf;
+
+// Improved error message when feature not enabled
+// This provides helpful guidance instead of generic "unresolved import" error
+// NOTE: Requires manual addition of 'phf_error_hint' feature to trigger
+#[cfg(all(not(feature = "static_registry"), feature = "phf_error_hint"))]
+compile_error!(
+  "PHF re-export requires the 'static_registry' feature.\n\
+   \n\
+   Add this to your Cargo.toml:\n\
+   \n\
+   [dependencies]\n\
+   unilang = { version = \"0.46\", features = [\"static_registry\"] }\n\
+   \n\
+   Or enable all features:\n\
+   unilang = { version = \"0.46\", features = [\"all\"] }"
+);

@@ -78,7 +78,14 @@ approach_inline_literals = [ "static_registry", "const_parsing" ]              #
 # These are automatically enabled by approach features above.
 # Advanced users can enable these directly for custom configurations.
 
+# Enables compile-time perfect-hashed command registries.
+# When enabled:
+# - Build scripts generate code using PHF maps for O(1) command lookup
+# - PHF types (phf::Map, phf::phf_map, etc.) are re-exported via unilang::phf
+# - No need to add phf as a direct dependency
+# See readme.md "PHF Re-export" section for usage examples.
 static_registry = [ "dep:phf" ]              # Static command registry infrastructure
+phf_error_hint = []                          # Documentation feature for PHF compile error hint (no dependencies)
 yaml_parser = [ "dep:serde_yaml" ]           # YAML parsing support (build-time + runtime)
 json_parser = [ "dep:serde_json" ]           # JSON parsing support (build-time + runtime)
 multi_file = [ "dep:walkdir" ]               # Multi-file auto-discovery (any format)
