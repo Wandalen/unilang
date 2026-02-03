@@ -1,5 +1,15 @@
 # Manual Testing Plan for Unilang
 
+## Recent Test Reports
+
+**Latest**: [Manual Testing Report - 2026-01-21](./-manual_testing_report.md)
+- Status: ✅ All critical corner cases pass
+- Test Script: `examples/manual_corner_case_test.rs`
+- Findings: 2 low-priority items identified (1 test gap filled, 1 enhancement opportunity)
+- Verdict: Framework is production-ready
+
+See [Detailed Findings](./-findings.md) for technical analysis.
+
 ## Overview
 
 This directory contains manual testing procedures for the Unilang framework. Manual testing is essential for validating user experience aspects that automated tests cannot fully capture.

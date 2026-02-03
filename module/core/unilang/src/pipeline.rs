@@ -573,6 +573,41 @@ impl Pipeline
   }
 
   ///
+  /// Creates a new pipeline from a static command registry.
+  ///
+  /// This constructor enables using compile-time optimized static registries
+  /// with the Pipeline API. The static registry is converted to a CommandRegistry
+  /// internally using the existing `From<StaticCommandRegistry>` implementation.
+  ///
+  /// # Performance
+  ///
+  /// While the static registry provides 10-50x faster command lookups during
+  /// registration, the conversion to CommandRegistry happens once at pipeline
+  /// creation time. Subsequent command processing maintains the performance
+  /// benefits of pre-registered commands.
+  ///
+  /// # Examples
+  ///
+  /// ```ignore
+  /// use unilang::pipeline::Pipeline;
+  /// use unilang::registry::StaticCommandRegistry;
+  ///
+  /// let static_registry = StaticCommandRegistry::new();
+  /// let pipeline = Pipeline::from_static(static_registry);
+  /// ```
+  ///
+  /// # Feature Gate
+  ///
+  /// Requires the `static_registry` feature to be enabled.
+  #[ must_use ]
+  #[ cfg( feature = "static_registry" ) ]
+  pub fn from_static( static_registry : crate::registry::StaticCommandRegistry ) -> Self
+  {
+    let registry = CommandRegistry::from( static_registry );
+    Self::new( registry )
+  }
+
+  ///
   /// Creates a new pipeline with custom parser options.
   ///
   #[ must_use ]

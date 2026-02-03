@@ -343,7 +343,6 @@ fn test_error_propagation_through_components()
 #[test]
 fn test_integration_performance_characteristics()
 {
-  use std::time::Instant;
 
   // Arrange - Set up system for performance testing
   let mut registry = CommandRegistry::new();
@@ -383,7 +382,6 @@ fn test_integration_performance_characteristics()
   let interpreter = Interpreter::new();
 
   // Act - Measure performance of integrated workflow
-  let start_time = Instant::now();
 
   for i in 0..50  // Test reasonable number of commands
   {

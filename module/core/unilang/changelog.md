@@ -1,5 +1,42 @@
 # Changelog
 
+### 2026-01-30 - Pipeline Support for StaticCommandRegistry (v0.47.0)
+
+**New Feature:** Added `Pipeline::from_static()` constructor for direct StaticCommandRegistry support.
+
+**What changed:**
+- Added `Pipeline::from_static(StaticCommandRegistry)` constructor method
+- Enables direct pipeline creation from static registries without intermediate conversion
+- Added comprehensive test coverage (2 new tests in static_registry_conversion_test.rs)
+
+**Why:**
+- Simplifies usage pattern for static command registries
+- Provides clearer API surface for static vs dynamic registry workflows
+- Eliminates need for manual `.into()` conversion in common cases
+
+**Usage:**
+
+**Old pattern (still supported):**
+```rust
+let static_registry = StaticCommandRegistry::new();
+let pipeline = Pipeline::new(static_registry.into());
+```
+
+**New pattern (recommended):**
+```rust
+let static_registry = StaticCommandRegistry::new();
+let pipeline = Pipeline::from_static(static_registry);
+```
+
+**Benefits:**
+- More explicit intent (from_static vs generic into())
+- Better discoverability through API naming
+- Maintains same performance characteristics (conversion happens once at pipeline creation)
+
+**Feature gate:** Requires `static_registry` feature to be enabled.
+
+---
+
 ### 2025-11-30 - IMPORTANT: Runtime Registration Messaging Update (v0.45.0)
 
 **TL;DR:** Runtime registration is NOT deprecated. It's a performance trade-off with legitimate use cases.

@@ -12,6 +12,87 @@ members = [
 repo_url = "https://github.com/Wandalen/unilang"
 discord_url = "https://discord.gg/m3yKnHRAGr"
 
+[workspace.dependencies]
+# ========================================
+# Workspace Member Crates
+# ========================================
+unilang = { version = "~0.46.0", path = "module/core/unilang", default-features = false }
+unilang_parser = { version = "~0.30.0", path = "module/core/unilang_parser", default-features = false }
+unilang_meta = { version = "~0.1.0", path = "module/core/unilang_meta", default-features = false }
+cargo_unilang = { version = "~0.1.0", path = "module/core/cargo_unilang", default-features = false }
+
+# ========================================
+# Core Dependencies
+# ========================================
+serde = { version = "1.0" }
+url = { version = "2.5.0" }
+chrono = { version = "0.4.38" }
+regex = { version = "1.10.4" }
+log = { version = "0.4" }
+
+# ========================================
+# Format Parsers
+# ========================================
+serde_json = { version = "1.0" }
+serde_yaml = { version = "0.9" }
+toml = { version = "0.8" }
+ron = { version = "0.8" }
+
+# ========================================
+# Infrastructure
+# ========================================
+phf = { version = "0.11" }
+walkdir = { version = "2.5" }
+indexmap = { version = "2.2.6" }
+lru = { version = "0.12.3" }
+toml_edit = { version = "0.22" }
+
+# ========================================
+# wTools Ecosystem
+# ========================================
+error_tools = { version = "~0.36.0" }
+mod_interface = { version = "~0.55.0" }
+former = { version = "~2.40.0" }
+strs_tools = { version = "~0.42.0" }
+iter_tools = { version = "~0.43.0" }
+macro_tools = { version = "~0.78.0" }
+component_model_types = { version = "~0.20.0" }
+cli_fmt = { version = "~0.3.0" }
+test_tools = { version = "~0.16.0" }
+
+# ========================================
+# Performance Optimizations
+# ========================================
+simd-json = { version = "0.13" }
+memchr = { version = "2.7" }
+bytecount = { version = "0.6" }
+
+# ========================================
+# Optional Dependencies
+# ========================================
+rustyline = { version = "14.0" }
+prost = { version = "0.12" }
+async-graphql = { version = "7.0" }
+utoipa = { version = "4.0" }
+libloading = { version = "0.8" }
+bincode = { version = "1.3" }
+
+# ========================================
+# Build Dependencies
+# ========================================
+phf_codegen = { version = "0.11", default-features = false }
+
+# ========================================
+# Dev Dependencies
+# ========================================
+assert_cmd = { version = "2.0" }
+predicates = { version = "3.1" }
+assert_fs = { version = "1.1" }
+clap = { version = "4.4" }
+pico-args = { version = "0.5" }
+tempfile = { version = "3.8" }
+criterion = { version = "0.5" }
+
 [profile.release]
 lto = true
 opt-level = 3

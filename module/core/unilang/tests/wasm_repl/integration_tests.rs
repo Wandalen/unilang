@@ -156,7 +156,6 @@ fn test_native_utility_functions() {
 fn test_native_performance() {
   let repl = UniLangWasmRepl::new();
   
-  let start = std::time::Instant::now();
   
   // Execute 1000 commands
   for i in 0..1000 {
@@ -169,7 +168,6 @@ fn test_native_performance() {
     let _result = repl.execute_command(command);
   }
   
-  let duration = start.elapsed();
   println!("1000 commands executed in {:?}", duration);
   println!("Average per command: {:?}", duration / 1000);
   

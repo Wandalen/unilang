@@ -6,7 +6,6 @@
 use std::fs;
 use std::path::{ Path, PathBuf };
 use std::process::Command;
-use std::time::Instant;
 use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
@@ -340,7 +339,6 @@ impl QualityAssessor
     println!( "⚡ Assessing performance metrics..." );
 
     // Run tests and measure performance
-    let start_time = Instant::now();
 
     // Mock performance measurement - in real implementation, run actual tests
     let total_test_time = 8.5; // seconds

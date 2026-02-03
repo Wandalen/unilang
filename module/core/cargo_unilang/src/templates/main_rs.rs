@@ -115,26 +115,3 @@ fn run() -> Result< (), unilang::Error >
 "#
 }
 
-#[cfg(test)]
-mod tests
-{
-  use super::*;
-
-  #[test]
-  fn test_main_rs_minimal_contains_key_elements()
-  {
-    let content = main_rs_minimal();
-    assert!( content.contains( "StaticCommandRegistry::from_commands" ) );
-    assert!( content.contains( "include!" ) );
-    assert!( content.contains( "STATIC_COMMANDS" ) );
-    assert!( content.contains( "NO custom build.rs" ) );
-  }
-
-  #[test]
-  fn test_main_rs_full_has_error_handling()
-  {
-    let content = main_rs_full();
-    assert!( content.contains( "process::exit" ) );
-    assert!( content.contains( "match run()" ) );
-  }
-}

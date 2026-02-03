@@ -10,19 +10,19 @@ categories = [ "command-line-utilities", "development-tools" ]
 
 [dependencies]
 # CLI framework (Rust CLI Framework Mandate compliance)
-unilang = { path = "../unilang", version = "~0.46.0" }
+unilang = { workspace = true, features = ["full"] }
 
 # For Cargo.toml parsing and generation
-toml_edit = "0.22"
+toml_edit = { workspace = true }
 
 # For file operations
-walkdir = "2.5"
+walkdir = { workspace = true }
 
 [dev-dependencies]
 # Integration testing
-assert_cmd = "2.0"
-assert_fs = "1.1"
-predicates = "3.1"
+assert_cmd = { workspace = true }
+assert_fs = { workspace = true }
+predicates = { workspace = true }
 
 [[bin]]
 name = "cargo_unilang"

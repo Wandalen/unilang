@@ -43,7 +43,7 @@ impl CheckParams
 }
 
 /// Validate verbosity level
-fn validate_verbosity( level : &str ) -> Result< u8, String >
+pub fn validate_verbosity( level : &str ) -> Result< u8, String >
 {
   match level.parse::< u8 >()
   {
@@ -54,7 +54,7 @@ fn validate_verbosity( level : &str ) -> Result< u8, String >
 }
 
 /// Parse boolean value
-fn parse_bool( value : &str ) -> Result< bool, String >
+pub fn parse_bool( value : &str ) -> Result< bool, String >
 {
   match value.to_lowercase().as_str()
   {
@@ -65,7 +65,7 @@ fn parse_bool( value : &str ) -> Result< bool, String >
 }
 
 /// Validate path exists and is accessible
-fn validate_path( path : &Path ) -> Result< (), String >
+pub fn validate_path( path : &Path ) -> Result< (), String >
 {
   // Check if path exists
   if !path.exists()
@@ -238,128 +238,3 @@ pub fn execute( params : CheckParams ) -> Result< i32, String >
   Ok( exit_code )
 }
 
-#[cfg(test)]
-mod tests
-{
-  use super::*;
-  use assert_fs::prelude::*;
-
-  #[test]
-  fn test_validate_verbosity()
-  {
-    assert_eq!( validate_verbosity( "0" ).unwrap(), 0 );
-    assert_eq!( validate_verbosity( "5" ).unwrap(), 5 );
-    assert!( validate_verbosity( "6" ).is_err() );
-    assert!( validate_verbosity( "abc" ).is_err() );
-  }
-
-  #[test]
-  fn test_parse_bool()
-  {
-    assert_eq!( parse_bool( "true" ).unwrap(), true );
-    assert_eq!( parse_bool( "false" ).unwrap(), false );
-    assert_eq!( parse_bool( "1" ).unwrap(), true );
-    assert_eq!( parse_bool( "0" ).unwrap(), false );
-    assert_eq!( parse_bool( "yes" ).unwrap(), true );
-    assert_eq!( parse_bool( "no" ).unwrap(), false );
-    assert!( parse_bool( "invalid" ).is_err() );
-  }
-
-  #[test]
-  fn test_validate_path_nonexistent()
-  {
-    let path = PathBuf::from( "/nonexistent/path" );
-    assert!( validate_path( &path ).is_err() );
-  }
-
-  #[test]
-  fn test_validate_path_valid()
-  {
-    let temp = assert_fs::TempDir::new().unwrap();
-    assert!( validate_path( temp.path() ).is_ok() );
-  }
-
-  #[test]
-  fn test_params_parse_minimal()
-  {
-    let args = vec![];
-    let params = CheckParams::parse( &args ).unwrap();
-    assert_eq!( params.path, PathBuf::from( "." ) );
-    assert_eq!( params.verbosity, 2 );
-    assert_eq!( params.fix, false );
-  }
-
-  #[test]
-  fn test_params_parse_full()
-  {
-    let temp = assert_fs::TempDir::new().unwrap();
-    let args = vec![
-      ( "path".to_string(), temp.path().to_str().unwrap().to_string() ),
-      ( "verbosity".to_string(), "3".to_string() ),
-      ( "fix".to_string(), "true".to_string() ),
-    ];
-
-    let params = CheckParams::parse( &args ).unwrap();
-    assert_eq!( params.path, temp.path() );
-    assert_eq!( params.verbosity, 3 );
-    assert_eq!( params.fix, true );
-  }
-
-  #[test]
-  fn test_execute_clean_project()
-  {
-    let temp = assert_fs::TempDir::new().unwrap();
-
-    // Create clean project structure
-    temp.child( "Cargo.toml" ).write_str(
-r#"[package]
-name = "test"
-version = "0.1.0"
-
-[dependencies]
-unilang = "0.33"
-"#
-    ).unwrap();
-
-    let src = temp.child( "src" );
-    src.create_dir_all().unwrap();
-    src.child( "main.rs" ).write_str(
-      "fn main() { let registry = StaticCommandRegistry::from_commands(&STATIC_COMMANDS); }"
-    ).unwrap();
-
-    let params = CheckParams
-    {
-      path : temp.path().to_path_buf(),
-      verbosity : 0,
-      fix : false,
-    };
-
-    let exit_code = execute( params ).unwrap();
-    assert_eq!( exit_code, 0 ); // All checks passed
-  }
-
-  #[test]
-  fn test_execute_with_issues()
-  {
-    let temp = assert_fs::TempDir::new().unwrap();
-
-    // Create project with issues
-    temp.child( "build.rs" ).write_str( "fn main() { serde_yaml::from_str(); }" ).unwrap();
-    temp.child( "Cargo.toml" ).write_str(
-r#"[dependencies]
-unilang = "0.33"
-serde_yaml = "0.9"
-"#
-    ).unwrap();
-
-    let params = CheckParams
-    {
-      path : temp.path().to_path_buf(),
-      verbosity : 0,
-      fix : false,
-    };
-
-    let exit_code = execute( params ).unwrap();
-    assert_eq!( exit_code, 1 ); // Issues found
-  }
-}

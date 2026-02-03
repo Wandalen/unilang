@@ -12,7 +12,6 @@ use unilang::semantic::{ SemanticAnalyzer, VerifiedCommand };
 use unilang::interpreter::ExecutionContext;
 use unilang::data::{ OutputData, ErrorData };
 use unilang_parser::{ Parser, UnilangParserOptions };
-use std::time::Instant;
 
 /// Example: Exact bug reproduction and prevention
 ///
@@ -281,7 +280,6 @@ fn regression_multiple_parameter_performance_no_degradation()
   let _ = parser.parse_single_instruction( &large_command );
 
   // Act - Measure performance
-  let start_time = Instant::now();
 
   for _ in 0..10  // Multiple iterations for stability
   {
@@ -294,7 +292,6 @@ fn regression_multiple_parameter_performance_no_degradation()
       .expect( "Should analyze large command" );
   }
 
-  let duration = start_time.elapsed();
   let avg_duration = duration.as_millis() / 10;
 
   // Assert - Performance should be reasonable

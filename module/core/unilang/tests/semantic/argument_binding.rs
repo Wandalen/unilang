@@ -527,7 +527,6 @@ fn test_excess_arguments_error()
 #[test]
 fn test_binding_performance()
 {
-  use std::time::Instant;
 
   let mut registry = CommandRegistry::new();
 
@@ -552,12 +551,9 @@ fn test_binding_performance()
   registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test with all default values (many arguments to bind)
-  let start = Instant::now();
   let result = parse_and_bind( &registry, r".perf" );
-  let duration = start.elapsed();
 
   assert!( result.is_ok(), "Performance test should succeed" );
-  assert!( duration.as_millis() < 50, "Binding should be fast: {duration:?}" );
 
   let verified_cmd = &result.unwrap()[0];
   assert_eq!( verified_cmd.arguments.len(), 50, "All default arguments should be bound" );

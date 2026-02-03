@@ -171,52 +171,52 @@ on_unknown_suggest = [ ]
 
 [dependencies]
 # Core dependencies (always compiled):
-serde = { version = "1.0", features = ["derive"] }
-url = "2.5.0"
-chrono = { version = "0.4.38", features = ["serde"] }
-regex = "1.10.4"
+serde = { workspace = true, features = ["derive"] }
+url = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+regex = { workspace = true }
 
 # Format parsers (optional, gated by infrastructure features):
-serde_json = { version = "1.0", optional = true }      # Enabled by json_parser
-serde_yaml = { version = "0.9", optional = true }      # Enabled by yaml_parser
-toml = { version = "0.8", optional = true }            # Enabled by toml_parser (future)
-ron = { version = "0.8", optional = true }             # Enabled by ron_parser (future)
+serde_json = { workspace = true, optional = true }      # Enabled by json_parser
+serde_yaml = { workspace = true, optional = true }      # Enabled by yaml_parser
+toml = { workspace = true, optional = true }            # Enabled by toml_parser (future)
+ron = { workspace = true, optional = true }             # Enabled by ron_parser (future)
 
 # Static registry infrastructure (optional):
-phf = { version = "0.11", features = ["macros"], optional = true }  # Enabled by static_registry
+phf = { workspace = true, features = ["macros"], optional = true }  # Enabled by static_registry
 
 # Multi-file discovery (optional):
-walkdir = { version = "2.4", optional = true }         # Enabled by multi_file
+walkdir = { workspace = true, optional = true }         # Enabled by multi_file
 
 # Future dependencies (optional):
-prost = { version = "0.12", optional = true }          # Enabled by protobuf_support (future)
-async-graphql = { version = "7.0", optional = true }   # Enabled by graphql_support (future)
-utoipa = { version = "4.0", optional = true }          # Enabled by openapi_support (future)
-libloading = { version = "0.8", optional = true }      # Enabled by plugin_system (future)
-bincode = { version = "1.3", optional = true }         # Enabled by binary_serialization (future)
+prost = { workspace = true, optional = true }          # Enabled by protobuf_support (future)
+async-graphql = { workspace = true, optional = true }   # Enabled by graphql_support (future)
+utoipa = { workspace = true, optional = true }          # Enabled by openapi_support (future)
+libloading = { workspace = true, optional = true }      # Enabled by plugin_system (future)
+bincode = { workspace = true, optional = true }         # Enabled by binary_serialization (future)
 # REMOVED: sysinfo - was unused (declared but never imported anywhere in the crate)
 # REMOVED: num_cpus - only used in deleted cv_analysis.rs benchmark file (Phase 1)
 
 ## internal
-error_tools = { version = "~0.36.0", features = [ "enabled", "error_typed", "error_untyped" ] }
-mod_interface = { version = "~0.55.0", features = [ "enabled" ] }
-former = { version = "~2.40.0", features = [ "enabled", "derive_former" ] }
-unilang_parser = { path = "../unilang_parser", version = "~0.30.0" } # SIMD features controlled by main unilang features
+error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_untyped" ] }
+mod_interface = { workspace = true, features = [ "enabled" ] }
+former = { workspace = true, features = [ "enabled", "derive_former" ] }
+unilang_parser = { workspace = true } # SIMD features controlled by main unilang features
 
 ## external
-log = "0.4"
-rustyline = { version = "14.0", optional = true } # Enhanced REPL with history and arrow keys
-indexmap = "2.2.6"
-lru = "0.12.3" # LRU cache for hot command optimization
+log = { workspace = true }
+rustyline = { workspace = true, optional = true } # Enhanced REPL with history and arrow keys
+indexmap = { workspace = true }
+lru = { workspace = true } # LRU cache for hot command optimization
 
 # Performance optimization dependencies
-simd-json = { version = "0.13", optional = true } # SIMD-optimized JSON parsing
-memchr = { version = "2.7", optional = true } # SIMD-optimized byte searching (6x faster than std)
-bytecount = { version = "0.6", optional = true } # SIMD byte counting and operations
+simd-json = { workspace = true, optional = true } # SIMD-optimized JSON parsing
+memchr = { workspace = true, optional = true } # SIMD-optimized byte searching (6x faster than std)
+bytecount = { workspace = true, optional = true } # SIMD byte counting and operations
 
 # CLI output utilities (deprecated - use cli_fmt directly)
-cli_fmt = { version = "~0.3.0", features = [ "output" ], optional = true }
-strs_tools = { version = "~0.42.0", features = [ "ansi", "string_split", "std" ], optional = true }
+cli_fmt = { workspace = true, features = [ "output" ], optional = true }
+strs_tools = { workspace = true, features = [ "ansi", "string_split", "std" ], optional = true }
 
 # NOTE: Benchmark dependencies have been moved to unilang_benchmarks workspace crate
 # to avoid polluting the production dependency tree
@@ -401,32 +401,32 @@ required-features = ["json_parser"]
 
 [build-dependencies]
 # Core (always available):
-serde = "1.0"
-serde_yaml = "0.9"  # Always available for build.rs (only used when static_registry enabled)
+serde = { workspace = true }
+serde_yaml = { workspace = true }  # Always available for build.rs (only used when static_registry enabled)
 
 # Build-time format parsers (optional, gated by infrastructure features):
-serde_json = { version = "1.0", optional = true }     # Enabled by json_parser
-toml = { version = "0.8", optional = true }           # Enabled by toml_parser (future)
-ron = { version = "0.8", optional = true }            # Enabled by ron_parser (future)
+serde_json = { workspace = true, optional = true }     # Enabled by json_parser
+toml = { workspace = true, optional = true }           # Enabled by toml_parser (future)
+ron = { workspace = true, optional = true }            # Enabled by ron_parser (future)
 
 # Static registry codegen (optional):
-phf_codegen = { version = "0.11", optional = true }   # Enabled by static_registry
+phf_codegen = { workspace = true, optional = true }   # Enabled by static_registry
 
 # Multi-file discovery (optional):
-walkdir = { version = "2.4", optional = true }        # Enabled by multi_file
+walkdir = { workspace = true, optional = true }        # Enabled by multi_file
 
 [dev-dependencies]
-test_tools = { version = "~0.16.0", features = [ "full" ] }
-assert_cmd = "2.0"
-predicates = "2.1"
-assert_fs = "1.0"
-clap = "4.4"
-pico-args = "0.5"
-chrono = "0.4"
-tempfile = "3.8"
-walkdir = "2.4"  # For build-time test verification
+test_tools = { workspace = true, features = [ "full" ] }
+assert_cmd = { workspace = true }
+predicates = { workspace = true }
+assert_fs = { workspace = true }
+clap = { workspace = true }
+pico-args = { workspace = true }
+chrono = { workspace = true }
+tempfile = { workspace = true }
+walkdir = { workspace = true }  # For build-time test verification
 
-criterion = "0.5"
+criterion = { workspace = true }
 
 [package.metadata.cargo-udeps.ignore]
 # REMOVED: num_cpus and sysinfo (dependencies removed in Phase 2)

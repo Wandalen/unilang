@@ -316,7 +316,6 @@ fn test_user_edge_case_scenarios()
 #[test]
 fn test_user_performance_experience()
 {
-  use std::time::Instant;
 
   let cli = TestCLI::new();
 

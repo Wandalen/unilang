@@ -96,6 +96,50 @@ mod conversion_tests
 
     // If this compiles and runs, the pattern works
   }
+
+  /// Test that `Pipeline::from_static()` constructor works correctly.
+  ///
+  /// This validates the direct conversion pattern without intermediate variable:
+  /// `Pipeline::from_static(static_registry)` vs `Pipeline::new(static_registry.into())`
+  #[test]
+  fn test_pipeline_from_static_constructor()
+  {
+    use unilang::pipeline::Pipeline;
+
+    let static_registry = StaticCommandRegistry::new();
+
+    // Direct construction using from_static() method
+    let pipeline = Pipeline::from_static(static_registry);
+
+    // Verify pipeline is usable
+    let result = pipeline.process_command_simple(".");
+
+    // Pipeline should work - either show help or empty command list
+    // The key test is that from_static() compiles and creates a working pipeline
+    assert!(result.success || result.is_help_response(), "Pipeline should be functional");
+  }
+
+  /// Test that `Pipeline::from_static()` preserves command functionality.
+  ///
+  /// Verifies that commands registered in the static registry remain
+  /// accessible through the pipeline after conversion.
+  #[test]
+  fn test_pipeline_from_static_preserves_functionality()
+  {
+    use unilang::pipeline::Pipeline;
+
+    let static_registry = StaticCommandRegistry::new();
+    let pipeline = Pipeline::from_static(static_registry);
+
+    // Process a simple command to verify pipeline functionality
+    let result = pipeline.process_command_simple(".");
+
+    // Either help response or successful execution - both valid
+    assert!(
+      result.success || result.is_help_response(),
+      "Pipeline from static registry should process commands"
+    );
+  }
 }
 
 // Tests that should work regardless of feature flags

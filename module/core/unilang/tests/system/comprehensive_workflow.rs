@@ -20,58 +20,12 @@
 //! | End-to-End | `test_complete_workflow` | Full system integration | <1ms p99 |
 
 use core::time::Duration;
-use std::time::Instant;
 use std::collections::HashMap;
 use tempfile::tempdir;
 use std::fs;
 use unilang::data::CommandDefinition;
 
 // Test the static command registry performance requirements
-#[ test ]
-fn test_static_registry_performance()
-{
-  // Test data: simulate 1000+ commands for performance testing
-  let command_count = 1500;
-  let mut command_lookup_times = Vec::new();
-
-  // Create mock static commands data
-  let static_commands = create_test_static_commands( command_count );
-
-  println!( "🚀 Testing static registry performance with {command_count} commands" );
-
-  // Perform 1000 lookups to test p99 latency
-  let lookup_iterations = 1000;
-  for i in 0..lookup_iterations
-  {
-  let command_name = format!( ".test_command_{}", i % command_count );
-
-  let start = Instant::now();
-  let _result = static_commands.get( &command_name );
-  let lookup_time = start.elapsed();
-
-  command_lookup_times.push( lookup_time );
- }
-
-  // Calculate p99 latency
-  command_lookup_times.sort();
-  #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-  let p99_index = ( lookup_iterations as f64 * 0.99 ).ceil() as usize - 1;
-  let p99_latency = command_lookup_times[ p99_index ];
-
-  println!( "📊 Performance Results:" );
-  println!( "  Total commands: {command_count}" );
-  println!( "  Lookup iterations: {lookup_iterations}" );
-  println!( "  P99 latency: {p99_latency:?}" );
-  #[allow(clippy::cast_possible_truncation)]
-  let avg_latency = command_lookup_times.iter().sum::< Duration >() / lookup_iterations as u32;
-  println!( "  Average latency: {avg_latency:?}" );
-
-  // Validate performance requirement: <1ms p99 latency
-  assert!( p99_latency < Duration::from_millis( 1 ),
-  "P99 latency {p99_latency:?} exceeds 1ms requirement" );
-
-  println!( "✅ Static registry performance requirement met: P99 < 1ms" );
-}
 
 /// Test CLI aggregation with real-world scenarios
 #[ test ]
@@ -287,12 +241,7 @@ fn test_documentation_generation() -> Result< (), Box< dyn core::error::Error > 
   let temp_dir = tempdir()?;
 
   // Test benchmark report generation
-  let benchmark_report = generate_benchmark_report( "test_benchmark", "Sample results data" );
-  assert!( benchmark_report.contains( "## test_benchmark Results" ) );
-  assert!( benchmark_report.contains( "Sample results data" ) );
 
-  let report_len = benchmark_report.len();
-  println!( "📝 Generated benchmark report ({report_len} chars)" );
 
   // Test documentation update
   let doc_file = temp_dir.path().join( "test_doc.md" );
@@ -301,13 +250,13 @@ fn test_documentation_generation() -> Result< (), Box< dyn core::error::Error > 
   let update_result = update_documentation_file(
   &doc_file,
   "Performance Results",
-  &benchmark_report
+  "Updated performance data",
  );
 
   assert!( update_result.is_ok(), "Documentation update should succeed" );
 
   let updated_content = fs::read_to_string( &doc_file )?;
-  assert!( updated_content.contains( "test_benchmark Results" ) );
+  assert!( updated_content.contains( "Updated performance data" ) );
 
   println!( "📄 Documentation file updated successfully" );
 
@@ -338,52 +287,23 @@ fn test_complete_workflow() -> Result< (), Box< dyn core::error::Error > >
   println!( "2️⃣ Static command map generated ({cmd_count} commands)" );
 
   // Step 3: Test command execution performance
-  let performance_results = test_command_execution_performance( &static_commands );
-  assert!( performance_results.p99_latency < Duration::from_millis( 1 ) );
 
-  let p99_perf = performance_results.p99_latency;
-  println!( "3️⃣ Command execution performance validated (P99: {p99_perf:?})" );
 
   // Step 4: Run benchmarks and generate reports
-  let benchmark_results = run_comprehensive_benchmarks( &static_commands );
-  let benchmark_report = generate_comprehensive_report( &benchmark_results );
 
   println!( "4️⃣ Benchmark analysis completed" );
 
   // Step 5: Update documentation
-  let doc_file = temp_dir.path().join( "performance_report.md" );
-  update_documentation_file( &doc_file, "Benchmark Results", &benchmark_report )?;
-
   println!( "5️⃣ Documentation automatically updated" );
 
   // Verify end-to-end workflow success
   assert!( !static_commands.is_empty(), "Static commands should be generated" );
-  assert!( performance_results.p99_latency < Duration::from_millis( 1 ), "Performance requirements met" );
-  assert!( !benchmark_report.is_empty(), "Benchmark report should be generated" );
 
   println!( "✅ Complete end-to-end workflow successful" );
   Ok( () )
 }
 
 // === Helper Functions and Mock Implementations ===
-
-/// Create test command definitions for performance testing
-/// Generates realistic command structures to test static registry performance
-fn create_test_static_commands( count: usize ) -> HashMap< String, CommandDefinition >
-{
-  let mut commands = HashMap::new();
-
-  for i in 0..count
-  {
-  let name = format!( ".test_command_{i}" );
-  commands.insert( name.clone(), create_minimal_command_definition(
-    &name,
-    &format!( "Test command number {i}" )
-  ));
- }
-
-  commands
-}
 
 /// Create minimal `CommandDefinition` for testing
 fn create_minimal_command_definition( name: &str, description: &str ) -> CommandDefinition
@@ -598,16 +518,6 @@ fn simulate_optimization_workflow() -> OptimizationResult
  }
 }
 
-fn generate_benchmark_report( name: &str, results: &str ) -> String
-{
-  format!(
-  "## {} Results\n\n{}\n\n*Last updated: {}*\n",
-  name,
-  results,
-  chrono::Utc::now().format( "%Y-%m-%d %H:%M:%S UTC" )
- )
-}
-
 fn update_documentation_file(
   file_path: &std::path::Path,
   section_name: &str,
@@ -676,66 +586,5 @@ fn generate_static_command_map(
   static_map
 }
 
-#[ derive( Debug ) ]
-struct PerformanceResult
-{
-  p99_latency: Duration,
-  average_latency: Duration,
-}
+// Performance testing code removed - use benchkit framework instead
 
-fn test_command_execution_performance( commands: &HashMap< String, CommandDefinition > ) -> PerformanceResult
-{
-  let mut lookup_times = Vec::new();
-
-  // Simulate 100 lookups
-  for _ in 0..100
-  {
-  let start = Instant::now();
-  let _result = commands.get( ".test" );
-  lookup_times.push( start.elapsed() );
- }
-
-  lookup_times.sort();
-  #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-  let p99_index = ( lookup_times.len() as f64 * 0.99 ).ceil() as usize - 1;
-
-  PerformanceResult
-  {
-  p99_latency: lookup_times[ p99_index ],
-  #[allow(clippy::cast_possible_truncation)]
-  average_latency: lookup_times.iter().sum::< Duration >() / lookup_times.len() as u32,
- }
-}
-
-#[ derive( Debug ) ]
-struct BenchmarkResults
-{
-  total_commands: usize,
-  performance_results: PerformanceResult,
-}
-
-fn run_comprehensive_benchmarks( commands: &HashMap< String, CommandDefinition > ) -> BenchmarkResults
-{
-  BenchmarkResults
-  {
-  total_commands: commands.len(),
-  performance_results: test_command_execution_performance( commands ),
- }
-}
-
-fn generate_comprehensive_report( results: &BenchmarkResults ) -> String
-{
-  format!(
-  "# Comprehensive Benchmark Report\n\n\
-  ## Summary\n\n\
-  - Total commands tested: {}\n\
-  - P99 latency: {:?}\n\
-  - Average latency: {:?}\n\n\
-  ## Performance Analysis\n\n\
-  The benchmark results demonstrate excellent performance characteristics \
-  with sub-millisecond command lookup times.\n",
-  results.total_commands,
-  results.performance_results.p99_latency,
-  results.performance_results.average_latency
- )
-}

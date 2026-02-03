@@ -80,7 +80,7 @@
 //! Always verify both API paths with tests (see `test_api_path_consistency` in
 //! `tests/diagnostic_real_bug.rs`).
 
-mod helpers;
+mod validation_utilities;
 
 use crate ::
 {
@@ -119,7 +119,7 @@ impl Parser
   pub fn parse_single_instruction( &self, input: &str ) -> Result< crate ::instruction ::GenericInstruction, ParseError >
   {
   // Validate quote completeness before processing
-  helpers::validate_quote_completeness( input )?;
+  validation_utilities::validate_quote_completeness( input )?;
 
   // Use strs_tools as mandated by the architecture specification
   let mut all_delimiters = alloc::vec::Vec::new();
@@ -169,7 +169,7 @@ impl Parser
   .collect();
 
   // Fix for Task 026: Handle empty quoted strings that were filtered out by strs_tools
-  let rich_items = helpers::inject_empty_quoted_string_tokens( input, rich_items );
+  let rich_items = validation_utilities::inject_empty_quoted_string_tokens( input, rich_items );
 
   self.parse_single_instruction_from_rich_items( rich_items )
  }
@@ -756,7 +756,7 @@ impl Parser
           // Check for duplicate named arguments if the option is set
           if self.options.error_on_duplicate_named_arguments && named_arguments.contains_key( arg_name )
           {
-            return Err( helpers ::error_duplicate_named_argument( arg_name, item.adjusted_source_location.clone() ) );
+            return Err( validation_utilities::error_duplicate_named_argument( arg_name, item.adjusted_source_location.clone() ) );
           }
 
           // Insert or append to existing vector
@@ -902,7 +902,7 @@ impl Parser
           // Check for duplicate named arguments if the option is set
           if self.options.error_on_duplicate_named_arguments && named_arguments.contains_key( arg_name )
           {
-            return Err( helpers ::error_duplicate_named_argument( arg_name, item.adjusted_source_location.clone() ) );
+            return Err( validation_utilities::error_duplicate_named_argument( arg_name, item.adjusted_source_location.clone() ) );
           }
 
           // Insert or append to existing vector
@@ -912,13 +912,13 @@ impl Parser
         }
         _ =>
         {
-          return Err( helpers ::error_missing_named_value( arg_name, value_item.source_location() ) )
+          return Err( validation_utilities::error_missing_named_value( arg_name, value_item.source_location() ) )
         }
       }
     }
     else
     {
-      return Err( helpers ::error_missing_named_value_at_end( arg_name, item.adjusted_source_location.clone() ) );
+      return Err( validation_utilities::error_missing_named_value_at_end( arg_name, item.adjusted_source_location.clone() ) );
     }
 
     Ok( () )
@@ -944,7 +944,7 @@ impl Parser
    {
   UnilangTokenKind ::Unrecognized( ref s ) =>
   {
-   return Err( helpers ::error_unexpected_token( s, item.adjusted_source_location.clone() ) );
+   return Err( validation_utilities::error_unexpected_token( s, item.adjusted_source_location.clone() ) );
  }
 
   UnilangTokenKind ::Identifier( ref s ) =>
@@ -1007,23 +1007,23 @@ impl Parser
   else
   {
    // Positional argument
-   helpers ::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+   validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
  }
  }
    else
    {
   // Last token, must be positional
-  helpers ::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+  validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
  }
  }
   UnilangTokenKind ::Number( ref s ) =>
   {
    // Positional argument
-   helpers ::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+   validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
  }
   UnilangTokenKind ::Operator( "?" ) =>
   {
-   helpers ::validate_help_operator( &item, items_iter )?;
+   validation_utilities::validate_help_operator( &item, items_iter )?;
    help_operator_found = true;
    // When help is requested, clear any previously collected positional arguments
    // as they are not relevant for help display
@@ -1031,7 +1031,7 @@ impl Parser
  }
   UnilangTokenKind::Operator("::" | " :: ") =>
   {
-   return Err( helpers ::error_orphaned_operator( item.adjusted_source_location.clone() ) );
+   return Err( validation_utilities::error_orphaned_operator( item.adjusted_source_location.clone() ) );
  }
   UnilangTokenKind::Delimiter(":") =>
   {
@@ -1041,15 +1041,15 @@ impl Parser
     if let UnilangTokenKind::Delimiter(":") = &next_item.kind
     {
      // This is an orphaned "::" operator (no preceding identifier)
-     return Err( helpers ::error_orphaned_operator( item.adjusted_source_location.clone() ) );
+     return Err( validation_utilities::error_orphaned_operator( item.adjusted_source_location.clone() ) );
     }
    }
    // Single ":" without following ":" is unexpected
-   return Err( helpers ::error_unexpected_token( ":", item.adjusted_source_location.clone() ) );
+   return Err( validation_utilities::error_unexpected_token( ":", item.adjusted_source_location.clone() ) );
  }
   _ =>
   {
-   return Err( helpers ::error_unexpected_token( &item.inner.string, item.adjusted_source_location.clone() ) );
+   return Err( validation_utilities::error_unexpected_token( &item.inner.string, item.adjusted_source_location.clone() ) );
  }
  }
  }
@@ -1115,7 +1115,7 @@ impl Parser
     }
 
     // Detect potential argv misuse (emits warning if suspicious patterns found)
-    helpers::detect_argv_misuse( argv );
+    validation_utilities::detect_argv_misuse( argv );
 
     // Process argv into a reconstructed command string with proper token boundaries
     // We need to quote values that contain spaces to preserve argv boundaries

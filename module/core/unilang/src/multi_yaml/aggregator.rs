@@ -557,6 +557,9 @@ impl MultiYamlAggregator
     // must be updated, including this method and any direct PHF generation in build.rs files
     content.push_str( &format!( "  category: \"{}\",\n", Self::escape_string( cmd.category() ) ) );
 
+    // show_version_in_help: controls whether version is displayed in help output
+    content.push_str( &format!( "  show_version_in_help: {},\n", cmd.show_version_in_help() ) );
+
     content
   }
 

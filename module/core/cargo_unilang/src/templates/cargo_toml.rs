@@ -42,33 +42,3 @@ unilang = "0.46"
     license_name = license_name
   )
 }
-
-#[cfg(test)]
-mod tests
-{
-  use super::*;
-
-  #[test]
-  fn test_cargo_toml_minimal()
-  {
-    let content = cargo_toml( "my-cli", None, None );
-    assert!( content.contains( "name = \"my-cli\"" ) );
-    assert!( content.contains( "unilang = \"0.46\"" ) );
-    assert!( content.contains( "Do NOT create build.rs" ) );
-    assert!( content.contains( "license = \"MIT\"" ) );
-  }
-
-  #[test]
-  fn test_cargo_toml_with_author()
-  {
-    let content = cargo_toml( "my-cli", Some( "John Doe <john@example.com>" ), None );
-    assert!( content.contains( "authors = [ \"John Doe <john@example.com>\" ]" ) );
-  }
-
-  #[test]
-  fn test_cargo_toml_with_license()
-  {
-    let content = cargo_toml( "my-cli", None, Some( "Apache-2.0" ) );
-    assert!( content.contains( "license = \"Apache-2.0\"" ) );
-  }
-}

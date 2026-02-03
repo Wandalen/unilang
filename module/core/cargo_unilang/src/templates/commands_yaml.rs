@@ -117,26 +117,3 @@ r#"# Full-featured command definitions
 "#
 }
 
-#[cfg(test)]
-mod tests
-{
-  use super::*;
-
-  #[test]
-  fn test_commands_yaml_minimal_has_example_command()
-  {
-    let content = commands_yaml_minimal();
-    assert!( content.contains( ".greet" ) );
-    assert!( content.contains( ".help" ) );
-    assert!( content.contains( "Unilang does ALL of this automatically" ) );
-  }
-
-  #[test]
-  fn test_commands_yaml_full_has_multiple_commands()
-  {
-    let content = commands_yaml_full();
-    assert!( content.contains( ".greet" ) );
-    assert!( content.contains( ".echo" ) );
-    assert!( content.contains( ".help" ) );
-  }
-}
