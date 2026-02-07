@@ -7,6 +7,8 @@ members = [
   "module/core/unilang_meta",
   "module/core/cargo_unilang",
 ]
+dev-dependencies = {}
+build-dependencies = {}
 
 [workspace.metadata]
 repo_url = "https://github.com/Wandalen/unilang"
@@ -16,8 +18,8 @@ discord_url = "https://discord.gg/m3yKnHRAGr"
 # ========================================
 # Workspace Member Crates
 # ========================================
-unilang = { version = "~0.46.0", path = "module/core/unilang", default-features = false }
-unilang_parser = { version = "~0.30.0", path = "module/core/unilang_parser", default-features = false }
+unilang = { version = "~0.47.0", path = "module/core/unilang", default-features = false }
+unilang_parser = { version = "~0.31.0", path = "module/core/unilang_parser", default-features = false }
 unilang_meta = { version = "~0.1.0", path = "module/core/unilang_meta", default-features = false }
 cargo_unilang = { version = "~0.1.0", path = "module/core/cargo_unilang", default-features = false }
 
