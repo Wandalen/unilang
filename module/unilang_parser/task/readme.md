@@ -4,9 +4,10 @@
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Task | Description |
 |-------|----|--------------:|------:|---------:|-------:|---------:|--------|------|-------------|
-| 1 | 085 | 2016 | 9 | 7 | 8 | 4 | ✅ (Completed) | [cli_parser_message_tail](./completed/085_cli_parser_message_tail.md) | Add CLI parser module with message tail collection for AI assistant CLIs |
+| 1 | 086 | 784 | 8 | 7 | 7 | 2 | 🔄 (Planned) | [harden_parser_misuse_detection](./086_harden_parser_misuse_detection.md) | Add targeted hint errors for name=value, --flag/-f, and fix CliParser consistency |
 | 2 | 001 | 360 | 10 | 3 | 6 | 2 | 📥 (Backlog) | [zero_copy_tokens](./backlog/001_zero_copy_tokens.md) | Zero-copy token implementation for 8-15x performance improvement |
-| 3 | 084 | 0 | 9 | 7 | 7 | 0 | ✅ (Completed) | [tokenizer_escaped_quote_handling](./completed/084_tokenizer_escaped_quote_handling.md) | Fix tokenizer handling of backslash-escaped quotes in values with whitespace |
+| 3 | 085 | 0 | 9 | 7 | 8 | 0 | ✅ (Completed) | [cli_parser_message_tail](./completed/085_cli_parser_message_tail.md) | Add CLI parser module with message tail collection for AI assistant CLIs |
+| 4 | 084 | 0 | 9 | 7 | 7 | 0 | ✅ (Completed) | [tokenizer_escaped_quote_handling](./completed/084_tokenizer_escaped_quote_handling.md) | Fix tokenizer handling of backslash-escaped quotes in values with whitespace |
 
 ## Issues Index
 

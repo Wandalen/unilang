@@ -46,9 +46,7 @@
 mod private
 {
   #[cfg(feature = "simd-json")]
-  use simd_json::OwnedValue;
-  #[cfg(feature = "simd-json")]
-  use simd_json::prelude::{ ValueAsScalar, ValueAsContainer, TypedScalarValue };
+  use simd_json::{ OwnedValue, StaticNode };
   #[cfg(feature = "json_parser")]
   use serde_json::Value as SerdeValue;
   use crate::types::TypeError;
@@ -157,31 +155,19 @@ mod private
 #[allow(clippy::needless_pass_by_value)]
     fn simd_to_serde( simd_value : OwnedValue ) -> SerdeValue
     {
-      
-      if simd_value.is_null() {
-        SerdeValue::Null
-      } else if let Some( b ) = simd_value.as_bool() {
-        SerdeValue::Bool( b )
-      } else if let Some( s ) = simd_value.as_str() {
-        SerdeValue::String( s.to_string() )
-      } else if let Some( arr ) = simd_value.as_array() {
-        SerdeValue::Array( 
-          arr.iter().map( | v | Self::simd_to_serde( v.clone() ) ).collect() 
-        )
-      } else if let Some( obj ) = simd_value.as_object() {
-        SerdeValue::Object(
-          obj.iter()
-            .map( |( k, v )| ( k.clone(), Self::simd_to_serde( v.clone() ) ) )
-            .collect()
-        )
-      } else if let Some( n ) = simd_value.as_i64() {
-        SerdeValue::Number( n.into() )
-      } else if let Some( n ) = simd_value.as_u64() {
-        SerdeValue::Number( n.into() )
-      } else if let Some( n ) = simd_value.as_f64() {
-        SerdeValue::Number( serde_json::Number::from_f64( n ).unwrap_or_else( || 0.into() ) )
-      } else {
-        SerdeValue::Null
+      match simd_value
+      {
+        OwnedValue::Static( StaticNode::Null ) => SerdeValue::Null,
+        OwnedValue::Static( StaticNode::Bool( b ) ) => SerdeValue::Bool( b ),
+        OwnedValue::Static( StaticNode::I64( n ) ) => SerdeValue::Number( n.into() ),
+        OwnedValue::Static( StaticNode::U64( n ) ) => SerdeValue::Number( n.into() ),
+        OwnedValue::Static( StaticNode::F64( n ) ) =>
+          SerdeValue::Number( serde_json::Number::from_f64( n ).unwrap_or_else( || 0.into() ) ),
+        OwnedValue::String( s ) => SerdeValue::String( s ),
+        OwnedValue::Array( arr ) =>
+          SerdeValue::Array( arr.into_iter().map( | v | Self::simd_to_serde( v ) ).collect() ),
+        OwnedValue::Object( obj ) =>
+          SerdeValue::Object( obj.into_iter().map( |( k, v )| ( k, Self::simd_to_serde( v ) ) ).collect() ),
       }
     }
     
