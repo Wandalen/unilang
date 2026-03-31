@@ -27,6 +27,7 @@ Documentation is organized by topic to reflect the nature of the content rather 
 | `migration.md` | Runtime → build-time guide | Step-by-step migration for 50x performance improvement |
 | `cli_aggregation.md` | CLI aggregation guide | Unify multiple CLIs with namespace isolation and conflict detection |
 | `phf_reexport.md` | PHF re-export usage | Using unilang's PHF re-export instead of direct phf dependency |
+| `parameter_syntax.md` | Parameter syntax reference | `::` operator, value context, file paths, quoting, migration guide |
 | `features/` | Feature design documents | Detailed feature design and implementation guides |
 
 ### Quick Access

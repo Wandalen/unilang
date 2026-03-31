@@ -91,6 +91,49 @@ Parameter names are validated strictly. Use `??` operator to see valid parameter
 
 ---
 
+## "Parse error" when passing a file path
+
+**Symptom:** A command fails with "Parse error" or "Unexpected token" when you include a file path.
+
+**Cause:** Single colon (`path:value`) is not valid unilang syntax. The missing second colon
+causes the parser to reject the input before even reading the path value. The parser is not
+rejecting the path — it never reaches the path.
+
+```bash
+# ❌ Wrong — produces parse error (invalid syntax)
+.run file:tests/data/input.yaml
+
+# ✅ Correct — double colon activates value context
+.run file::tests/data/input.yaml
+```
+
+The `::` operator enables value context, which preserves `/`, `.`, `#`, `?` and other
+special characters inside the value. File paths, URLs, and any string work as values.
+
+See [parameter_syntax.md](parameter_syntax.md) for the full reference.
+
+---
+
+## Argument value not received by handler
+
+**Symptom:** A command runs but the handler receives `None` for a parameter you provided.
+
+**Cause:** If you wrote `name:value` (single colon), the parser did not create a named
+argument for `name`. Instead it likely failed to parse, or parsed `name:value` as a
+different token type entirely. The handler then sees the argument as missing.
+
+```bash
+# ❌ Wrong — 'name' argument will be missing in handler
+.greet name:Alice
+
+# ✅ Correct
+.greet name::Alice
+```
+
+Check: if a required argument is missing, verify the command string uses `::` not `:`.
+
+---
+
 ## Still having issues?
 
 1. Run `cargo run --example static_01_basic_compile_time`

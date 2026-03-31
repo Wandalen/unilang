@@ -4,7 +4,7 @@
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Task | Description |
 |-------|----|--------------:|------:|---------:|-------:|---------:|--------|------|-------------|
-| 1 | 092 | 2000 | 10 | 8 | 5 | 5 | 🔄 (Planned) | [fix_incorrect_file_path_documentation](./092_fix_incorrect_file_path_documentation.md) | Fix widespread incorrect documentation claiming unilang cannot parse file paths - actually works with :: syntax |
+| 1 | 092 | 0 | 10 | 8 | 5 | 0 | ✅ (Completed) | [fix_incorrect_file_path_documentation](./completed/092_fix_incorrect_file_path_documentation.md) | Fix widespread incorrect documentation claiming unilang cannot parse file paths - actually works with :: syntax |
 | 2 | 093 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [fix_from_static_routine_transfer](./completed/093_fix_from_static_routine_transfer.md) | Fix From<StaticCommandRegistry> to transfer routines; fix Pipeline::from_static() doctest |
 | 3 | 084 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [help_formatting_improvements](./completed/084_help_formatting_improvements.md) | Already implemented - All features exist: categorization, prefix filtering, hidden commands |
 | 2 | 085 | 0 | 10 | 4 | 5 | 0 | ✅ (Completed) | [make_illegal_states_unrepresentable](./completed/085_make_illegal_states_unrepresentable.md) | Build-time validation prevents illegal states - Task 085 resolved (8/10 items) |

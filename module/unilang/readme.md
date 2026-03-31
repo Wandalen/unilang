@@ -65,11 +65,28 @@ fn main() -> Result< (), unilang::Error >
 cargo run  # Builds, generates static registry, runs
 ```
 
+## Parameter Syntax
+
+Named parameters use `name::value` — **double colon** is required. The `::` operator
+activates value context, preserving special characters (`/`, `.`, `#`, `?`) until
+whitespace:
+
+```bash
+.greet name::Alice
+.run   file::./examples/plan.md          # file paths — fully supported
+.fetch url::https://example.com/path     # URLs — fully supported
+.find  pattern::"multi word value"       # spaces → quote the value
+```
+
+Single colon (`name:value`) is not valid syntax and produces a parse error.
+See [docs/parameter_syntax.md](docs/parameter_syntax.md) for the full reference.
+
 ## Documentation
 
 | Document | Contents |
 |----------|----------|
 | [docs/quick_start.md](docs/quick_start.md) | Step-by-step setup guide |
+| [docs/parameter_syntax.md](docs/parameter_syntax.md) | `::` operator, value context, file paths, quoting |
 | [docs/cli_definition_approaches.md](docs/cli_definition_approaches.md) | All 21 approaches (YAML/JSON/DSL, build/runtime) |
 | [docs/cli_aggregation.md](docs/cli_aggregation.md) | CLI aggregation with namespace isolation |
 | [docs/migration.md](docs/migration.md) | Runtime → build-time migration (50x speedup) |

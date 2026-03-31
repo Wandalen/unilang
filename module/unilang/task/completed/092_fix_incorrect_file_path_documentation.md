@@ -102,16 +102,16 @@ Analyzed unilang parser implementation at `/home/user1/pro/lib/wip_core/unilang/
 
 ## Acceptance Criteria
 
-- [ ] Unilang main documentation includes "Parameter Syntax" section explaining `::` operator
-- [ ] Documentation explicitly shows file path examples: `path::dir/file.md`
-- [ ] Value context protection behavior documented (what characters are preserved)
-- [ ] Downstream project `planer` updates:
-  - [ ] Remove "KNOWN LIMITATION" comment from code
-  - [ ] Delete/update `tests/cli_parser_limitations.rs` (it documents wrong syntax)
-  - [ ] Add positive test showing correct `::` syntax works
-  - [ ] Update CLI documentation with correct syntax examples
-- [ ] Migration guide created for users of wrong syntax
-- [ ] Tests added to unilang demonstrating file path parsing works
+- [x] Unilang main documentation includes "Parameter Syntax" section explaining `::` operator
+- [x] Documentation explicitly shows file path examples: `path::dir/file.md`
+- [x] Value context protection behavior documented (what characters are preserved)
+- [x] Downstream project `planer` updates:
+  - [x] Remove "KNOWN LIMITATION" comment from code
+  - [x] Delete/update `tests/cli_parser_limitations.rs` (it documents wrong syntax)
+  - [x] Add positive test showing correct `::` syntax works
+  - [x] Update CLI documentation with correct syntax examples
+- [x] Migration guide created for users of wrong syntax
+- [x] Tests added to unilang demonstrating file path parsing works
 
 ## Rulebook References
 

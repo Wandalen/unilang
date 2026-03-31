@@ -228,9 +228,30 @@ Description: Greet someone
 ...
 ```
 
+### Parameter Syntax
+
+All named parameters use `name::value` — **double colon**:
+
+```bash
+# ✅ Correct — double colon
+cargo run -- .greet name::Alice
+cargo run -- .run file::./examples/plan.md        # file paths work
+cargo run -- .fetch url::https://example.com/api  # URLs work
+cargo run -- .search query::"multi word string"   # spaces → quote the value
+
+# ❌ Wrong — single colon produces a parse error
+cargo run -- .greet name:Alice
+```
+
+The `::` operator activates value context: everything after it until whitespace is
+one value, including `/`, `.`, `#`, `?`, and other special characters. This means
+file paths and URLs are fully supported — just use `::`.
+
+For the complete reference, see [parameter_syntax.md](parameter_syntax.md).
+
 **Troubleshooting**:
 - **"Unknown command"** → Check command name starts with `.` (dot)
-- **Argument not parsed** → Use `name::value` format (double colon)
+- **"Parse error" or "Unexpected token"** → Missing `::` — use `name::value`, not `name:value`
 - **"Missing required argument"** → Provide all non-optional arguments
 - **Quotes issues** → Use `process_command_from_argv()` (already in code) to handle shell quoting
 
