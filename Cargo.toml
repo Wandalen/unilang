@@ -19,7 +19,7 @@ discord_url = "https://discord.gg/m3yKnHRAGr"
 # Workspace Member Crates
 # ========================================
 unilang = { version = "~0.49.0", path = "module/unilang", default-features = false }
-unilang_parser = { version = "~0.31.0", path = "module/unilang_parser", default-features = false }
+unilang_parser = { version = "~0.32.0", path = "module/unilang_parser", default-features = false }
 unilang_meta = { version = "~0.1.0", path = "module/unilang_meta", default-features = false }
 cargo_unilang = { version = "~0.1.0", path = "module/cargo_unilang", default-features = false }
 
