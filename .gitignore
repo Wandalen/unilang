@@ -2,11 +2,8 @@
 /target/
 **/target/
 
-# Cargo.lock files
-# Keep: Workspace root Cargo.lock (needed for reproducible builds with binary crates)
-# Ignore: Individual crate Cargo.lock files (library crates should not have lock files)
-# Pattern: Ignore Cargo.lock anywhere under module/ subdirectories
-module/**/Cargo.lock
+# Cargo.lock — not committed (library workspace)
+Cargo.lock
 
 # Debug and release builds
 debug/
