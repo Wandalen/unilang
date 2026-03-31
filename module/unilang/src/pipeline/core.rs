@@ -1,112 +1,77 @@
-//!
-//! Pipeline utilities for common Unilang workflows.
-//!
-//! This module provides convenient helper functions that combine multiple
-//! Unilang components to handle common use cases, making it easier to
-//! integrate Unilang into applications.
-//!
-//! # REPL Implementation Insights
-//!
-//! The Pipeline is specifically designed for REPL (Read-Eval-Print Loop) applications:
-//!
-//! ## Stateless Operation
-//! - **Critical**: All components (Parser, `SemanticAnalyzer`, Interpreter) are completely stateless
-//! - Each `process_command` call is independent - no state accumulation between calls
-//! - Memory usage remains constant regardless of session length
-//! - Safe for long-running REPL sessions without memory leaks
-//!
-//! ## Command Pipeline Performance Analysis
-//! - Component reuse provides 20-50% performance improvement over creating new instances
-//! - Static command registry lookups are zero-cost even with millions of commands
-//! - Parsing overhead is minimal and constant-time for typical command lengths
-//!
-//! ## Error Isolation
-//! - Command failures are isolated - one failed command doesn't affect subsequent commands
-//! - Parse errors, semantic errors, and execution errors are all safely contained
-//! - REPL sessions can continue indefinitely even with frequent command failures
-//!
-//! ## Interactive Argument Handling
-//! - The `UNILANG_ARGUMENT_INTERACTIVE_REQUIRED` error is designed to be caught by REPL loops
-//! - Interactive prompts should be handled at the REPL level, not within the pipeline
-//! - Secure input (passwords, API keys) should never be logged or stored in pipeline state
+use crate::data::OutputData;
+use crate::error::Error;
+use crate::interpreter::{ ExecutionContext, Interpreter };
+use crate::registry::CommandRegistry;
+use crate::semantic::SemanticAnalyzer;
+use unilang_parser::{ Parser, UnilangParserOptions };
 
-/// Internal namespace.
-mod private
+///
+/// Structured error types for better API consistency and error handling.
+///
+/// This enum replaces string matching for common error patterns and provides
+/// type-safe access to error information for REPL applications and CLI tools.
+#[ derive( Debug, Clone, PartialEq ) ]
+pub enum UnilangError
 {
-  use crate::data::OutputData;
-  use crate::error::Error;
-  use crate::interpreter::{ ExecutionContext, Interpreter };
-  use crate::registry::CommandRegistry;
-  use crate::semantic::SemanticAnalyzer;
-  use unilang_parser::{ Parser, UnilangParserOptions };
-
-  ///
-  /// Structured error types for better API consistency and error handling.
-  ///
-  /// This enum replaces string matching for common error patterns and provides
-  /// type-safe access to error information for REPL applications and CLI tools.
-  #[ derive( Debug, Clone, PartialEq ) ]
-  pub enum UnilangError
+  /// Command was not found, with optional suggestions for similar commands.
+  CommandNotFound
   {
-    /// Command was not found, with optional suggestions for similar commands.
-    CommandNotFound 
-    { 
-      /// The command that was not found
-      command: String, 
-      /// Suggested similar commands
-      suggestions: Vec<String> 
-    },
-    /// An interactive argument is required and must be prompted from the user.
-    InteractiveArgumentRequired 
-    { 
-      /// The argument name that requires interactive input
-      argument: String, 
-      /// The command that requires the interactive argument
-      command: String 
-    },
-    /// A static command was called but has no executable routine.
-    StaticCommandNoRoutine 
-    { 
-      /// The static command name
-      command: String 
-    },
-    /// Command arguments are invalid.
-    InvalidArguments 
-    { 
-      /// Error message describing the invalid arguments
-      message: String 
-    },
-    /// Command execution failed.
-    ExecutionFailure 
-    { 
-      /// Error message describing the execution failure
-      message: String 
-    },
-    /// Help request (e.g., user typed '.' or command with '?').
-    HelpRequest 
-    { 
-      /// List of available commands to show in help
-      commands: Vec<String> 
-    },
-    /// Parse error occurred.
-    ParseError 
-    { 
-      /// Error message describing the parse error
-      message: String 
-    },
-    /// Semantic analysis error occurred.
-    SemanticError 
-    { 
-      /// Error message describing the semantic analysis error
-      message: String 
-    },
-    /// Generic error that doesn't fit other categories.
-    Other 
-    { 
-      /// The error message
-      message: String 
-    },
-  }
+    /// The command that was not found
+    command: String,
+    /// Suggested similar commands
+    suggestions: Vec<String>
+  },
+  /// An interactive argument is required and must be prompted from the user.
+  InteractiveArgumentRequired
+  {
+    /// The argument name that requires interactive input
+    argument: String,
+    /// The command that requires the interactive argument
+    command: String
+  },
+  /// A static command was called but has no executable routine.
+  StaticCommandNoRoutine
+  {
+    /// The static command name
+    command: String
+  },
+  /// Command arguments are invalid.
+  InvalidArguments
+  {
+    /// Error message describing the invalid arguments
+    message: String
+  },
+  /// Command execution failed.
+  ExecutionFailure
+  {
+    /// Error message describing the execution failure
+    message: String
+  },
+  /// Help request (e.g., user typed '.' or command with '?').
+  HelpRequest
+  {
+    /// List of available commands to show in help
+    commands: Vec<String>
+  },
+  /// Parse error occurred.
+  ParseError
+  {
+    /// Error message describing the parse error
+    message: String
+  },
+  /// Semantic analysis error occurred.
+  SemanticError
+  {
+    /// Error message describing the semantic analysis error
+    message: String
+  },
+  /// Generic error that doesn't fit other categories.
+  Other
+  {
+    /// The error message
+    message: String
+  },
+}
 
 ///
 /// Result of processing a single command through the pipeline.
@@ -127,7 +92,7 @@ pub struct CommandResult
 impl CommandResult
 {
   /// Returns true if command executed successfully.
-  /// 
+  ///
   /// This method provides a clear, single source of truth for success detection,
   /// eliminating the confusion between checking `success` field and `error` field.
   #[ must_use ]
@@ -137,7 +102,7 @@ impl CommandResult
   }
 
   /// Returns true if command failed.
-  /// 
+  ///
   /// This is the logical complement of `is_success()`.
   #[ must_use ]
   pub fn is_error( &self ) -> bool
@@ -146,7 +111,7 @@ impl CommandResult
   }
 
   /// Returns error message if any.
-  /// 
+  ///
   /// Provides convenient access to error message without repeated Option handling.
   #[ must_use ]
   pub fn error_message( &self ) -> Option< &str >
@@ -155,7 +120,7 @@ impl CommandResult
   }
 
   /// Returns outputs if command succeeded, empty slice otherwise.
-  /// 
+  ///
   /// This prevents accessing potentially invalid outputs when command failed.
   #[ must_use ]
   pub fn outputs_or_empty( &self ) -> &[ OutputData ]
@@ -171,16 +136,16 @@ impl CommandResult
   }
 
   /// Parses the error message into a structured `UnilangError` type.
-  /// 
+  ///
   /// This enables type-safe error handling instead of fragile string matching.
   /// Returns None if the command succeeded.
   #[ must_use ]
   pub fn error_type( &self ) -> Option< UnilangError >
   {
     let error_msg = self.error.as_ref()?;
-    
+
     // Parse interactive argument errors - handle both old and new formats
-    if error_msg.contains( "UNILANG_ARGUMENT_INTERACTIVE_REQUIRED" ) 
+    if error_msg.contains( "UNILANG_ARGUMENT_INTERACTIVE_REQUIRED" )
       || error_msg.contains( "Interactive Argument Required" )
     {
       // Extract argument name and command from error message
@@ -232,10 +197,10 @@ impl CommandResult
   }
 
   /// Returns true if error indicates interactive input is required.
-  /// 
+  ///
   /// This is a convenience method for the common pattern of checking for
   /// interactive argument requirements in REPL applications.
-  /// 
+  ///
   /// # REPL Integration Example
   /// ```
   /// use unilang::pipeline::Pipeline;
@@ -253,7 +218,7 @@ impl CommandResult
   ///     }
   /// }
   /// ```
-  /// 
+  ///
   /// # Security Notes
   /// - Always use secure input methods for interactive arguments
   /// - Never log or store sensitive interactive values
@@ -265,7 +230,7 @@ impl CommandResult
   }
 
   /// Returns the argument name that requires interactive input.
-  /// 
+  ///
   /// Returns None if this is not an interactive argument error.
   #[ must_use ]
   pub fn interactive_argument( &self ) -> Option< String >
@@ -281,10 +246,10 @@ impl CommandResult
   }
 
   /// Returns true if error contains help information.
-  /// 
+  ///
   /// This is useful for detecting when the user requested help (e.g., typed '.')
   /// versus when a genuine error occurred.
-  /// 
+  ///
   /// # REPL Integration Example
   /// ```
   /// use unilang::pipeline::Pipeline;
@@ -303,7 +268,7 @@ impl CommandResult
   ///     println!("Error: {}", result.error_message().unwrap_or("Unknown error"));
   /// }
   /// ```
-  /// 
+  ///
   /// # Common Help Triggers
   /// - Typing `.` alone lists all commands
   /// - Typing `.command ?` shows help for specific command
@@ -315,7 +280,7 @@ impl CommandResult
   }
 
   /// Extracts formatted help content from error message.
-  /// 
+  ///
   /// Returns None if this is not a help request error.
   #[ must_use ]
   pub fn help_content( &self ) -> Option< String >
@@ -343,7 +308,7 @@ fn extract_interactive_argument( error_msg : &str ) -> Option< &str >
       return Some( &after[ ..end ] );
     }
   }
-  
+
   // Fallback: look for "Interactive Argument Required: <arg_name>"
   if let Some( start ) = error_msg.find( "Interactive Argument Required:" )
   {
@@ -358,7 +323,7 @@ fn extract_interactive_argument( error_msg : &str ) -> Option< &str >
       return Some( arg_part );
     }
   }
-  
+
   // Another fallback: look for "argument '" pattern
   if let Some( start ) = error_msg.find( "argument '" )
   {
@@ -368,7 +333,7 @@ fn extract_interactive_argument( error_msg : &str ) -> Option< &str >
       return Some( &after[ ..end ] );
     }
   }
-  
+
   None
 }
 
@@ -385,8 +350,8 @@ fn extract_command_from_error( error_msg : &str ) -> Option< &str >
     }
     return Some( after );
   }
-  
-  // Look for "command '<name>'" pattern  
+
+  // Look for "command '<name>'" pattern
   if let Some( start ) = error_msg.find( "command '" )
   {
     let after = &error_msg[ start + "command '".len().. ];
@@ -395,7 +360,7 @@ fn extract_command_from_error( error_msg : &str ) -> Option< &str >
       return Some( &after[ ..end ] );
     }
   }
-  
+
   None
 }
 
@@ -404,17 +369,17 @@ fn extract_available_commands( error_msg : &str ) -> Vec< String >
 {
   let mut commands = Vec::new();
   let mut in_commands_section = false;
-  
+
   for line in error_msg.lines()
   {
     let line = line.trim();
-    
+
     if line.contains( "Available commands:" )
     {
       in_commands_section = true;
       continue;
     }
-    
+
     if in_commands_section
     {
       // Stop if we hit an empty line or different section
@@ -422,8 +387,8 @@ fn extract_available_commands( error_msg : &str ) -> Vec< String >
       {
         break;
       }
-      
-      // Extract command names - they typically start with '.' 
+
+      // Extract command names - they typically start with '.'
       // Handle various indentation patterns
       if let Some( stripped ) = line.strip_prefix( '.' )
       {
@@ -455,7 +420,7 @@ fn extract_available_commands( error_msg : &str ) -> Vec< String >
       }
     }
   }
-  
+
   commands
 }
 
@@ -463,7 +428,7 @@ fn extract_available_commands( error_msg : &str ) -> Vec< String >
 fn extract_command_suggestions( error_msg : &str ) -> Vec< String >
 {
   let mut suggestions = Vec::new();
-  
+
   // Look for "Did you mean:" pattern
   if let Some( start ) = error_msg.find( "Did you mean:" )
   {
@@ -476,7 +441,7 @@ fn extract_command_suggestions( error_msg : &str ) -> Vec< String >
       }
     }
   }
-  
+
   suggestions
 }
 
@@ -499,53 +464,6 @@ fn format_help_content( commands : &[ String ] ) -> String
 }
 
 ///
-/// Result of processing multiple commands through the pipeline.
-///
-#[ derive( Debug, Clone ) ]
-pub struct BatchResult
-{
-  /// Results for each individual command.
-  pub results : Vec< CommandResult >,
-  /// Total number of commands processed.
-  pub total_commands : usize,
-  /// Number of commands that succeeded.
-  pub successful_commands : usize,
-  /// Number of commands that failed.
-  pub failed_commands : usize,
-}
-
-impl BatchResult
-{
-  /// Returns true if all commands in the batch succeeded.
-  #[ must_use ]
-  pub fn all_succeeded( &self ) -> bool
-  {
-    self.failed_commands == 0
-  }
-
-  /// Returns true if any commands in the batch failed.
-  #[ must_use ]
-  pub fn any_failed( &self ) -> bool
-  {
-    self.failed_commands > 0
-  }
-
-  /// Returns the success rate as a percentage.
-  #[ must_use ]
-  pub fn success_rate( &self ) -> f64
-  {
-    if self.total_commands == 0
-    {
-      0.0
-    }
-    else
-    {
-      ( self.successful_commands as f64 / self.total_commands as f64 ) * 100.0
-    }
-  }
-}
-
-///
 /// A high-level pipeline processor that combines parsing, semantic analysis, and execution.
 ///
 /// This struct provides convenient methods for processing commands through the
@@ -553,8 +471,8 @@ impl BatchResult
 #[ allow( missing_debug_implementations ) ]
 pub struct Pipeline
 {
-  parser : Parser,
-  registry : CommandRegistry,
+  pub( in super ) parser : Parser,
+  pub( in super ) registry : CommandRegistry,
 }
 
 impl Pipeline
@@ -663,8 +581,9 @@ impl Pipeline
   /// let result = pipeline.process_command(".help", context);
   /// # drop(result); // Suppress unused variable warning
   /// ```
-#[allow(clippy::needless_pass_by_value)]
-  #[must_use] pub fn process_command( &self, command_str : &str, mut context : ExecutionContext ) -> CommandResult
+  #[ allow( clippy::needless_pass_by_value ) ]
+  #[ must_use ]
+  pub fn process_command( &self, command_str : &str, mut context : ExecutionContext ) -> CommandResult
   {
     let command = command_str.to_string();
 
@@ -704,7 +623,7 @@ impl Pipeline
               {
                 content : error_data.message.clone(),
                 format : "text".to_string(),
-      execution_time_ms : None,
+                execution_time_ms : None,
               }],
               success : true,
               error : None,
@@ -748,288 +667,10 @@ impl Pipeline
   ///
   /// This is a convenience method that creates a default execution context
   /// for simple use cases.
-  #[must_use] pub fn process_command_simple( &self, command_str : &str ) -> CommandResult
+  #[ must_use ]
+  pub fn process_command_simple( &self, command_str : &str ) -> CommandResult
   {
     self.process_command( command_str, ExecutionContext::default() )
-  }
-
-  ///
-  /// Processes a command from an argv array (OS command-line arguments).
-  ///
-  /// This method provides proper CLI integration by preserving the original argv structure
-  /// from the operating system, avoiding information loss from string joining and re-tokenization.
-  ///
-  /// **Recommended for CLI applications** - This is the preferred method when building CLI
-  /// applications that receive argv from `std::env::args()`. Use `process_command()` for
-  /// REPL, interactive shells, or when parsing embedded DSL strings.
-  ///
-  /// # Algorithm
-  ///
-  /// The argv parser intelligently combines consecutive argv elements:
-  /// 1. Elements containing `::` start named arguments (`key::value`)
-  /// 2. Following elements without `::` or `.` are combined into the parameter value
-  /// 3. Combining stops at the next `::` or dot-prefixed element
-  ///
-  /// # Arguments
-  /// * `argv` - Command-line arguments from `std::env::args().skip(1).collect()`
-  /// * `context` - The execution context (will be moved and consumed)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use unilang::pipeline::Pipeline;
-  /// use unilang::registry::CommandRegistry;
-  /// use unilang::interpreter::ExecutionContext;
-  ///
-  /// let registry = CommandRegistry::new();
-  /// let pipeline = Pipeline::new(registry);
-  /// let context = ExecutionContext::default();
-  ///
-  /// // Shell: ./app .command arg1 arg2
-  /// // OS provides: [".command", "arg1", "arg2"]
-  /// let argv: Vec<String> = vec![".help".to_string()];
-  /// let result = pipeline.process_command_from_argv(&argv, context);
-  /// # drop(result); // Suppress unused variable warning
-  /// ```
-  ///
-  /// # Why Use This Method?
-  ///
-  /// **Problem with string-based API:**
-  /// ```ignore
-  /// // ❌ BAD: Information loss
-  /// let argv = vec!["command::ls", "-la"];
-  /// let command_str = argv.join(" ");  // "command::ls -la"
-  /// pipeline.process_command(&command_str);  // Parse error!
-  /// ```
-  ///
-  /// **Solution with argv-based API:**
-  /// ```
-  /// use unilang::pipeline::Pipeline;
-  /// use unilang::registry::CommandRegistry;
-  /// use unilang::interpreter::ExecutionContext;
-  ///
-  /// # let registry = CommandRegistry::new();
-  /// # let pipeline = Pipeline::new(registry);
-  /// # let context = ExecutionContext::default();
-  /// // ✅ GOOD: Preserves structure
-  /// let argv = vec![".help".to_string()];
-  /// let result = pipeline.process_command_from_argv(&argv, context);
-  /// # drop(result);
-  /// ```
-  ///
-  /// # See Also
-  ///
-  /// - [`Self::process_command`] - For REPL/interactive shells
-  /// - [`Self::process_command_from_argv_simple`] - Convenience method with default context
-  /// - Task 080: Argv-Based API Request - Full specification
-  #[allow(clippy::needless_pass_by_value)]
-  #[must_use] pub fn process_command_from_argv( &self, argv : &[String], mut context : ExecutionContext ) -> CommandResult
-  {
-    // Build a command string representation for error reporting
-    let command = argv.join( " " );
-
-    // Step 1: Parse argv using the argv-aware parser
-    let instruction = match self.parser.parse_from_argv( argv )
-    {
-      Ok( instruction ) => instruction,
-      Err( error ) =>
-      {
-        return CommandResult
-        {
-          command,
-          outputs : vec![],
-          success : false,
-          error : Some( format!( "Parse error: {error}" ) ),
-        };
-      }
-    };
-
-    // Step 2: Semantic Analysis
-    let instructions = [ instruction ];
-    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry );
-    let verified_commands = match analyzer.analyze()
-    {
-      Ok( commands ) => commands,
-      Err( error ) =>
-      {
-        // Check if this is a help request - if so, treat it as successful output
-        if let crate::error::Error::Execution( error_data ) = &error
-        {
-          if error_data.code == crate::data::ErrorCode::HelpRequested
-          {
-            return CommandResult
-            {
-              command,
-              outputs : vec![ crate::data::OutputData
-              {
-                content : error_data.message.clone(),
-                format : "text".to_string(),
-      execution_time_ms : None,
-              }],
-              success : true,
-              error : None,
-            };
-          }
-        }
-
-        return CommandResult
-        {
-          command,
-          outputs : vec![],
-          success : false,
-          error : Some( format!( "Semantic analysis error: {error}" ) ),
-        };
-      }
-    };
-
-    // Step 3: Execution
-    let interpreter = Interpreter::new( &verified_commands, &self.registry );
-    match interpreter.run( &mut context )
-    {
-      Ok( outputs ) => CommandResult
-      {
-        command,
-        outputs,
-        success : true,
-        error : None,
-      },
-      Err( error ) => CommandResult
-      {
-        command,
-        outputs : vec![],
-        success : false,
-        error : Some( format!( "Execution error: {error}" ) ),
-      },
-    }
-  }
-
-  ///
-  /// Processes a command from argv with a default execution context.
-  ///
-  /// This is a convenience method for CLI applications that creates a default
-  /// execution context for simple use cases.
-  ///
-  /// # Examples
-  /// ```rust
-  /// use unilang::pipeline::Pipeline;
-  /// use unilang::registry::CommandRegistry;
-  ///
-  /// let registry = CommandRegistry::new();
-  /// let pipeline = Pipeline::new(registry);
-  ///
-  /// // Typical CLI application pattern
-  /// let argv: Vec<String> = vec![".help".to_string()];
-  /// let result = pipeline.process_command_from_argv_simple(&argv);
-  ///
-  /// if result.success {
-  ///     println!("Success");
-  /// } else {
-  ///     eprintln!("Error: {}", result.error.unwrap_or_default());
-  /// }
-  /// ```
-  #[must_use] pub fn process_command_from_argv_simple( &self, argv : &[String] ) -> CommandResult
-  {
-    self.process_command_from_argv( argv, ExecutionContext::default() )
-  }
-
-  ///
-  /// Processes multiple command strings as a batch.
-  ///
-  /// This method processes each command independently and returns a summary
-  /// of the batch execution results. Commands are executed in order, and
-  /// failure of one command does not stop execution of subsequent commands.
-  ///
-  /// # Arguments
-  /// * `commands` - Slice of command strings to process
-  /// * `context` - The execution context (will be cloned for each command)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use unilang::pipeline::Pipeline;
-  /// use unilang::registry::CommandRegistry;
-  /// use unilang::interpreter::ExecutionContext;
-  ///
-  /// let registry = CommandRegistry::new();
-  /// let pipeline = Pipeline::new(registry);
-  /// let context = ExecutionContext::default();
-  ///
-  /// let commands = vec![".help"];
-  /// let batch_result = pipeline.process_batch(&commands, context);
-  /// println!("Success rate: {:.1}%", batch_result.success_rate());
-  /// ```
-#[allow(clippy::needless_pass_by_value)]
-  #[must_use] pub fn process_batch( &self, commands : &[ &str ], context : ExecutionContext ) -> BatchResult
-  {
-    let mut results = Vec::new();
-    let mut successful = 0;
-    let mut failed = 0;
-
-    for &cmd_str in commands
-    {
-      let result = self.process_command( cmd_str, context.clone() );
-
-      if result.success
-      {
-        successful += 1;
-      }
-      else
-      {
-        failed += 1;
-      }
-
-      results.push( result );
-    }
-
-    BatchResult
-    {
-      results,
-      total_commands : commands.len(),
-      successful_commands : successful,
-      failed_commands : failed,
-    }
-  }
-
-  ///
-  /// Processes multiple command strings with early termination on failure.
-  ///
-  /// Unlike `process_batch`, this method stops processing commands as soon
-  /// as one command fails, returning the results of commands processed up
-  /// to that point.
-  ///
-  /// # Arguments
-  /// * `commands` - Slice of command strings to process
-  /// * `context` - The execution context (will be moved and mutated)
-#[allow(clippy::needless_pass_by_value)]
-  #[must_use] pub fn process_sequence( &self, commands : &[ &str ], context : ExecutionContext ) -> BatchResult
-  {
-    let mut results = Vec::new();
-    let mut successful = 0;
-    let mut failed = 0;
-
-    for &cmd_str in commands
-    {
-      let result = self.process_command( cmd_str, context.clone() );
-
-      if result.success
-      {
-        successful += 1;
-      }
-      else
-      {
-        failed += 1;
-        results.push( result );
-        break; // Stop on first failure
-      }
-
-      results.push( result );
-    }
-
-    BatchResult
-    {
-      results,
-      total_commands : commands.len(),
-      successful_commands : successful,
-      failed_commands : failed,
-    }
   }
 
   ///
@@ -1041,7 +682,7 @@ impl Pipeline
   /// # Returns
   /// - `Ok(())` if the command is valid and would be executable
   /// - `Err(Error)` if the command has syntax or semantic errors
-  #[allow(clippy::missing_errors_doc)]
+  #[ allow( clippy::missing_errors_doc ) ]
   pub fn validate_command( &self, command_str : &str ) -> Result< (), Error >
   {
     // Step 1: Parsing
@@ -1060,7 +701,8 @@ impl Pipeline
   ///
   /// Returns a vector of validation results, one for each command.
   /// This is useful for batch validation scenarios.
-  #[must_use] pub fn validate_batch( &self, commands : &[ &str ] ) -> Vec< Result< (), Error > >
+  #[ must_use ]
+  pub fn validate_batch( &self, commands : &[ &str ] ) -> Vec< Result< (), Error > >
   {
     commands.iter()
     .map( | &cmd_str | self.validate_command( cmd_str ) )
@@ -1094,7 +736,7 @@ impl Pipeline
   ///     Err(e) => eprintln!("Help error: {}", e),
   /// }
   /// ```
-  #[allow(clippy::needless_pass_by_value)]
+  #[ allow( clippy::needless_pass_by_value ) ]
   pub fn process_help_request( &self, command_name : &str, _context : ExecutionContext ) -> Result< OutputData, Error >
   {
     match self.registry.get_help_for_command( command_name )
@@ -1103,7 +745,7 @@ impl Pipeline
       {
         content : help_text,
         format : "text".to_string(),
-      execution_time_ms : None,
+        execution_time_ms : None,
       }),
       None => Err( Error::Registration( format!(
         "Help Error: Command '{}' not found. Use '.' to see all available commands.",
@@ -1132,7 +774,8 @@ impl Pipeline
 /// let result = process_single_command(".help", &registry, context);
 /// # drop(result); // Suppress unused variable warning
 /// ```
-#[must_use] pub fn process_single_command
+#[ must_use ]
+pub fn process_single_command
 (
   command_str : &str,
   registry : &CommandRegistry,
@@ -1206,7 +849,7 @@ CommandResult
 ///
 /// This is a shorthand for creating a pipeline and validating one command.
 /// Note: This creates a new parser each time, so it's less efficient than reusing a Pipeline.
-#[allow(clippy::missing_errors_doc)]
+#[ allow( clippy::missing_errors_doc ) ]
 pub fn validate_single_command
 (
   command_str : &str,
@@ -1227,190 +870,4 @@ Result< (), Error >
   analyzer.analyze()?;
 
   Ok(())
-}
-
-}
-
-mod_interface::mod_interface!
-{
-  exposed use private::UnilangError;
-  exposed use private::CommandResult;
-  exposed use private::BatchResult;
-  exposed use private::Pipeline;
-  exposed use private::process_single_command;
-  exposed use private::validate_single_command;
-  
-  prelude use private::UnilangError;
-  prelude use private::CommandResult;
-  prelude use private::BatchResult;
-  prelude use private::Pipeline;
-  prelude use private::process_single_command;
-}
-
-#[ cfg( test ) ]
-mod tests
-{
-  use super::*;
-  use crate::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind };
-  use crate::types::Value;
-  use crate::registry::CommandRegistry;
-  use crate::interpreter::ExecutionContext;
-  use crate::data::OutputData;
-
-  fn create_test_registry() -> CommandRegistry
-  {
-    #[ allow( deprecated ) ]
-    let mut registry = CommandRegistry::new();
-
-    // Add a simple test command
-    let test_command = CommandDefinition::former()
-    .name( ".test" )
-    .namespace( String::new() )
-    .description( "Test command".to_string() )
-    .hint( "Test command" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( true )
-    .deprecation_message( String::new() )
-    .http_method_hint( "GET".to_string() )
-    .examples( vec![] )
-    .arguments( vec!
-    [
-      ArgumentDefinition::former()
-      .name( "message" )
-      .description( "Test message".to_string() )
-      .kind( Kind::String )
-      .hint( "Message to echo" )
-      .attributes
-      (
-        ArgumentAttributes
-        {
-          optional: true,
-          multiple: false,
-          default: Some( "hello".to_string() ),
-          sensitive: false,
-          interactive: false,
-        }
-      )
-      .validation_rules( vec![] )
-      .aliases( vec![] )
-      .tags( vec![] )
-      .end()
-    ])
-    .end();
-
-    let test_routine = Box::new( | cmd : crate::semantic::VerifiedCommand, _ctx |
-    {
-      let default_message = "hello".to_string();
-      let message = cmd.arguments.get( "message" )
-      .and_then( | v | if let Value::String( s ) = v { Some( s ) } else { None } )
-      .unwrap_or( &default_message );
-
-      Ok( OutputData
-      {
-        content : message.clone(),
-        format : "text".to_string(),
-      execution_time_ms : None,
-      })
-    });
-
-    #[ allow( deprecated ) ]
-    registry.command_add_runtime( &test_command, test_routine ).unwrap();
-    registry
-  }
-
-  #[ test ]
-  fn test_pipeline_process_command_success()
-  {
-    let registry = create_test_registry();
-    let pipeline = Pipeline::new( registry );
-    let context = ExecutionContext::default();
-
-    let result = pipeline.process_command( ".test world", context );
-
-    assert!( result.success );
-    assert!( result.error.is_none() );
-    assert_eq!( result.outputs.len(), 1 );
-    assert_eq!( result.outputs[ 0 ].content, "world" );
-  }
-
-  #[ test ]
-  fn test_pipeline_process_command_parse_error()
-  {
-    let registry = create_test_registry();
-    let pipeline = Pipeline::new( registry );
-    let context = ExecutionContext::default();
-
-    // This should cause a parse error (invalid syntax)
-    let result = pipeline.process_command( "invalid..syntax", context );
-
-    assert!( !result.success );
-    assert!( result.error.is_some() );
-    assert!( result.error.as_ref().unwrap().contains( "Parse error" ) );
-  }
-
-  #[ test ]
-  fn test_pipeline_process_command_semantic_error()
-  {
-    let registry = create_test_registry();
-    let pipeline = Pipeline::new( registry );
-    let context = ExecutionContext::default();
-
-    // This should cause a semantic error (command not found)
-    let result = pipeline.process_command( "nonexistent_command", context );
-
-    assert!( !result.success );
-    assert!( result.error.is_some() );
-    assert!( result.error.as_ref().unwrap().contains( "Semantic analysis error" ) );
-  }
-
-  #[ test ]
-  fn test_pipeline_process_batch()
-  {
-    let registry = create_test_registry();
-    let pipeline = Pipeline::new( registry );
-    let context = ExecutionContext::default();
-
-    let commands = vec![ ".test hello", ".test world", "nonexistent" ];
-    let batch_result = pipeline.process_batch( &commands, context );
-
-    assert_eq!( batch_result.total_commands, 3 );
-    assert_eq!( batch_result.successful_commands, 2 );
-    assert_eq!( batch_result.failed_commands, 1 );
-    assert!( !batch_result.all_succeeded() );
-    assert!( batch_result.any_failed() );
-    assert!( ( batch_result.success_rate() - 66.666_666 ).abs() < 0.001 );
-  }
-
-  #[ test ]
-  fn test_pipeline_validate_command()
-  {
-    let registry = create_test_registry();
-    let pipeline = Pipeline::new( registry );
-
-    // Valid command
-    assert!( pipeline.validate_command( ".test hello" ).is_ok() );
-
-    // Invalid command
-    assert!( pipeline.validate_command( "nonexistent_command" ).is_err() );
-  }
-
-  #[ test ]
-  fn test_convenience_functions()
-  {
-    let registry = create_test_registry();
-    let context = ExecutionContext::default();
-
-    // Test process_single_command
-    let result = process_single_command( ".test hello", &registry, context );
-    assert!( result.success );
-    assert_eq!( result.outputs[ 0 ].content, "hello" );
-
-    // Test validate_single_command
-    assert!( validate_single_command( ".test hello", &registry ).is_ok() );
-    assert!( validate_single_command( "nonexistent", &registry ).is_err() );
-  }
 }

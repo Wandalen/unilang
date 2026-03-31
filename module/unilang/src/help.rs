@@ -123,7 +123,7 @@ mod private
 /// // Default is Standard (Level 2)
 /// assert_eq!( HelpVerbosity::default(), HelpVerbosity::Standard );
 /// ```
-#[ derive( Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord ) ]
+#[ derive( Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default ) ]
 pub enum HelpVerbosity
 {
   /// Level 0: Just command name and brief description
@@ -131,19 +131,12 @@ pub enum HelpVerbosity
   /// Level 1: Add parameters list with types only
   Basic = 1,
   /// Level 2: Standard concise help (USAGE, PARAMETERS, EXAMPLES) - DEFAULT
+  #[ default ]
   Standard = 2,
   /// Level 3: Detailed help with all metadata
   Detailed = 3,
   /// Level 4: Comprehensive with extensive explanations
   Comprehensive = 4,
-}
-
-impl Default for HelpVerbosity
-{
-  fn default() -> Self
-  {
-    Self::Standard
-  }
 }
 
 impl HelpVerbosity

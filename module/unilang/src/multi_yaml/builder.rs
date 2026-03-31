@@ -270,7 +270,7 @@ mod private
           let final_name = self.compute_final_command_name( cmd, module.prefix.as_ref() );
           all_commands
             .entry( final_name )
-            .or_insert_with( Vec::new )
+            .or_default()
             .push( module.name.clone() );
         }
       }
@@ -296,7 +296,7 @@ mod private
                 let final_name = self.compute_final_command_name( &cmd, module.prefix.as_ref() );
                 all_commands
                   .entry( final_name )
-                  .or_insert_with( Vec::new )
+                  .or_default()
                   .push( module.name.clone() );
               }
             }
@@ -314,7 +314,7 @@ mod private
             let final_name = self.compute_final_command_name( cmd, cond_module.module.prefix.as_ref() );
             all_commands
               .entry( final_name )
-              .or_insert_with( Vec::new )
+              .or_default()
               .push( cond_module.name.clone() );
           }
         }

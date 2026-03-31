@@ -4,9 +4,9 @@
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Task | Description |
 |-------|----|--------------:|------:|---------:|-------:|---------:|--------|------|-------------|
-| 1 | 093 | 896 | 8 | 7 | 8 | 2 | 📥 (Backlog) | [fix_from_static_routine_transfer](./093_fix_from_static_routine_transfer.md) | Fix From<StaticCommandRegistry> to transfer routines; fix Pipeline::from_static() doctest |
-| 2 | 092 | 200 | 10 | 8 | 5 | 5 | 🔄 (Planned) | [fix_incorrect_file_path_documentation](./092_fix_incorrect_file_path_documentation.md) | Fix widespread incorrect documentation claiming unilang cannot parse file paths - actually works with :: syntax |
-| 2 | 084 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [help_formatting_improvements](./completed/084_help_formatting_improvements.md) | Already implemented - All features exist: categorization, prefix filtering, hidden commands |
+| 1 | 092 | 2000 | 10 | 8 | 5 | 5 | 🔄 (Planned) | [fix_incorrect_file_path_documentation](./092_fix_incorrect_file_path_documentation.md) | Fix widespread incorrect documentation claiming unilang cannot parse file paths - actually works with :: syntax |
+| 2 | 093 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [fix_from_static_routine_transfer](./completed/093_fix_from_static_routine_transfer.md) | Fix From<StaticCommandRegistry> to transfer routines; fix Pipeline::from_static() doctest |
+| 3 | 084 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [help_formatting_improvements](./completed/084_help_formatting_improvements.md) | Already implemented - All features exist: categorization, prefix filtering, hidden commands |
 | 2 | 085 | 0 | 10 | 4 | 5 | 0 | ✅ (Completed) | [make_illegal_states_unrepresentable](./completed/085_make_illegal_states_unrepresentable.md) | Build-time validation prevents illegal states - Task 085 resolved (8/10 items) |
 | 3 | 086 | 0 | 9 | 6 | 7 | 0 | ✅ (Completed) | [prevent_argv_misuse_pitfall](./completed/086_prevent_argv_misuse_pitfall.md) | Prevent argv→string→split misuse through API redesign and documentation |
 | 4 | 087 | 0 | 9 | 6 | 6 | 0 | ✅ (Completed) | [prevent_command_help_divergence](./completed/087_prevent_command_help_divergence.md) | Make command/help divergence impossible through registry API enforcement - Phase 1 complete: auto-help generation, format_command_listing(), validate_help_completeness() |
@@ -44,7 +44,11 @@
 | 36 | 042 | 0 | 6 | 6 | 7 | 0 | ✅ (Completed) | [add_context_rich_benchmark_documentation](./completed/042_add_context_rich_benchmark_documentation.md) | Add context-rich benchmark documentation |
 | 37 | 043 | 0 | 6 | 6 | 7 | 0 | ✅ (Completed) | [implement_before_after_optimization_workflow](./completed/043_implement_before_after_optimization_workflow.md) | Implement before/after optimization workflow |
 | 38 | 045 | 0 | 6 | 9 | 9 | 0 | ✅ (Completed) | [move_completed_tasks_to_completed_directory](./completed/045_move_completed_tasks_to_completed_directory.md) | Move completed tasks to completed directory |
-| 39 | 077 | 0 | 10 | 4 | 5 | 0 | ✅ (Completed) | [final_integration_testing](./completed/077_final_integration_testing.md) | Final integration testing |
+| 39 | 070 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | [write_tests_for_documentation_updater](./completed/070_write_tests_for_documentation_updater.md) | Write tests for documentation updater |
+| 40 | 071 | 0 | 8 | 4 | 7 | 0 | ✅ (Completed) | [implement_documentation_updater](./completed/071_implement_documentation_updater.md) | Implement documentation updater |
+| 41 | 072 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | [write_tests_for_benchmark_configuration_system](./completed/072_write_tests_for_benchmark_configuration_system.md) | Write tests for benchmark configuration system |
+| 42 | 074 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | [write_tests_for_performance_analysis_tools](./completed/074_write_tests_for_performance_analysis_tools.md) | Write tests for performance analysis tools |
+| 43 | 077 | 0 | 10 | 4 | 5 | 0 | ✅ (Completed) | [final_integration_testing](./completed/077_final_integration_testing.md) | Final integration testing |
 | 40 | 047 | 0 | 8 | 6 | 8 | 0 | ✅ (Completed) | [verify_benchmark_execution_functionality](./completed/047_verify_benchmark_execution_functionality.md) | Verify benchmark execution functionality |
 | 41 | 046 | 0 | 4 | 10 | 9 | 0 | ✅ (Completed) | [remove_obsolete_task_artifacts](./completed/046_remove_obsolete_task_artifacts.md) | Remove obsolete task artifacts |
 | 42 | 026 | 0 | 8 | 9 | 4 | 0 | ✅ (Completed) | [remove_obsolete_throughput_benchmark_original](./completed/026_remove_obsolete_throughput_benchmark_original.md) | Remove obsolete throughput benchmark original |

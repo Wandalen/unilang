@@ -460,6 +460,14 @@ mod private
     pub interactive : bool,
   }
 
+  impl Default for StaticArgumentAttributes
+  {
+    fn default() -> Self
+    {
+      Self::new()
+    }
+  }
+
   impl StaticArgumentAttributes
   {
     /// Creates a new `StaticArgumentAttributes` with sensible defaults.
@@ -654,21 +662,18 @@ mod private
     }
 
     /// Get an iterator over all command names.
-    #[ must_use ]
     pub fn keys( &self ) -> impl Iterator< Item = &&'static str >
     {
       self.inner.keys()
     }
 
     /// Get an iterator over all (name, definition) pairs.
-    #[ must_use ]
     pub fn entries( &self ) -> impl Iterator< Item = (&&'static str, &&'static StaticCommandDefinition) >
     {
       self.inner.entries()
     }
 
     /// Get an iterator over all command definitions.
-    #[ must_use ]
     pub fn values( &self ) -> impl Iterator< Item = &&'static StaticCommandDefinition >
     {
       self.inner.values()

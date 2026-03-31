@@ -103,9 +103,6 @@ plugin_system = [ "dep:libloading" ]         # Dynamic library loading (future)
 binary_serialization = [ "dep:bincode" ]     # Binary serialization (future)
 const_parsing = [ ]                          # Const eval parsing (future)
 
-# Output processing utilities (DEPRECATED in 0.31.0, will be removed in 0.32.0)
-# Use cli_fmt::output directly instead
-output_processing = [ "dep:cli_fmt", "dep:strs_tools" ]
 
 # ========================================
 # Convenience Features
@@ -224,9 +221,6 @@ simd-json = { workspace = true, optional = true } # SIMD-optimized JSON parsing
 memchr = { workspace = true, optional = true } # SIMD-optimized byte searching (6x faster than std)
 bytecount = { workspace = true, optional = true } # SIMD byte counting and operations
 
-# CLI output utilities (deprecated - use cli_fmt directly)
-cli_fmt = { workspace = true, features = [ "output" ], optional = true }
-strs_tools = { workspace = true, features = [ "ansi", "string_split", "std" ], optional = true }
 
 # NOTE: Benchmark dependencies have been moved to unilang_benchmarks workspace crate
 # to avoid polluting the production dependency tree

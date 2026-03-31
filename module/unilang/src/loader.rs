@@ -59,9 +59,9 @@ pub fn load_command_definitions_from_json_str( json_str : &str ) -> Result< Vec<
 ///
 pub fn resolve_routine_link( _link : &str ) -> Result< CommandRoutine, Error >
 {
-  // qqq: This is a placeholder. Actual dynamic loading will be implemented in a later increment.
-  // For now, return a dummy routine or an error if the link is not recognized.
-  // For testing purposes, we can return a routine that just prints the link.
+  // Not yet implemented: dynamic library loading is planned in Phase 11 (M11.2).
+  // Until then, commands with a `routine_link` set will silently succeed with empty output.
+  // See docs/roadmap.md § Phase 11 M11.2 (routine_implement_dynamic_loading).
   Ok( Box::new( move | _args, _context |
   {
     // println!( "Dummy routine executed for link: {}", link );

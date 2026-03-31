@@ -22,6 +22,11 @@ Documentation is organized by topic to reflect the nature of the content rather 
 | `performance.md` | Performance characteristics | Performance analysis and benchmarks |
 | `quick_start.md` | Getting started guide | Quick introduction for new users |
 | `roadmap.md` | Future development plans | Planned features and improvements |
+| `features.md` | Feature tracking table | ROI-scored feature status per feature_management.rulebook.md |
+| `troubleshooting.md` | Common issues and fixes | Errors, type hints, build failures, and solutions |
+| `migration.md` | Runtime → build-time guide | Step-by-step migration for 50x performance improvement |
+| `cli_aggregation.md` | CLI aggregation guide | Unify multiple CLIs with namespace isolation and conflict detection |
+| `phf_reexport.md` | PHF re-export usage | Using unilang's PHF re-export instead of direct phf dependency |
 | `features/` | Feature design documents | Detailed feature design and implementation guides |
 
 ### Quick Access

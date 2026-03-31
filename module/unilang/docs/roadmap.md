@@ -79,13 +79,15 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   **Goal:** To meet the stringent performance NFRs by systematically eliminating bottlenecks identified in the performance analysis, with a focus on reducing string allocations and leveraging SIMD instructions.
 *   **Outcome:** A framework with throughput competitive with minimalist parsers like `pico-args`, achieved through zero-copy techniques, string interning, and SIMD-accelerated operations.
 
-*   [⚫] **M6.1: optimization_implement_string_interning:**
+*   [✅] **M6.1: optimization_implement_string_interning:**
     *   **Spec Reference:** `performance.md` (Task 001)
     *   **Deliverable:** A string interning system integrated into the `SemanticAnalyzer` to cache command names and other common strings.
-*   [⚫] **M6.2: token_refactor_to_zero_copy:**
+    *   **Completed:** Task 001. Implemented in `src/interner.rs` as `StringInterner` with LRU-bounded lookup cache (10,000 entries), thread-safe `RwLock`-protected storage, and `Box::leak`-based `&'static str` returns. Global singleton exposed via `global_interner()`. Integrated into semantic hot path.
+*   [✅] **M6.2: token_refactor_to_zero_copy:**
     *   **Prerequisites:** M6.1
     *   **Spec Reference:** `performance.md` (Task 002)
     *   **Deliverable:** The `unilang_parser` crate updated to use `&str` tokens, and the `unilang` crate updated to consume them, eliminating major allocation overhead.
+    *   **Completed:** Task 002. Zero-copy token references implemented in `unilang_parser`. Parser returns borrowed `&str` slices from the input rather than owned `String`s, eliminating allocation overhead in the parsing hot path.
 *   [✅] **M6.3: parser_integrate_simd_json:**
     *   **Prerequisites:** M6.2
     *   **Spec Reference:** `performance.md` (Task 009)

@@ -16,9 +16,15 @@ mod private
   const DEFAULT_CACHE_SIZE_LIMIT : usize = 10_000;
 
   /// Thread-safe string interner that caches strings and returns 'static references.
-  /// 
-  /// Uses `Box::leak()` to extend string lifetimes to 'static, enabling zero-copy
-  /// command name lookups. Implements LRU eviction to prevent unbounded memory growth.
+  ///
+  /// Uses `Box::leak()` to produce `&'static str` references for zero-copy command name lookups.
+  ///
+  /// **Memory model:** Every unique string interned via `Box::leak()` is a permanent heap
+  /// allocation that cannot be freed for the lifetime of the process. The LRU eviction policy
+  /// only limits the size of the lookup cache (the HashMap); it does NOT reclaim the leaked
+  /// memory. After `size_limit` unique strings have been interned, subsequent entries are dropped
+  /// from the cache but their heap allocations remain. Use only for a bounded set of strings
+  /// (e.g., command names known at startup) to avoid unbounded heap growth.
   #[ derive( Debug ) ]
   pub struct StringInterner
   {
@@ -60,9 +66,10 @@ mod private
     }
 
     /// Interns a string, returning a 'static reference for zero-copy usage.
-    /// 
+    ///
     /// If the string is already cached, returns the existing reference.
-    /// Otherwise, allocates the string on the heap with `Box::leak()` and caches it.
+    /// Otherwise, allocates the string permanently on the heap via `Box::leak()` and caches it.
+    /// Note: leaked allocations are never freed — only intern strings from a bounded, known set.
     #[allow(clippy::missing_panics_doc)]
     pub fn intern( &self, s : &str ) -> &'static str
     {
@@ -84,7 +91,9 @@ mod private
         return interned;
       }
 
-      // Create interned string by leaking a Box allocation
+      // Permanently leak this allocation to produce a &'static str.
+      // The LRU eviction below only removes this entry from the lookup cache;
+      // the heap memory itself is never freed (Box::leak is irreversible).
       let interned : &'static str = Box::leak( s.to_string().into_boxed_str() );
       
       // Insert into cache

@@ -19,10 +19,11 @@
   /// let active = CommandStatus::Active;
   /// assert!(active.is_active());
   /// ```
-  #[ derive( Debug, Clone, PartialEq, Eq ) ]
+  #[ derive( Debug, Clone, PartialEq, Eq, Default ) ]
   pub enum CommandStatus
   {
     /// Command is active and stable for production use
+    #[ default ]
     Active,
 
     /// Command is deprecated and may be removed in future versions
@@ -140,14 +141,6 @@
         },
         _ => None,
       }
-    }
-  }
-
-  impl Default for CommandStatus
-  {
-    fn default() -> Self
-    {
-      CommandStatus::Active
     }
   }
 
@@ -323,10 +316,10 @@
   ///    - If namespace exists, concatenate with proper dot handling
   pub fn construct_full_command_name( namespace : &str, name : &str ) -> String
   {
-    if name.starts_with( '.' )
+    if let Some( name_stripped ) = name.strip_prefix( '.' )
     {
       // Name already has dot prefix
-      if namespace.is_empty() || name.contains( ".." ) || name[ 1.. ].contains( '.' )
+      if namespace.is_empty() || name.contains( ".." ) || name_stripped.contains( '.' )
       {
         // Name is already in full format (e.g., ".integration.test")
         // OR has multiple dots (e.g., ".a.b") indicating it's already complete
@@ -336,7 +329,7 @@
       {
         // Name has dot but is just the command part (e.g., ".test")
         // Need to prepend namespace
-        let name_without_dot = &name[ 1.. ];
+        let name_without_dot = name_stripped;
         if namespace.starts_with( '.' )
         {
           format!( "{}.{}", namespace, name_without_dot )

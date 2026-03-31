@@ -25,7 +25,7 @@
 //! ```
 
 use serde_yaml::Value;
-use crate::{ ArgumentDefinition, Kind };
+use crate::data::{ ArgumentDefinition, Kind };
 
 /// Analyzes argument definitions for potential type issues
 #[derive(Debug)]
@@ -83,18 +83,15 @@ impl TypeAnalyzer
     {
       if let Some( def ) = default
       {
-        if def == "true" || def == "false"
+        if ( def == "true" || def == "false" )
+           && self.context_suggests_boolean( name, arg )
         {
-          // Additional context check to reduce false positives
-          if self.context_suggests_boolean( name, arg )
+          hints.push( TypeHint::BooleanAsString
           {
-            hints.push( TypeHint::BooleanAsString
-            {
-              argument_name : name.to_string(),
-              default_value : def.to_string(),
-              severity : Severity::Warning,
-            } );
-          }
+            argument_name : name.to_string(),
+            default_value : def.to_string(),
+            severity : Severity::Warning,
+          } );
         }
       }
     }
@@ -108,18 +105,16 @@ impl TypeAnalyzer
         if def.parse::< i64 >().is_ok() &&
            !def.starts_with( '0' ) &&
            !def.contains( '.' ) &&
-           def.len() > 0 &&
+           !def.is_empty() &&
            def.chars().all( | c | c.is_ascii_digit() )
+           && self.context_suggests_integer( name, arg )
         {
-          if self.context_suggests_integer( name, arg )
+          hints.push( TypeHint::IntegerAsString
           {
-            hints.push( TypeHint::IntegerAsString
-            {
-              argument_name : name.to_string(),
-              default_value : def.to_string(),
-              severity : Severity::Warning,
-            } );
-          }
+            argument_name : name.to_string(),
+            default_value : def.to_string(),
+            severity : Severity::Warning,
+          } );
         }
       }
     }
@@ -149,17 +144,15 @@ impl TypeAnalyzer
     {
       if let Some( ref default_value ) = arg.attributes.default
       {
-        if default_value == "true" || default_value == "false"
+        if ( default_value == "true" || default_value == "false" )
+           && self.context_suggests_boolean_for_arg( &arg.name, &arg.description )
         {
-          if self.context_suggests_boolean_for_arg( &arg.name, &arg.description )
+          hints.push( TypeHint::BooleanAsString
           {
-            hints.push( TypeHint::BooleanAsString
-            {
-              argument_name : arg.name.clone(),
-              default_value : default_value.clone(),
-              severity : Severity::Warning,
-            } );
-          }
+            argument_name : arg.name.clone(),
+            default_value : default_value.clone(),
+            severity : Severity::Warning,
+          } );
         }
       }
     }
@@ -175,16 +168,14 @@ impl TypeAnalyzer
            !default_value.contains( '.' ) &&
            !default_value.is_empty() &&
            default_value.chars().all( | c | c.is_ascii_digit() )
+           && self.context_suggests_integer_for_arg( &arg.name )
         {
-          if self.context_suggests_integer_for_arg( &arg.name )
+          hints.push( TypeHint::IntegerAsString
           {
-            hints.push( TypeHint::IntegerAsString
-            {
-              argument_name : arg.name.clone(),
-              default_value : default_value.clone(),
-              severity : Severity::Warning,
-            } );
-          }
+            argument_name : arg.name.clone(),
+            default_value : default_value.clone(),
+            severity : Severity::Warning,
+          } );
         }
       }
     }
