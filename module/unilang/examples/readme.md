@@ -8,30 +8,30 @@ Comprehensive examples demonstrating unilang framework usage patterns and featur
 - `00_pipeline_basics.rs` - Basic pipeline usage
 - `00_quick_start.rs` - Getting started guide
 
-## Feature Examples (01-19)
+## Feature Examples (01-24)
 
 ### Core Features (01-09)
 - `01_basic_command_registration.rs` - Command registration patterns
 - `02_argument_types.rs` - Argument type system
 - `03_collection_types.rs` - List and collection arguments
 - `04_validation_rules.rs` - Input validation
-- `05_namespaces_and_aliases.rs` - Command organization
+- `05_namespaces_and_aliases.rs` - Command organization and aliases
 - `06_help_system.rs` - Help generation
 - `07_yaml_json_loading.rs` - External config loading
-- `08_semantic_validation.rs` - Semantic analysis
-- `09_error_handling.rs` - Error handling patterns
+- `08_semantic_analysis_simple.rs` - Semantic analysis
+- `09_command_execution.rs` - Command execution pipeline
 
 ### Advanced Features (10-19)
-- `10_custom_types.rs` - Custom argument types
-- `11_middleware_pipeline.rs` - Pipeline middleware
-- `12_dynamic_commands.rs` - Runtime command registration
-- `13_repl_mode.rs` - Interactive REPL
-- `14_web_api.rs` - Web API integration
-- `15_gui_integration.rs` - GUI integration
-- `16_cli_parsing.rs` - CLI argument parsing
-- `17_performance.rs` - Performance optimization
-- `18_security.rs` - Security features
-- `19_advanced_patterns.rs` - Advanced patterns
+- `10_full_pipeline.rs` - Full pipeline demo
+- `11_pipeline_api.rs` - Pipeline API patterns
+- `12_error_handling.rs` - Error handling and type validation
+- `12_repl_loop.rs` - REPL loop
+- `13_static_dynamic_registry.rs` - Static and dynamic registry
+- `14_advanced_types_validation.rs` - Advanced types and validation
+- `15_interactive_repl_mode.rs` - Interactive REPL mode
+- `16_comprehensive_loader_demo.rs` - Comprehensive loader demo
+- `17_advanced_repl_features.rs` - Advanced REPL features
+- `18_help_conventions_demo.rs` - Help conventions demo
 
 ### Integration Examples (20-29)
 - `20_rust_dsl_inline_closures.rs` - Inline closure DSL
@@ -43,6 +43,21 @@ Comprehensive examples demonstrating unilang framework usage patterns and featur
 ## Static Registry Examples (static_*)
 
 Compile-time command registration with zero-overhead lookups using Perfect Hash Functions.
+
+- `static_01_basic_compile_time.rs` - Basic compile-time registry
+- `static_02_yaml_build_integration.rs` - YAML build integration
+- `static_03_performance_comparison.rs` - Runtime vs compile-time performance comparison
+- `static_04_multi_module_aggregation.rs` - Multi-module static aggregation
+
+## Aggregation Examples
+
+- `compile_time_aggregation.rs` - Compile-time CLI aggregation demo
+- `ergonomic_cli_aggregation.rs` - Ergonomic CLI export and aggregation
+- `full_cli_example.rs` - Comprehensive CLI framework usage
+- `practical_cli_aggregation.rs` - Real-world CLI aggregation patterns
+- `repl_comparison.rs` - REPL feature comparison
+- `yaml_cli_aggregation.rs` - YAML-based CLI aggregation workflow
+- `manual_corner_case_test.rs` - Edge cases difficult to cover in automated tests
 
 ## Running Examples
 
