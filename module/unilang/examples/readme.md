@@ -33,6 +33,13 @@ Comprehensive examples demonstrating unilang framework usage patterns and featur
 - `18_security.rs` - Security features
 - `19_advanced_patterns.rs` - Advanced patterns
 
+### Integration Examples (20-29)
+- `20_rust_dsl_inline_closures.rs` - Inline closure DSL
+- `21_rust_dsl_static.rs` - Static DSL registration
+- `22_minimal_cli_aggregation.rs` - CLI aggregation across modules
+- `23_help_verbosity_demo.rs` - Help verbosity levels
+- `24_posix_style_commands.rs` - POSIX-compatible command interfaces
+
 ## Static Registry Examples (static_*)
 
 Compile-time command registration with zero-overhead lookups using Perfect Hash Functions.
