@@ -93,7 +93,7 @@ assert_fs = { version = "1" }
 clap = { version = "4" }
 pico-args = { version = "0.5" }
 tempfile = { version = "3" }
-criterion = { version = "0.5" }
+criterion = { version = "0.8" }
 
 [profile.release]
 lto = true
