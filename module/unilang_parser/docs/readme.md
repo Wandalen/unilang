@@ -7,6 +7,8 @@ Documentation for the unilang_parser crate.
 | File | Responsibility |
 |------|---------------|
 | `cli_integration.md` | Explain correct argv vs string parsing usage and pitfalls |
+| `feature/` | Behavioral requirements for parser features |
+| `invariant/` | Non-negotiable architectural and correctness constraints |
 
 ## Overview
 
@@ -28,7 +30,7 @@ The unilang_parser crate provides low-level lexical and syntactic analysis for t
 | `Parser::parse_single_instruction(&str)` | Raw string | REPL, config files, embedded commands |
 | `Parser::parse_multiple_instructions(&str)` | Multi-command string | Batch processing |
 
-> **Planned:** `parse_single_instruction` will be renamed to `parse_repl_input` with a deprecation forwarding shim for clarity. See task 095.
+> **Note:** `parse_repl_input` is the canonical name; `parse_single_instruction` is `#[deprecated]` forwarding shim. See `feature/001_parsing_api.md`.
 
 ## Usage
 

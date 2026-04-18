@@ -7,8 +7,6 @@ members = [
   "module/unilang_meta",
   "module/cargo_unilang",
 ]
-dev-dependencies = {}
-build-dependencies = {}
 
 [workspace.metadata]
 repo_url = "https://github.com/Wandalen/unilang"

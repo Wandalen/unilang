@@ -7,9 +7,6 @@ license = "MIT"
 repository = "https://github.com/Wandalen/unilang/tree/master/module/cargo_unilang"
 keywords = [ "cli", "scaffolding", "unilang", "code-generation" ]
 categories = [ "command-line-utilities", "development-tools" ]
-dependencies = {}
-dev-dependencies = {}
-build-dependencies = {}
 
 [dependencies]
 # CLI framework (Rust CLI Framework Mandate compliance)
