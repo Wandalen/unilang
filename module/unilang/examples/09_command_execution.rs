@@ -383,7 +383,7 @@ fn main() -> Result< (), unilang::error::Error >
     println!( "\n--- Test Case {}: {} ---", i + 1, description );
     println!( "🔍 Executing: '{command_str}'" );
 
-    match parser.parse_single_instruction( command_str )
+    match parser.parse_repl_input( command_str )
     {
       Ok( instruction ) =>
       {
@@ -443,7 +443,7 @@ fn main() -> Result< (), unilang::error::Error >
   let mut all_instructions = Vec::new();
   for cmd_str in &batch_commands
   {
-    match parser.parse_single_instruction( cmd_str )
+    match parser.parse_repl_input( cmd_str )
     {
       Ok( instruction ) => all_instructions.push( instruction ),
       Err( e ) => println!( "❌ Failed to parse '{cmd_str}': {e}" ),

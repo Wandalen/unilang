@@ -2,11 +2,10 @@
 
 ## Metadata
 
-- **Last Updated:** 2026-03-31
+- **Last Updated:** 2026_03_31
 - **Version:** 0.49.0
-- **Features:** 30
 - **Categories:** 7
-- **Status:** ✅ 28/30 (93.3% Complete — Production Ready)
+- **Status:** See Overview Table below
 
 ## Column Legend
 

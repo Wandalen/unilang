@@ -8,7 +8,7 @@ fn test_underscore_command_with_positional_args()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "test_cmd hello 123";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();

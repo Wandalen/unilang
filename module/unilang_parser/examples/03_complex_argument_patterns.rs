@@ -13,7 +13,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Mixed positional and named arguments
   println!( "=== Mixed Argument Types ===" );
-  let cmd = parser.parse_single_instruction
+  let cmd = parser.parse_repl_input
   (
   "server.deploy production config :: \"/etc/app.conf\" replicas :: 3 verbose :: true dry_run :: true"
  )?;
@@ -40,7 +40,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Another example with file operations
   println!( "\n=== File Operation Example ===" );
-  let cmd2 = parser.parse_single_instruction
+  let cmd2 = parser.parse_repl_input
   (
   "file.backup \"/home/user/documents\" destination :: \"/backup/daily\" compress :: true incremental :: true"
  )?;

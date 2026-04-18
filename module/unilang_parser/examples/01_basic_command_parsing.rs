@@ -13,13 +13,13 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Simple command with namespace
   println!( "=== Simple Command ===" );
-  let cmd = parser.parse_single_instruction( "system.info" )?;
+  let cmd = parser.parse_repl_input( "system.info" )?;
   println!( "Command path: {:?}", cmd.command_path_slices );
   println!( "Arguments: {:?}", cmd.positional_arguments );
 
   // Command with positional arguments
   println!( "\n=== Command with Positional Arguments ===" );
-  let cmd = parser.parse_single_instruction( "log.write \"Error occurred\" 5" )?;
+  let cmd = parser.parse_repl_input( "log.write \"Error occurred\" 5" )?;
   println!( "Command path: {:?}", cmd.command_path_slices );
   println!( "Positional arguments: {:?}", cmd.positional_arguments );
 

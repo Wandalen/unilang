@@ -17,7 +17,7 @@ fn main()
   let default_parser = Parser ::new( UnilangParserOptions ::default() );
 
   // This should work with default settings
-  match default_parser.parse_single_instruction( "cmd pos1 name ::val1 pos2 name ::val2" )
+  match default_parser.parse_repl_input( "cmd pos1 name ::val1 pos2 name ::val2" )
   {
   Ok( instruction ) =>
   {
@@ -44,7 +44,7 @@ fn main()
 
   // Test duplicate named arguments (should error in strict mode)
   println!( "\n2a. Testing Duplicate Named Arguments: " );
-  match strict_parser.parse_single_instruction( "cmd arg1 ::val1 arg1 ::val2" )
+  match strict_parser.parse_repl_input( "cmd arg1 ::val1 arg1 ::val2" )
   {
   Ok( _ ) => println!( "✗ Strict parser unexpectedly accepted duplicates" ),
   Err( e ) =>
@@ -56,7 +56,7 @@ fn main()
 
   // Test positional after named (should error in strict mode)
   println!( "\n2b. Testing Positional After Named: " );
-  match strict_parser.parse_single_instruction( "cmd named ::value positional_arg" )
+  match strict_parser.parse_repl_input( "cmd named ::value positional_arg" )
   {
   Ok( _ ) => println!( "✗ Strict parser unexpectedly accepted positional after named" ),
   Err( e ) =>
@@ -68,7 +68,7 @@ fn main()
 
   // Show what strict parser accepts
   println!( "\n2c. What Strict Parser Accepts: " );
-  match strict_parser.parse_single_instruction( "cmd pos1 pos2 named1 ::val1 named2 ::val2" )
+  match strict_parser.parse_repl_input( "cmd pos1 pos2 named1 ::val1 named2 ::val2" )
   {
   Ok( instruction ) =>
   {
@@ -92,13 +92,13 @@ fn main()
   {
   println!( "\nTest: {description} - '{test_input}'" );
 
-  match default_parser.parse_single_instruction( test_input )
+  match default_parser.parse_repl_input( test_input )
   {
    Ok( _ ) => println!( "  Default: ✓ Accepted" ),
    Err( _ ) => println!( "  Default: ✗ Rejected" ),
  }
 
-  match strict_parser.parse_single_instruction( test_input )
+  match strict_parser.parse_repl_input( test_input )
   {
    Ok( _ ) => println!( "  Strict: ✓ Accepted" ),
    Err( _ ) => println!( "  Strict: ✗ Rejected" ),
@@ -122,13 +122,13 @@ fn main()
   let partial_parser = Parser ::new( partial_strict );
 
   println!( "Partial strict (no duplicates, mixed order OK) : " );
-  match partial_parser.parse_single_instruction( "cmd pos1 name ::val pos2" )
+  match partial_parser.parse_repl_input( "cmd pos1 name ::val pos2" )
   {
   Ok( _ ) => println!( "  ✓ Accepted mixed order" ),
   Err( _ ) => println!( "  ✗ Rejected mixed order" ),
  }
 
-  match partial_parser.parse_single_instruction( "cmd name ::val1 name ::val1" )
+  match partial_parser.parse_repl_input( "cmd name ::val1 name ::val1" )
   {
   Ok( _ ) => println!( "  ✗ Unexpectedly accepted duplicates" ),
   Err( _ ) => println!( "  ✓ Correctly rejected duplicates" ),

@@ -97,7 +97,7 @@ fn test_hash_in_value()
   // Expected: Value = "Bug #003"
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".search query::\"Bug #003\"" );
+  let result = parser.parse_repl_input( ".search query::\"Bug #003\"" );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -116,7 +116,7 @@ fn test_question_mark_in_value()
   // Expected: Value = "test?"
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".cmd arg::test?" );
+  let result = parser.parse_repl_input( ".cmd arg::test?" );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -139,7 +139,7 @@ fn test_multiple_values_with_special_chars()
 
   let input = ".search query::\"Bug #003\" status::open? max::100";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -162,7 +162,7 @@ fn test_value_with_path_containing_hash()
 
   let input = ".cmd file::path/to/file#123";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -181,7 +181,7 @@ fn test_empty_value()
 
   let input = ".cmd query::\"\"";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -200,7 +200,7 @@ fn test_whitespace_terminates_value()
 
   let input = ".cmd query::val1 val2";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -222,7 +222,7 @@ fn test_help_operator_after_value()
 
   let input = ".cmd query::\"Bug #003\" ?";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -243,7 +243,7 @@ fn test_dot_delimiter_in_value()
 
   let input = ".cmd path::file.name.ext";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -261,7 +261,7 @@ fn test_slash_in_value()
 
   let input = ".cmd path::dir/subdir/file";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -279,7 +279,7 @@ fn test_operator_spacing_variant_with_spaces()
 
   let input = ".cmd query :: \"Bug #003\"";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -321,7 +321,7 @@ fn test_complex_value_with_multiple_delimiters()
 
   let input = ".cmd arg::path/to#file.ext?query";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -339,7 +339,7 @@ fn test_value_at_eof()
 
   let input = ".cmd query::value#123";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -357,7 +357,7 @@ fn test_value_with_tab_delimiter()
 
   let input = ".cmd query::val1\tval2";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -378,7 +378,7 @@ fn test_regression_hash_outside_value_still_errors()
 
   let input = ".cmd arg::test #";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   // Should fail - # outside value context is an error
   assert!( result.is_err(), "Expected parse error for # outside value context" );
@@ -403,7 +403,7 @@ fn test_regression_help_operator_alone_still_works()
 
   let input = ".cmd ?";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -421,7 +421,7 @@ fn test_value_with_newline_delimiter()
 
   let input = ".cmd query::val1\nval2";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
@@ -439,7 +439,7 @@ fn test_consecutive_operators_in_value()
 
   let input = ".cmd arg1::val1 arg2::val2";
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();

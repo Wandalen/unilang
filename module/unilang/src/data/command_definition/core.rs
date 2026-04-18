@@ -115,16 +115,11 @@ pub struct CommandDefinition
   pub(in super) arguments : Vec< ArgumentDefinition >,
   /// Optional link to the routine that executes this command
   pub(in super) routine_link : Option< String >,
-  /// TEMPORARY: Public namespace field for validation testing (String type)
+  /// Namespace for this command (public to allow validation tests to set invalid states).
   ///
-  /// This field remains public to allow validation tests to create invalid states
-  /// (e.g., namespace without dot prefix) for testing error handling. The field is
-  /// intentionally String rather than NamespaceType to enable testing invalid values.
-  ///
-  /// **Used by**: tests/registry/validation_enforcement.rs, tests/semantic/command_validation.rs
-  ///
-  /// **Future**: Could be made private once validation testing strategy is redesigned
-  /// to use builder pattern with validation bypass or test-only constructors.
+  /// Kept as `String` rather than `NamespaceType` so that tests can construct out-of-contract
+  /// values (e.g. namespace without dot prefix) to verify that the registry correctly rejects
+  /// them. Validation is enforced at registration time, not construction time.
   pub namespace : String,
   /// Short hint for the command
   pub(in super) hint : String,

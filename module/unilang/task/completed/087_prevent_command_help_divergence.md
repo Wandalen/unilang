@@ -3,7 +3,7 @@
 **Date**: 2025-10-21
 **Priority**: CRITICAL
 **Category**: API Design - Prevent Misuse
-**Status**: Proposed
+**Status**: Completed (Phase 1 + Phase 2 implemented; Phase 3 superseded — see RESOLUTION)
 
 ## Problem Statement
 
@@ -613,3 +613,54 @@ def hello(name):
 **Status**: Awaiting review and approval for implementation
 **Priority**: CRITICAL - This prevents users from shipping broken CLI applications
 **Effort**: Medium (2-3 weeks for all phases)
+
+---
+
+## RESOLUTION
+
+**Status**: Completed (Phase 1 complete; Phase 2 effectively complete via superior approach; Phase 3 superseded)
+
+### Implementation Summary
+
+Phases 1 and 2 were implemented in `unilang/src/registry/dynamic.rs`. Phase 3 (type-state pattern) was evaluated and superseded by a superior auto-generation approach that achieves the same safety guarantee with less API friction.
+
+### Files Modified
+
+**Phase 1 — Non-breaking additions:**
+- `unilang/src/registry/dynamic.rs:370` — `format_command_listing()` added
+- `unilang/src/registry/dynamic.rs:423` — `validate_help_completeness()` added
+- `unilang/src/registry/dynamic.rs:505` — `register_with_auto_help()` added
+
+**Phase 2 — Auto-help on every registration:**
+- `unilang/src/registry/dynamic.rs:207-248` — `command_add_runtime()` auto-generates `.help` command unconditionally when `auto_help_enabled == true` (the default). This is effectively stronger than Phase 2's proposed breaking change: help generation is automatic unless explicitly opted out via `CommandDefinition::with_auto_help(false)`.
+
+### Why Phase 3 Was Superseded
+
+The type-state proposal required:
+```rust
+UnregisteredCommand::new(def).with_help()  // explicit .with_help() call
+```
+
+The implemented approach is superior:
+```rust
+registry.command_add_runtime(cmd, routine)?;  // help auto-generated, no extra call
+```
+
+The `auto_help_enabled = true` default makes divergence impossible in normal use — matching the type-state guarantee without the boilerplate. The type-state pattern adds compile-time enforcement only for the edge case where `auto_help_enabled = false`, which is an explicit opt-out indicating intentional behavior.
+
+### Acceptance Criteria Verification
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| `command_add_runtime()` auto-generates `.command.help` entries | ✅ | `dynamic.rs:231-245` |
+| `format_command_listing()` returns complete command list | ✅ | `dynamic.rs:370` |
+| `validate_help_completeness()` catches divergence | ✅ | `dynamic.rs:423` |
+| Help auto-generation is default behavior | ✅ | `auto_help_enabled` defaults to `true` |
+
+### Deferred Items (No Further Action Required)
+
+- **Phase 3 (Type-state API):** Superseded — auto-generation approach achieves the same safety guarantee. No type-state task should be created; the problem is solved differently.
+
+### Key Design Decision
+
+Auto-generation (Phase 2 style, implemented without breaking changes) is architecturally superior to type-state for this use case. Auto-generation makes correct usage the ONLY easy path. Type-state would require users to acknowledge every help generation explicitly, adding friction without proportional benefit.

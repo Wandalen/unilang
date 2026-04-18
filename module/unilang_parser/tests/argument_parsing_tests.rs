@@ -71,7 +71,7 @@ fn command_with_only_positional_args_fully_parsed()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd pos1 pos2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -90,7 +90,7 @@ fn command_with_only_named_args_fully_parsed()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name1 ::val1 name2 ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -112,7 +112,7 @@ fn command_with_mixed_args_positional_first_fully_parsed()
 {
   let parser = Parser ::new( options_allow_positional_after_named() );
   let input = "cmd pos1 name1 ::val1 pos2 name2 ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -138,7 +138,7 @@ fn command_with_mixed_args_positional_after_named_error_when_option_set()
 {
   let parser = Parser ::new( options_error_on_positional_after_named() );
   let input = "cmd name1 ::val1 pos1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!
   (
   result.is_err(),
@@ -163,7 +163,7 @@ fn command_with_mixed_args_positional_after_named_ok_when_option_not_set()
 {
   let parser = Parser ::new( options_allow_positional_after_named() );
   let input = "cmd name1 ::val1 pos1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -181,7 +181,7 @@ fn named_arg_with_empty_value_no_quotes_error()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name :: ";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err() );
   if let Err( e ) = result
   {
@@ -202,7 +202,7 @@ fn malformed_named_arg_name_delimiter_operator()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name :: ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err() );
   if let Err( e ) = result
   {
@@ -220,7 +220,7 @@ fn named_arg_missing_name_error()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = " ::value";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err() );
   if let Err( e ) = result
   {
@@ -236,7 +236,7 @@ fn unescaping_works_for_named_arg_value()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name :: \"a\\\\b\\\"c'd\""; // Removed invalid escape sequence \'
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.named_arguments.get( "name" ).unwrap()[0].value, "a\\b\"c'd" );
@@ -249,7 +249,7 @@ fn unescaping_works_for_positional_arg_value()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"a\\\\b\\\"c'd\\ne\\tf\""; // Removed invalid escape sequence \'
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.positional_arguments.len(), 1 );
@@ -267,7 +267,7 @@ fn duplicate_named_arg_error_when_option_set()
   ..Default ::default()
  });
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err() );
   if let Err( e ) = result
   {
@@ -287,7 +287,7 @@ fn duplicate_named_arg_last_wins_by_default()
 {
   let parser = Parser ::new( options_allow_duplicate_named() ); // Use the new options
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!
   (
   result.is_ok(),
@@ -323,7 +323,7 @@ fn command_with_path_and_args_complex_fully_parsed()
 {
   let parser = Parser ::new( options_allow_positional_after_named() );
   let input = "path sub name ::val pos1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -345,7 +345,7 @@ fn named_arg_with_quoted_escaped_value_location()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd key :: \"value with \\\"quotes\\\" and \\\\slash\\\\\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
 
@@ -362,7 +362,7 @@ fn positional_arg_with_quoted_escaped_value_location()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"a\\\\b\\\"c'd\\ne\\tf\""; // Removed invalid escape
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.positional_arguments.len(), 1 );
@@ -376,7 +376,7 @@ fn malformed_named_arg_name_value_no_delimiter()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name value";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -392,7 +392,7 @@ fn parses_kebab_case_named_argument()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd my-arg ::value another-arg ::true";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );

@@ -87,7 +87,7 @@ fn regression_task_024_exact_scenario_reproduction()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".run command::"cargo build" command::"echo hello1" command::"cargo clippy" parallel::2"#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
 
   // Run semantic analysis (this is where the bug was)
   let instructions_array = [instruction];
@@ -160,7 +160,7 @@ fn regression_task_024_with_multiple_true_still_works()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".run_fixed command::"cargo build" command::"echo hello1" command::"cargo clippy""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
   let instructions_array = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions_array, &registry );
   let verified_commands = analyzer.analyze().expect( "Semantic analysis should succeed" );
@@ -184,7 +184,7 @@ fn regression_parser_still_collects_parameters_correctly()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test param::"value1" param::"value2" param::"value3""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
 
   // Verify parser collected all parameters with the same name
   let param_args = instruction.named_arguments.get( "param" ).expect( "param should exist in parsed result" );
@@ -231,7 +231,7 @@ fn regression_performance_no_degradation()
   let input = input_parts.join( " " );
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( &input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( &input ).expect( "Parse should succeed" );
   let instructions_array = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions_array, &registry );
   let verified_commands = analyzer.analyze().expect( "Analysis should succeed" );
@@ -279,7 +279,7 @@ fn regression_single_parameter_backward_compatibility()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".single value::"single_item""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
   let instructions_array = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions_array, &registry );
   let verified_commands = analyzer.analyze().expect( "Analysis should succeed" );
@@ -332,7 +332,7 @@ fn regression_edge_case_prevention()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".edge test::"value1" t::"value2" test::"value3""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Parse should succeed" );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
   let instructions_array = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions_array, &registry );
   let verified_commands = analyzer.analyze().expect( "Analysis should succeed" );

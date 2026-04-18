@@ -69,7 +69,7 @@ fn tm2_1_multi_segment_path_with_positional_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.sub.another arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!(
@@ -89,7 +89,7 @@ fn tm2_2_command_path_ends_with_named_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd arg ::val";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -106,7 +106,7 @@ fn tm2_3_command_path_ends_with_quoted_string()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"quoted_arg\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -123,7 +123,7 @@ fn tm2_4_command_path_ends_with_comment_operator()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd #comment";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -143,7 +143,7 @@ fn tm2_5_trailing_dot_after_command_path()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -163,7 +163,7 @@ fn tm2_6_named_arg_followed_by_help_operator()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name ::val ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -180,7 +180,7 @@ fn tm2_7_help_operator_followed_by_other_tokens()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd ? arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -203,7 +203,7 @@ fn tm2_8_named_arg_with_simple_quoted_value()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name :: \"value with spaces\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -223,7 +223,7 @@ fn tm2_9_named_arg_with_quoted_value_containing_double_colon()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd msg :: \"DEPRECATED ::message\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -243,7 +243,7 @@ fn tm2_10_multiple_named_args_with_simple_quoted_values()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name1 :: \"val1\" name2 :: \"val2\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -261,7 +261,7 @@ fn tm2_11_named_arg_with_comma_separated_value()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd tags ::dev,rust,unilang";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -281,7 +281,7 @@ fn tm2_12_named_arg_with_key_value_pair_string()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd headers ::Content-Type=application/json,Auth-Token=xyz";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -301,7 +301,7 @@ fn s6_1_whitespace_separation_and_command_path()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "  cmd.sub  arg1  ";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string(), "sub".to_string() ] );
@@ -316,7 +316,7 @@ fn s6_2_whitespace_in_quoted_positional_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"val with spaces\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -331,7 +331,7 @@ fn s6_3_multi_segment_path_and_positional_arg_transition()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.sub.action arg1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!(
@@ -349,7 +349,7 @@ fn s6_4_multi_segment_path_and_named_arg_transition()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.sub name ::val";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string(), "sub".to_string() ] );
@@ -364,7 +364,7 @@ fn s6_5_leading_dot_command_with_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = ".cmd arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -379,7 +379,7 @@ fn s6_6_trailing_dot_syntax_error()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -399,7 +399,7 @@ fn s6_7_consecutive_dots_syntax_error()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd..sub";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -419,7 +419,7 @@ fn s6_8_help_operator_correct_placement()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -433,7 +433,7 @@ fn s6_9_named_arg_followed_by_help_operator()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name ::val ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -449,7 +449,7 @@ fn s6_10_help_operator_followed_by_other_tokens_error()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd ? arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -472,7 +472,7 @@ fn s6_11_multiple_positional_arguments()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd pos1 pos2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -488,7 +488,7 @@ fn s6_12_single_named_argument()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd key ::val";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -503,7 +503,7 @@ fn s6_13_named_arg_quoted_value_with_spaces()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd key :: \"val with spaces\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -521,7 +521,7 @@ fn s6_14_positional_after_named_allowed()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() ); // Default allows positional after named
   let input = "cmd name ::val pos1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -542,7 +542,7 @@ fn s6_15_positional_after_named_error()
   ..Default ::default()
  });
   let input = "cmd name ::val pos1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -565,7 +565,7 @@ fn s6_16_duplicate_named_arg_last_wins()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() ); // Default: last wins
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -587,7 +587,7 @@ fn s6_17_duplicate_named_arg_error()
   ..Default ::default()
  });
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -666,7 +666,7 @@ fn s6_21_transition_by_non_identifier_token()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd !arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -686,7 +686,7 @@ fn s6_22_transition_by_quoted_string()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"arg\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -701,7 +701,7 @@ fn s6_23_transition_by_help_operator()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -715,7 +715,7 @@ fn s6_24_named_arg_value_with_double_colon()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd msg :: \"DEPRECATED ::message\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -733,7 +733,7 @@ fn s6_25_named_arg_value_with_commas()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd tags ::dev,rust,unilang";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -751,7 +751,7 @@ fn s6_26_named_arg_value_with_key_value_pair()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd headers ::Content-Type=application/json,Auth-Token=xyz";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -769,7 +769,7 @@ fn s6_27_command_path_whitespace_around_dot()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd . sub";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string(), "sub".to_string() ] );
@@ -782,7 +782,7 @@ fn s6_28_command_path_invalid_identifier_segment()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.123.sub";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "Expected error for input '{}', but got Ok: {:?}",
@@ -805,7 +805,7 @@ fn s6_29_command_path_longest_possible_sequence()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.sub arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string(), "sub".to_string() ] );
@@ -820,7 +820,7 @@ fn s6_30_multiple_consecutive_whitespace()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd   arg";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );

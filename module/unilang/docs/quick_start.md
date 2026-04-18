@@ -498,7 +498,7 @@ What happens when you run `cargo build`:
 - [CLI Definition Approaches](cli_definition_approaches.md) - 21 ways to define commands
 - [Examples](../examples/) - Comprehensive examples
 - [Optimization Guide](optimization_guide.md) - Performance tuning
-- [Specification](../spec.md) - Complete framework specification
+- [Requirements](feature/001_command_registry.md) - Core framework requirements
 
 ---
 

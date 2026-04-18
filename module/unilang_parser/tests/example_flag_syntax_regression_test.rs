@@ -55,7 +55,7 @@ fn flag_syntax_rejection_verbose()
   let parser = Parser ::new( UnilangParserOptions ::default() );
 
   // Attempt to parse command with --verbose flag
-  let result = parser.parse_single_instruction( "command.run --verbose" );
+  let result = parser.parse_repl_input( "command.run --verbose" );
 
   assert!( result.is_err(), "Parser should reject --verbose flag syntax" );
 
@@ -74,7 +74,7 @@ fn flag_syntax_rejection_dry_run()
   let parser = Parser ::new( UnilangParserOptions ::default() );
 
   // Attempt to parse command with --dry-run flag (hyphenated)
-  let result = parser.parse_single_instruction( "deploy.staging --dry-run" );
+  let result = parser.parse_repl_input( "deploy.staging --dry-run" );
 
   assert!( result.is_err(), "Parser should reject --dry-run flag syntax" );
 
@@ -93,7 +93,7 @@ fn flag_syntax_rejection_binary()
   let parser = Parser ::new( UnilangParserOptions ::default() );
 
   // Attempt to parse command with --binary flag
-  let result = parser.parse_single_instruction( "file.read path :: \"/etc/hosts\" --binary" );
+  let result = parser.parse_repl_input( "file.read path :: \"/etc/hosts\" --binary" );
 
   assert!( result.is_err(), "Parser should reject --binary flag syntax" );
 
@@ -112,7 +112,7 @@ fn correct_boolean_syntax_works()
   let parser = Parser ::new( UnilangParserOptions ::default() );
 
   // Verify the correct syntax works
-  let result = parser.parse_single_instruction( "command.run verbose :: true dry_run :: true" );
+  let result = parser.parse_repl_input( "command.run verbose :: true dry_run :: true" );
 
   assert!( result.is_ok(), "Parser should accept key::value syntax for boolean flags" );
 
@@ -132,7 +132,7 @@ fn mixed_correct_and_incorrect_syntax()
   let parser = Parser ::new( UnilangParserOptions ::default() );
 
   // Command with both correct named arg and incorrect flag
-  let result = parser.parse_single_instruction( "server.deploy config :: \"/etc/app.conf\" --verbose" );
+  let result = parser.parse_repl_input( "server.deploy config :: \"/etc/app.conf\" --verbose" );
 
   assert!( result.is_err(), "Parser should reject command even with one invalid flag" );
 

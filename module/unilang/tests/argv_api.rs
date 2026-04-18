@@ -263,7 +263,7 @@ fn test_comparison_string_vs_argv()
 
   // String API: May not handle multi-word values optimally
   let joined_string = argv.join(" "); // ".run command::ls -la"
-  let _string_result = parser.parse_single_instruction(&joined_string);
+  let _string_result = parser.parse_repl_input(&joined_string);
 
   // Argv API: Works correctly by combining consecutive argv elements
   let argv_result = parser.parse_from_argv(&argv);

@@ -201,7 +201,7 @@ let parser = Parser::new(UnilangParserOptions::default());
 
 **Single Instruction Parsing**
 ```rust
-let instruction = parser.parse_single_instruction("command arg::value")?;
+let instruction = parser.parse_repl_input("command arg::value")?;
 ```
 
 **Multiple Instruction Parsing**
@@ -221,7 +221,7 @@ println!("Help: {}", instruction.help_invoked);
 
 ### Error Handling Pattern
 ```rust
-match parser.parse_single_instruction(input) {
+match parser.parse_repl_input(input) {
     Ok(instruction) => {
         // Process successful parse
         println!("Parsed: {:?}", instruction.command_path_slices);
@@ -237,7 +237,7 @@ match parser.parse_single_instruction(input) {
 ```rust
 let commands = vec!["cmd1", "cmd2", "cmd3"];
 for cmd in commands {
-    match parser.parse_single_instruction(cmd) {
+    match parser.parse_repl_input(cmd) {
         Ok(instruction) => process_instruction(instruction),
         Err(e) => eprintln!("Failed to parse '{}': {}", cmd, e),
     }

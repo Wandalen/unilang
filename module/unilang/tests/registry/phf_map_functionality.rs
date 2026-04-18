@@ -315,7 +315,7 @@ fn test_multi_yaml_aggregator_static_registry_generation()
   let source_code = aggregator.generate_static_registry_source();
 
   // Verify static registry structure
-  assert!( source_code.contains("use unilang::phf::{phf_map, Map}") );
+  assert!( source_code.contains("use unilang::phf::{self, Map}") );
   assert!( source_code.contains("StaticCommandDefinition") );
   assert!( source_code.contains("phf_map!") );
 

@@ -59,7 +59,7 @@ fn test_semantic_analyzer_validates_required_arguments()
 
   // Create instruction missing the required argument
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".test" ).unwrap(); // No arguments provided
+  let instruction = parser.parse_repl_input( ".test" ).unwrap(); // No arguments provided
 
   let instructions = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -112,7 +112,7 @@ fn test_argument_parsing_handles_edge_case_values()
   for (input, expected_value) in test_cases
   {
     // Act
-    let result = parser.parse_single_instruction( &input );
+    let result = parser.parse_repl_input( &input );
 
     // Assert
     assert!( result.is_ok(), "Should parse edge case input: {}", input );
@@ -211,7 +211,7 @@ fn test_parser_robustness_with_arbitrary_input()
     let parser = Parser::new( UnilangParserOptions::default() );
 
     // Parser should either succeed or fail gracefully
-    match parser.parse_single_instruction( &input )
+    match parser.parse_repl_input( &input )
     {
       Ok( instruction ) => {
         // If parsing succeeds, result should be well-formed
@@ -280,7 +280,7 @@ fn test_semantic_analyzer_error_conditions()
   for ( input, expected_error_keyword ) in error_cases
   {
     // Parse instruction (should succeed)
-    let instruction = parser.parse_single_instruction( input ).unwrap();
+    let instruction = parser.parse_repl_input( input ).unwrap();
     let instructions = [instruction];
 
     // Semantic analysis should fail
@@ -352,7 +352,7 @@ fn test_with_helper_functions()
   registry.command_add_runtime( &cmd, create_mock_routine() ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".helper_test" ).unwrap();
+  let instruction = parser.parse_repl_input( ".helper_test" ).unwrap();
 
   // Act
   let instructions = [instruction];

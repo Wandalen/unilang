@@ -1,6 +1,6 @@
 # Unilang Crate/Framework Implementation Roadmap
 
-### Current Status (as of 2025-11-24)
+### Current Status (as of 2025_11_24)
 The project has successfully completed Phase 4 (Zero-Overhead Static Command Registry), including build-time validation to make illegal states unrepresentable. The framework now features compile-time prevention of duplicate commands and parameter storage mismatches (wplan bug pattern). Phase 5 work is in progress, with 3 of 4 milestones complete. The framework is production-ready for building high-performance, type-safe command-line utilities.
 
 **Legend:**
@@ -33,26 +33,26 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   [✅] **M4.1: registry_design_hybrid_architecture:**
     *   **Spec Reference:** FR-PERF-1, NFR-Performance
     *   **Deliverable:** A detailed task plan for implementing a zero-overhead static command registry.
-    *   **Description:** Design a build-time mechanism (using `build.rs`) to generate an optimized static registry from a command manifest. This plan will outline the steps to refactor the `CommandRegistry` into a hybrid model.
+    *   **Purpose:** Design a build-time mechanism (using `build.rs`) to generate an optimized static registry from a command manifest. This plan will outline the steps to refactor the `CommandRegistry` into a hybrid model.
 *   [✅] **M4.2: static_registry_implement_build_time_generation:**
     *   **Prerequisites:** M4.1
     *   **Deliverable:** A `build.rs` script that generates a `.rs` file containing the static optimized registry from `unilang.commands.yaml`.
-    *   **Description:** Implement the build script that parses the YAML manifest and uses compile-time optimization to construct the static registry.
+    *   **Purpose:** Implement the build script that parses the YAML manifest and uses compile-time optimization to construct the static registry.
 *   [✅] **M4.3: registry_refactor_to_hybrid_model:**
     *   **Prerequisites:** M4.2
     *   **Deliverable:** An updated `CommandRegistry` that uses the generated static registry for compile-time commands and a `HashMap` for dynamic commands.
-    *   **Description:** Refactor all lookup methods to query the static registry first before falling back to the dynamic `HashMap`.
+    *   **Purpose:** Refactor all lookup methods to query the static registry first before falling back to the dynamic `HashMap`.
 *   [✅] **M4.4: test_implement_performance_stress_harness:**
     *   **Prerequisites:** M4.3
     *   **Spec Reference:** FR-PERF-1
     *   **Deliverable:** A new integration test that generates a large YAML manifest (1000+ commands) and a test binary that proves the performance NFRs are met.
-    *   **Description:** The test will generate the manifest, compile a test binary against it, and then execute the binary to measure and assert that startup time is negligible and p99 command resolution latency is under 1ms.
+    *   **Purpose:** The test will generate the manifest, compile a test binary against it, and then execute the binary to measure and assert that startup time is negligible and p99 command resolution latency is under 1ms.
 *   [✅] **M4.5: build_time_validation_illegal_states:**
     *   **Prerequisites:** M4.2
     *   **Spec Reference:** FR-REG-9, Task 085
     *   **Deliverable:** Build-time validation in `build.rs` preventing illegal command states (duplicate names, wplan bug pattern).
-    *   **Description:** Implement compile-time validation to make illegal states unrepresentable: (1) Duplicate command name detection via HashMap tracking, (2) Parameter storage type validation (multiple:true requires List), (3) Actionable error messages with fix guidance. Resolves 8 of 10 items from Task 085. All 833 tests pass.
-    *   **Completed:** 2025-11-24
+    *   **Purpose:** Implement compile-time validation to make illegal states unrepresentable: (1) Duplicate command name detection via HashMap tracking, (2) Parameter storage type validation (multiple:true requires List), (3) Actionable error messages with fix guidance. Resolves 8 of 10 items from Task 085. All 833 tests pass.
+    *   **Completed:** 2025_11_24
 
 ### Phase 5: Core API Enhancements & Modality Support
 *   **Goal:** To implement the remaining mandatory functional requirements from Spec v2.2.0, ensuring the framework fully supports REPL, interactive CLI, and WebAssembly (WASM) modalities.
@@ -61,11 +61,11 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   [✅] **M5.1: pipeline_refactor_for_reusability:**
     *   **Spec Reference:** FR-REPL-1
     *   **Deliverable:** An audited and confirmed stateless core pipeline and a new example file (`repl_example.rs`).
-    *   **Description:** Audit the core pipeline components (`Parser`, `SemanticAnalyzer`, `Interpreter`) to ensure they are stateless and can be reused in a REPL loop.
+    *   **Purpose:** Audit the core pipeline components (`Parser`, `SemanticAnalyzer`, `Interpreter`) to ensure they are stateless and can be reused in a REPL loop.
 *   [✅] **M5.2: argument_implement_interactive_signaling:**
     *   **Spec Reference:** FR-INTERACTIVE-1
     *   **Deliverable:** The `SemanticAnalyzer` correctly returns the `UNILANG_ARGUMENT_INTERACTIVE_REQUIRED` error for missing interactive arguments.
-    *   **Description:** Modify the `bind_arguments` logic to check for the `interactive: true` attribute on missing mandatory arguments and return the specific error code.
+    *   **Purpose:** Modify the `bind_arguments` logic to check for the `interactive: true` attribute on missing mandatory arguments and return the specific error code.
 *   [✅] **M5.3: test_create_interactive_prompting_verification:**
     *   **Prerequisites:** M5.2
     *   **Deliverable:** A new unit test for the `SemanticAnalyzer` and an updated CLI binary demonstrating how to catch the interactive signal.
@@ -73,7 +73,7 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Prerequisites:** M5.1
     *   **Spec Reference:** NFR-PLATFORM-1
     *   **Deliverable:** A working, browser-based REPL example compiled to WebAssembly.
-    *   **Description:** Create a minimal web application that uses the `unilang` WASM package to provide a fully client-side REPL, proving the WASM compatibility NFR.
+    *   **Purpose:** Create a minimal web application that uses the `unilang` WASM package to provide a fully client-side REPL, proving the WASM compatibility NFR.
 
 ### Phase 6: Performance Hardening & SIMD Optimization
 *   **Goal:** To meet the stringent performance NFRs by systematically eliminating bottlenecks identified in the performance analysis, with a focus on reducing string allocations and leveraging SIMD instructions.
@@ -92,7 +92,7 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Prerequisites:** M6.2
     *   **Spec Reference:** `performance.md` (Task 009)
     *   **Deliverable:** The type system's JSON parsing logic updated to use the `simd-json` crate for a 4-25x performance improvement on JSON-heavy workloads.
-    *   **Completed:** 2025-10-19. SIMD JSON parsing implemented in `src/simd_json_parser.rs`. Provides 4-25x speedup. Feature-gated with `simd-json` + `json_parser`.
+    *   **Completed:** 2025_10_19. SIMD JSON parsing implemented in `src/simd_json_parser.rs`. Provides 4-25x speedup. Feature-gated with `simd-json` + `json_parser`.
 *   [⚫] **M6.4: benchmark_audit_performance_final:**
     *   **Prerequisites:** M6.3
     *   **Deliverable:** An updated `performance.md` with final benchmark results proving all performance NFRs are met.
@@ -104,24 +104,24 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   [✅] **M7.1: dependency_audit_features:**
     *   **Spec Reference:** NFR-MODULARITY-1, NFR-MODULARITY-2
     *   **Deliverable:** A dependency graph mapping features to the libraries they introduce.
-    *   **Description:** Analyze `Cargo.toml` and the codebase to identify all dependencies that can be made optional.
-    *   **Completed:** 2025-10-19. Identified and made optional: serde_yaml, serde_json, phf, walkdir (~330KB total savings).
+    *   **Purpose:** Analyze `Cargo.toml` and the codebase to identify all dependencies that can be made optional.
+    *   **Completed:** 2025_10_19. Identified and made optional: serde_yaml, serde_json, phf, walkdir (~330KB total savings).
 *   [✅] **M7.2: feature_gate_implement_granular:**
     *   **Prerequisites:** M7.1
     *   **Deliverable:** An updated `Cargo.toml` and codebase where all non-essential functionality is gated by feature flags (e.g., `declarative_loading`, `chrono_types`).
-    *   **Completed:** 2025-10-19. Implemented 2-tier architecture: 20 approach features + 12 infrastructure features. All format parsers optional.
+    *   **Completed:** 2025_10_19. Implemented 2-tier architecture: 20 approach features + 12 infrastructure features. All format parsers optional.
 *   [✅] **M7.3: profile_create_minimal_core:**
     *   **Prerequisites:** M7.2
     *   **Deliverable:** A working `unilang` crate when compiled with `--no-default-features`.
-    *   **Completed:** 2025-10-19. Minimal build verified: `cargo check --no-default-features --features enabled` compiles successfully.
+    *   **Completed:** 2025_10_19. Minimal build verified: `cargo check --no-default-features --features enabled` compiles successfully.
 *   [✅] **M7.4: footprint_verify_lightweight:**
     *   **Prerequisites:** M7.3
     *   **Deliverable:** Benchmark results comparing the compile time and dependency count of the minimal `unilang` profile against `pico-args`.
-    *   **Completed:** 2025-10-19. Verified: Minimal build has ~30% faster compilation. Default build saves ~200KB vs full build.
+    *   **Completed:** 2025_10_19. Verified: Minimal build has ~30% faster compilation. Default build saves ~200KB vs full build.
 *   [✅] **M7.5: implement_opinionated_defaults:**
     *   **Prerequisites:** M7.2
     *   **Deliverable:** Opinionated defaults strategy where only Approach #2 (Multi-YAML Build-Time Static) is enabled by default.
-    *   **Completed:** 2025-10-19. Reduced default from 21 approaches to 1. All tests pass (513 total with --features full).
+    *   **Completed:** 2025_10_19. Reduced default from 21 approaches to 1. All tests pass (513 total with --features full).
 
 ### Phase 8: Advanced Features - Web Modality
 *   **Goal:** To implement a full Web API modality, building on the now stable, performant, and modular architecture.
@@ -174,3 +174,25 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Deliverable:** A robust implementation for `routine_link` that can load routines from dynamic libraries.
 *   [⚫] **M11.3: system_design_plugin:**
     *   **Deliverable:** A formal specification for a plugin system, allowing third-party crates to provide `unilang` commands to a host application.
+
+---
+
+### Project Goals & Success Metrics
+
+- **Primary Goal:** To create a stable, performant, and ergonomic framework for building multi-modal command-line utilities in Rust that allows developers to define a command interface once and deploy it everywhere with zero-overhead for static commands.
+- **Success Metric 1 (Performance):** The framework **must** meet all performance NFRs defined in `docs/invariant/002_non_functional_requirements.md`, verified by the project's benchmark suite.
+- **Success Metric 2 (Adoption):** The framework is considered successful if it is used to build at least three distinct applications with different modalities within 12 months of the v1.0 release.
+
+### Deliverables
+
+1. Published `unilang` Rust crate on crates.io.
+2. Published `unilang_parser` Rust crate on crates.io.
+3. Published `unilang_meta` Rust crate on crates.io.
+4. Compiled WebAssembly (`.wasm`) package and JavaScript bindings for the core framework.
+5. Full source code repository access, including all examples and benchmarks.
+6. Generated API documentation hosted on docs.rs for all public crates.
+
+### Open Questions
+
+1. **Custom Type Registration:** What is the API and process for an integrator to define a new custom `Kind` and register its associated parsing and validation logic with the framework?
+2. **Plugin System:** What would a formal plugin system look like, allowing third-party crates to provide `unilang` commands to a host application?

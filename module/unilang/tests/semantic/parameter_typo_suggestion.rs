@@ -81,7 +81,7 @@ fn test_typo_suggestion_for_required_parameter()
 
   // User makes typo: "fiel" instead of "file"
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r#".load fiel::"data.txt""# ).unwrap();
+  let instruction = parser.parse_repl_input( r#".load fiel::"data.txt""# ).unwrap();
 
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -156,7 +156,7 @@ fn test_typo_suggestion_for_optional_parameter()
 
   // User makes typo: "verbos" instead of "verbose"
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r#".build verbos::true"# ).unwrap();
+  let instruction = parser.parse_repl_input( r#".build verbos::true"# ).unwrap();
 
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -239,7 +239,7 @@ fn test_typo_suggestion_with_multiple_parameters()
 
   // User makes typo in one parameter: "sorce" instead of "source"
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r#".copy sorce::"a.txt" destination::"b.txt""# ).unwrap();
+  let instruction = parser.parse_repl_input( r#".copy sorce::"a.txt" destination::"b.txt""# ).unwrap();
 
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -314,7 +314,7 @@ fn test_no_suggestion_for_distant_typo()
 
   // User provides completely different parameter (not a typo)
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r#".test foo::true"# ).unwrap();
+  let instruction = parser.parse_repl_input( r#".test foo::true"# ).unwrap();
 
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );

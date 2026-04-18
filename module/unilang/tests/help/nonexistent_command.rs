@@ -34,7 +34,7 @@ fn test_help_operator_on_nonexistent_command()
 
   // Parse help request for non-existent command using `?` operator (FR-HELP-3)
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".nonexistent ?" ).unwrap();
+  let instruction = parser.parse_repl_input( ".nonexistent ?" ).unwrap();
 
   // Verify help was requested
   assert!( instruction.help_requested, "Help operator should be detected even for non-existent commands" );
@@ -73,7 +73,7 @@ fn test_help_parameter_on_nonexistent_command()
   // Parse help request using `??` parameter (FR-HELP-5)
   // Note: `??` must be quoted to avoid parser conflicts
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r#".nonexistent "??""# ).unwrap();
+  let instruction = parser.parse_repl_input( r#".nonexistent "??""# ).unwrap();
 
   // Run semantic analysis
   let instructions = vec![instruction];
@@ -105,7 +105,7 @@ fn test_unquoted_double_question_mark_fails()
 {
   // Verify that using `??` without quotes causes parser error (as per FR-HELP-5)
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".command ??" );
+  let result = parser.parse_repl_input( ".command ??" );
 
   // Should fail to parse because `??` must be quoted
   assert!(

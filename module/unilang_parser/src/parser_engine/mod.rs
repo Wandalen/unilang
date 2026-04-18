@@ -73,7 +73,7 @@
 //!
 //! ### API Consistency Requirement
 //!
-//! Both `parse_from_argv()` and `parse_single_instruction()` must produce identical
+//! Both `parse_from_argv()` and `parse_repl_input()` must produce identical
 //! results for equivalent inputs. Workarounds or special handling in one path but not
 //! the other create inconsistencies and violate user expectations.
 //!
@@ -112,11 +112,35 @@ impl Parser
  }
 
   /// Parses a single Unilang instruction from the input string.
-  /// Parses a single Unilang instruction from the input string.
+  ///
+  /// **Deprecated since next version.** Use [`parse_repl_input`] for REPL/string input.
   ///
   /// # Errors
   /// Returns a `ParseError` if the input string cannot be parsed into a valid instruction.
+  ///
+  /// [`parse_repl_input`]: Self::parse_repl_input
+  #[ deprecated(
+    since = "0.33.0",
+    note = "Use parse_repl_input() for REPL/string input. \
+            Use parse_from_argv() for CLI argv input."
+  ) ]
   pub fn parse_single_instruction( &self, input: &str ) -> Result< crate ::instruction ::GenericInstruction, ParseError >
+  {
+    self.parse_repl_input( input )
+  }
+
+  /// Parses a single Unilang instruction from a raw input string.
+  ///
+  /// Use for REPL, configuration files, or any source where the string has NOT
+  /// been tokenized by the shell. For shell argv, use [`parse_from_argv`].
+  ///
+  /// # Errors
+  ///
+  /// Returns `ParseError` if the input cannot be parsed.
+  ///
+  /// [`parse_from_argv`]: Self::parse_from_argv
+  pub fn parse_repl_input( &self, input : &str )
+    -> Result< crate ::instruction ::GenericInstruction, ParseError >
   {
   // Validate quote completeness before processing
   validation_utilities::validate_quote_completeness( input )?;
@@ -172,7 +196,41 @@ impl Parser
   let rich_items = validation_utilities::inject_empty_quoted_string_tokens( input, rich_items );
 
   self.parse_single_instruction_from_rich_items( rich_items )
- }
+  }
+
+  /// Type-safe CLI entry point. Accepts pre-tokenized shell argv.
+  ///
+  /// Delegates to [`parse_from_argv`] after unwrapping the [`crate::argv_types::ShellArgv`]
+  /// marker. Use this when you want compile-time enforcement that shell-tokenized
+  /// input is not accidentally passed to the REPL parser.
+  ///
+  /// # Errors
+  ///
+  /// Returns `ParseError` if the argv cannot be parsed.
+  ///
+  /// [`parse_from_argv`]: Self::parse_from_argv
+  pub fn parse_cli( &self, argv : &crate ::argv_types ::ShellArgv )
+    -> Result< crate ::instruction ::GenericInstruction, ParseError >
+  {
+    self.parse_from_argv( argv.as_slice() )
+  }
+
+  /// Type-safe REPL entry point. Accepts a raw command string.
+  ///
+  /// Delegates to [`parse_repl_input`] after unwrapping the [`crate::argv_types::ReplInput`]
+  /// marker. Use this when you want compile-time enforcement that a raw string
+  /// is not accidentally passed to the argv parser.
+  ///
+  /// # Errors
+  ///
+  /// Returns `ParseError` if the input cannot be parsed.
+  ///
+  /// [`parse_repl_input`]: Self::parse_repl_input
+  pub fn parse_repl( &self, input : &crate ::argv_types ::ReplInput )
+    -> Result< crate ::instruction ::GenericInstruction, ParseError >
+  {
+    self.parse_repl_input( input.as_str() )
+  }
 
   /// Merges tokens in value context (after :: operators) to protect special characters.
   ///
@@ -382,7 +440,7 @@ impl Parser
  },
  ));
  }
-   let instruction = self.parse_single_instruction( trimmed )?;
+   let instruction = self.parse_repl_input( trimmed )?;
    instructions.push( instruction );
  }
 
@@ -1097,7 +1155,7 @@ impl Parser
   ///
   /// # See Also
   ///
-  /// - [`parse_single_instruction`] - For parsing pre-formatted command strings
+  /// - [`parse_repl_input`] - For parsing REPL or string input
   /// - Task 080: Argv-Based API Request - Full specification and rationale
   pub fn parse_from_argv( &self, argv: &[String] ) -> Result< GenericInstruction, ParseError >
   {
@@ -1277,7 +1335,7 @@ impl Parser
     // Now convert tokens into a space-separated string and parse it
     // This reuses the existing string parser infrastructure
     let command_str = tokens.join( " " );
-    self.parse_single_instruction( &command_str )
+    self.parse_repl_input( &command_str )
   }
 
 }

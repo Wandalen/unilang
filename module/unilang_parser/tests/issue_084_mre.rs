@@ -86,7 +86,7 @@
 //! **Impact:** Cannot use `parse_single_instruction()` with pre-escaped input like:
 //! ```rust
 //! // ❌ FAILS: Direct parsing with escaped inner quotes
-//! parser.parse_single_instruction(r#"cmd::"value with \"inner\" quotes""#)
+//! parser.parse_repl_input(r#"cmd::"value with \"inner\" quotes""#)
 //! ```
 //!
 //! **Mitigation:** Always use `parse_from_argv()` which applies correct escaping automatically.
@@ -284,7 +284,7 @@ fn mre_direct_parse_with_escaped_quotes()
 
   // This input pattern is what parse_from_argv() generates internally
   // Fixed by command path lookahead (issue-cmd-path)
-  let result = parser.parse_single_instruction( r#"cmd::"value with \"inner\" quotes""# );
+  let result = parser.parse_repl_input( r#"cmd::"value with \"inner\" quotes""# );
 
   // Now works correctly thanks to command path fix
   match &result
@@ -534,7 +534,7 @@ fn error_unclosed_quote()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
 
-  let result = parser.parse_single_instruction( r#"cmd::"unclosed"# );
+  let result = parser.parse_repl_input( r#"cmd::"unclosed"# );
 
   assert!( result.is_err(), "Unclosed quote should fail parsing" );
 

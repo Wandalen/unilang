@@ -216,7 +216,7 @@ fn main() -> Result< (), unilang::error::Error >
     println!( "\n--- Test Case {}: {} ---", i + 1, description );
     println!( "Command: '{cmd_str}'" );
 
-    match parser.parse_single_instruction( cmd_str )
+    match parser.parse_repl_input( cmd_str )
     {
       Ok( instruction ) =>
       {
@@ -269,7 +269,7 @@ fn main() -> Result< (), unilang::error::Error >
   {
     println!( "\n🔍 Analyzing: '{cmd_str}'" );
 
-    match parser.parse_single_instruction( cmd_str )
+    match parser.parse_repl_input( cmd_str )
     {
       Ok( instruction ) =>
       {

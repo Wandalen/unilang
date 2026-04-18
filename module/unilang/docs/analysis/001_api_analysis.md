@@ -1,12 +1,18 @@
-# Unilang Codebase API Analysis Report
+# Analysis: API Analysis
 
-**Thoroughness Level:** Very Thorough  
-**Date:** 2025-01-19  
-**Scope:** Public API, Examples, Error Patterns, Builder Patterns, Type Safety Issues
+### Scope
+
+- **Purpose:** Document API surface analysis findings, patterns, and improvement opportunities
+- **Responsibility:** Analysis of public API ergonomics, boilerplate patterns, and type safety gaps
+- **In Scope:** Argument extraction patterns, builder patterns, error handling, type safety issues
+- **Out of Scope:** Implementation of fixes (see feature/ instances for requirements)
+
+- **Thoroughness Level:** Very Thorough
+- **Date:** 2025_01_19
 
 ---
 
-## Executive Summary
+### Executive Summary
 
 The Unilang framework is a command-line utility language framework designed to provide a unified way to define commands once and use them everywhere (CLI, REPL, TUI, Web APIs). The codebase exhibits several well-designed patterns but also contains several API design opportunities and potential error-prone patterns that could benefit from stronger compile-time guarantees.
 
@@ -20,11 +26,11 @@ The Unilang framework is a command-line utility language framework designed to p
 
 ---
 
-## Part 1: Common Boilerplate Code Patterns
+### Part 1: Common Boilerplate Code Patterns
 
 ### Pattern 1: Repetitive Argument Extraction (Most Common)
 
-**Location:** All examples with multiple argument types  
+**Location:** All examples with multiple argument types
 **Instances:** 15+ examples
 
 ```rust
@@ -59,7 +65,7 @@ let dividend = cmd.arguments.get("dividend")
 
 ### Pattern 2: Builder Configuration Boilerplate
 
-**Location:** `CommandDefinition` registration in examples  
+**Location:** `CommandDefinition` registration in examples
 **Instances:** Every example that creates commands
 
 ```rust
@@ -90,7 +96,7 @@ let greet_command = CommandDefinition::former()
 
 ### Pattern 3: Argument Definition Template Repetition
 
-**Location:** Examples 02_argument_types.rs, others  
+**Location:** Examples 02_argument_types.rs, others
 **Instances:** Whenever multiple argument types are defined
 
 ```rust
@@ -114,7 +120,7 @@ ArgumentDefinition {
 
 ---
 
-## Part 2: Public API Surface Analysis
+### Part 2: Public API Surface Analysis
 
 ### Exposed in `src/lib.rs` prelude:
 
@@ -155,11 +161,11 @@ let registry = CommandRegistry::builder()
 
 ---
 
-## Part 3: Error-Prone API Patterns
+### Part 3: Error-Prone API Patterns
 
 ### Issue 1: Unwrap() in Example Code
 
-**Severity:** Medium (Examples show bad practices)  
+**Severity:** Medium (Examples show bad practices)
 **Locations:**
 - `/examples/00_pipeline_basics.rs:` `result.error.as_ref().unwrap()`
 - `/examples/11_pipeline_api.rs:` Multiple `.unwrap()` calls on timestamps
@@ -176,7 +182,7 @@ let registry = CommandRegistry::builder()
 
 ### Issue 2: Type Confusion in Argument Handling
 
-**Severity:** High (Silent failures)  
+**Severity:** High (Silent failures)
 **Pattern:**
 ```rust
 // Semantic analyzer might return Value::String("Alice")
@@ -192,7 +198,7 @@ let name = cmd.arguments.get("name")
 
 ### Issue 3: String-Based Error Codes
 
-**Severity:** Medium (Fragile error handling)  
+**Severity:** Medium (Fragile error handling)
 **Examples:**
 ```rust
 // From semantic.rs and pipeline.rs
@@ -212,7 +218,7 @@ let name = cmd.arguments.get("name")
 
 ### Issue 4: Missing Compile-Time Argument Validation
 
-**Severity:** High (Runtime failures expected)  
+**Severity:** High (Runtime failures expected)
 **Pattern:**
 ```rust
 // At compile time, the command expects "name" and "count" arguments
@@ -235,7 +241,7 @@ let routine = Box::new(|cmd: VerifiedCommand, _ctx| {
 
 ---
 
-## Part 4: Builder Pattern Usage Analysis
+### Part 4: Builder Pattern Usage Analysis
 
 ### CommandRegistry::builder() Pattern
 
@@ -274,7 +280,7 @@ if let Err(e) = self.registry.command_add_runtime(&cmd, Box::new(routine)) {
 CommandDefinition::builder()
   .name("...")
   .description("...")
-  .namespace("...")  
+  .namespace("...")
   .hint("...")
   .status("...")
   .version("...")
@@ -294,7 +300,7 @@ CommandDefinition::builder()
 
 ---
 
-## Part 5: Type Safety Issues & Missing Compile-Time Checks
+### Part 5: Type Safety Issues & Missing Compile-Time Checks
 
 ### Issue 1: Value Enum Pattern Matching
 
@@ -314,8 +320,8 @@ match cmd.arguments.get("name") {
 
 **Severity:** Medium (Confusing API)
 
-From spec.md FR-REG-6:
-- Format 1: `name: ".session.list"`, `namespace: ""` 
+From feature/001_command_registry.md FR-REG-6:
+- Format 1: `name: ".session.list"`, `namespace: ""`
 - Format 2: `name: "list"`, `namespace: ".session"`
 
 Both are valid but create different semantics:
@@ -359,7 +365,7 @@ pub struct ArgumentAttributes {
 
 ---
 
-## Part 6: Opportunities for Better API Design
+### Part 6: Opportunities for Better API Design
 
 ### Opportunity 1: Argument Extraction Helpers
 
@@ -493,7 +499,7 @@ ArgumentDefinition {
 
 ---
 
-## Part 7: Missing API Patterns Found in Examples
+### Part 7: Missing API Patterns Found in Examples
 
 ### Pattern 1: Interactive Argument Handling (Not in Public API)
 
@@ -536,7 +542,7 @@ But there's no:
 
 ---
 
-## Part 8: Recommended Priority Fixes
+### Part 8: Recommended Priority Fixes
 
 ### High Priority (Fixes pain points)
 1. **Add argument extraction helpers** - Would eliminate 90% of boilerplate
@@ -555,9 +561,9 @@ But there's no:
 
 ---
 
-## Part 9: Specification Alignment Issues
+### Part 9: Feature Alignment Issues
 
-From spec.md review:
+From feature review:
 
 1. **FR-ARG-6 (Validation Rule Enforcement):** ✅ Implemented via `ValidationRule` enum, but error messages are weak
 2. **FR-REG-6 (Explicit Command Names):** ✅ Enforced in runtime API, clear error handling
@@ -571,7 +577,7 @@ From spec.md review:
 
 ---
 
-## Part 10: Summary of Root Causes
+### Part 10: Summary of Root Causes
 
 ### Why boilerplate is heavy:
 1. **No type-safe extraction helpers** - Users write their own repeatedly
@@ -593,7 +599,7 @@ From spec.md review:
 
 ---
 
-## Conclusion
+### Conclusion
 
 The Unilang framework has excellent foundational design with support for both compile-time and runtime command registration. However, the public API could be significantly improved by:
 
@@ -605,3 +611,12 @@ The Unilang framework has excellent foundational design with support for both co
 
 These improvements would make the API more ergonomic, safer, and more discoverable for users while maintaining backward compatibility.
 
+### Cross-References
+
+| Type | File | Responsibility |
+|------|------|----------------|
+| doc | [api/001_public_types.md](../api/001_public_types.md) | Public Value types and structures being analyzed |
+| doc | [feature/001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 requirement analyzed in Part 5 |
+| doc | [feature/002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
+| doc | [feature/004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
+| doc | [architecture/004_implementation_details.md](../architecture/004_implementation_details.md) | Static registry implementation referenced in Part 7 |

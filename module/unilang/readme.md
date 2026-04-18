@@ -24,7 +24,7 @@ unilang processes command definitions at compile-time, generating optimized stat
 
 ```toml
 [dependencies]
-unilang = "0.49"
+unilang = "0.51"
 ```
 
 The default configuration enables multi-YAML build-time static registration (Approach #2 — recommended for 95% of users).
@@ -94,7 +94,9 @@ See [docs/parameter_syntax.md](docs/parameter_syntax.md) for the full reference.
 | [docs/features.md](docs/features.md) | Full feature tracking table |
 | [docs/optimization_guide.md](docs/optimization_guide.md) | Performance tuning guidelines |
 | [docs/phf_reexport.md](docs/phf_reexport.md) | PHF re-export for `static_registry` users |
-| [spec/](spec/) | Requirements and specification |
+| [docs/feature/](docs/feature/) | Feature requirements (FR-REG, FR-ARG, FR-PIPE, FR-HELP) |
+| [docs/invariant/](docs/invariant/) | System invariants, NFRs, governing principles |
+| [docs/api/](docs/api/) | API contracts, data structures, implementation details |
 | [examples/](examples/) | Runnable examples with learning path |
 
 ## Approach Selection

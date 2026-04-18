@@ -588,7 +588,7 @@ impl Pipeline
     let command = command_str.to_string();
 
     // Step 1: Parsing
-    let instruction = match self.parser.parse_single_instruction( command_str )
+    let instruction = match self.parser.parse_repl_input( command_str )
     {
       Ok( instruction ) => instruction,
       Err( error ) =>
@@ -686,7 +686,7 @@ impl Pipeline
   pub fn validate_command( &self, command_str : &str ) -> Result< (), Error >
   {
     // Step 1: Parsing
-    let instruction = self.parser.parse_single_instruction( command_str )?;
+    let instruction = self.parser.parse_repl_input( command_str )?;
 
     // Step 2: Semantic Analysis
     let instructions = [ instruction ];
@@ -789,7 +789,7 @@ CommandResult
   let command = command_str.to_string();
 
   // Step 1: Parsing
-  let instruction = match parser.parse_single_instruction( command_str )
+  let instruction = match parser.parse_repl_input( command_str )
   {
     Ok( instruction ) => instruction,
     Err( error ) =>
@@ -862,7 +862,7 @@ Result< (), Error >
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Step 1: Parsing
-  let instruction = parser.parse_single_instruction( command_str )?;
+  let instruction = parser.parse_repl_input( command_str )?;
 
   // Step 2: Semantic Analysis
   let instructions = [ instruction ];

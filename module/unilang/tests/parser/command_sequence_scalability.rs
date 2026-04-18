@@ -54,7 +54,7 @@ fn parse_multiple_commands( registry : &CommandRegistry, inputs : &[&str] ) -> R
   let mut parsed_count = 0;
 
   for input in inputs {
-    match parser.parse_single_instruction( input ) {
+    match parser.parse_repl_input( input ) {
       Ok( instruction ) => {
         let instructions_array = [instruction];
         let analyzer = SemanticAnalyzer::new( &instructions_array, registry );

@@ -32,7 +32,7 @@ fn test_dot_command_shows_help_instead_of_panicking()
   // Parse a single dot - this used to cause panic
   let program = ".";
   let parser = Parser::new(UnilangParserOptions::default());
-  let instruction = parser.parse_single_instruction(program)
+  let instruction = parser.parse_repl_input(program)
     .expect("Should parse single dot without error");
   let instructions = &[instruction];
   
@@ -59,7 +59,7 @@ fn test_dot_command_with_minimal_commands()
   
   let program = ".";
   let parser = Parser::new(UnilangParserOptions::default());
-  let instruction = parser.parse_single_instruction(program)
+  let instruction = parser.parse_repl_input(program)
     .expect("Should parse single dot without error");
   let instructions = &[instruction];
   
@@ -103,7 +103,7 @@ fn test_dot_command_lists_multiple_commands()
   
   let program = ".";
   let parser = Parser::new(UnilangParserOptions::default());
-  let instruction = parser.parse_single_instruction(program)
+  let instruction = parser.parse_repl_input(program)
     .expect("Should parse single dot without error");
   let instructions = &[instruction];
   

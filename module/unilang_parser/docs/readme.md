@@ -2,9 +2,11 @@
 
 Documentation for the unilang_parser crate.
 
-## Contents
+## File Responsibility Table
 
-- `cli_integration.md` - Integration guide for CLI applications
+| File | Responsibility |
+|------|---------------|
+| `cli_integration.md` | Explain correct argv vs string parsing usage and pitfalls |
 
 ## Overview
 
@@ -15,6 +17,18 @@ The unilang_parser crate provides low-level lexical and syntactic analysis for t
 - **Lexer**: Token generation from input strings
 - **Parser**: Syntactic analysis and instruction building
 - **Error Recovery**: Robust error handling and reporting
+
+## Public API Summary
+
+### Primary Parsing Methods
+
+| Method | Input | Use Case |
+|--------|-------|----------|
+| `Parser::parse_from_argv(&[String])` | Shell argv (pre-tokenized) | CLI applications receiving `std::env::args()` |
+| `Parser::parse_single_instruction(&str)` | Raw string | REPL, config files, embedded commands |
+| `Parser::parse_multiple_instructions(&str)` | Multi-command string | Batch processing |
+
+> **Planned:** `parse_single_instruction` will be renamed to `parse_repl_input` with a deprecation forwarding shim for clarity. See task 095.
 
 ## Usage
 

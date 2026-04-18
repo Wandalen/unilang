@@ -31,7 +31,7 @@ use unilang_parser ::UnilangParserOptions;
 fn parse_single_str_empty_input()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let result = parser.parse_single_instruction( "" );
+  let result = parser.parse_repl_input( "" );
   assert!( result.is_ok(), "Expected Ok for empty input, got Err: {:?}", result.err() );
   let instruction = result.unwrap();
   assert!( instruction.command_path_slices.is_empty() );
@@ -47,7 +47,7 @@ fn parse_single_str_whitespace_input()
 {
   let options = UnilangParserOptions ::default();
   let parser = Parser ::new( options );
-  let result = parser.parse_single_instruction( "   \t\n  " );
+  let result = parser.parse_repl_input( "   \t\n  " );
   assert!(
   result.is_ok(),
   "Expected Ok for whitespace input, got Err: {:?}",
@@ -67,7 +67,7 @@ fn parse_single_str_comment_input()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "# This is a comment";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err(), "Parse error for comment input: {:?}", result.err() );
   if let Err( e ) = result
   {
@@ -82,7 +82,7 @@ fn parse_single_str_simple_command_placeholder()
 {
   let options = UnilangParserOptions ::default();
   let parser = Parser ::new( options );
-  let result = parser.parse_single_instruction( "command" );
+  let result = parser.parse_repl_input( "command" );
   assert!( result.is_ok(), "Parse error for 'command' : {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "command".to_string() ] );
@@ -100,7 +100,7 @@ fn parse_single_str_unterminated_quote_passes_to_analyzer()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "command \"unterminated";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_ok(),
   "Expected Ok for unterminated quote, got Err: {:?}",

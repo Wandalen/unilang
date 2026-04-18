@@ -2,7 +2,7 @@
 
 **CRITICAL: Read before making ANY changes to this codebase**
 
-This project strictly follows design rules from `$PRO/genai/code/rules/code_design.rulebook.md`. Violations will be rejected.
+This project strictly follows the design rules documented in `docs/invariant/003_governing_principles.md` and the architecture mandates in `docs/architecture/001_mandates.md`.
 
 ## Quick Reference Card
 
@@ -166,8 +166,8 @@ If you accidentally violate rules:
 
 ## References
 
-- **Primary Rules:** `$PRO/genai/code/rules/code_design.rulebook.md`
-- **Style Rules:** `$PRO/genai/code/rules/code_style.rulebook.md`
+- **Primary Rules:** `docs/invariant/003_governing_principles.md`
+- **Architecture Mandates:** `docs/architecture/001_mandates.md`
 - **Benchmarking:** Use `benchkit` framework only
 - **Test Organization:** `tests/` for correctness, `benchkit` for performance
 

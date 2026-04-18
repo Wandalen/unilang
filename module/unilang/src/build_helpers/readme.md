@@ -1,6 +1,6 @@
 # Build Helpers
 
-Utilities used by `build.rs` to analyze and generate code at build time.
+Utilities used by `build/main.rs` and the main crate for type analysis and hint generation.
 
 ## Files
 

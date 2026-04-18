@@ -18,7 +18,7 @@ fn test_command_with_dot_prefix_and_file_path_with_dot_slash()
   let parser = Parser::new(UnilangParserOptions::default());
   let input = ".run_file file::./examples/rust_learning.yaml";
   
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   
   match result {
     Ok(instruction) => {
@@ -59,7 +59,7 @@ fn test_command_with_dot_prefix_and_various_file_paths()
   ];
   
   for (input, expected_path) in test_cases {
-    let result = parser.parse_single_instruction(input);
+    let result = parser.parse_repl_input(input);
     
     match result {
       Ok(instruction) => {
@@ -86,7 +86,7 @@ fn test_file_path_does_not_interfere_with_command_parsing()
   
   // Command with namespace and file path - should not be confused
   let input = ".namespace.command file::./path/to/file.ext";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   
   match result {
     Ok(instruction) => {

@@ -103,7 +103,7 @@ fn test_fixed_shell_args_two_commands()
   registry.register( create_run_command() );
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( &instruction_text )
+  let instruction = parser.parse_repl_input( &instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -151,7 +151,7 @@ fn test_fixed_shell_args_four_commands()
   registry.register( create_run_command() );
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( &instruction_text )
+  let instruction = parser.parse_repl_input( &instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -195,7 +195,7 @@ fn test_fixed_real_cargo_commands()
   registry.register( create_run_command() );
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( &instruction_text )
+  let instruction = parser.parse_repl_input( &instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -242,7 +242,7 @@ fn test_fixed_single_word_commands()
   registry.register( create_run_command() );
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( &instruction_text )
+  let instruction = parser.parse_repl_input( &instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];

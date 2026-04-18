@@ -285,7 +285,7 @@ Result< (), Error >
   }
 
   let input_str = processed_args.join( " " );
-  let instructions = vec![ parser.parse_single_instruction( &input_str )? ];
+  let instructions = vec![ parser.parse_repl_input( &input_str )? ];
 
   // 4. Semantic Analysis
   let semantic_analyzer = SemanticAnalyzer::new( &instructions, &registry );

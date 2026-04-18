@@ -51,7 +51,7 @@ fn create_unicode_test_command( name : &str ) -> CommandDefinition
 fn parse_unicode_command( registry : &CommandRegistry, input : &str ) -> Result< (), String >
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( input )
+  let instruction = parser.parse_repl_input( input )
     .map_err( |e| format!( "Parse error: {e:?}" ) )?;
 
   let instructions_array = [instruction];
@@ -113,11 +113,11 @@ fn test_multiple_commands_with_unicode()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Parse first command with Unicode
-  let result1 = parser.parse_single_instruction( r#".test1 content::"echo 🎯 test1""# );
+  let result1 = parser.parse_repl_input( r#".test1 content::"echo 🎯 test1""# );
   assert!( result1.is_ok(), "First Unicode command should parse: {result1:?}" );
 
   // Parse second command with Unicode
-  let result2 = parser.parse_single_instruction( r#".test2 content::"echo ✅ test2""# );
+  let result2 = parser.parse_repl_input( r#".test2 content::"echo ✅ test2""# );
   assert!( result2.is_ok(), "Second Unicode command should parse: {result2:?}" );
 }
 

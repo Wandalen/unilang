@@ -12,7 +12,7 @@ fn parser_reexport_basic_types()
   let parser = unilang::parser::Parser::new( options );
 
   // Parse a simple instruction
-  let result = parser.parse_single_instruction( "cmd arg1 arg2" );
+  let result = parser.parse_repl_input( "cmd arg1 arg2" );
   assert!( result.is_ok() );
 
   let instruction = result.unwrap();
@@ -118,6 +118,6 @@ fn parser_reexport_prelude()
 
   let options = UnilangParserOptions::default();
   let parser = Parser::new( options );
-  let result = parser.parse_single_instruction( "test" );
+  let result = parser.parse_repl_input( "test" );
   assert!( result.is_ok() );
 }

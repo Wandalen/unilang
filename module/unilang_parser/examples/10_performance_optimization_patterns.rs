@@ -39,7 +39,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   for cmd_str in &commands
   {
-  match parser.parse_single_instruction( cmd_str )
+  match parser.parse_repl_input( cmd_str )
   {
    Ok( instruction ) =>
    {
@@ -130,7 +130,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   // Process one at a time to minimize memory usage
   for cmd in large_command_set.iter().cycle().take( 1000 )
   {
-  if let Ok( instruction ) = parser.parse_single_instruction( cmd ) 
+  if let Ok( instruction ) = parser.parse_repl_input( cmd ) 
   {
    processed_count += 1;
    total_args += instruction.positional_arguments.len() + instruction.named_arguments.len();
@@ -174,7 +174,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   for cmd in mixed_commands
   {
-  match parser.parse_single_instruction( cmd )
+  match parser.parse_repl_input( cmd )
   {
    Ok( _ ) =>
    {
@@ -219,14 +219,14 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   let fast_start = Instant ::now();
   for _ in 0..1000
   {
-  let _ = fast_parser.parse_single_instruction( test_cmd );
+  let _ = fast_parser.parse_repl_input( test_cmd );
  }
   let fast_duration = fast_start.elapsed();
 
   let strict_start = Instant ::now();
   for _ in 0..1000
   {
-  let _ = strict_parser.parse_single_instruction( test_cmd );
+  let _ = strict_parser.parse_repl_input( test_cmd );
  }
   let strict_duration = strict_start.elapsed();
 

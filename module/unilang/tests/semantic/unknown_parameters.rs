@@ -52,7 +52,7 @@ fn test_unknown_named_parameter_with_suggestion()
   // User types: .test drry::1
   // Note the typo: "drry" instead of "dry"
   let instruction_text = ".test drry::1";
-  let instruction = parser.parse_single_instruction( instruction_text )
+  let instruction = parser.parse_repl_input( instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -89,7 +89,7 @@ fn test_multiple_unknown_parameters()
 
   // User provides multiple unknown parameters
   let instruction_text = ".test drry::1 verbose::1 foo::bar";
-  let instruction = parser.parse_single_instruction( instruction_text )
+  let instruction = parser.parse_repl_input( instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -126,7 +126,7 @@ fn test_mix_valid_and_unknown()
 
   // Mix valid parameter "dry" with unknown "drry"
   let instruction_text = ".test dry::1 drry::1";
-  let instruction = parser.parse_single_instruction( instruction_text )
+  let instruction = parser.parse_repl_input( instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -161,7 +161,7 @@ fn test_no_params_command_rejects_any_named()
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction_text = ".simple foo::bar";
-  let instruction = parser.parse_single_instruction( instruction_text )
+  let instruction = parser.parse_repl_input( instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];
@@ -192,7 +192,7 @@ fn test_valid_parameter_succeeds()
 
   // Correct parameter name "dry"
   let instruction_text = ".test dry::1";
-  let instruction = parser.parse_single_instruction( instruction_text )
+  let instruction = parser.parse_repl_input( instruction_text )
     .expect( "Parser should succeed" );
 
   let instructions = vec![ instruction ];

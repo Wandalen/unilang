@@ -338,7 +338,7 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
           eprintln!();
           eprintln!( "   Common mistake:" );
           eprintln!( "     let joined = argv.join(\" \");  // ❌ Loses token boundaries");
-          eprintln!( "     parser.parse_single_instruction(&joined);  // ❌ Re-tokenizes incorrectly");
+          eprintln!( "     parser.parse_repl_input(&joined);  // ❌ Re-tokenizes incorrectly");
           eprintln!();
           eprintln!( "   Correct approach:" );
           eprintln!( "     parser.parse_from_argv(&argv);  // ✅ Preserves shell tokenization");

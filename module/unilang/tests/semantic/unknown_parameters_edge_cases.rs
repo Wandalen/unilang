@@ -75,7 +75,7 @@ fn test_distance_one_suggests()
 
   // "verbse" vs "verbose" - distance 1 (missing 'o')
   let instruction_text = ".complex verbse::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -103,7 +103,7 @@ fn test_distance_two_suggests()
   // Try "vebose" - distance 1 (deletion of 'r')
   // Try "vrbase" vs "verbose" - distance 2
   let instruction_text = ".complex vrbase::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -126,7 +126,7 @@ fn test_distance_three_no_suggestion()
 
   // "xyz" vs "verbose" - distance > 2
   let instruction_text = ".complex xyz::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -148,7 +148,7 @@ fn test_exact_match_succeeds()
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction_text = ".complex verbose::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -172,7 +172,7 @@ fn test_unknown_close_to_alias_suggests_alias()
 
   // "vrb" vs "verb" (alias) - distance 1
   let instruction_text = ".complex vrb::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -196,7 +196,7 @@ fn test_alias_parameter_succeeds()
 
   // Use alias "v" instead of "verbose"
   let instruction_text = ".complex v::1";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -216,7 +216,7 @@ fn test_mix_canonical_and_alias()
 
   // Use both canonical name and alias
   let instruction_text = ".complex verbose::1 o::output.txt";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -240,7 +240,7 @@ fn test_multiple_close_matches_picks_closest()
 
   // "cfg" is an exact alias match, but "cg" is close to "cfg" (distance 1) and "config" (distance 4)
   let instruction_text = ".complex cg::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -271,7 +271,7 @@ fn test_very_long_parameter_name()
 
   let long_name = "a".repeat( 100 );
   let instruction_text = format!( ".complex {long_name}::value" );
-  let instruction = parser.parse_single_instruction( &instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( &instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -308,7 +308,7 @@ fn test_parameter_with_numbers_underscores()
 
   // Typo: "param_12" instead of "param_123"
   let instruction_text = ".test param_12::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -361,7 +361,7 @@ fn test_many_parameters_stress()
 
   // Typo in one of many parameters
   let instruction_text = ".stress param0::a param1::b param99::c";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -422,7 +422,7 @@ fn test_similar_parameter_names()
 
   // Typo "flie" - could match "file" (distance 2) or "files" (distance 3)
   let instruction_text = ".similar flie::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -475,7 +475,7 @@ fn test_all_optional_params_unknown_provided()
 
   // Provide unknown "c" even though all params are optional
   let instruction_text = ".optional c::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -515,7 +515,7 @@ fn test_no_params_provided_all_optional_succeeds()
 
   // Provide no parameters
   let instruction_text = ".optional";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -556,7 +556,7 @@ fn test_suggestion_boundary_distance_2()
 
   // "tst" vs "test" - delete 'e', delete 's' = distance 2
   let instruction_text = ".test ts::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -586,7 +586,7 @@ fn test_empty_command_definition()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   let instruction_text = ".empty anything::value";
-  let instruction = parser.parse_single_instruction( instruction_text ).unwrap();
+  let instruction = parser.parse_repl_input( instruction_text ).unwrap();
 
   let instructions = vec![ instruction ];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );

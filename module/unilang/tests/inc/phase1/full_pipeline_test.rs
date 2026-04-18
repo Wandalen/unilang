@@ -84,7 +84,7 @@ fn semantic_analyzer_tests()
 
   // T3.1
   let input = "test_cmd hello 123";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let verified = analyzer.analyze().unwrap();
@@ -98,7 +98,7 @@ fn semantic_analyzer_tests()
 
   // T3.2
   let input = "unknown_cmd";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let error = analyzer.analyze().unwrap_err();
@@ -106,7 +106,7 @@ fn semantic_analyzer_tests()
 
   // T3.3
   let input = "test_cmd";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let error = analyzer.analyze().unwrap_err();
@@ -114,7 +114,7 @@ fn semantic_analyzer_tests()
 
   // T3.4 - Updated to test a clear type mismatch for the second argument
   let input = "test_cmd hello not-an-integer";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let error = analyzer.analyze().unwrap_err();
@@ -122,7 +122,7 @@ fn semantic_analyzer_tests()
 
   // T3.5
   let input = "test_cmd \"hello\" 123 456";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let error = analyzer.analyze().unwrap_err();
@@ -221,7 +221,7 @@ fn interpreter_tests()
 
   // T4.1
   let input = ".cmd1";
-  let instruction = parser.parse_single_instruction( input ).unwrap();
+  let instruction = parser.parse_repl_input( input ).unwrap();
   let instructions = &[ instruction ][ .. ];
   let analyzer = SemanticAnalyzer::new( instructions, &registry );
   let verified = analyzer.analyze().unwrap();
@@ -236,7 +236,7 @@ fn interpreter_tests()
   let mut instructions_vec : Vec< GenericInstruction > = Vec::new();
   for cmd_str in input_commands
   {
-    instructions_vec.push( parser.parse_single_instruction( cmd_str ).unwrap() );
+    instructions_vec.push( parser.parse_repl_input( cmd_str ).unwrap() );
   }
   let analyzer = SemanticAnalyzer::new( &instructions_vec, &registry );
   let verified = analyzer.analyze().unwrap();

@@ -13,7 +13,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Named arguments with quoting
   println!( "=== Named Arguments with Quoting ===" );
-  let cmd = parser.parse_single_instruction
+  let cmd = parser.parse_repl_input
   (
   r#"database.query sql :: "SELECT * FROM users WHERE name = 'John'" timeout :: 30"#
  )?;
@@ -37,7 +37,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Example with single quotes
   println!( "\n=== Single Quote Example ===" );
-  let cmd2 = parser.parse_single_instruction( "config.set key :: 'my_value' priority ::high" )?;
+  let cmd2 = parser.parse_repl_input( "config.set key :: 'my_value' priority ::high" )?;
   println!( "Config command: {:?}", cmd2.named_arguments );
 
   println!( "\n✓ Named arguments and quoting parsing successful!" );

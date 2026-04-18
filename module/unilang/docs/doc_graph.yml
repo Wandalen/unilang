@@ -1,0 +1,204 @@
+meta:
+  description: Cross-reference graph for all doc instances in unilang
+  node_count: 17
+  edge_count: 51
+  component_count: 1
+  generated: 2026-04-18
+
+nodes:
+  - id: analysis/001
+    file: analysis/001_api_analysis.md
+    label: API Analysis
+    entity: analysis
+
+  - id: analysis/002
+    file: analysis/002_usability_improvements.md
+    label: Usability Improvements
+    entity: analysis
+
+  - id: api/001
+    file: api/001_public_types.md
+    label: Public Types
+    entity: api
+
+  - id: architecture/001
+    file: architecture/001_mandates.md
+    label: Mandates
+    entity: architecture
+
+  - id: architecture/002
+    file: architecture/002_benchmark_separation.md
+    label: Benchmark Separation
+    entity: architecture
+
+  - id: architecture/003
+    file: architecture/003_vision_scope.md
+    label: Vision & Scope
+    entity: architecture
+
+  - id: architecture/004
+    file: architecture/004_implementation_details.md
+    label: Implementation Details
+    entity: architecture
+
+  - id: architecture/005
+    file: architecture/005_help_decoupling.md
+    label: Help Decoupling
+    entity: architecture
+
+  - id: architecture/006
+    file: architecture/006_repl_implementation.md
+    label: REPL Implementation
+    entity: architecture
+
+  - id: feature/001
+    file: feature/001_command_registry.md
+    label: Command Registry
+    entity: feature
+
+  - id: feature/002
+    file: feature/002_argument_system.md
+    label: Argument System
+    entity: feature
+
+  - id: feature/003
+    file: feature/003_pipeline.md
+    label: Pipeline
+    entity: feature
+
+  - id: feature/004
+    file: feature/004_help_system.md
+    label: Help System
+    entity: feature
+
+  - id: feature/005
+    file: feature/005_repl_interactive.md
+    label: REPL Interactive
+    entity: feature
+
+  - id: invariant/001
+    file: invariant/001_system_actors_vocabulary.md
+    label: System Actors Vocabulary
+    entity: invariant
+
+  - id: invariant/002
+    file: invariant/002_non_functional_requirements.md
+    label: Non-Functional Requirements
+    entity: invariant
+
+  - id: invariant/003
+    file: invariant/003_governing_principles.md
+    label: Governing Principles
+    entity: invariant
+
+edges:
+  # feature/001 outbound (4)
+  - { from: feature/001, to: invariant/002,     via: cross_references }
+  - { from: feature/001, to: invariant/003,     via: cross_references }
+  - { from: feature/001, to: architecture/004,  via: cross_references }
+  - { from: feature/001, to: api/001,           via: cross_references }
+
+  # feature/002 outbound (3)
+  - { from: feature/002, to: feature/001,       via: cross_references }
+  - { from: feature/002, to: feature/003,       via: cross_references }
+  - { from: feature/002, to: api/001,           via: cross_references }
+
+  # feature/003 outbound (3)
+  - { from: feature/003, to: feature/001,       via: cross_references }
+  - { from: feature/003, to: feature/002,       via: cross_references }
+  - { from: feature/003, to: feature/004,       via: cross_references }
+
+  # feature/004 outbound (3)
+  - { from: feature/004, to: feature/001,       via: cross_references }
+  - { from: feature/004, to: architecture/005,  via: cross_references }
+  - { from: feature/004, to: invariant/003,     via: cross_references }
+
+  # feature/005 outbound (3)
+  - { from: feature/005, to: feature/003,       via: cross_references }
+  - { from: feature/005, to: invariant/002,     via: cross_references }
+  - { from: feature/005, to: architecture/006,  via: cross_references }
+
+  # invariant/001 outbound (2)
+  - { from: invariant/001, to: invariant/003,   via: cross_references }
+  - { from: invariant/001, to: architecture/003, via: cross_references }
+
+  # invariant/002 outbound (3)
+  - { from: invariant/002, to: feature/001,     via: cross_references }
+  - { from: invariant/002, to: architecture/001, via: cross_references }
+  - { from: invariant/002, to: architecture/004, via: cross_references }
+
+  # invariant/003 outbound (3)
+  - { from: invariant/003, to: invariant/001,   via: cross_references }
+  - { from: invariant/003, to: invariant/002,   via: cross_references }
+  - { from: invariant/003, to: architecture/001, via: cross_references }
+
+  # api/001 outbound (3)
+  - { from: api/001, to: feature/001,           via: cross_references }
+  - { from: api/001, to: architecture/004,      via: cross_references }
+  - { from: api/001, to: invariant/002,         via: cross_references }
+
+  # architecture/001 outbound (3)
+  - { from: architecture/001, to: invariant/003, via: cross_references }
+  - { from: architecture/001, to: architecture/002, via: cross_references }
+  - { from: architecture/001, to: architecture/004, via: cross_references }
+
+  # architecture/002 outbound (2)
+  - { from: architecture/002, to: architecture/001, via: cross_references }
+  - { from: architecture/002, to: invariant/002, via: cross_references }
+
+  # architecture/003 outbound (3)
+  - { from: architecture/003, to: feature/001,  via: cross_references }
+  - { from: architecture/003, to: invariant/001, via: cross_references }
+  - { from: architecture/003, to: architecture/001, via: cross_references }
+
+  # architecture/004 outbound (3)
+  - { from: architecture/004, to: feature/001,  via: cross_references }
+  - { from: architecture/004, to: invariant/002, via: cross_references }
+  - { from: architecture/004, to: api/001,       via: cross_references }
+
+  # architecture/005 outbound (2)
+  - { from: architecture/005, to: feature/004,  via: cross_references }
+  - { from: architecture/005, to: invariant/003, via: cross_references }
+
+  # architecture/006 outbound (2)
+  - { from: architecture/006, to: feature/005,  via: cross_references }
+  - { from: architecture/006, to: architecture/003, via: cross_references }
+
+  # analysis/001 outbound (5)
+  - { from: analysis/001, to: api/001,          via: cross_references }
+  - { from: analysis/001, to: feature/001,      via: cross_references }
+  - { from: analysis/001, to: feature/002,      via: cross_references }
+  - { from: analysis/001, to: feature/004,      via: cross_references }
+  - { from: analysis/001, to: architecture/004, via: cross_references }
+
+  # analysis/002 outbound (4)
+  - { from: analysis/002, to: analysis/001,     via: cross_references }
+  - { from: analysis/002, to: feature/001,      via: cross_references }
+  - { from: analysis/002, to: feature/002,      via: cross_references }
+  - { from: analysis/002, to: feature/005,      via: cross_references }
+
+components:
+  - id: 1
+    label: Main corpus
+    size: 17
+    isolated: false
+    nodes:
+      - analysis/001
+      - analysis/002
+      - api/001
+      - architecture/001
+      - architecture/002
+      - architecture/003
+      - architecture/004
+      - architecture/005
+      - architecture/006
+      - feature/001
+      - feature/002
+      - feature/003
+      - feature/004
+      - feature/005
+      - invariant/001
+      - invariant/002
+      - invariant/003
+
+dangling_refs: []

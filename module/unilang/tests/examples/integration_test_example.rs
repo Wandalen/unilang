@@ -98,7 +98,7 @@ fn test_complete_command_processing_pipeline()
 
   // 1. Parse command
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( input_command )
+  let instruction = parser.parse_repl_input( input_command )
     .expect( "Parser should successfully parse valid command" );
 
   // 2. Semantic analysis
@@ -178,7 +178,7 @@ fn test_parser_semantic_analyzer_contract()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Test with minimal required arguments
-  let instruction = parser.parse_single_instruction( r#".contract_test required_arg::"value""# )
+  let instruction = parser.parse_repl_input( r#".contract_test required_arg::"value""# )
     .expect( "Parser should handle valid input" );
 
   // Verify parser output structure (contract requirements)
@@ -300,7 +300,7 @@ fn test_error_propagation_through_components()
 
   // Test 1: Semantic analysis error (before execution)
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( r".nonexistent_command" ).unwrap();
+  let instruction = parser.parse_repl_input( r".nonexistent_command" ).unwrap();
   let instructions = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let semantic_result = analyzer.analyze();
@@ -308,7 +308,7 @@ fn test_error_propagation_through_components()
   assert!( semantic_result.is_err(), "Should fail at semantic analysis stage" );
 
   // Test 2: Execution error (after successful semantic analysis)
-  let valid_instruction = parser.parse_single_instruction( r#".error_test trigger::"validation""# ).unwrap();
+  let valid_instruction = parser.parse_repl_input( r#".error_test trigger::"validation""# ).unwrap();
   let valid_instructions = [valid_instruction];
   let valid_analyzer = SemanticAnalyzer::new( &valid_instructions, &registry );
   let verified_commands = valid_analyzer.analyze()
@@ -325,7 +325,7 @@ fn test_error_propagation_through_components()
   assert!( execution_error.message.contains( "validation" ), "Error message should be preserved" );
 
   // Test 3: Error recovery - system should handle subsequent valid commands
-  let recovery_instruction = parser.parse_single_instruction( r#".echo message::"recovery test""# ).unwrap();
+  let recovery_instruction = parser.parse_repl_input( r#".echo message::"recovery test""# ).unwrap();
   let recovery_instructions = [recovery_instruction];
   let recovery_analyzer = SemanticAnalyzer::new( &recovery_instructions, &registry );
 
@@ -388,7 +388,7 @@ fn test_integration_performance_characteristics()
     let command_input = format!( r#".perf_test_{} data::"test_data_{}""#, i % 100, i );
 
     // Complete workflow: parse -> analyze -> execute
-    let instruction = parser.parse_single_instruction( &command_input )
+    let instruction = parser.parse_repl_input( &command_input )
       .expect( "Should parse performance test command" );
 
     let instructions = [instruction];
@@ -402,7 +402,7 @@ fn test_integration_performance_characteristics()
   }
 
   // Verify system is still responsive after processing many commands
-  let final_test = parser.parse_single_instruction( r#".perf_test_0 data::"final""# ).unwrap();
+  let final_test = parser.parse_repl_input( r#".perf_test_0 data::"final""# ).unwrap();
   let final_instructions = [final_test];
   let final_analyzer = SemanticAnalyzer::new( &final_instructions, &registry );
   let final_result = final_analyzer.analyze();
@@ -437,10 +437,10 @@ fn test_configuration_integration()
   let ambiguous_input = r".test arg::value extra_text";
 
   // Strict parser might be more restrictive
-  let strict_result = strict_parser.parse_single_instruction( ambiguous_input );
+  let strict_result = strict_parser.parse_repl_input( ambiguous_input );
 
   // Permissive parser might be more forgiving
-  let permissive_result = permissive_parser.parse_single_instruction( ambiguous_input );
+  let permissive_result = permissive_parser.parse_repl_input( ambiguous_input );
 
   // Verify configuration affects behavior appropriately
   // (Exact behavior depends on implementation)
@@ -448,7 +448,7 @@ fn test_configuration_integration()
           "At least one parser configuration should handle the input" );
 
   // Configuration should be consistent within same parser instance
-  let second_strict_result = strict_parser.parse_single_instruction( ambiguous_input );
+  let second_strict_result = strict_parser.parse_repl_input( ambiguous_input );
   assert_eq!( strict_result.is_ok(), second_strict_result.is_ok(),
              "Parser behavior should be consistent with same configuration" );
 }

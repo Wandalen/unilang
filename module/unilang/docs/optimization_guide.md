@@ -4,7 +4,7 @@
 
 ### Command Lookup Performance
 
-Based on benchmarking and NFR requirements (spec.md NFR-PERF-2: p99 < 100ns):
+Based on benchmarking and NFR requirements (invariant/002_non_functional_requirements.md NFR-PERF-2: p99 < 100ns):
 
 | Approach | Lookup Time | Memory Overhead | Performance vs Runtime |
 |----------|-------------|-----------------|----------------------|
@@ -221,7 +221,7 @@ println!("Cache hit rate: {:.1}%", metrics.cache_hit_rate() * 100.0);
 
 ## Future Optimization Opportunities
 
-Based on roadmap.md and spec.md:
+Based on roadmap.md and invariant/002_non_functional_requirements.md:
 
 1. **Lazy static command initialization** (if binary size becomes concern)
 2. **SIMD argument parsing** (extend SIMD beyond JSON to all parsers)
@@ -230,7 +230,7 @@ Based on roadmap.md and spec.md:
 
 ## References
 
-- Performance NFRs: `spec.md` Section 5 (NFR-PERF-1, NFR-PERF-2, NFR-PERF-3)
+- Performance NFRs: `invariant/002_non_functional_requirements.md` (NFR-PERF-1, NFR-PERF-2, NFR-PERF-3)
 - Benchmark examples: `examples/static_03_performance_comparison.rs`
 - Performance tests: `tests/performance/test_performance.rs`
 - SIMD implementation: `src/simd_json_parser.rs`, `src/simd_tokenizer.rs`

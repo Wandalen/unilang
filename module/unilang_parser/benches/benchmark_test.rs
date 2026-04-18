@@ -13,7 +13,7 @@ fn main()
   // Warmup
   for _ in 0..1000
   {
-  let _ = parser.parse_single_instruction( test_input );
+  let _ = parser.parse_repl_input( test_input );
  }
   
   // Benchmark current implementation
@@ -22,7 +22,7 @@ fn main()
   
   for _ in 0..iterations
   {
-  let result = parser.parse_single_instruction( test_input );
+  let result = parser.parse_repl_input( test_input );
   assert!( result.is_ok() );
  }
   
@@ -36,7 +36,7 @@ fn main()
   println!( "Parsing rate: {:.0} commands/sec", 1_000_000_000.0 / avg_time.as_nanos() as f64 );
   
   // Test the instruction result
-  let result = parser.parse_single_instruction( test_input ).unwrap();
+  let result = parser.parse_repl_input( test_input ).unwrap();
   println!( "\nParsed instruction: " );
   println!( "  Command path: {:?}", result.command_path_slices );
   println!( "  Named args: {}", result.named_arguments.len() );

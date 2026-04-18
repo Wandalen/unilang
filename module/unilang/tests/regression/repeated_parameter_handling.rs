@@ -82,7 +82,7 @@ fn parse_and_verify_command( input: &str ) -> Result< String, String >
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
-  match parser.parse_single_instruction( input )
+  match parser.parse_repl_input( input )
   {
     Ok( instruction ) =>
     {

@@ -15,7 +15,6 @@
 use std::collections::HashMap;
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, OutputData };
 use unilang::data::Kind as ArgumentKind;
-// use unilang::error::Error; // Not currently used
 use unilang::help::HelpGenerator;
 use unilang::interpreter::{ ExecutionContext, Interpreter };
 use unilang::registry::{ CommandRegistry, CommandRoutine };

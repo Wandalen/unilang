@@ -26,7 +26,7 @@ fn parse_and_assert( input: &str, expected_path: &[ &str ], expected_args: &[ &s
 {
   let options = UnilangParserOptions ::default();
   let parser = Parser ::new( options ); // Updated Parser instantiation
-  let instruction = parser.parse_single_instruction( input ).unwrap(); // Updated method call and direct unwrap
+  let instruction = parser.parse_repl_input( input ).unwrap(); // Updated method call and direct unwrap
   assert_eq!( instruction.command_path_slices, expected_path );
   assert_eq!( instruction.positional_arguments.len(), expected_args.len() );
   for ( i, expected_arg ) in expected_args.iter().enumerate()
@@ -80,7 +80,7 @@ fn rejects_kebab_case_in_command_path()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.my-sub.command arg1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_err(), "Expected error for kebab-case in command path" );
   if let Err( e ) = result
   {

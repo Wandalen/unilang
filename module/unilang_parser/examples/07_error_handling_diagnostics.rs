@@ -17,7 +17,7 @@ fn main()
 
   // Invalid command path (double dots)
   println!( "\n1. Invalid Command Path: " );
-  match parser.parse_single_instruction( "invalid..command" )
+  match parser.parse_repl_input( "invalid..command" )
   {
   Ok( _ ) => println!( "Unexpected success!" ),
   Err( error ) =>
@@ -41,7 +41,7 @@ fn main()
 
   // Unterminated quoted string
   println!( "\n2. Unterminated Quoted String: " );
-  match parser.parse_single_instruction( r#"cmd arg :: "unterminated string"# )
+  match parser.parse_repl_input( r#"cmd arg :: "unterminated string"# )
   {
   Ok( _ ) => println!( "Unexpected success!" ),
   Err( error ) =>
@@ -59,7 +59,7 @@ fn main()
 
   // Invalid escape sequence
   println!( "\n3. Invalid Escape Sequence: " );
-  match parser.parse_single_instruction( r#"cmd text :: "invalid \x escape""# )
+  match parser.parse_repl_input( r#"cmd text :: "invalid \x escape""# )
   {
   Ok( _ ) => println!( "Unexpected success!" ),
   Err( error ) =>
@@ -77,7 +77,7 @@ fn main()
 
   // Empty command path
   println!( "\n4. Empty Command Path: " );
-  match parser.parse_single_instruction( "" )
+  match parser.parse_repl_input( "" )
   {
   Ok( _ ) => println!( "Unexpected success!" ),
   Err( error ) =>
@@ -89,7 +89,7 @@ fn main()
 
   // Invalid argument format
   println!( "\n5. Invalid Argument Format: " );
-  match parser.parse_single_instruction( "cmd arg :::invalid" )
+  match parser.parse_repl_input( "cmd arg :::invalid" )
   {
   Ok( _ ) => println!( "Unexpected success!" ),
   Err( error ) =>
@@ -126,7 +126,7 @@ fn main()
 
   for ( i, test_case ) in test_cases.iter().enumerate()
   {
-  match parser.parse_single_instruction( test_case )
+  match parser.parse_repl_input( test_case )
   {
    Ok( _ ) => println!( "Test {} : Unexpected success for '{}'", i + 1, test_case ),
    Err( error ) =>

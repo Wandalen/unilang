@@ -521,7 +521,7 @@ See `examples/` directory:
 - `12_repl_loop.rs` - Basic REPL
 - `practical_cli_aggregation.rs` - Advanced multi-crate
 
-**Full specification:** See `spec.md` for complete API documentation.
+**Full documentation:** See `docs/readme.md` for the complete documentation index.
 
 ---
 

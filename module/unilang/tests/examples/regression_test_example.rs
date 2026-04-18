@@ -89,7 +89,7 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
 
   // Act - Execute the EXACT failing scenario from Task 024
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction(
+  let instruction = parser.parse_repl_input(
     r#".run command::"cargo build" command::"echo hello1" command::"cargo clippy" parallel::2"#
   ).expect( "Should parse the exact Task 024 command" );
 
@@ -189,7 +189,7 @@ fn regression_backward_compatibility_single_parameter_usage()
   for pattern in single_param_patterns
   {
     // Act
-    let instruction = parser.parse_single_instruction( pattern )
+    let instruction = parser.parse_repl_input( pattern )
       .expect( &format!( "Should parse single parameter pattern: {}", pattern ) );
 
     let instructions = [instruction];
@@ -277,13 +277,13 @@ fn regression_multiple_parameter_performance_no_degradation()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Warm up
-  let _ = parser.parse_single_instruction( &large_command );
+  let _ = parser.parse_repl_input( &large_command );
 
   // Act - Measure performance
 
   for _ in 0..10  // Multiple iterations for stability
   {
-    let instruction = parser.parse_single_instruction( &large_command )
+    let instruction = parser.parse_repl_input( &large_command )
       .expect( "Should parse large command" );
 
     let instructions = [instruction];
@@ -300,7 +300,7 @@ fn regression_multiple_parameter_performance_no_degradation()
           avg_duration );
 
   // Verify correctness wasn't sacrificed for performance
-  let instruction = parser.parse_single_instruction( &large_command ).unwrap();
+  let instruction = parser.parse_repl_input( &large_command ).unwrap();
   let instructions = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let verified_commands = analyzer.analyze().unwrap();
@@ -361,7 +361,7 @@ fn regression_edge_case_parameter_collection_robustness()
 
   // Edge Case 1: Empty values
   let empty_test = r#".edge_test value::"" value::"non_empty" value::"""#;
-  let instruction = parser.parse_single_instruction( empty_test )
+  let instruction = parser.parse_repl_input( empty_test )
     .expect( "Should handle empty values" );
 
   let instructions = [instruction];
@@ -377,7 +377,7 @@ fn regression_edge_case_parameter_collection_robustness()
 
   // Edge Case 2: Whitespace-only values
   let whitespace_test = r#".edge_test value::"   " value::"normal" value::" 	 ""#;
-  let ws_instruction = parser.parse_single_instruction( whitespace_test )
+  let ws_instruction = parser.parse_repl_input( whitespace_test )
     .expect( "Should handle whitespace values" );
 
   let ws_instructions = [ws_instruction];
@@ -391,7 +391,7 @@ fn regression_edge_case_parameter_collection_robustness()
 
   // Edge Case 3: Mixed quoted/unquoted (if supported)
   let mixed_test = r#".edge_test value::unquoted value::"quoted" value::also_unquoted"#;
-  let mixed_instruction = parser.parse_single_instruction( mixed_test );
+  let mixed_instruction = parser.parse_repl_input( mixed_test );
 
   // Should either parse successfully or fail gracefully
   match mixed_instruction
@@ -430,7 +430,7 @@ fn regression_configuration_compatibility()
   let default_parser = Parser::new( UnilangParserOptions::default() );
 
   let standard_command = r#".test arg::"value""#;
-  let default_result = default_parser.parse_single_instruction( standard_command );
+  let default_result = default_parser.parse_repl_input( standard_command );
 
   assert!( default_result.is_ok(),
           "Default configuration should continue to work with standard commands" );
@@ -442,7 +442,7 @@ fn regression_configuration_compatibility()
   };
 
   let explicit_parser = Parser::new( explicit_options );
-  let explicit_result = explicit_parser.parse_single_instruction( standard_command );
+  let explicit_result = explicit_parser.parse_repl_input( standard_command );
 
   assert!( explicit_result.is_ok(),
           "Explicit configuration should work consistently" );
@@ -481,7 +481,7 @@ fn regression_api_stability()
 
   // Test that essential methods exist and work
   let parser = Parser::new( UnilangParserOptions::default() );
-  let parse_result = parser.parse_single_instruction( ".test" );
+  let parse_result = parser.parse_repl_input( ".test" );
 
   // Method should exist and return expected type
   assert!( parse_result.is_ok() || parse_result.is_err(),

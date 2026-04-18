@@ -859,7 +859,7 @@ Static commands are fast (<100ns), dynamic commands are flexible. Zero additiona
 
 - Cargo build scripts: https://doc.rust-lang.org/cargo/reference/build-scripts.html
 - Command registry implementation: `src/registry.rs`
-- Static command optimization: See `spec.md` Appendix A for implementation details
+- Static command optimization: See `architecture/004_implementation_details.md` for implementation details
 - Static data structures: `src/static_data.rs`
 - Build script implementation: `build.rs:1-409`
 - YAML specification: https://yaml.org/spec/

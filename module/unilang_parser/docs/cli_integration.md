@@ -49,9 +49,9 @@ fn main() -> Result< (), Box<dyn std ::error ::Error >> {
   let joined = argv.join(" ");
   // joined = "my-app .deploy --name Production Server --region us-east-1"
 
-  // MISTAKE #2: Use parse_single_instruction (which splits on whitespace)
+  // MISTAKE #2: Use parse_repl_input (which splits on whitespace) on shell argv
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let instruction = parser.parse_single_instruction(&joined)?;
+  let instruction = parser.parse_repl_input(&joined)?;
 
   // Result: "Production Server" becomes TWO separate arguments: "Production" and "Server"
   // User expectation: BROKEN ❌
@@ -110,7 +110,7 @@ fn main() -> Result< (), Box<dyn std ::error ::Error >> {
 
 **Why:** Shell has already tokenized. Re-tokenizing breaks quote handling.
 
-### Use `parse_single_instruction(input)` When:
+### Use `parse_repl_input(input)` When:
 
 ✅ Parsing instruction strings from configuration files
 ✅ Accepting user input from a REPL or interactive prompt
@@ -150,14 +150,14 @@ where
 }
 ```
 
-### What parse_single_instruction() Does
+### What parse_repl_input() Does
 
 1. Takes a raw string
 2. Uses `strs_tools` to tokenize (split on whitespace, handle quotes)
 3. Applies unilang syntax rules
 
 ```rust
-pub fn parse_single_instruction( &self, input : &str ) -> Result< GenericInstruction >
+pub fn parse_repl_input( &self, input : &str ) -> Result< GenericInstruction >
 {
   // Tokenize the input string (handles quotes, escapes)
   let items = self.itemize_string( input )?;
@@ -169,7 +169,7 @@ pub fn parse_single_instruction( &self, input : &str ) -> Result< GenericInstruc
 ### Key Difference
 
 - **parse_from_argv:** No tokenization (assumes pre-tokenized)
-- **parse_single_instruction:** Full tokenization (assumes raw string)
+- **parse_repl_input:** Full tokenization (assumes raw string)
 
 ---
 
@@ -198,7 +198,7 @@ fn main() -> Result< (), Box<dyn std ::error ::Error >> {
 
 fn parse_config( config_content : &str ) -> Result< GenericInstruction, Box<dyn std ::error ::Error >> {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let instruction = parser.parse_single_instruction(config_content)?;  // ✅ Correct
+  let instruction = parser.parse_repl_input(config_content)?;  // ✅ Correct
 
   // instruction.named_args["name"] = "Production Server" (quotes parsed correctly)
   Ok(())
@@ -212,7 +212,7 @@ fn parse_config( config_content : &str ) -> Result< GenericInstruction, Box<dyn 
 
 fn handle_repl_input( input : &str ) -> Result< GenericInstruction, Box<dyn std ::error ::Error >> {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let instruction = parser.parse_single_instruction(input)?;  // ✅ Correct
+  let instruction = parser.parse_repl_input(input)?;  // ✅ Correct
 
   Ok(())
 }
@@ -228,7 +228,7 @@ fn main() -> Result< (), Box<dyn std ::error ::Error >> {
   let joined = argv[1..].join(" ");  // ❌ WRONG: Loses token boundaries
 
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let instruction = parser.parse_single_instruction(&joined)?;
+  let instruction = parser.parse_repl_input(&joined)?;
 
   // BROKEN: instruction now has TWO args: "Production" and "Server"
   Ok(())
@@ -247,7 +247,7 @@ Is your input coming from the shell (std::env::args)?
 │
 └─ NO → Is your input a raw string?
         │
-        ├─ YES → Use parse_single_instruction(input)
+        ├─ YES → Use parse_repl_input(input)
         │         Reason: String needs tokenization
         │
         └─ Are you converting argv to a string then re-parsing?
@@ -276,7 +276,7 @@ $ wflow .languages --path "src/my project"
 - Command failed: "unexpected positional argument 'project'"
 
 **Root Cause:**
-Code used `argv.join(" ")` followed by `parse_single_instruction()`, destroying the shell's tokenization.
+Code used `argv.join(" ")` followed by `parse_repl_input()`, destroying the shell's tokenization.
 
 **Fix:**
 Changed to `parse_from_argv(&argv)`, preserving shell tokenization.
@@ -288,7 +288,7 @@ Changed to `parse_from_argv(&argv)`, preserving shell tokenization.
 When integrating unilang_parser into a CLI application:
 
 - [ ] Are you receiving arguments from the shell (`std ::env ::args()`)?
-- [ ] Are you using `parse_from_argv(&argv)` (NOT `parse_single_instruction`)?
+- [ ] Are you using `parse_from_argv(&argv)` (NOT `parse_repl_input`)?
 - [ ] Are you avoiding `argv.join(" ")` or similar string concatenation?
 - [ ] Have you tested with arguments containing spaces (e.g., `--name "foo bar"`)?
 - [ ] Have you verified quote handling is preserved end-to-end?
@@ -298,7 +298,7 @@ When integrating unilang_parser into a CLI application:
 ## Related Documentation
 
 - [Task 086: Prevent Argv Misuse Pitfall](../task/086_prevent_argv_misuse_pitfall.md) - Original task specification
-- [Parser Engine Source](../src/parser_engine.rs) - Implementation of parse_from_argv() and parse_single_instruction()
+- [Parser Engine Source](../src/parser_engine.rs) - Implementation of parse_from_argv() and parse_repl_input()
 - [Argv Multiword Bug Test](../tests/argv_multiword_bug_test.rs) - Regression test for this pitfall
 
 ---
@@ -310,4 +310,4 @@ If you're unsure which method to use, ask yourself:
 **"Has the input already been tokenized by something else (like the shell)?"**
 
 - **YES** → Use `parse_from_argv()` (don't re-tokenize)
-- **NO** → Use `parse_single_instruction()` (needs tokenization)
+- **NO** → Use `parse_repl_input()` (needs tokenization)

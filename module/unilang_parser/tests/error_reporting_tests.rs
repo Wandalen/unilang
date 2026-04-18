@@ -44,7 +44,7 @@ fn error_invalid_escape_sequence_location_str()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = r#"cmd arg1 "value with \x invalid escape""#;
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
 
   assert!(
   result.is_ok(),
@@ -67,7 +67,7 @@ fn error_unexpected_delimiter_location_str()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = r"cmd ::arg2";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
 
   assert!(
   result.is_ok(),
@@ -154,7 +154,7 @@ fn missing_value_for_named_arg()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd name :: ";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_err(),
   "Expected error for missing value for named arg, input: '{input}'"
@@ -180,7 +180,7 @@ fn unexpected_colon_colon_no_name()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd ::value";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_ok(),
   "Named-only args should parse successfully (spec.md:173), input: '{}', error: {:?}",
@@ -200,7 +200,7 @@ fn unexpected_colon_colon_after_value()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd name ::val1 ::val2";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(result.is_err(), "Expected error for 'name ::val1 ::val2', input: '{input}'");
   let err = result.unwrap_err();
   assert_eq!(
@@ -219,7 +219,7 @@ fn positional_after_named_error()
 {
   let parser = Parser ::new(options_error_on_positional_after_named());
   let input = "cmd name ::val pos1";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_err(),
   "Expected error for positional after named, input: '{input}'"
@@ -240,7 +240,7 @@ fn unexpected_help_operator_middle()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd ? arg1";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(result.is_err(), "Expected error for '?' in middle, input: '{input}'");
   let err = result.unwrap_err();
   assert_eq!(
@@ -259,7 +259,7 @@ fn unexpected_token_in_args()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd arg1 ! badchar";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_err(),
   "Expected error for unexpected token '!', input: '{}', got: {:?}",

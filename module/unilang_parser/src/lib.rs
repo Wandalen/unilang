@@ -51,7 +51,7 @@ extern crate alloc;
 ///     let parser = Parser ::new(options);
 ///     let input = "my.command arg1 name ::value";
 ///
-///     let instruction = parser.parse_single_instruction(input)?;
+///     let instruction = parser.parse_repl_input(input)?;
 ///
 ///     println!("Command Path: {:?}", instruction.command_path_slices);
 ///     Ok(())
@@ -97,7 +97,7 @@ extern crate alloc;
 ///
 ///     // ❌ WRONG: Don't use split_whitespace() on shell argv!
 ///     // This breaks quote handling that the shell already performed
-///     let instruction = parser.parse_single_instruction(&joined)?;
+///     let instruction = parser.parse_repl_input(&joined)?;
 ///
 ///     Ok(())
 /// }
@@ -116,7 +116,7 @@ extern crate alloc;
 /// ### Rule of Thumb
 ///
 /// - **From shell (CLI app):** Use `parse_from_argv(&argv)` - shell already tokenized
-/// - **From string (embedded/scripting):** Use `parse_single_instruction(input)` - string needs parsing
+/// - **From string (embedded/scripting):** Use `parse_repl_input(input)` - string needs parsing
 pub mod config;
 /// Defines error types for the parser.
 pub mod error;
@@ -128,6 +128,8 @@ pub mod item_adapter;
 pub mod parser_engine;
 /// CLI parameter parsing convenience API.
 pub mod cli_parser;
+/// Input marker newtypes for type-safe parser entry points.
+pub mod argv_types;
 
 /// Prelude for commonly used items.
 pub mod prelude
@@ -138,6 +140,7 @@ pub mod prelude
   pub use super ::item_adapter :: *;
   pub use super ::parser_engine :: *;
   pub use super ::cli_parser :: *;
+  pub use super ::argv_types :: { ShellArgv, ReplInput };
 }
 
 pub use prelude :: *;

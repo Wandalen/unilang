@@ -24,7 +24,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   let input_single = "log.level severity :: \"debug\" message :: 'Hello, Unilang!' verbose :: true";
   println!( "   Input: {input_single}" );
 
-  let instruction = parser.parse_single_instruction( input_single )?;
+  let instruction = parser.parse_repl_input( input_single )?;
 
   println!( "   Command path: {:?}", instruction.command_path_slices );
   println!( "   Positional args: {:?}", instruction.positional_arguments );
@@ -90,7 +90,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Example 4 : Command path analysis
   println!( "\n4. Command Path Analysis: " );
-  let complex_path = parser.parse_single_instruction( "system.network.diagnostics.ping host :: \"example.com\" count :: 5" )?;
+  let complex_path = parser.parse_repl_input( "system.network.diagnostics.ping host :: \"example.com\" count :: 5" )?;
 
   println!( "   Full command path: {:?}", complex_path.command_path_slices );
   println!( "   Namespace: {:?}", &complex_path.command_path_slices[ ..complex_path.command_path_slices.len() - 1 ] );
@@ -108,7 +108,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   for help_cmd in help_examples
   {
   println!( "   Help command: {help_cmd}" );
-  let help_instruction = parser.parse_single_instruction( help_cmd )?;
+  let help_instruction = parser.parse_repl_input( help_cmd )?;
 
   println!( "     Command: {:?}", help_instruction.command_path_slices );
   println!( "     Help requested: {:?}", help_instruction.help_requested );

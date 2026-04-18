@@ -99,7 +99,7 @@ use unilang_parser::{ Parser, UnilangParserOptions };
 fn diagnostic_simple_named_arg_no_quotes()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( "cmd::value" );
+  let result = parser.parse_repl_input( "cmd::value" );
 
   match &result {
     Ok( inst ) => {
@@ -119,7 +119,7 @@ fn diagnostic_simple_named_arg_no_quotes()
 fn diagnostic_command_plus_named_arg()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".test arg::value" );
+  let result = parser.parse_repl_input( ".test arg::value" );
 
   match &result {
     Ok( inst ) => {
@@ -139,7 +139,7 @@ fn diagnostic_command_plus_named_arg()
 fn diagnostic_escaped_quotes_shows_same_bug()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( r#"cmd::"value with \"inner\" quotes""# );
+  let result = parser.parse_repl_input( r#"cmd::"value with \"inner\" quotes""# );
 
   match &result {
     Ok( inst ) => {
@@ -182,7 +182,7 @@ fn diagnostic_strs_tools_is_correct()
 fn test_named_arg_with_space_operator()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( "arg :: value" );
+  let result = parser.parse_repl_input( "arg :: value" );
 
   assert!( result.is_ok(), "Should parse named arg with space operator" );
   let inst = result.unwrap();
@@ -197,7 +197,7 @@ fn test_named_arg_with_space_operator()
 fn test_multiple_named_args_no_command()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( "arg1::val1 arg2::val2 arg3::val3" );
+  let result = parser.parse_repl_input( "arg1::val1 arg2::val2 arg3::val3" );
 
   assert!( result.is_ok(), "Should parse multiple named args without command" );
   let inst = result.unwrap();
@@ -214,7 +214,7 @@ fn test_multiple_named_args_no_command()
 fn test_named_arg_quoted_value()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( r#"path::"my file.txt""# );
+  let result = parser.parse_repl_input( r#"path::"my file.txt""# );
 
   assert!( result.is_ok(), "Should parse named arg with quoted value" );
   let inst = result.unwrap();
@@ -230,7 +230,7 @@ fn test_named_arg_quoted_value()
 fn test_named_arg_empty_value()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( r#"arg::"""# );
+  let result = parser.parse_repl_input( r#"arg::"""# );
 
   assert!( result.is_ok(), "Should parse named arg with empty quoted value" );
   let inst = result.unwrap();
@@ -244,7 +244,7 @@ fn test_named_arg_empty_value()
 fn test_dotted_path_plus_named()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".files.copy src::source.txt dst::dest.txt" );
+  let result = parser.parse_repl_input( ".files.copy src::source.txt dst::dest.txt" );
 
   assert!( result.is_ok(), "Should parse dotted path with named args" );
   let inst = result.unwrap();
@@ -261,7 +261,7 @@ fn test_api_path_consistency()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
   let result_argv = parser.parse_from_argv( &[ "arg::value".to_string() ] );
-  let result_direct = parser.parse_single_instruction( "arg::value" );
+  let result_direct = parser.parse_repl_input( "arg::value" );
 
   assert!( result_argv.is_ok(), "parse_from_argv should succeed" );
   assert!( result_direct.is_ok(), "parse_single_instruction should succeed" );
@@ -278,7 +278,7 @@ fn test_api_path_consistency()
 fn test_truly_orphaned_operator_errors()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( "::" );
+  let result = parser.parse_repl_input( "::" );
 
   assert!( result.is_err(), "Truly orphaned :: operator should produce error" );
   if let Err( e ) = result {
@@ -292,7 +292,7 @@ fn test_truly_orphaned_operator_errors()
 fn test_command_path_then_orphaned_operator()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let result = parser.parse_single_instruction( ".cmd ::" );
+  let result = parser.parse_repl_input( ".cmd ::" );
 
   assert!( result.is_err(), "Command path followed by orphaned :: should error" );
 }

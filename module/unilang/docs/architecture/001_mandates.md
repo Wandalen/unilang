@@ -1,22 +1,31 @@
-## Part II: Internal Design (Design Recommendations)
-*This part of the specification describes the recommended internal architecture and implementation strategies. These are best-practice starting points, and the development team has the flexibility to modify them as needed.*
+# Architecture: Mandates
 
-### 10. Architectural Mandates & Design Principles
+### Scope
+
+- **Purpose:** Define the architectural mandates, system diagrams, and crate responsibilities
+- **Responsibility:** Governing architectural decisions that all contributors must follow
+- **In Scope:** Architectural mandates, system diagrams, crate responsibility boundaries
+- **Out of Scope:** Feature requirements, API contracts, implementation specifics
+
+*This section describes the recommended internal architecture and implementation strategies. These are best-practice starting points, and the development team has the flexibility to modify them as needed.*
+
+### Architectural Mandates & Design Principles
 
 It is recommended that the `unilang` ecosystem adhere to the following principles:
 
-*   **Parser Independence:** The `unilang` core crate **should** delegate all command string parsing to the `unilang_parser` crate.
-*   **Zero-Overhead Static Registry:** To meet `NFR-PERF-1`, it is **strongly recommended** that the `CommandRegistry` be implemented using a hybrid model:
-    *   An **optimized static map**, generated at compile-time in `build.rs`, for all statically known commands. The implementation **must** be hidden behind the `StaticCommandMap` wrapper to prevent dependency leakage.
-    *   A standard `HashMap` for commands registered dynamically at runtime.
-    *   Lookups **should** check the static map first before falling back to the dynamic map.
-    *   Downstream crates **must not** require implementation-specific dependencies - the wrapper ensures complete encapsulation.
-    *   **Implementation detail:** See Appendix A for the compile-time optimization strategy.
-*   **`enabled` Feature Gate Mandate:** All framework crates **must** implement the `enabled` feature gate pattern. The entire crate's functionality, including its modules and dependencies, **should** be conditionally compiled using `#[cfg(feature = "enabled")]`. This is a critical mechanism for managing complex feature sets and dependencies within a Cargo workspace, allowing a crate to be effectively disabled even when it is listed as a non-optional dependency.
+- **Parser Independence:** The `unilang` core crate **should** delegate all command string parsing to the `unilang_parser` crate.
+- **Zero-Overhead Static Registry:** To meet `NFR-PERF-1`, it is **strongly recommended** that the `CommandRegistry` be implemented using a hybrid model:
+  - An **optimized static map**, generated at compile-time in `build.rs`, for all statically known commands. The implementation **must** be hidden behind the `StaticCommandMap` wrapper to prevent dependency leakage.
+  - A standard `HashMap` for commands registered dynamically at runtime.
+  - Lookups **should** check the static map first before falling back to the dynamic map.
+  - Downstream crates **must not** require implementation-specific dependencies — the wrapper ensures complete encapsulation.
+  - See `docs/architecture/004_implementation_details.md` for the compile-time optimization strategy.
+- **`enabled` Feature Gate Mandate:** All framework crates **must** implement the `enabled` feature gate pattern. The entire crate's functionality, including its modules and dependencies, **should** be conditionally compiled using `#[cfg(feature = "enabled")]`. This is a critical mechanism for managing complex feature sets and dependencies within a Cargo workspace, allowing a crate to be effectively disabled even when it is listed as a non-optional dependency.
 
-### 11. Architectural Diagrams
+### Architectural Diagrams
 
-#### 11.1. Use Case Diagram
+### Use Case Diagram
+
 ```mermaid
 graph TD
     subgraph Unilang Framework
@@ -40,7 +49,8 @@ graph TD
     actorEndUser --> UC6
 ```
 
-#### 11.2. System Context Diagram
+### System Context Diagram
+
 ```mermaid
 graph TD
     style Integrator fill:#fff,stroke:#333,stroke-width:2px
@@ -62,7 +72,8 @@ graph TD
     EndUser -- "Interacts with" --> Utility1
 ```
 
-#### 11.3. C4 Container Diagram
+### C4 Container Diagram
+
 ```mermaid
 C4Context
     title Container diagram for a 'utility1' Application
@@ -83,7 +94,8 @@ C4Context
     Rel(unilang_core, unilang_parser, "Uses for parsing")
 ```
 
-#### 11.4. High-Level Architecture (Hybrid Registry)
+### High-Level Architecture (Hybrid Registry)
+
 ```mermaid
 graph TD
     subgraph "Compile Time"
@@ -115,7 +127,8 @@ graph TD
     end
 ```
 
-#### 11.5. Sequence Diagram: Unified Processing Pipeline
+### Sequence Diagram: Unified Processing Pipeline
+
 ```mermaid
 sequenceDiagram
     actor User
@@ -145,10 +158,16 @@ sequenceDiagram
     CLI->>User: Displays "Result: 30"
 ```
 
-### 12. Crate-Specific Responsibilities
+### Crate-Specific Responsibilities
 
-*   **`unilang` (Core Framework):** Recommended to be the central orchestrator, implementing the `CommandRegistry`, `SemanticAnalyzer`, `Interpreter`, `Pipeline`, and all core data structures.
-*   **`unilang_parser` (Parser):** Recommended to be the dedicated lexical and syntactic analyzer. It should be stateless and have no knowledge of command definitions.
-*   **`unilang_meta` (Macros):** Recommended to provide procedural macros for a simplified, compile-time developer experience.
+- **`unilang` (Core Framework):** Recommended to be the central orchestrator, implementing the `CommandRegistry`, `SemanticAnalyzer`, `Interpreter`, `Pipeline`, and all core data structures.
+- **`unilang_parser` (Parser):** Recommended to be the dedicated lexical and syntactic analyzer. It should be stateless and have no knowledge of command definitions.
+- **`unilang_meta` (Macros):** Recommended to provide procedural macros for a simplified, compile-time developer experience.
 
----
+### Cross-References
+
+| Type | File | Responsibility |
+|------|------|----------------|
+| doc | [invariant/003_governing_principles.md](../invariant/003_governing_principles.md) | Principles that mandates enforce |
+| doc | [architecture/002_benchmark_separation.md](002_benchmark_separation.md) | Benchmark architecture mandate |
+| doc | [architecture/004_implementation_details.md](004_implementation_details.md) | Compile-time optimization strategy |

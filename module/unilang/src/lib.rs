@@ -227,6 +227,12 @@ mod_interface::mod_interface!
 /// ```
 pub use unilang_parser as parser;
 
+/// Re-export of input marker newtypes from `unilang_parser`.
+///
+/// Provides direct access to [`ShellArgv`] and [`ReplInput`] without requiring
+/// users to import from `unilang::parser::argv_types` directly.
+pub use unilang_parser ::{ ShellArgv, ReplInput };
+
 /// Re-export of PHF (Perfect Hash Function) types for generated code.
 ///
 /// # Purpose

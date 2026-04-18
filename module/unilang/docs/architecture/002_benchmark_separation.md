@@ -1,10 +1,17 @@
-# Benchmark Architecture - Separate Crate Design
+# Architecture: Benchmark Separation
 
-## Overview
+### Scope
+
+- **Purpose:** Document the rationale for keeping benchmarks in a separate crate
+- **Responsibility:** Explains why benchmark code is isolated from the main crate
+- **In Scope:** Benchmark separation rationale, dependency isolation, crate structure
+- **Out of Scope:** Benchmark implementation details, performance results
+
+### Overview
 
 Performance benchmarks for unilang are maintained in a separate workspace crate (`unilang_benchmarks`) rather than the main `unilang` crate. This architectural decision improves dependency isolation and production build performance.
 
-## Rationale
+### Rationale
 
 ### Dependency Isolation
 
@@ -38,7 +45,7 @@ Separation provides:
 - Easier benchmark infrastructure evolution
 - Clearer API surface for production users
 
-## Structure
+### Structure
 
 ```
 wTools/module/move/
@@ -60,7 +67,7 @@ wTools/module/move/
     └── Cargo.toml             # All benchmark dependencies
 ```
 
-## Usage
+### Usage
 
 ### Running Benchmarks
 
@@ -86,15 +93,21 @@ BENCHMARK_ENV=production cargo bench -p unilang_benchmarks
 
 The `unilang_benchmarks` crate imports `unilang` with `features = ["full"]` to access all functionality for comprehensive performance testing.
 
-## Migration Notes
+### Migration Notes
 
 - All benchmark code moved from `unilang/benches/` → `unilang_benchmarks/benches/`
 - Benchmark modules moved from `unilang/src/` → `unilang_benchmarks/src/`
 - Feature flags `benchmarks` and `advanced_benchmarks` removed from main crate
 - Documentation updated to reference separate benchmark crate
 
-## See Also
+### See Also
 
 - `unilang_benchmarks/readme.md` - Benchmark crate documentation
-- `docs/performance.md` - Performance characteristics guide
 - `docs/optimization_guide.md` - Optimization techniques
+
+### Cross-References
+
+| Type | File | Responsibility |
+|------|------|----------------|
+| doc | [architecture/001_mandates.md](001_mandates.md) | Broader architectural mandates |
+| doc | [invariant/002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs validated by benchmarks |

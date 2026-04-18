@@ -51,7 +51,7 @@ fn test_help_operator_shows_help_not_error()
 
   // Parse command with help operator
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".run_file ?" ).unwrap();
+  let instruction = parser.parse_repl_input( ".run_file ?" ).unwrap();
   
   // Verify help was requested
   assert!( instruction.help_requested, "Help operator should be detected" );
@@ -141,7 +141,7 @@ fn test_help_operator_with_multiple_required_args()
 
   // Parse command with help operator
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".files.copy ?" ).unwrap();
+  let instruction = parser.parse_repl_input( ".files.copy ?" ).unwrap();
   
   // Run semantic analysis
   let instructions = vec![instruction];
@@ -215,7 +215,7 @@ fn test_help_operator_takes_precedence_over_validation()
 
   // Parse command with help - no arguments provided
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( "set_port ?" ).unwrap();
+  let instruction = parser.parse_repl_input( "set_port ?" ).unwrap();
   
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -284,7 +284,7 @@ fn test_normal_command_without_help_operator_still_validates()
 
   // Parse command WITHOUT help operator
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( ".run_file" ).unwrap();
+  let instruction = parser.parse_repl_input( ".run_file" ).unwrap();
   
   assert!( !instruction.help_requested, "Help should not be requested" );
   

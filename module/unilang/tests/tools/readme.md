@@ -2,6 +2,21 @@
 
 This directory contains automated tools for validating and maintaining the systematic test organization standards defined in `../readme.md`.
 
+## Files
+
+| File | Responsibility |
+|------|----------------|
+| `test_organization_validator.rs` | Core validation library for test organization rules |
+| `validate_organization.rs` | CLI tool for running organization validation |
+| `assess_quality_cli.rs` | CLI tool for test quality assessment |
+| `quality_assessor.rs` | Quality assessment logic library |
+| `quality_monitor.sh` | Shell script: continuous quality monitoring |
+| `pre_commit_test_organization.sh` | Shell script: git pre-commit hook for test org |
+| `rollback_prevention_suite.sh` | Shell script: rollback prevention test suite |
+| `state_metrics_verification.sh` | Shell script: verify state metrics consistency |
+| `test_organization_ci.yml` | GitHub Actions workflow for CI validation |
+| `makefile.test_organization` | Makefile targets for test organization tasks |
+
 ## Tools Overview
 
 ### 1. `test_organization_validator.rs`

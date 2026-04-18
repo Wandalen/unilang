@@ -1,5 +1,5 @@
-//\! Integration tests Tests
-//\!
+//! Cross-Phase Integration Tests
+//!
 //\! ## Scope  
 //\! Tests for integration tests functionality
 //\!

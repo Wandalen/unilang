@@ -1,10 +1,19 @@
-# Unilang: Making It Easier to Use & Harder to Misuse
+# Analysis: Usability Improvements
 
-## Executive Summary
+### Scope
 
-Based on comprehensive analysis of 40+ examples and 3,000+ lines of framework code, here are **prioritized recommendations** to make Unilang easier to use correctly and nearly impossible to misuse.
+- **Purpose:** Document prioritized recommendations for improving API ergonomics and misuse prevention
+- **Responsibility:** Actionable summary of usability findings from comprehensive example analysis
+- **In Scope:** Boilerplate patterns, type safety gaps, builder ergonomics, error handling improvements
+- **Out of Scope:** Formal feature requirements (see feature/ instances), implementation details
 
-## Critical Issues (Fix First)
+---
+
+### Executive Summary
+
+Based on comprehensive analysis of 40+ examples and 3,000+ lines of framework code, here are prioritized recommendations to make Unilang easier to use correctly and nearly impossible to misuse.
+
+### Critical Issues (Fix First)
 
 ### 1. Boilerplate Explosion (90% of code affected)
 
@@ -16,7 +25,7 @@ let name = cmd.arguments.get("name")
   .unwrap_or(&default_name);
 ```
 
-**Impact:** 
+**Impact:**
 - 15+ instances across examples
 - Teaches bad patterns (silent type mismatches)
 - Developer frustration
@@ -42,7 +51,7 @@ impl VerifiedCommand {
   pub fn get_bool(&self, name: &str) -> Option<bool> { ... }
   pub fn get_integer(&self, name: &str) -> Option<i64> { ... }
   pub fn get_float(&self, name: &str) -> Option<f64> { ... }
-  
+
   pub fn require_string(&self, name: &str) -> Result<&str, Error> { ... }
   pub fn require_bool(&self, name: &str) -> Result<bool, Error> { ... }
   // etc.
@@ -131,7 +140,7 @@ pub fn build(self) -> CommandRegistry  // Keeps backwards compat
 pub fn build_checked(self) -> Result<CommandRegistry, ValidationErrors>
 ```
 
-**Or even better - fail at registration time:**
+**Or even better — fail at registration time:**
 ```rust
 pub fn command_with_routine(
   self,
@@ -145,7 +154,7 @@ pub fn command_with_routine(
 
 ---
 
-## High Priority Improvements
+### High Priority Improvements
 
 ### 4. String-Based Error Codes
 
@@ -226,7 +235,7 @@ impl OutputData {
   pub fn text(content: impl Into<String>) -> Self {
     Self { content: content.into(), format: "text".to_string() }
   }
-  
+
   pub fn json(value: &impl Serialize) -> Result<Self, serde_json::Error> {
     Ok(Self {
       content: serde_json::to_string_pretty(value)?,
@@ -241,7 +250,7 @@ Ok(OutputData::text(format!("Hello {}", name)))
 
 ---
 
-## Medium Priority Improvements
+### Medium Priority Improvements
 
 ### 7. Builder String Conversion Spam
 
@@ -319,7 +328,7 @@ if let Some(cmd) = registry.command(".greet") {
 
 ---
 
-## Low Priority (But Still Valuable)
+### Low Priority (But Still Valuable)
 
 ### 10. CommandDefinition Default Pollution
 
@@ -404,7 +413,7 @@ ArgumentDefinition::builder()
 
 ---
 
-## Implementation Priority
+### Implementation Priority
 
 ### Phase 1: Critical Fixes (1-2 weeks)
 1. ✅ Add typed extraction helpers to VerifiedCommand
@@ -428,7 +437,7 @@ ArgumentDefinition::builder()
 
 ---
 
-## Root Cause Analysis
+### Root Cause Analysis
 
 The main issues stem from:
 
@@ -439,7 +448,7 @@ The main issues stem from:
 
 ---
 
-## Success Metrics
+### Success Metrics
 
 After implementing these improvements:
 
@@ -450,19 +459,11 @@ After implementing these improvements:
 - ✅ API guides users toward correct usage
 - ✅ Misuse becomes difficult or impossible
 
----
+### Cross-References
 
-## Files Created
-
-1. `unilang_api_analysis.md` - Full 607-line analysis
-2. `ANALYSIS_INDEX.md` - Navigation guide
-3. `USABILITY_IMPROVEMENTS.md` - This actionable summary
-
-## Next Steps
-
-1. Review with team
-2. Prioritize based on bandwidth
-3. Start with Phase 1 (critical fixes)
-4. Update examples as API changes
-5. Monitor user feedback
-
+| Type | File | Responsibility |
+|------|------|----------------|
+| doc | [analysis/001_api_analysis.md](001_api_analysis.md) | Detailed API analysis backing these recommendations |
+| doc | [feature/001_command_registry.md](../feature/001_command_registry.md) | Registry requirements relevant to builder issues |
+| doc | [feature/002_argument_system.md](../feature/002_argument_system.md) | Argument system requirements relevant to type safety |
+| doc | [feature/005_repl_interactive.md](../feature/005_repl_interactive.md) | Interactive argument handling requirements |

@@ -14,7 +14,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // T4.1: Empty Quoted Command Values - should parse but task claims it fails
-        let result = parser.parse_single_instruction(r#".test content::"""#);
+        let result = parser.parse_repl_input(r#".test content::"""#);
 
         assert!(result.is_ok(), "Empty quoted values should parse successfully: {result:?}");
 
@@ -31,7 +31,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // T4.2: Whitespace-Only Values - should preserve whitespace
-        let result = parser.parse_single_instruction(r#".test content::"   ""#);
+        let result = parser.parse_repl_input(r#".test content::"   ""#);
 
         assert!(result.is_ok(), "Whitespace-only values should be preserved: {result:?}");
 
@@ -48,7 +48,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // T4.3: Escape Sequences - should handle escaped quotes
-        let result = parser.parse_single_instruction(r#".test content::"test with \"quotes\"""#);
+        let result = parser.parse_repl_input(r#".test content::"test with \"quotes\"""#);
 
         assert!(result.is_ok(), "Escape sequences should be processed correctly: {result:?}");
 
@@ -87,7 +87,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // Test mixing empty and non-empty values
-        let result = parser.parse_single_instruction(r#".test empty::"" full::"content" whitespace::"   ""#);
+        let result = parser.parse_repl_input(r#".test empty::"" full::"content" whitespace::"   ""#);
 
         assert!(result.is_ok(), "Mixed empty and non-empty values should work: {result:?}");
 
@@ -106,7 +106,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // Test various escape sequences
-        let result = parser.parse_single_instruction(r#".test newline::"line1\nline2" tab::"col1\tcol2" quote::"say \"hello\"""#);
+        let result = parser.parse_repl_input(r#".test newline::"line1\nline2" tab::"col1\tcol2" quote::"say \"hello\"""#);
 
         assert!(result.is_ok(), "Complex escape sequences should work: {result:?}");
 
@@ -125,7 +125,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // Test Unicode content mixed with empty values
-        let result = parser.parse_single_instruction(r#".test unicode::"🚀 test" empty::"" ascii::"hello""#);
+        let result = parser.parse_repl_input(r#".test unicode::"🚀 test" empty::"" ascii::"hello""#);
 
         assert!(result.is_ok(), "Unicode with empty values should work: {result:?}");
 
@@ -144,7 +144,7 @@ mod task_026_empty_value_mre {
         let parser = Parser::new(UnilangParserOptions::default());
 
         // Test quoted strings containing operators
-        let result = parser.parse_single_instruction(r#".test operators::"key::value" empty::"" special::"a::b::c""#);
+        let result = parser.parse_repl_input(r#".test operators::"key::value" empty::"" special::"a::b::c""#);
 
         assert!(result.is_ok(), "Quoted operators should be preserved: {result:?}");
 

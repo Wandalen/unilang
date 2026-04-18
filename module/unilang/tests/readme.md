@@ -96,6 +96,12 @@ Each domain directory contains **all test types** relevant to that domain:
 - Each test file should have a module doc comment explaining its scope
 - Tests should be grouped logically within files using mod blocks if needed
 
+## Support Files
+
+| File | Responsibility |
+|------|----------------|
+| `doc_test_status.md` | Doc test enablement tracking: current pass/fail/ignore state |
+
 ## Manual Testing
 
 See `manual/readme.md` for manual testing procedures and organization.

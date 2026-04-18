@@ -16,6 +16,7 @@ Define your command-line utility interface once and get consistent interaction a
 """
 categories = [ "command-line-interface", "command-line-utilities" ]
 keywords = [ "wtools", "CLI", "CUI", "user-interface" ]
+build = "build/main.rs"
 dependencies = {}
 dev-dependencies = {}
 build-dependencies = {}

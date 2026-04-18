@@ -169,7 +169,7 @@ fn main() -> Result< (), Box< dyn core::error::Error > >
     println!( "🧪 Testing: {input}" );
     println!( "   Expected: {expected_error}" );
     
-    match parser.parse_single_instruction( input )
+    match parser.parse_repl_input( input )
     {
       Ok( instruction ) =>
       {
@@ -210,7 +210,7 @@ fn main() -> Result< (), Box< dyn core::error::Error > >
   println!( "🔄 Error Recovery Example:" );
   let problematic_input = "test.validate age::invalid email::test@example.com";
   
-  match parser.parse_single_instruction( problematic_input )
+  match parser.parse_repl_input( problematic_input )
   {
     Ok( instruction ) =>
     {

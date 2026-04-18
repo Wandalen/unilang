@@ -38,7 +38,7 @@ fn multi_segment_command_path_parsed()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd subcmd another";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_ok(),
   "parse_single_instruction failed for input '{}' : {:?}",
@@ -58,7 +58,7 @@ fn multi_segment_command_path_parsed()
 fn command_with_help_operator_parsed() 
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let result = parser.parse_single_instruction("cmd ?");
+  let result = parser.parse_repl_input("cmd ?");
   assert!(result.is_ok(), "parse_single_instruction failed: {:?}", result.err());
   let instruction = result.unwrap();
   assert_eq!(instruction.command_path_slices, vec!["cmd".to_string()]);
@@ -74,7 +74,7 @@ fn command_with_help_operator_and_multi_segment_path()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd sub ?";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(
   result.is_ok(),
   "parse_single_instruction failed for input '{}' : {:?}",
@@ -94,7 +94,7 @@ fn command_with_help_operator_and_multi_segment_path()
 fn only_help_operator() 
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let result = parser.parse_single_instruction("?");
+  let result = parser.parse_repl_input("?");
   assert!(result.is_ok(), "parse_single_instruction failed for '?' : {:?}", result.err());
   let instruction = result.unwrap();
   assert!(instruction.command_path_slices.is_empty());
@@ -207,7 +207,7 @@ fn path_stops_at_double_colon_delimiter()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd path arg ::val";
-  let result = parser.parse_single_instruction(input);
+  let result = parser.parse_repl_input(input);
   assert!(result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err());
   let instruction = result.unwrap();
   assert_eq!(instruction.command_path_slices, vec!["cmd".to_string()]);

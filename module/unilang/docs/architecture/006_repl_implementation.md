@@ -1,13 +1,20 @@
-# REPL Feature Specification
+# Architecture: REPL Implementation
 
-## Overview
+### Scope
+
+- **Purpose:** Document the REPL feature implementation: feature flags, configuration, and usage patterns
+- **Responsibility:** How to enable and configure REPL, integration patterns, feature combinations
+- **In Scope:** Feature flag configuration, usage examples, REPL implementation guide
+- **Out of Scope:** REPL behavioral requirements (see feature/005_repl_interactive.md)
+
+### Overview
 
 The Unilang REPL functionality is organized into two feature levels:
 
 1. **`repl`** - Base REPL functionality with standard input/output
 2. **`enhanced_repl`** - Advanced REPL with arrow keys, command history, and tab completion
 
-## Feature Dependencies
+### Feature Dependencies
 
 ```
 enhanced_repl
@@ -19,7 +26,7 @@ repl
 └── (no dependencies - uses std::io only)
 ```
 
-## Feature Combinations & Behavior
+### Feature Combinations & Behavior
 
 | Features Enabled | Behavior | Arrow Keys | Command History | Tab Completion |
 |------------------|----------|------------|-----------------|----------------|
@@ -32,7 +39,7 @@ repl
 - **`enhanced_repl` without `repl`** is equivalent to **neither feature enabled** (shows error)
 - **Default configuration** includes both `repl` and `enhanced_repl`
 
-## Default Features
+### Default Features
 
 ```toml
 default = [ "enabled", "simd", "repl", "enhanced_repl" ]
@@ -43,7 +50,7 @@ This means running without explicit features gets the full enhanced experience:
 cargo run --example 15_interactive_repl_mode  # Uses enhanced REPL by default
 ```
 
-## Usage Examples
+### Usage Examples
 
 ### 1. Enhanced REPL (Default)
 ```bash
@@ -93,7 +100,7 @@ Available options:
 💡 The 'enhanced_repl' feature adds arrow keys, history, and tab completion
 ```
 
-## Implementation Details
+### Implementation Details
 
 ### Conditional Compilation
 
@@ -103,10 +110,10 @@ The example uses conditional compilation to handle different feature combination
 #[cfg(feature = "repl")]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // REPL functionality when repl feature is enabled
-    
+
     #[cfg(feature = "enhanced_repl")]
     run_enhanced_repl(&pipeline)?;
-    
+
     #[cfg(all(feature = "repl", not(feature = "enhanced_repl")))]
     run_basic_repl(&pipeline)?;
 }
@@ -127,19 +134,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Dependency Management
 
-#### Enhanced REPL Dependencies
+**Enhanced REPL Dependencies:**
 ```toml
 rustyline = { version = "14.0", optional = true }
 atty = { version = "0.2", optional = true }
 ```
 
-#### Feature Definitions
+**Feature Definitions:**
 ```toml
 repl = []  # Base feature, no dependencies
 enhanced_repl = [ "repl", "dep:rustyline", "dep:atty" ]
 ```
-
-## Arrow Key Functionality
 
 ### How Arrow Keys Work
 
@@ -173,25 +178,6 @@ When **`enhanced_repl`** feature is enabled:
 
 The REPL automatically detects the environment and provides appropriate guidance.
 
-### TTY Detection
-
-```rust
-let is_tty = std::io::stdin().is_terminal();
-
-if is_tty {
-    println!("💡 Arrow Key Usage:");
-    println!("  • Enter some commands first");
-    println!("  • Then use ↑ to go back through history");
-    // ...
-} else {
-    println!("⚠️  Note: Arrow keys only work in interactive terminals");
-    println!("   Current session: Non-interactive (piped input detected)");
-    println!("   For arrow key support, run directly in terminal");
-}
-```
-
-## History Management
-
 ### Enhanced REPL History
 - **Storage**: Handled by `rustyline` internally
 - **Navigation**: ↑/↓ arrow keys
@@ -210,7 +196,7 @@ if is_tty {
 - `quit`, `exit`, `q`
 - Empty input
 
-## Error Handling
+### Error Handling
 
 ### Feature-Specific Error Handling
 
@@ -223,13 +209,13 @@ if is_tty {
 All REPL modes support interactive argument detection and secure input prompting:
 
 ```rust
-if error.contains("UNILANG_ARGUMENT_INTERACTIVE_REQUIRED") || 
+if error.contains("UNILANG_ARGUMENT_INTERACTIVE_REQUIRED") ||
    error.contains("Interactive Argument Required") {
     // Handle secure input prompting
 }
 ```
 
-## REPL Implementation Performance Analysis
+### REPL Implementation Performance Analysis
 
 ### Enhanced REPL
 - **Memory**: Higher due to rustyline dependencies
@@ -243,7 +229,7 @@ if error.contains("UNILANG_ARGUMENT_INTERACTIVE_REQUIRED") ||
 - **Runtime**: Minimal overhead
 - **User Experience**: Functional but basic
 
-## Testing
+### Testing
 
 ### Feature Combination Tests
 
@@ -281,7 +267,7 @@ help
 # Edit and press Enter to execute
 ```
 
-## Migration Guide
+### Migration Guide
 
 ### From Old Implementation
 If you have existing code using the old feature structure:
@@ -303,7 +289,7 @@ For environments where enhanced features aren't needed:
 cargo build --example 15_interactive_repl_mode --no-default-features --features enabled,repl
 ```
 
-## Future Enhancements
+### Future Enhancements
 
 Possible future improvements:
 
@@ -313,6 +299,13 @@ Possible future improvements:
 4. **Syntax Highlighting**: Real-time command syntax highlighting
 5. **Multi-line Input**: Support for complex multi-line commands
 
-## Summary
+### Summary
 
 The REPL feature system provides a clean separation between basic functionality (`repl`) and enhanced user experience (`enhanced_repl`), with sensible defaults that provide the best experience while allowing minimal configurations when needed.
+
+### Cross-References
+
+| Type | File | Responsibility |
+|------|------|----------------|
+| doc | [feature/005_repl_interactive.md](../feature/005_repl_interactive.md) | FR-REPL-* requirements this implements |
+| doc | [architecture/003_vision_scope.md](003_vision_scope.md) | REPL as a supported modality |

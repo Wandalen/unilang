@@ -10,6 +10,17 @@
 
 See [Detailed Findings](./-findings.md) for technical analysis.
 
+## Files
+
+| File | Responsibility |
+|------|----------------|
+| `test_arrow_keys_manual.rs` | Manual REPL arrow key and cursor navigation tests |
+| `manual_test_complex_generics.rs` | Manual test for complex generic type parameters |
+| `manual_test_documentation_examples.rs` | Manual test for documentation example snippets |
+| `manual_test_edge_cases.rs` | Manual test for edge cases and error conditions |
+| `manual_test_ordered_types.rs` | Manual test for PHF ordered type collections |
+| `manual_test_wildcard_import.rs` | Manual test for wildcard import pattern behavior |
+
 ## Overview
 
 This directory contains manual testing procedures for the Unilang framework. Manual testing is essential for validating user experience aspects that automated tests cannot fully capture.

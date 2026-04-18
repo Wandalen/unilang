@@ -132,7 +132,7 @@ fn parse_and_analyze_instruction( registry: &CommandRegistry ) -> Vec< VerifiedC
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".process_files file::"data.json" file::"config.yaml" file::"output.txt" format::"xml""#;
 
-  let instruction = parser.parse_single_instruction( input )
+  let instruction = parser.parse_repl_input( input )
     .expect( "Failed to parse multiple parameter input" );
   let instructions = vec![ instruction ];
 
@@ -288,7 +288,7 @@ fn test_backward_compatibility_single_parameter_integration()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".single_file file::"data.json""#;
 
-  let instruction = parser.parse_single_instruction( input )
+  let instruction = parser.parse_repl_input( input )
     .expect( "Failed to parse single parameter input" );
   let instructions = vec![ instruction ];
 
@@ -398,7 +398,7 @@ fn test_quote_handling_integration()
   // Test complex quoted values with spaces and special characters
   let input = r#".quote_test command::"echo 'hello world'" command::"cargo test --verbose" command::"find . -name '*.rs'"#;
 
-  let instruction = parser.parse_single_instruction( input )
+  let instruction = parser.parse_repl_input( input )
     .expect( "Failed to parse quoted parameters" );
   let instructions = vec![ instruction ];
 
@@ -528,7 +528,7 @@ fn test_multiple_parameter_performance()
   // Run the complete pipeline 10 times to measure performance
   for _ in 0..10
   {
-    let instruction = parser.parse_single_instruction( &input )
+    let instruction = parser.parse_repl_input( &input )
       .expect( "Failed to parse performance test input" );
     let instructions = vec![ instruction ];
 

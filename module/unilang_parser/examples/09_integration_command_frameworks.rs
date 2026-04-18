@@ -144,7 +144,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   {
   println!( "{}. Command: '{}'", i + 1, cmd_str );
 
-  match parser.parse_single_instruction( cmd_str )
+  match parser.parse_repl_input( cmd_str )
   {
    Ok( instruction ) =>
    {
@@ -204,7 +204,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   println!( "\n=== Advanced Integration Patterns ===" );
 
   // Pattern 1 : Command validation before execution
-  let validation_cmd = parser.parse_single_instruction( "user.create name :: \"\" email ::invalid-email" )?;
+  let validation_cmd = parser.parse_repl_input( "user.create name :: \"\" email ::invalid-email" )?;
   let app_cmd = convert_instruction( validation_cmd );
 
   println!( "Validating command before execution: " );
@@ -233,7 +233,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
  }
  };
 
-  let aliased_cmd = parser.parse_single_instruction( "u.c name ::bob email ::bob@test.com" )?;
+  let aliased_cmd = parser.parse_repl_input( "u.c name ::bob email ::bob@test.com" )?;
   let mut app_cmd = convert_instruction( aliased_cmd );
   app_cmd.name = alias_mapping( &app_cmd.name );
 

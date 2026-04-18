@@ -55,7 +55,7 @@ fn create_binding_test_command( name : &str, arguments : Vec< ArgumentDefinition
 fn parse_and_bind( registry : &CommandRegistry, input : &str ) -> Result< Vec< VerifiedCommand >, String >
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_single_instruction( input )
+  let instruction = parser.parse_repl_input( input )
     .map_err( |e| format!( "Parse error: {e:?}" ) )?;
 
   let instructions_array = [instruction];

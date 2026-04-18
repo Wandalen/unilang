@@ -13,7 +13,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Complex escaping scenarios
   println!( "=== Complex Escape Sequences ===" );
-  let cmd = parser.parse_single_instruction
+  let cmd = parser.parse_repl_input
   (
   r#"log.message text :: "Line 1\nLine 2\tTabbed" pattern :: "\\d+\\.\\d+""#
  )?;
@@ -34,7 +34,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // JSON-like content with escaping
   println!( "\n=== JSON Content with Escaping ===" );
-  let cmd2 = parser.parse_single_instruction
+  let cmd2 = parser.parse_repl_input
   (
   r#"api.send payload :: "{\"name\" : \"John Doe\", \"age\" : 30, \"city\" : \"New\\York\"}" content_type :: "application/json""#
  )?;
@@ -46,7 +46,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // File paths with spaces and special characters
   println!( "\n=== File Paths with Special Characters ===" );
-  let cmd3 = parser.parse_single_instruction
+  let cmd3 = parser.parse_repl_input
   (
   r#"file.process input :: "/path/with spaces/file(1).txt" output :: "/backup/file_copy.txt""#
  )?;
@@ -56,7 +56,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Mixed single and double quotes
   println!( "\n=== Mixed Quote Types ===" );
-  let cmd4 = parser.parse_single_instruction
+  let cmd4 = parser.parse_repl_input
   (
   r#"script.run command :: 'echo "Hello World"' timeout :: 30"#
  )?;
@@ -65,7 +65,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // SQL with complex escaping
   println!( "\n=== SQL with Complex Escaping ===" );
-  let cmd5 = parser.parse_single_instruction
+  let cmd5 = parser.parse_repl_input
   (
   r#"db.query sql :: "SELECT * FROM users WHERE name LIKE '%O\'Reilly%' AND status = \"active\"" limit :: 100"#
  )?;

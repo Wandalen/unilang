@@ -23,7 +23,7 @@ fn test_basic_named_argument_parsing()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test name::"value""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.command_path_slices, vec![ "test" ] );
   assert_eq!( instruction.named_arguments.len(), 1 );
@@ -39,7 +39,7 @@ fn test_multiple_named_arguments()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test first::"value1" second::"value2" third::"value3""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.named_arguments.len(), 3 );
 
@@ -59,7 +59,7 @@ fn test_positional_argument_parsing()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test "arg1" "arg2" "arg3""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.positional_arguments.len(), 3 );
   assert_eq!( instruction.positional_arguments[0].value, "arg1" );
@@ -73,7 +73,7 @@ fn test_mixed_positional_and_named_arguments()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test "pos1" name::"named_value" "pos2""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.positional_arguments.len(), 2 );
   assert_eq!( instruction.positional_arguments[0].value, "pos1" );
@@ -90,7 +90,7 @@ fn test_same_name_multiple_arguments()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test param::"value1" param::"value2" param::"value3""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.named_arguments.len(), 1 );
   let param_args = instruction.named_arguments.get( "param" ).expect( "param should exist" );
@@ -106,15 +106,15 @@ fn test_command_path_parsing()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Test simple command
-  let instruction1 = parser.parse_single_instruction( ".test" ).expect( "Should parse" );
+  let instruction1 = parser.parse_repl_input( ".test" ).expect( "Should parse" );
   assert_eq!( instruction1.command_path_slices, vec![ "test" ] );
 
   // Test namespaced command
-  let instruction2 = parser.parse_single_instruction( ".video.search" ).expect( "Should parse" );
+  let instruction2 = parser.parse_repl_input( ".video.search" ).expect( "Should parse" );
   assert_eq!( instruction2.command_path_slices, vec![ "video", "search" ] );
 
   // Test deeply nested command
-  let instruction3 = parser.parse_single_instruction( ".level1.level2.level3.command" ).expect( "Should parse" );
+  let instruction3 = parser.parse_repl_input( ".level1.level2.level3.command" ).expect( "Should parse" );
   assert_eq!( instruction3.command_path_slices, vec![ "level1", "level2", "level3", "command" ] );
 }
 
@@ -124,7 +124,7 @@ fn test_help_operator_parsing()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = ".test ?";
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.command_path_slices, vec![ "test" ] );
   assert!( instruction.help_requested, "Help should be requested" );
@@ -136,7 +136,7 @@ fn test_empty_command_parsing()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = ".";
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert!( instruction.command_path_slices.is_empty(), "Command path should be empty for dot command" );
 }
@@ -147,7 +147,7 @@ fn test_argument_without_quotes()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = ".test param::value";
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   let param_args = instruction.named_arguments.get( "param" ).expect( "param should exist" );
   assert_eq!( param_args[0].value, "value" );
@@ -159,7 +159,7 @@ fn test_complex_values_with_special_characters()
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".test url::"https://example.com/path?param=value&other=data" regex::"[a-zA-Z0-9]+""#;
 
-  let instruction = parser.parse_single_instruction( input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   let url_args = instruction.named_arguments.get( "url" ).expect( "url should exist" );
   assert_eq!( url_args[0].value, "https://example.com/path?param=value&other=data" );
@@ -181,7 +181,7 @@ fn test_performance_with_large_input()
   }
   let input = input_parts.join( " " );
 
-  let instruction = parser.parse_single_instruction( &input ).expect( "Should parse successfully" );
+  let instruction = parser.parse_repl_input( &input ).expect( "Should parse successfully" );
 
   // Performance check - 100 arguments should parse within reasonable time (debug build allowance)
 
@@ -205,7 +205,7 @@ fn test_malformed_input_handling()
   ];
 
   for input in malformed_inputs {
-    let result = parser.parse_single_instruction( input );
+    let result = parser.parse_repl_input( input );
     // The exact behavior depends on parser implementation
     // We just ensure it doesn't panic and handles errors gracefully
     match result {

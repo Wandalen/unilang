@@ -262,7 +262,7 @@ impl MultiYamlAggregator
   pub fn generate_static_registry_source( &self ) -> String
   {
     let mut source_code = String::new();
-    source_code.push_str( "use unilang::phf::{phf_map, Map};\n" );
+    source_code.push_str( "use unilang::phf::{self, Map};\n" );
     source_code.push_str( "use unilang::static_data::{StaticCommandDefinition, StaticArgumentDefinition, StaticArgumentAttributes, StaticKind};\n\n" );
 
     // Generate each command
@@ -329,7 +329,7 @@ impl MultiYamlAggregator
     }
 
     // Generate optimized static map
-    source_code.push_str( "pub static AGGREGATED_COMMANDS: Map<&'static str, &'static StaticCommandDefinition> = phf_map! {\n" );
+    source_code.push_str( "pub static AGGREGATED_COMMANDS: Map<&'static str, &'static StaticCommandDefinition> = phf::phf_map! {\n" );
     for cmd_name in self.commands.keys()
     {
       let const_name = format!(

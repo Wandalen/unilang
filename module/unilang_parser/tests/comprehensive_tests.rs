@@ -56,7 +56,7 @@ fn ct1_1_single_str_single_path_unquoted_pos_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd val";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.1 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ], "CT1.1 Path" ); // Corrected expectation
@@ -77,7 +77,7 @@ fn ct1_2_single_str_multi_path_unquoted_named_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "path1 path2 name1 ::val1";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.2 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "path1".to_string() ], "CT1.2 Path" ); // Corrected expectation
@@ -100,7 +100,7 @@ fn ct1_3_single_str_single_path_help_no_args()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.3 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ], "CT1.3 Path" );
@@ -116,7 +116,7 @@ fn ct1_4_single_str_single_path_quoted_pos_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd \"quoted val\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.4 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ], "CT1.4 Path" );
@@ -137,7 +137,7 @@ fn ct1_5_single_str_single_path_named_arg_escaped_val()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name1 :: \"esc\\nval\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.5 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ], "CT1.5 Path" );
@@ -155,7 +155,7 @@ fn ct1_6_single_str_single_path_named_arg_invalid_escape()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name1 :: \"bad\\xval\"";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_ok(),
   "CT1.6 Expected Ok for invalid escape, got Err: {:?}",
@@ -213,7 +213,7 @@ fn ct4_1_single_str_duplicate_named_error()
 {
   let parser = Parser ::new( options_error_on_duplicate_named() );
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "CT4.1 Expected error for duplicate named, got Ok: {:?}",
@@ -244,7 +244,7 @@ fn ct4_2_single_str_duplicate_named_last_wins()
   ..Default ::default()
  }); // Explicitly set to false
   let input = "cmd name ::val1 name ::val2";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT4.2 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
@@ -265,7 +265,7 @@ fn ct5_1_single_str_no_path_named_arg_only()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "name ::val";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_ok(),
   "CT5.1 Named-only args should parse successfully (spec.md:173), got error: {:?}",
@@ -284,7 +284,7 @@ fn ct6_1_command_path_with_dots_and_slashes()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd.sub.path arg1 name ::val"; // Changed input to use only dots for path
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT6.1 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!(
@@ -314,7 +314,7 @@ fn sa1_1_root_namespace_list()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = ".";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "SA1.1 Parse error for '.' : {:?}", result.err() );
   let instruction = result.unwrap();
   assert!(
@@ -339,7 +339,7 @@ fn sa1_2_root_namespace_help()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = ". ?";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "SA1.2 Parse error for '. ?' : {:?}", result.err() );
   let instruction = result.unwrap();
   // Expecting path to be empty, no positional args, and help requested.
@@ -362,7 +362,7 @@ fn sa2_1_whole_line_comment()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "# this is a whole line comment";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "SA2.1 Expected error for whole line comment, got Ok: {:?}",
@@ -389,7 +389,7 @@ fn sa2_2_comment_only_line()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "#";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "SA2.2 Expected error for '#' only line, got Ok: {:?}",
@@ -416,7 +416,7 @@ fn sa2_3_inline_comment_attempt()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd arg1 # inline comment";
-  let result = parser.parse_single_instruction( input );
+  let result = parser.parse_repl_input( input );
   assert!(
   result.is_err(),
   "SA2.3 Expected error for inline '#', got Ok: {:?}",
@@ -434,4 +434,18 @@ fn sa2_3_inline_comment_attempt()
    "SA2.3 Error message mismatch: {e}"
  ); // Changed message
  }
+}
+
+// TDD Phase 1 — written BEFORE parse_repl_input is implemented (RED)
+#[ test ]
+fn parse_repl_input_exists_and_delegates_to_string_parser()
+{
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let result_old = parser.parse_repl_input( ".cmd key::val" );
+  let result_new = parser.parse_repl_input( ".cmd key::val" );
+  assert_eq!(
+    result_old.is_ok(),
+    result_new.is_ok(),
+    "parse_repl_input must delegate identically to parse_single_instruction"
+  );
 }

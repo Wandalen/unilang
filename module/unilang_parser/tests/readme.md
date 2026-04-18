@@ -25,6 +25,7 @@ tests/
 ├── tests.rs                            # General test infrastructure
 ├── underscore_command_test.rs          # Underscore in command names
 │
+├── argv_types.rs                       # ShellArgv and ReplInput marker type tests
 ├── argv_multiword_bug_test.rs          # Argv handling edge cases (bug reproduction)
 ├── diagnostic_real_bug.rs              # ISSUE-CMD-PATH: Command path lookahead (diagnostic + comprehensive)
 ├── issue_084_mre.rs                    # Issue 084: Quote handling (MRE + comprehensive)
@@ -45,7 +46,8 @@ Tests are organized into these functional domains:
 | **Error Handling** | `error_reporting_tests.rs` | Error messages, source location tracking, error clarity |
 | **Parser Configuration** | `parser_config_entry_tests.rs` | Parser options, configuration settings |
 | **Spec Compliance** | `spec_adherence_tests.rs` | Verification against language specification |
-| **Argv Integration** | `argv_multiword_bug_test.rs` | Shell argv parsing and reconstruction |
+| **Argv Integration** | `argv_types.rs`, `argv_multiword_bug_test.rs` | ShellArgv/ReplInput marker types, shell argv parsing and reconstruction |
+| **Marker Types** | `argv_types.rs` | ShellArgv and ReplInput newtypes, parse_cli/parse_repl entry points |
 | **Quote Handling** | `issue_084_mre.rs` | Quote escaping, inner quotes, quote workarounds |
 | **Edge Cases & Regressions** | `path_with_dots_regression_test.rs`, `task_026_mre_tests.rs` | Historical bugs, corner cases, boundary conditions |
 | **End-to-End** | `comprehensive_tests.rs` | Complete parsing scenarios combining multiple features |

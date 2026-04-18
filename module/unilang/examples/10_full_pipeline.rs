@@ -113,7 +113,7 @@ fn main() -> Result< (), unilang::error::Error >
   let mut all_instructions = Vec::new();
   for cmd_str in &batch_script
   {
-    match parser.parse_single_instruction( cmd_str )
+    match parser.parse_repl_input( cmd_str )
     {
       Ok( instruction ) =>
       {
@@ -206,7 +206,7 @@ Result< (), unilang::error::Error >
 {
 
   // Step 1: Parsing
-  match parser.parse_single_instruction( command_str )
+  match parser.parse_repl_input( command_str )
   {
     Ok( instruction ) =>
     {

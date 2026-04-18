@@ -6,5 +6,5 @@ Tests for the WebAssembly REPL interface and browser integration.
 
 | File | Responsibility |
 |------|----------------|
-| `integration_tests.rs` | WASM REPL integration with unilang command processing |
-| `wasm_tests.rs` | WASM-specific bindings and JavaScript interop |
+| `integration.rs` | WASM REPL integration with unilang command processing |
+| `wasm.rs` | WASM-specific bindings and JavaScript interop |
