@@ -1,6 +1,19 @@
 # Harden Parser Misuse Detection
 
-🔄 (Planned)
+## Execution State
+
+- **Executor Type:** any
+- **Actor:** null
+- **Claimed At:** null
+- **Status:** 🎯 (Available)
+- **Validated By:** null
+- **Validation Date:** null
+
+## Metrics
+
+| Value | Easiness | Priority | Safety | Advisability |
+|-------|----------|----------|--------|--------------|
+| 8 | 7 | 2 | 7 | 784 |
 
 <!-- task_metadata
 value: 8

@@ -2,12 +2,13 @@
 
 ## Execution State
 
-- **Status:** ✅ (Complete)
+- **Status:** ✅ (Completed)
 - **Executor Type:** AI
-- **Actor:** Claude (exec_pln)
-- **Created:** 2026-04-18
-- **Priority:** 3
-- **Claims:** 1
+- **Actor:** null
+- **Claimed At:** null
+- **Priority:** 0
+- **Validated By:** N/A
+- **Validation Date:** 2026-04-18
 
 ## Goal
 
@@ -92,3 +93,7 @@ Introduce `ShellArgv(Vec<String>)` and `ReplInput(String)` as zero-cost newtype 
 ## Requirements
 
 Apply all rulebooks discovered via `kbase .role name::dev`. Key: newtypes not type aliases, all public items documented, tests in `tests/` directory only.
+
+## Outcomes
+
+Delivered as specified. `ShellArgv(Vec<String>)` and `ReplInput(String)` newtypes implemented in `module/unilang_parser/src/argv_types.rs`. `Parser::parse_cli(&ShellArgv)` and `Parser::parse_repl(&ReplInput)` type-safe entry points added to `mod.rs`. Both types re-exported from `unilang_parser` prelude and from `unilang`. Test file `tests/argv_types.rs` covers all Test Matrix rows (319 lines). `w3 .test level::3` passes with 0 failures and 0 warnings. Passing a bare `Vec<String>` to `parse_repl` is now a compile-time error as required.
