@@ -1,8 +1,27 @@
-# Task 001: Zero-Copy Token Implementation
+# Zero-Copy Token Implementation
 
-## Priority: High
-## Impact: 8-15x performance improvement
-## Estimated Effort: 3-4 days
+## Execution State
+
+- **Executor Type:** any
+- **Actor:** null
+- **Claimed At:** null
+- **Status:** 📥 (Backlog)
+- **Validated By:** null
+- **Validation Date:** null
+
+## Metrics
+
+| Value | Easiness | Priority | Safety | Advisability |
+|-------|----------|----------|--------|--------------|
+| 10 | 3 | 2 | 6 | 360 |
+
+<!-- task_metadata
+value: 10
+easiness: 3
+priority: 2
+safety: 6
+advisability: 360
+-->
 
 ## Problem Statement
 

@@ -59,7 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
     let parser = Parser::new(UnilangParserOptions::default());
     
     // Parse a single instruction
-    let instruction = parser.parse_single_instruction(
+    let instruction = parser.parse_repl_input(
         "file.copy src::\"/path/to/source.txt\" dest::\"/path/to/dest.txt\" --overwrite"
     )?;
     
@@ -107,11 +107,11 @@ use unilang_parser::{Parser, UnilangParserOptions};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Simple command
-let cmd = parser.parse_single_instruction("system.info")?;
+let cmd = parser.parse_repl_input("system.info")?;
 assert_eq!(cmd.command_path_slices, ["system", "info"]);
 
 // Command with positional arguments
-let cmd = parser.parse_single_instruction("log.write \"Error occurred\" 5")?;
+let cmd = parser.parse_repl_input("log.write \"Error occurred\" 5")?;
 assert_eq!(cmd.command_path_slices, ["log", "write"]);
 assert_eq!(cmd.arguments.len(), 2);
 ```
@@ -124,7 +124,7 @@ use unilang_parser::{Parser, UnilangParserOptions};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Named arguments with quoting
-let cmd = parser.parse_single_instruction(
+let cmd = parser.parse_repl_input(
     r#"database.query sql::"SELECT * FROM users WHERE name = 'John'" timeout::30"#
 )?;
 
@@ -140,7 +140,7 @@ use unilang_parser::{Parser, UnilangParserOptions};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Mixed positional and named arguments
-let cmd = parser.parse_single_instruction(
+let cmd = parser.parse_repl_input(
     "server.deploy production config::\"/etc/app.conf\" replicas::3 --verbose --dry-run"
 )?;
 
@@ -175,11 +175,11 @@ use unilang_parser::{Parser, UnilangParserOptions};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Command help
-let cmd = parser.parse_single_instruction("file.copy ?")?;
+let cmd = parser.parse_repl_input("file.copy ?")?;
 assert!(cmd.help_invoked);
 
 // Contextual help with arguments
-let cmd = parser.parse_single_instruction("database.migrate version::1.2.0 ?")?;
+let cmd = parser.parse_repl_input("database.migrate version::1.2.0 ?")?;
 assert!(cmd.help_invoked);
 assert_eq!(cmd.named_arguments.get("version").unwrap(), "1.2.0");
 ```
@@ -192,7 +192,7 @@ use unilang_parser::{Parser, UnilangParserOptions};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Complex escaping scenarios
-let cmd = parser.parse_single_instruction(
+let cmd = parser.parse_repl_input(
     r#"log.message text::"Line 1\nLine 2\tTabbed" pattern::"\\d+\\.\\d+""#
 )?;
 
@@ -209,7 +209,7 @@ use unilang_parser::{Parser, UnilangParserOptions, ErrorKind};
 let parser = Parser::new(UnilangParserOptions::default());
 
 // Handle parsing errors
-match parser.parse_single_instruction("invalid..command") {
+match parser.parse_repl_input("invalid..command") {
     Ok(_) => unreachable!(),
     Err(error) => {
         match error.kind {
@@ -236,7 +236,7 @@ let options = UnilangParserOptions {
 let parser = Parser::new(options);
 
 // This will error due to duplicate arguments
-let result = parser.parse_single_instruction("cmd arg1::val1 arg1::val2");
+let result = parser.parse_repl_input("cmd arg1::val1 arg1::val2");
 assert!(result.is_err());
 ```
 
@@ -262,7 +262,7 @@ fn convert_instruction(instruction: GenericInstruction) -> AppCommand
 }
 
 let parser = Parser::new(UnilangParserOptions::default());
-let instruction = parser.parse_single_instruction("user.create name::john email::john@example.com")?;
+let instruction = parser.parse_repl_input("user.create name::john email::john@example.com")?;
 let app_cmd = convert_instruction(instruction);
 
 println!("App command: {:?}", app_cmd);
@@ -283,7 +283,7 @@ let commands = vec![
 ];
 
 for cmd_str in commands {
-    match parser.parse_single_instruction(cmd_str) {
+    match parser.parse_repl_input(cmd_str) {
         Ok(instruction) => {
             // Process instruction
             println!("Processing: {:?}", instruction.command_path_slices);
@@ -306,7 +306,7 @@ for cmd_str in commands {
 ### Key Methods
 
 - **`Parser::new(options)`**: Create parser with configuration
-- **`parse_single_instruction(input)`**: Parse one command
+- **`parse_repl_input(input)`**: Parse one command
 - **`parse_multiple_instructions(input)`**: Parse `;;`-separated commands
 
 ## Integration with the Unilang Ecosystem

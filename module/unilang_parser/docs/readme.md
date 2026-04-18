@@ -27,10 +27,10 @@ The unilang_parser crate provides low-level lexical and syntactic analysis for t
 | Method | Input | Use Case |
 |--------|-------|----------|
 | `Parser::parse_from_argv(&[String])` | Shell argv (pre-tokenized) | CLI applications receiving `std::env::args()` |
-| `Parser::parse_single_instruction(&str)` | Raw string | REPL, config files, embedded commands |
+| `Parser::parse_repl_input(&str)` | Raw string | REPL, config files, embedded commands |
 | `Parser::parse_multiple_instructions(&str)` | Multi-command string | Batch processing |
 
-> **Note:** `parse_repl_input` is the canonical name; `parse_single_instruction` is `#[deprecated]` forwarding shim. See `feature/001_parsing_api.md`.
+> **Note:** `parse_single_instruction` is a `#[deprecated]` forwarding shim since v0.33.0. Use `parse_repl_input` instead. See `feature/001_parsing_api.md`.
 
 ## Usage
 

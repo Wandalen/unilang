@@ -139,7 +139,7 @@ sequenceDiagram
     participant Routine
 
     User->>CLI: Enters "utility1 .math.add a::10 b::20"
-    CLI->>Parser: parse_single_instruction("...")
+    CLI->>Parser: parse_repl_input("...")
     activate Parser
     Parser-->>CLI: Returns GenericInstruction
     deactivate Parser
