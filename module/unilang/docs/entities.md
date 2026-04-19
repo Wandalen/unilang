@@ -8,7 +8,7 @@
 | `api/` | Public programmatic interfaces | [api/readme.md](api/readme.md) | 1 |
 | `architecture/` | Architectural decisions and rationale | [architecture/readme.md](architecture/readme.md) | 6 |
 | `feature/` | Behavioral feature requirements (FR-*) | [feature/readme.md](feature/readme.md) | 5 |
-| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 3 |
+| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 4 |
 
 ## Master Doc Instances Table
 
@@ -31,3 +31,4 @@
 | invariant | 001 | System Actors Vocabulary | [invariant/001_system_actors_vocabulary.md](invariant/001_system_actors_vocabulary.md) |
 | invariant | 002 | Non-Functional Requirements | [invariant/002_non_functional_requirements.md](invariant/002_non_functional_requirements.md) |
 | invariant | 003 | Governing Principles | [invariant/003_governing_principles.md](invariant/003_governing_principles.md) |
+| invariant | 004 | Workspace Dependency Standards | [invariant/004_workspace_dependency_standards.md](invariant/004_workspace_dependency_standards.md) |

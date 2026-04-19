@@ -15,9 +15,6 @@ Macros for unilang. Define your command-line utility interface once and get cons
 """
 categories = [ "algorithms", "development-tools" ]
 keywords = [ "fundamental", "general-purpose" ]
-dependencies = {}
-dev-dependencies = {}
-build-dependencies = {}
 
 [package.metadata.docs.rs]
 features = [ "full" ]
@@ -33,7 +30,7 @@ default = [
 full = [
   "enabled",
 ]
-enabled = [ "macro_tools/enabled", "iter_tools/enabled", "component_model_types/enabled" ]
+enabled = [ "dep:macro_tools", "dep:iter_tools", "dep:component_model_types", "dep:unilang", "unilang/enabled", "macro_tools/enabled", "iter_tools/enabled", "component_model_types/enabled" ]
 
 derive_as_mut = []
 derive_as_ref = []
@@ -44,15 +41,15 @@ derive_new = []
 derive_index = []
 derive_index_mut = []
 derive_inner_from = []
-derive_variadic_from = [ "iter_tools/iter_ext" ]
+derive_variadic_from = [ "enabled", "iter_tools/iter_ext" ]
 derive_not = []
 derive_phantom = []
 
 [dependencies]
-macro_tools = { workspace = true, features = [ "full" ] }
-iter_tools = { workspace = true, features = [ "iter_trait" ] }
-component_model_types = { workspace = true, features = [ "types_component_assign" ] }
-unilang = { workspace = true, features = [ "enabled" ] }
+macro_tools = { workspace = true, features = [ "full" ], optional = true }
+iter_tools = { workspace = true, features = [ "iter_trait" ], optional = true }
+component_model_types = { workspace = true, features = [ "types_component_assign" ], optional = true }
+unilang = { workspace = true, features = [ "enabled" ], optional = true }
 
 [dev-dependencies]
 test_tools = { workspace = true, features = [ "full" ] }

@@ -12,6 +12,7 @@
 #![ warn( missing_docs ) ]
 #![ warn( missing_debug_implementations ) ]
 #![ warn( rust_2018_idioms ) ]
+#[ cfg( feature = "enabled" ) ]
 extern crate alloc;
 /// `unilang_parser` is a Rust crate designed to parse `unilang` CLI-like instruction strings.
 /// It leverages `strs_tools` for initial itemization (splitting the input string into lexical tokens)
@@ -117,21 +118,29 @@ extern crate alloc;
 ///
 /// - **From shell (CLI app):** Use `parse_from_argv(&argv)` - shell already tokenized
 /// - **From string (embedded/scripting):** Use `parse_repl_input(input)` - string needs parsing
+#[ cfg( feature = "enabled" ) ]
 pub mod config;
 /// Defines error types for the parser.
+#[ cfg( feature = "enabled" ) ]
 pub mod error;
 /// Defines instruction and argument structures.
+#[ cfg( feature = "enabled" ) ]
 pub mod instruction;
 /// Adapts and classifies items from the splitter.
+#[ cfg( feature = "enabled" ) ]
 pub mod item_adapter;
 /// Contains the core parsing engine.
+#[ cfg( feature = "enabled" ) ]
 pub mod parser_engine;
 /// CLI parameter parsing convenience API.
+#[ cfg( feature = "enabled" ) ]
 pub mod cli_parser;
 /// Input marker newtypes for type-safe parser entry points.
+#[ cfg( feature = "enabled" ) ]
 pub mod argv_types;
 
 /// Prelude for commonly used items.
+#[ cfg( feature = "enabled" ) ]
 pub mod prelude
 {
   pub use super ::config :: *;
@@ -143,4 +152,5 @@ pub mod prelude
   pub use super ::argv_types :: { ShellArgv, ReplInput };
 }
 
+#[ cfg( feature = "enabled" ) ]
 pub use prelude :: *;

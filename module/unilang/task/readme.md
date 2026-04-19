@@ -4,7 +4,9 @@
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Task | Description |
 |-------|----|--------------:|------:|---------:|-------:|---------:|--------|------|-------------|
-| 1 | 096 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | [096_add_marker_types](./completed/096_add_marker_types.md) | Add ShellArgv/ReplInput newtypes and parse_cli/parse_repl type-safe entry points |
+| 1 | 098 | 9 | 9 | 4 | 6 | 0 | ✅ (Completed) | [098_implement_optional_dep_pattern](./completed/098_implement_optional_dep_pattern.md) | Make all library crate deps optional; wire `enabled` feature with `dep:name` syntax for no-op-when-disabled |
+| 2 | 097 | 9 | 6 | 9 | 9 | 0 | ✅ (Completed) | [097_fix_dep_version_format](./completed/097_fix_dep_version_format.md) | Rewrite workspace Cargo.toml version strings to `^X.Y` / `=X.Y.Z` format per invariant 004 R1 |
+| 3 | 096 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | [096_add_marker_types](./completed/096_add_marker_types.md) | Add ShellArgv/ReplInput newtypes and parse_cli/parse_repl type-safe entry points |
 | 2 | 095 | 0 | 9 | 5 | 7 | 0 | ✅ (Completed) | [095_rename_parse_single_instruction](./completed/095_rename_parse_single_instruction.md) | Rename parse_single_instruction → parse_repl_input with deprecation shim across 302 call sites |
 | 3 | 092 | 0 | 10 | 8 | 5 | 0 | ✅ (Completed) | [fix_incorrect_file_path_documentation](./completed/092_fix_incorrect_file_path_documentation.md) | Fix widespread incorrect documentation claiming unilang cannot parse file paths - actually works with :: syntax |
 | 4 | 093 | 0 | 8 | 7 | 8 | 0 | ✅ (Completed) | [fix_from_static_routine_transfer](./completed/093_fix_from_static_routine_transfer.md) | Fix From<StaticCommandRegistry> to transfer routines; fix Pipeline::from_static() doctest |
