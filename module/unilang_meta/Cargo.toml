@@ -15,6 +15,9 @@ Macros for unilang. Define your command-line utility interface once and get cons
 """
 categories = [ "algorithms", "development-tools" ]
 keywords = [ "fundamental", "general-purpose" ]
+dependencies = {}
+dev-dependencies = {}
+build-dependencies = {}
 
 [package.metadata.docs.rs]
 features = [ "full" ]
