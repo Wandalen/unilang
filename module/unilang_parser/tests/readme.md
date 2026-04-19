@@ -32,7 +32,9 @@ tests/
 ├── issue_084_mre.rs                        # Issue 084: Quote handling (MRE + comprehensive)
 ├── path_with_dots_regression_test.rs       # Regression: dot handling in paths
 ├── task_026_mre_tests.rs                   # Task 026: Empty value tokenization
-└── value_context_tests.rs                  # Value-context tokenization: Bug #006/#007 (::value as atomic unit)
+├── value_context_tests.rs                  # Value-context tokenization: Bug #006/#007 (::value as atomic unit)
+├── parse_from_argv_boundary_test.rs        # Issue-087: parse_from_argv greedy absorption of path-value positionals
+└── cli_misuse_detection_test.rs            # Issue-086: --flag/-f/= syntax misuse detection and CliParser consistency
 ```
 
 ## Domain Map
@@ -52,6 +54,8 @@ Tests are organized into these functional domains:
 | **Quote Handling** | `issue_084_mre.rs` | Quote escaping, inner quotes, quote workarounds |
 | **Edge Cases & Regressions** | `path_with_dots_regression_test.rs`, `task_026_mre_tests.rs`, `example_flag_syntax_regression_test.rs` | Historical bugs, corner cases, boundary conditions |
 | **Value Context** | `value_context_tests.rs` | Value-context tokenization: atomic `::value` units (Bug #006/#007) |
+| **Argv Boundary** | `parse_from_argv_boundary_test.rs` | Token-boundary absorption: issue-087 path-value positional fix |
+| **CLI Misuse Detection** | `cli_misuse_detection_test.rs` | issue-086: `--flag`, `-f`, `=`, single-colon misuse errors + API consistency |
 | **End-to-End** | `comprehensive_tests.rs` | Complete parsing scenarios combining multiple features |
 
 ## Test File Categories

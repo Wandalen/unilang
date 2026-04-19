@@ -295,6 +295,43 @@ pub fn parse_cli_args<T: CliParams>(args: &[String]) -> Result<CliParseResult<T>
         ) );
       }
 
+      // Fix(issue-086): Detect common misuse patterns from clap/shell users and emit
+      // actionable hint errors before silently treating them as positional/message tokens.
+      // Root cause: Users migrating from --flag CLIs or using shell/env variable syntax
+      //   produce no error — their wrong-syntax args become silent message fragments,
+      //   and the downstream "unexpected argument" error points nowhere near the real cause.
+      // Pitfall: These checks must fire in the PARAMETER phase only. Once message mode
+      //   starts, '-' or '=' may be valid message characters (paths, operators, etc.).
+      if arg.contains( '=' ) && !arg.contains( "::" )
+      {
+        let mut parts = arg.splitn( 2, '=' );
+        let name = parts.next().unwrap_or( arg );
+        let value = parts.next().unwrap_or( "value" );
+        return Err( format!(
+          "Invalid parameter syntax: '{}'. Use '::' separator instead of '=': e.g., '{name}::{value}'",
+          arg
+        ) );
+      }
+
+      if arg.starts_with( "--" )
+      {
+        let name = arg.trim_start_matches( '-' );
+        return Err( format!(
+          "Unilang does not use '--flag' syntax: '{}'. Use named parameters instead: e.g., '{name}::true'",
+          arg
+        ) );
+      }
+
+      if arg.starts_with( '-' )
+        && arg.len() > 1
+        && arg.chars().nth( 1 ).is_some_and( | c | c.is_ascii_alphabetic() )
+      {
+        return Err( format!(
+          "Unilang does not use '-f' short flags: '{}'. Use named parameters instead: e.g., 'flag::true'",
+          arg
+        ) );
+      }
+
       // Try to parse as parameter (key::value)
       if let Some((key, value)) = arg.split_once("::")
       {
@@ -625,6 +662,50 @@ impl<'a, C> CliParser<'a, C>
     {
       if parsing_params
       {
+        // Fix(issue-086): Mirror the misuse detection from parse_cli_args so both API paths
+        // produce identical errors for the same wrong input (consistency gap).
+        // Root cause: CliParser::parse had no syntax validation — wrong-input args became
+        //   silent message fragments, diverging from parse_cli_args which rejected them.
+        // Pitfall: Checks must match parse_cli_args exactly; any drift creates confusing
+        //   per-API differences that users cannot predict.
+        if arg.contains( ':' ) && !arg.contains( "::" )
+        {
+          return Err( format!(
+            "Invalid parameter syntax: '{}'. Parameters must use '::' separator (e.g., 'param::value')",
+            arg
+          ) );
+        }
+
+        if arg.contains( '=' ) && !arg.contains( "::" )
+        {
+          let mut parts = arg.splitn( 2, '=' );
+          let name = parts.next().unwrap_or( arg );
+          let value = parts.next().unwrap_or( "value" );
+          return Err( format!(
+            "Invalid parameter syntax: '{}'. Use '::' separator instead of '=': e.g., '{name}::{value}'",
+            arg
+          ) );
+        }
+
+        if arg.starts_with( "--" )
+        {
+          let name = arg.trim_start_matches( '-' );
+          return Err( format!(
+            "Unilang does not use '--flag' syntax: '{}'. Use named parameters instead: e.g., '{name}::true'",
+            arg
+          ) );
+        }
+
+        if arg.starts_with( '-' )
+          && arg.len() > 1
+          && arg.chars().nth( 1 ).is_some_and( | c | c.is_ascii_alphabetic() )
+        {
+          return Err( format!(
+            "Unilang does not use '-f' short flags: '{}'. Use named parameters instead: e.g., 'flag::true'",
+            arg
+          ) );
+        }
+
         if let Some((key, value)) = arg.split_once("::")
         {
           if let Some(canonical) = params.process_param(key, value)?

@@ -1,0 +1,5 @@
+error: unknown command attribute: bogus
+ --> tests/ui/12_unknown_attribute_fails.rs:6:42
+  |
+6 | #[ unilang_meta::command( name = ".foo", bogus = "bar" ) ]
+  |                                          ^^^^^

@@ -1,9 +1,16 @@
-# feature/
+# Feature Doc Entity
 
-Behavioral requirements for `unilang_meta` features.
+Behavioral requirements defining what the `unilang_meta` crate must provide.
 
-## File Responsibility Table
+### Scope
 
-| File | Responsibility |
-|------|----------------|
-| `001_command_macro.md` | `#[unilang::command]` attribute macro specification |
+- **Purpose:** Document functional requirements for procedural macro behavior
+- **Responsibility:** Answers: what macros must the crate provide, what code must they generate
+- **In Scope:** Macro behavioral contracts, generated code specifications, inference rules
+- **Out of Scope:** Macro implementation details, tooling strategy, compiler internals
+
+### Overview Table
+
+| ID | Name | Purpose | Status |
+|----|------|---------|--------|
+| 001 | [`#[unilang::command]` Attribute Macro](001_command_macro.md) | Command registration boilerplate elimination via attribute macro | ✅ |

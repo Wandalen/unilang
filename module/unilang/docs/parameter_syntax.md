@@ -155,7 +155,7 @@ help to see which parameters are positional:
 
 ## Discovering Valid Parameters
 
-Use the `??` operator on any command to list all accepted parameters:
+Use the `??` parameter on any command to list all accepted parameters:
 
 ```bash
 .greet ??
@@ -163,12 +163,54 @@ Use the `??` operator on any command to list all accepted parameters:
 # lang (String, optional, default: "en")
 ```
 
-Use the built-in help for full descriptions:
+Use the `.command.help` counterpart for full descriptions:
 
 ```bash
-.greet help
-.plan.phases help
+.greet.help
+.plan.phases.help
 ```
+
+---
+
+## Help Forms: `?`, `??`, and `.command.help`
+
+Three distinct mechanisms trigger help display. They operate at different layers
+and return different levels of detail:
+
+| Form | Layer | How it works | Output |
+|------|-------|--------------|--------|
+| `?` | Parser | Sets `help_requested = true` in `ParsedInstruction` | Brief inline help |
+| `??` | Framework | Positional argument value `"??"` detected by the framework | Parameter list with types and defaults |
+| `.command.help` | Command registry | Separate command auto-registered alongside every `.command` | Full command documentation |
+
+### Usage examples
+
+```bash
+# ? — parser-level help flag
+.greet ?
+
+# ?? — framework-level parameter listing
+.greet ??
+
+# .command.help — dedicated help command
+.greet.help
+```
+
+### When to use which
+
+- **`?`** — quick reminder that you need help with a command; lightest weight
+- **`??`** — see parameter names, types, and defaults before constructing a call
+- **`.command.help`** — full reference: description, examples, constraints
+
+### Key differences
+
+- `?` is tokenized by the parser (same layer as `::` and `!`); the application
+  receives `instruction.help_requested = true` and decides what to show.
+- `??` is NOT a parser operator — it is the literal string value `"??"` passed
+  as a positional argument; the framework intercepts it before dispatch.
+- `.command.help` is a **separate registered command** with its own dispatch
+  path. It is automatically generated for every command when `auto_help_enabled`
+  is set (the default).
 
 ---
 

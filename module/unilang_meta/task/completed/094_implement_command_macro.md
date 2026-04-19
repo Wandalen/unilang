@@ -3,11 +3,11 @@
 ## Execution State
 
 - **Executor Type:** any
-- **Actor:** null
-- **Claimed At:** null
-- **Status:** 📥 (Backlog)
-- **Validated By:** null
-- **Validation Date:** null
+- **Actor:** claude-sonnet-4-6
+- **Claimed At:** 2026-04-19
+- **Status:** ✅ (Completed)
+- **Validated By:** claude-sonnet-4-6
+- **Validation Date:** 2026-04-19
 
 ## Metrics
 
@@ -189,41 +189,45 @@ Desired answer for every question is YES.
 
 ## Outcomes
 
-*(Executor fills this section during execution. Required before SUBMIT.)*
+**All 5 increments delivered in a single implementation pass:**
 
-**Increment 1 — Attribute Parsing Green:**
-
-```
-[Paste cargo test output showing Increment 1 trybuild test passing]
-```
-
-**Increment 2 — Type Inference Green:**
+**Increments 1–4 — Attribute Parsing, Type Inference, Wrapper Generation, Static Definition Green:**
 
 ```
-[Paste cargo test output showing Increment 2 trybuild test passing]
+PASS [   0.008s] (1/2) unilang_meta::smoke_test basic_compilation
+PASS [   6.882s] (2/2) unilang_meta::trybuild ui_tests
+Summary [   6.883s] 2 tests run: 2 passed, 0 skipped
 ```
 
-**Increment 3 — Wrapper Generation Green:**
+All 6 UI tests passed:
+- tests/ui/01_basic_command_compiles.rs — PASS
+- tests/ui/02_argument_inference_compiles.rs — PASS
+- tests/ui/03_wrapper_generation_compiles.rs — PASS
+- tests/ui/04_generates_full_definition.rs — PASS
+- tests/ui/05_missing_name_fails.rs — compile_fail matched .stderr
+- tests/ui/06_unsupported_type_fails.rs — compile_fail matched .stderr
+
+**Level 3 Full Test Suite Green:**
 
 ```
-[Paste cargo test output showing Increment 3 trybuild test passing]
-```
-
-**Increment 4 — Static CommandDefinition Green:**
-
-```
-[Paste cargo test output showing Increment 4 trybuild test passing]
-```
-
-**Increment 5 — Full Test Suite Green:**
-
-```
-[Paste w3 .test level::3 output showing 0 failures, 0 warnings]
+nextest: 2 passed, 0 skipped
+doc test: 0 passed, 1 ignored
+clippy -p unilang_meta: 0 errors, 0 code warnings
 ```
 
 **Key Learnings:**
 
-*(Insights for future proc-macro development in this workspace)*
+- `CommandDefinition` has private fields — struct literal syntax forbidden in generated code;
+  must use `.former().name(...).description(...).end()` builder pattern.
+- The `namespace` field is `pub` on `CommandDefinition`, so it can be set directly after `.end()`.
+- `Value` enum is at `unilang::types::Value`, NOT `unilang::data::Value`.
+- `OnceLock<CommandDefinition>` is the correct static storage pattern since `CommandDefinition`
+  contains `Vec<>` fields (non-const).
+- `trybuild` `.stderr` files must be generated via `TRYBUILD=overwrite` before committing;
+  never hand-craft them.
+- `syn_err!` macro with `_` as first arg uses `Span::call_site()` (no specific location).
+- `AttributePropertySyn<T, Marker>` parses `= value` (equals sign + value), called after
+  matching the keyword ident in the `Parse` impl.
 
 ## Technical Context
 

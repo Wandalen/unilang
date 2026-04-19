@@ -5,8 +5,8 @@
 - **Executor Type:** any
 - **Actor:** null
 - **Claimed At:** null
-- **Status:** 🎯 (Available)
-- **Progress:** 0/8 — not started
+- **Status:** ✅ (Completed)
+- **Progress:** 8/8 — fix implemented, test suite passes, pending validation
 
 ## Goal
 
@@ -83,11 +83,11 @@ Execute in order. Do not skip or reorder steps.
 
 ### Checklist
 
-- [ ] Does `parse_from_argv` stop absorbing bare positional tokens after named params?
-- [ ] Does multi-word value absorption (`message::hello world`) still work?
-- [ ] Does `bug_reproducer(issue-087)` marker exist in test code?
-- [ ] Does source code contain 3-field `Fix(issue-087)` comment?
-- [ ] Does test file contain all 5 documentation sections?
+- [x] Does `parse_from_argv` stop absorbing bare positional tokens after named params?
+- [x] Does multi-word value absorption (`message::hello world`) still work?
+- [x] Does `bug_reproducer(issue-087)` marker exist in test code?
+- [x] Does source code contain 3-field `Fix(issue-087)` comment?
+- [x] Does test file contain all 5 documentation sections?
 
 ### Measurements
 
@@ -109,3 +109,32 @@ Execute in order. Do not skip or reorder steps.
 - `grep -rn "Fix(issue-087)" src/parser_engine/mod.rs` must return at least 1 result
 - Test count must be ≥ pre-fix count (no tests deleted)
 - T03 must still pass — multi-word absorption not broken
+
+## Outcomes
+
+### Validation Results
+- **Validated By:** independent-validator
+- **Validation Date:** 2026-04-19
+
+#### Checklist
+- C1: YES — T01 (`test_parse_from_argv_no_greedy_absorption_path_value`) and T04 (`test_parse_from_argv_two_positionals_after_path_value`) both PASS, asserting repo="Wandalen/willbe" with separate positionals; fix at `mod.rs:1244-1254` stops absorption when accumulated value contains '/'.
+- C2: YES — T03 (`test_parse_from_argv_multiword_plain_value_preserved`) PASS: `message::hello` + `world` → message="hello world". Plain-text values without '/' continue absorbing normally.
+- C3: YES — `grep -rn "bug_reproducer(issue-087)" tests/` returns 2 matches: `tests/parse_from_argv_boundary_test.rs:68` and `:152`.
+- C4: YES — `grep -rn "Fix(issue-087)" src/parser_engine/mod.rs` returns matches at lines 1244 and 1336; primary fix block at 1244-1250 contains all 3 fields: `Fix(issue-087)`, `Root cause:`, `Pitfall:`.
+- C5: YES — File-level doc comment contains all 5 sections: `## Root Cause` (line 27), `## Why Not Caught Initially` (line 36), `## Fix Applied` (line 43), `## Prevention` (line 52), `## Pitfall` (line 59).
+
+#### Measurements
+- M1: MET — actual: 2, expected ≥1. Evidence: `tests/parse_from_argv_boundary_test.rs:68` and `:152` both carry `// test_kind: bug_reproducer(issue-087)`.
+- M2: MET — actual: 2 occurrences, expected ≥1. Primary fix at line 1244; secondary fix reference at line 1336.
+- M3: MET — `Summary [   0.250s] 266 tests run: 266 passed, 1 skipped`. Zero failures.
+
+#### Invariants
+- I1: HOLD — `RUSTFLAGS="-D warnings" cargo build -p unilang_parser 2>&1 | grep "^error" | wc -l` → 0 errors.
+- I2: HOLD — `cargo clippy -p unilang_parser --all-targets --all-features -- -D warnings 2>&1 | grep "^error" | wc -l` → 0 errors.
+
+#### Anti-faking
+- AF1: PASS — `grep -rn "bug_reproducer(issue-087)" tests/` returned: `tests/parse_from_argv_boundary_test.rs:68:// test_kind: bug_reproducer(issue-087)` and `tests/parse_from_argv_boundary_test.rs:152:// test_kind: bug_reproducer(issue-087)`.
+- AF2: PASS — `grep -rn "Fix(issue-087)" src/parser_engine/mod.rs` returned: line 1244 `// Fix(issue-087): Stop absorbing when the accumulated value already contains '/'.` and line 1336.
+- AF3: PASS — `cargo nextest run --test parse_from_argv_boundary_test 2>&1 | grep "PASS.*multiword"` returned: `PASS [   0.007s] (2/6) unilang_parser::parse_from_argv_boundary_test test_parse_from_argv_multiword_plain_value_preserved`.
+
+**Verdict:** COMPLETE

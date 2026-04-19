@@ -1,0 +1,7 @@
+error: name attribute is required
+ --> tests/ui/05_missing_name_fails.rs:3:1
+  |
+3 | #[ unilang_meta::command( namespace = ".app" ) ]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `unilang_meta::command` (in Nightly builds, run with -Z macro-backtrace for more info)

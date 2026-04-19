@@ -5,9 +5,9 @@
 - **Executor Type:** any
 - **Actor:** null
 - **Claimed At:** null
-- **Status:** 🎯 (Available)
-- **Validated By:** null
-- **Validation Date:** null
+- **Status:** ✅ (Completed)
+- **Validated By:** independent validator (claude-sonnet-4-6)
+- **Validation Date:** 2026-04-19
 
 ## Metrics
 
@@ -212,3 +212,55 @@ was passing before but fails after = regression.
 `grep` the new error messages for the word "Parameters must use '::'",
 "use `name::value`", and "named parameters". Generic messages like "invalid
 syntax" without a concrete fix hint fail this check.
+
+## Outcomes
+
+### Validation Results
+
+- **Validated by:** independent validator (claude-sonnet-4-6)
+- **Date:** 2026-04-19
+- **Verdict:** COMPLETE (17/17 checks pass)
+
+#### Pre-Walk Gate
+
+Validation section is non-standard: `## Validation Checklist` uses no C-prefix IDs; `## Validation Procedure` / `### Measurements` items are prose (not canonical `- [ ] M1 — name: command → expected (was: before)` format); `### Invariants` section is absent. Invariants derived from AC and standard set per Pre-Walk Gate: I1 = `RUSTFLAGS="-D warnings" cargo nextest run --all-features` → 0 failures; I2 = `cargo clippy --all-targets --all-features -- -D warnings` → exit 0.
+
+#### Checklist
+
+- [x] C1 — Does `CliParser<C>::parse()` produce an `Err` for `scope:local`? — YES: `src/cli_parser.rs` line 669-675, single-colon guard, confirmed by T02 pass
+- [x] C2 — Does the error message mention "Parameters must use '::' separator"? — YES: `src/cli_parser.rs` line 672: `Parameters must use '::' separator (e.g., 'param::value')`
+- [x] C3 — Is the error produced before any tokenization of the value portion? — YES: guards at lines 669-703, tokenization attempt (`split_once("::")`) at line 705 — guards precede it
+- [x] C4 — Does `parse_cli_args` produce an `Err` for `timeout=5000`? — YES: `src/cli_parser.rs` lines 305-312, equals-sign guard, confirmed by T03 pass
+- [x] C5 — Does `CliParser<C>::parse()` produce an `Err` for `timeout=5000`? — YES: `src/cli_parser.rs` lines 677-683, equals-sign guard, confirmed by T04 pass
+- [x] C6 — Does the error message name `timeout::5000` as the correct form? — YES (after fix): `splitn(2, '=')` extracts actual value from input; for `timeout=5000`, `name`=`timeout`, `value`=`5000`, message renders `'timeout::5000'` — confirmed by T03/T04 pass
+- [x] C7 — Does `scope::local=extra` still parse without error (no false positive)? — YES: condition `arg.contains('=') && !arg.contains("::")` is false for `scope::local=extra` (contains both `=` and `::`); no error emitted
+- [x] C8 — Does `parse_cli_args` produce an `Err` for `--verbose`? — YES: `src/cli_parser.rs` lines 314-321, double-dash guard, confirmed by T05 pass
+- [x] C9 — Does `parse_cli_args` produce an `Err` for `-v`? — YES: `src/cli_parser.rs` lines 323-331, single-dash guard, confirmed by T06 pass
+- [x] C10 — Does each error hint that unilang uses named parameters, not `--flag`/`-f`? — YES: lines 318 and 328: `"Use named parameters instead: e.g., '{name}::true'"` and `"Use named parameters instead: e.g., 'flag::true'"`
+- [x] C11 — Does `scope::local` parse successfully with value `"local"`? — YES: T07 passes on both paths; `result.unwrap().params.scope == Some("local")`
+- [x] C12 — Does `path::tests/file.md` parse successfully with value `"tests/file.md"`? — YES: T08 passes on both paths; `result.unwrap().params.path == Some("tests/file.md")`
+- [x] C13 — Does `w3 .test l::3` pass with zero failures and zero warnings? — YES: 274/274 nextest pass, 6/6 doctests pass, clippy exits 0
+- [x] C14 — Does `docs/parameter_syntax.md` contain a section comparing `?`, `??`, and `.help` side-by-side? — YES: `## Help Forms: ?, ??, and .command.help` section with comparison table at line 175 of `unilang/docs/parameter_syntax.md`
+- [x] C15 — Does `tests/readme.md` contain a row for `cli_misuse_detection_test.rs`? — YES: line 37 (directory structure tree) and line 58 (Domain Map table)
+- [x] C16 — Is `parse_single_instruction` unchanged? — YES: no issue-086 changes in `src/parser_engine/mod.rs`; `grep "issue-086" src/parser_engine/mod.rs` → 0 matches
+- [x] C17 — Is `parse_from_argv` unchanged? — YES: no issue-086 changes in `src/parser_engine/mod.rs` or `src/parser_engine/validation_utilities.rs`; `grep "issue-086"` → 0 matches
+
+#### Measurements
+
+- [x] M1 — New error paths added: `grep -c "Parameters must use '::'|Use '::' separator|named parameters instead" src/cli_parser.rs` → 8 hint-phrase lines: 4 in `parse_cli_args` (lines 293, 309, 318, 328), 4 in `CliParser<C>::parse()` (lines 672, 681, 690, 700) — MET (expected ≥3 in each path)
+- [x] M2 — Test count: `grep -c "^fn t0[0-9]_" tests/cli_misuse_detection_test.rs` → 8 test functions (t01–t08) — MET (expected ≥8)
+
+Note: M1 and M2 were described in prose without canonical executable commands (`- [ ] Mn — name: command → expected (was: before)` format). Measurements were derived from the prose intent and verified with equivalent commands. Format defect recorded but not blocking — intent is verifiable.
+
+#### Invariants
+
+Derived by validator (section was absent from task):
+
+- [x] I1 — test suite: `RUSTFLAGS="-D warnings" cargo nextest run --all-features` → 274 passed, 0 failed, 1 skipped — PASS
+- [x] I2 — compiler clean: `cargo clippy --all-targets --all-features -- -D warnings` → exit 0 — HOLD
+
+#### Anti-faking checks
+
+- [x] AF1 — Valid inputs parse identically: `RUSTFLAGS="-D warnings" cargo nextest run --all-features` → 274 tests pass, 0 failures; test count matches baseline (274 tests); no previously-passing tests now fail — PASS
+- [x] AF2 — Hint messages are specific: `grep "Parameters must use '::'\|named parameters" src/cli_parser.rs` → 6 hits with phrases `"Parameters must use '::'`", `"Use named parameters instead"`. No generic `"invalid syntax"` without fix hint — PASS
+

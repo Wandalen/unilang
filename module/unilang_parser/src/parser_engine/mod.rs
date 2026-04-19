@@ -1241,6 +1241,18 @@ impl Parser
             break;
           }
 
+          // Fix(issue-087): Stop absorbing when the accumulated value already contains '/'.
+          // Root cause: Path/URL values are complete in their first token; the absorption loop
+          //   had no way to distinguish "continuation of a multi-word value" from "a separate
+          //   positional that happens to look like a path", silently corrupting both.
+          // Pitfall: Check the ACCUMULATED value, not the next_arg. Multi-word plain-text values
+          //   (e.g., "message::hello" + "world") have no '/' and must continue absorbing normally.
+          //   Removing this check breaks intentional multi-word absorption for non-path params.
+          if value.contains( '/' )
+          {
+            break;
+          }
+
           // Combine this argument into the value
           if !value.is_empty()
           {
@@ -1313,11 +1325,29 @@ impl Parser
       else
       {
         // Not a named argument - just add as-is
-        // Quote if it contains whitespace to preserve the token boundary. Escape inner quotes
-        // if present to avoid nested quote errors.
+        // Quote if it contains whitespace to preserve the token boundary, or if it contains
+        // characters not valid in a unilang identifier (e.g., '/', '@', uppercase). The
+        // string parser classifies such tokens as Unrecognized, which triggers a parse error.
+        // Command-path tokens starting with '.' must NOT be quoted — they are handled by
+        // the command-path parser and quoting them would make them positional instead.
         //
-        // Fix(issue-084): Same quote-escaping as named arguments above.
-        if arg.chars().any( char::is_whitespace )
+        // Fix(issue-084): Escape inner quotes before wrapping to avoid nested quote errors.
+        //
+        // Fix(issue-087): Also quote tokens that the string parser would reject as Unrecognized.
+        // Root cause: Tokens with '/', '@', uppercase, etc. are Unrecognized in the string
+        //   parser, which returns an error instead of treating them as positional arguments.
+        // Pitfall: Do not quote tokens starting with '.'. They are command-path tokens and
+        //   quoting them would route them to the positional argument path instead.
+        let is_unilang_identifier = !arg.is_empty()
+          && arg.chars().next().is_some_and( | c | c.is_ascii_lowercase() || c == '_' )
+          && !arg.ends_with( '-' )
+          && arg.chars().all( | c | c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-' );
+        let is_number = arg.parse :: < i64 >().is_ok();
+        // '?' is the unilang help operator — must not be quoted even though it is not an identifier.
+        let is_operator = self.options.operators.contains( &arg.as_str() );
+        let needs_quoting = arg.chars().any( char::is_whitespace )
+          || ( !arg.starts_with( '.' ) && !is_unilang_identifier && !is_number && !is_operator );
+        if needs_quoting
         {
           // Escape any existing quotes by replacing " with \"
           let escaped_arg = arg.replace( '"', "\\\"" );

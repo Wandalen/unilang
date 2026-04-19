@@ -1,0 +1,5 @@
+error: unsupported parameter type: Vec
+ --> tests/ui/14_option_unsupported_inner_fails.rs:7:26
+  |
+7 | fn bulk( names : Option< Vec< String > > ) -> String
+  |                          ^^^
