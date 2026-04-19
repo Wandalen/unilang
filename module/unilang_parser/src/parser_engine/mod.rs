@@ -43,7 +43,7 @@
 //!
 //! ```rust,ignore
 //! let is_named_arg_operator = match &token.kind {
-//!     UnilangTokenKind::Operator(op) => *op == "::" || *op == " :: ",
+//!     ZeroCopyTokenKind::Operator(op) => *op == "::" || *op == " :: ",
 //!     _ => false,
 //! };
 //! ```
@@ -86,7 +86,7 @@ use crate ::
 {
   config ::UnilangParserOptions,
   error :: { ErrorKind, ParseError, SourceLocation },
-  item_adapter :: { RichItem, UnilangTokenKind },
+  item_adapter :: { RichItem, ZeroCopyTokenKind },
 };
 use crate ::instruction :: { Argument, GenericInstruction };
 use alloc ::collections ::BTreeMap;
@@ -189,7 +189,7 @@ impl Parser
 
   let rich_items: Vec< RichItem< '_ > > = rich_items
   .into_iter()
-  .filter( | item | !matches!( item.kind, UnilangTokenKind ::Delimiter( " " | "\n" | "\t" | "\r" ) ) )
+  .filter( | item | !matches!( item.kind, ZeroCopyTokenKind ::Delimiter( " " | "\n" | "\t" | "\r" ) ) )
   .collect();
 
   // Fix for Task 026: Handle empty quoted strings that were filtered out by strs_tools
@@ -271,7 +271,7 @@ impl Parser
       // Check if this is a :: operator (both variants)
       let is_named_arg_operator = matches!(
         &item.kind,
-        UnilangTokenKind::Operator( "::" | " :: " )
+        ZeroCopyTokenKind::Operator( "::" | " :: " )
       );
 
       if is_named_arg_operator
@@ -289,7 +289,7 @@ impl Parser
           // Check if this is a whitespace delimiter - if so, stop collecting
           let is_whitespace = matches!(
             &next_item.kind,
-            UnilangTokenKind::Delimiter( " " | "\t" | "\n" | "\r" )
+            ZeroCopyTokenKind::Delimiter( " " | "\t" | "\n" | "\r" )
           );
 
           if is_whitespace
@@ -313,11 +313,11 @@ impl Parser
           // Extract text from token
           let text = match &token.kind
           {
-            UnilangTokenKind::Identifier( s )
-            | UnilangTokenKind::Number( s )
-            | UnilangTokenKind::Unrecognized( s ) => s.clone(),
-            UnilangTokenKind::Operator( s )
-            | UnilangTokenKind::Delimiter( s ) => (*s).to_string(),
+            ZeroCopyTokenKind::Identifier( s )
+            | ZeroCopyTokenKind::Number( s )
+            | ZeroCopyTokenKind::Unrecognized( s ) => s.as_ref().to_string(),
+            ZeroCopyTokenKind::Operator( s )
+            | ZeroCopyTokenKind::Delimiter( s ) => (*s).to_string(),
           };
 
           value_parts.push( text );
@@ -346,7 +346,7 @@ impl Parser
 
           let merged_token = RichItem::new(
             split,
-            UnilangTokenKind::Identifier( merged_value ),
+            ZeroCopyTokenKind::Identifier( alloc ::borrow ::Cow ::Owned( merged_value ) ),
             source_location,
           );
 
@@ -477,7 +477,7 @@ impl Parser
   // Handle optional leading dot as per spec.md Rule 3.1
   if let Some( first_item ) = items_iter.peek()
   {
-   if let UnilangTokenKind ::Delimiter( "." ) = &first_item.kind
+   if let ZeroCopyTokenKind ::Delimiter( "." ) = &first_item.kind
    {
   if first_item.inner.start == 0
   {
@@ -520,7 +520,7 @@ impl Parser
   {
    match &item.kind
    {
-  UnilangTokenKind ::Identifier( ref s ) =>
+  ZeroCopyTokenKind ::Identifier( ref s ) =>
   {
    if command_path_slices.is_empty() || last_token_was_dot
    {
@@ -539,7 +539,7 @@ impl Parser
   //          lookahead correctly.
 
   // Clone data before lookahead (avoids borrow conflicts with peek)
-  let segment = s.clone();
+  let segment = s.as_ref().to_string();
   let item_location = item.adjusted_source_location.clone();
 
   // Peek ahead to check if this identifier is followed by named argument operator
@@ -553,7 +553,7 @@ impl Parser
    let is_named_arg_operator = match &next_item.kind
    {
     // Match both operator variants from config
-    UnilangTokenKind ::Operator( op ) => *op == "::" || *op == " :: ",
+    ZeroCopyTokenKind ::Operator( op ) => *op == "::" || *op == " :: ",
     _ => false,
    };
 
@@ -586,7 +586,7 @@ impl Parser
   break; // End of command path
  }
  }
-  UnilangTokenKind ::Delimiter( "." ) =>
+  ZeroCopyTokenKind ::Delimiter( "." ) =>
   {
    if last_token_was_dot
    // Consecutive dots, e.g., "cmd..sub"
@@ -600,7 +600,7 @@ impl Parser
    last_token_was_dot = true;
    items_iter.next(); // Consume item
  }
-  UnilangTokenKind ::Unrecognized( ref s ) | UnilangTokenKind ::Number( ref s ) =>
+  ZeroCopyTokenKind ::Unrecognized( ref s ) | ZeroCopyTokenKind ::Number( ref s ) =>
   {
    if last_token_was_dot
    {
@@ -651,11 +651,11 @@ impl Parser
     {
       match value_item.kind
       {
-        UnilangTokenKind ::Identifier( ref val )
-        | UnilangTokenKind ::Unrecognized( ref val )
-        | UnilangTokenKind ::Number( ref val ) =>
+        ZeroCopyTokenKind ::Identifier( ref val )
+        | ZeroCopyTokenKind ::Unrecognized( ref val )
+        | ZeroCopyTokenKind ::Number( ref val ) =>
         {
-          let mut current_value = val.clone();
+          let mut current_value = val.as_ref().to_string();
           let mut current_value_end_location = match value_item.source_location()
           {
             SourceLocation ::StrSpan { end, .. } => end,
@@ -673,7 +673,7 @@ impl Parser
               {
                 match &next_token.kind
                 {
-                  UnilangTokenKind ::Identifier( _ ) =>
+                  ZeroCopyTokenKind ::Identifier( _ ) =>
                   {
                     // FIXED: More reliable lookahead to detect named arguments
                     // Convert iterator to vec for reliable indexing
@@ -681,7 +681,7 @@ impl Parser
                     if remaining_items.len() >= 2
                     {
                       // Check if next two items form a named argument pattern
-                      if let UnilangTokenKind ::Operator( op ) = &remaining_items[1].kind
+                      if let ZeroCopyTokenKind ::Operator( op ) = &remaining_items[1].kind
                       {
                         if *op == " :: " || *op == "::"
                         {
@@ -706,7 +706,7 @@ impl Parser
                       false
                     }
                   }
-                  UnilangTokenKind ::Number( _ ) => true, // Numbers can be part of multi-word values
+                  ZeroCopyTokenKind ::Number( _ ) => true, // Numbers can be part of multi-word values
                   _ => false, // Other token types end the value
                 }
               }
@@ -742,17 +742,17 @@ impl Parser
             {
               break;
             };
-            if let UnilangTokenKind ::Delimiter( "." ) = &peeked_dot.kind
+            if let ZeroCopyTokenKind ::Delimiter( "." ) = &peeked_dot.kind
             {
               let _dot_item = items_iter.next().unwrap(); // Consume the dot
               let Some( peeked_segment ) = items_iter.peek() else
               {
                 break;
               };
-              if let UnilangTokenKind ::Identifier( ref s ) = &peeked_segment.kind
+              if let ZeroCopyTokenKind ::Identifier( ref s ) = &peeked_segment.kind
               {
                 current_value.push( '.' );
-                current_value.push_str( s );
+                current_value.push_str( s.as_ref() );
                 current_value_end_location = match peeked_segment.source_location()
                 {
                   SourceLocation ::StrSpan { end, .. } => end,
@@ -760,10 +760,10 @@ impl Parser
                 };
                 items_iter.next(); // Consume the segment
               }
-              else if let UnilangTokenKind ::Unrecognized( ref s ) = &peeked_segment.kind
+              else if let ZeroCopyTokenKind ::Unrecognized( ref s ) = &peeked_segment.kind
               {
                 current_value.push( '.' );
-                current_value.push_str( s );
+                current_value.push_str( s.as_ref() );
                 current_value_end_location = match peeked_segment.source_location()
                 {
                   SourceLocation ::StrSpan { end, .. } => end,
@@ -771,10 +771,10 @@ impl Parser
                 };
                 items_iter.next(); // Consume the segment
               }
-              else if let UnilangTokenKind ::Number( ref s ) = &peeked_segment.kind
+              else if let ZeroCopyTokenKind ::Number( ref s ) = &peeked_segment.kind
               {
                 current_value.push( '.' );
-                current_value.push_str( s );
+                current_value.push_str( s.as_ref() );
                 current_value_end_location = match peeked_segment.source_location()
                 {
                   SourceLocation ::StrSpan { end, .. } => end,
@@ -822,7 +822,7 @@ impl Parser
             .or_default()
             .push( argument );
         }
-        UnilangTokenKind ::Delimiter( "." ) =>
+        ZeroCopyTokenKind ::Delimiter( "." ) =>
         {
           // Handle file paths that start with "./" or "../"
           let mut current_value = ".".to_string();
@@ -838,10 +838,10 @@ impl Parser
           {
             match &next_item.kind
             {
-              UnilangTokenKind ::Unrecognized( ref s ) =>
+              ZeroCopyTokenKind ::Unrecognized( ref s ) =>
               {
                 // This handles cases like "./examples" where "/examples" is unrecognized
-                current_value.push_str( s );
+                current_value.push_str( s.as_ref() );
                 current_value_end_location =  match next_item.source_location()
                 {
                   SourceLocation ::StrSpan { end, .. } => end,
@@ -849,7 +849,7 @@ impl Parser
                 };
                 items_iter.next(); // Consume the unrecognized token
               }
-              UnilangTokenKind ::Delimiter( "." ) =>
+              ZeroCopyTokenKind ::Delimiter( "." ) =>
               {
                 // This handles "../" patterns
                 current_value.push( '.' );
@@ -863,9 +863,9 @@ impl Parser
                 // Look for the next token after ".."
                 if let Some( third_item ) = items_iter.peek()
                 {
-                  if let UnilangTokenKind ::Unrecognized( ref s ) = &third_item.kind
+                  if let ZeroCopyTokenKind ::Unrecognized( ref s ) = &third_item.kind
                   {
-                    current_value.push_str( s );
+                    current_value.push_str( s.as_ref() );
                     current_value_end_location =  match third_item.source_location()
                     {
                       SourceLocation ::StrSpan { end, .. } => end,
@@ -888,17 +888,17 @@ impl Parser
               {
                 break;
               };
-              if let UnilangTokenKind ::Delimiter( "." ) = &peeked_dot.kind
+              if let ZeroCopyTokenKind ::Delimiter( "." ) = &peeked_dot.kind
               {
                 let _dot_item = items_iter.next().unwrap(); // Consume the dot
                 let Some( peeked_segment ) = items_iter.peek() else
                 {
                   break;
                 };
-                if let UnilangTokenKind ::Identifier( ref s ) = &peeked_segment.kind
+                if let ZeroCopyTokenKind ::Identifier( ref s ) = &peeked_segment.kind
                 {
                   current_value.push( '.' );
-                  current_value.push_str( s );
+                  current_value.push_str( s.as_ref() );
                   current_value_end_location = match peeked_segment.source_location()
                   {
                     SourceLocation ::StrSpan { end, .. } => end,
@@ -906,10 +906,10 @@ impl Parser
                   };
                   items_iter.next(); // Consume the segment
                 }
-                else if let UnilangTokenKind ::Unrecognized( ref s ) = &peeked_segment.kind
+                else if let ZeroCopyTokenKind ::Unrecognized( ref s ) = &peeked_segment.kind
                 {
                   current_value.push( '.' );
-                  current_value.push_str( s );
+                  current_value.push_str( s.as_ref() );
                   current_value_end_location = match peeked_segment.source_location()
                   {
                     SourceLocation ::StrSpan { end, .. } => end,
@@ -917,10 +917,10 @@ impl Parser
                   };
                   items_iter.next(); // Consume the segment
                 }
-                else if let UnilangTokenKind ::Number( ref s ) = &peeked_segment.kind
+                else if let ZeroCopyTokenKind ::Number( ref s ) = &peeked_segment.kind
                 {
                   current_value.push( '.' );
-                  current_value.push_str( s );
+                  current_value.push_str( s.as_ref() );
                   current_value_end_location = match peeked_segment.source_location()
                   {
                     SourceLocation ::StrSpan { end, .. } => end,
@@ -1000,23 +1000,23 @@ impl Parser
   {
    match item.kind
    {
-  UnilangTokenKind ::Unrecognized( ref s ) =>
+  ZeroCopyTokenKind ::Unrecognized( ref s ) =>
   {
-   return Err( validation_utilities::error_unexpected_token( s, item.adjusted_source_location.clone() ) );
+   return Err( validation_utilities::error_unexpected_token( s.as_ref(), item.adjusted_source_location.clone() ) );
  }
 
-  UnilangTokenKind ::Identifier( ref s ) =>
+  ZeroCopyTokenKind ::Identifier( ref s ) =>
   {
    // First, check if we have consecutive ":" delimiters by looking ahead
    let has_consecutive_colons = {
     let mut lookahead_iter = items_iter.clone();
     if let Some( first_item ) = lookahead_iter.next()
     {
-     if matches!(first_item.kind, UnilangTokenKind::Delimiter(":"))
+     if matches!(first_item.kind, ZeroCopyTokenKind::Delimiter(":"))
      {
       if let Some( second_item ) = lookahead_iter.peek()
       {
-       matches!(second_item.kind, UnilangTokenKind::Delimiter(":"))
+       matches!(second_item.kind, ZeroCopyTokenKind::Delimiter(":"))
       }
       else
       {
@@ -1039,8 +1039,8 @@ impl Parser
   // Check if this looks like a named argument pattern
   let is_named_argument = match &next_item.kind
   {
-   UnilangTokenKind ::Operator( op ) => *op == " :: " || *op == "::",
-   UnilangTokenKind ::Delimiter( ":" ) => has_consecutive_colons,
+   ZeroCopyTokenKind ::Operator( op ) => *op == " :: " || *op == "::",
+   ZeroCopyTokenKind ::Delimiter( ":" ) => has_consecutive_colons,
    _ => false,
   };
 
@@ -1049,37 +1049,37 @@ impl Parser
    // Named argument - consume the "::" operator (either single token or two ":" delimiters)
    match &next_item.kind
    {
-    UnilangTokenKind ::Operator( _ ) => {
+    ZeroCopyTokenKind ::Operator( _ ) => {
      items_iter.next(); // Consume single "::" operator
     },
-    UnilangTokenKind ::Delimiter( ":" ) => {
+    ZeroCopyTokenKind ::Delimiter( ":" ) => {
      items_iter.next(); // Consume first ":"
      items_iter.next(); // Consume second ":"
     },
     _ => unreachable!(),
    }
-   let arg_name = s;
+   let arg_name = s.as_ref();
 
    self.process_named_argument( arg_name, &item, items_iter, &mut named_arguments )?;
 }
   else
   {
    // Positional argument
-   validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+   validation_utilities::process_positional_argument( &self.options, s.as_ref(), &item, &mut positional_arguments, &named_arguments )?;
  }
  }
    else
    {
   // Last token, must be positional
-  validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+  validation_utilities::process_positional_argument( &self.options, s.as_ref(), &item, &mut positional_arguments, &named_arguments )?;
  }
  }
-  UnilangTokenKind ::Number( ref s ) =>
+  ZeroCopyTokenKind ::Number( ref s ) =>
   {
    // Positional argument
-   validation_utilities::process_positional_argument( &self.options, s, &item, &mut positional_arguments, &named_arguments )?;
+   validation_utilities::process_positional_argument( &self.options, s.as_ref(), &item, &mut positional_arguments, &named_arguments )?;
  }
-  UnilangTokenKind ::Operator( "?" ) =>
+  ZeroCopyTokenKind ::Operator( "?" ) =>
   {
    validation_utilities::validate_help_operator( &item, items_iter )?;
    help_operator_found = true;
@@ -1087,16 +1087,16 @@ impl Parser
    // as they are not relevant for help display
    positional_arguments.clear();
  }
-  UnilangTokenKind::Operator("::" | " :: ") =>
+  ZeroCopyTokenKind::Operator("::" | " :: ") =>
   {
    return Err( validation_utilities::error_orphaned_operator( item.adjusted_source_location.clone() ) );
  }
-  UnilangTokenKind::Delimiter(":") =>
+  ZeroCopyTokenKind::Delimiter(":") =>
   {
    // Check if the next token is also ":" to form "::"
    if let Some( next_item ) = items_iter.peek()
    {
-    if let UnilangTokenKind::Delimiter(":") = &next_item.kind
+    if let ZeroCopyTokenKind::Delimiter(":") = &next_item.kind
     {
      // This is an orphaned "::" operator (no preceding identifier)
      return Err( validation_utilities::error_orphaned_operator( item.adjusted_source_location.clone() ) );

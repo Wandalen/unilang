@@ -94,6 +94,7 @@ clap = { version = "4" }
 pico-args = { version = "0.5" }
 tempfile = { version = "3" }
 criterion = { version = "0.8" }
+trybuild = { version = "1" }
 
 [profile.release]
 lto = true

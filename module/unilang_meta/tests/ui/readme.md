@@ -29,3 +29,13 @@ auto-generated snapshots of expected compiler error output.
 | 14_option_unsupported_inner_fails.stderr | snapshot | Expected error for T14 |
 | 15_reference_param_fails.rs | compile_fail | `&str` reference param produces error |
 | 15_reference_param_fails.stderr | snapshot | Expected error for T15 |
+| 16_hint_value_stored.rs | pass | hint attr value accessible via def.hint() |
+| 17_optional_wrong_type_is_none.rs | pass | Optional + wrong Value type → None, Ok (not Err) |
+| 18_integer_bool_pathbuf_runtime.rs | pass | Runtime extraction: i32/usize/bool/PathBuf via wrapper |
+| 19_f64_param_fails.rs | compile_fail | f64 param produces error |
+| 19_f64_param_fails.stderr | snapshot | Expected error for T19 |
+| 20_i8_param_fails.rs | compile_fail | i8 param produces error |
+| 20_i8_param_fails.stderr | snapshot | Expected error for T20 |
+| 21_tuple_param_fails.rs | compile_fail | Tuple param produces error |
+| 21_tuple_param_fails.stderr | snapshot | Expected error for T21 |
+| 22_register_fn_idempotent.rs | pass | Register fn returns same pointer on repeated calls |

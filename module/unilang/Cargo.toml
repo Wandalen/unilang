@@ -88,7 +88,7 @@ approach_inline_literals = [ "static_registry", "const_parsing" ]              #
 # - PHF types (phf::Map, phf::phf_map, etc.) are re-exported via unilang::phf
 # - No need to add phf as a direct dependency
 # See readme.md "PHF Re-export" section for usage examples.
-static_registry = [ "dep:phf" ]              # Static command registry infrastructure
+static_registry = [ "dep:phf", "dep:phf_codegen" ]  # Static command registry infrastructure
 phf_error_hint = []                          # Documentation feature for PHF compile error hint (no dependencies)
 yaml_parser = [ "dep:serde_yaml" ]           # YAML parsing support (build-time + runtime)
 json_parser = [ "dep:serde_json" ]           # JSON parsing support (build-time + runtime)
@@ -192,6 +192,7 @@ ron = { workspace = true, optional = true }             # Enabled by ron_parser 
 
 # Static registry infrastructure (optional):
 phf = { workspace = true, features = ["macros"], optional = true }  # Enabled by static_registry
+phf_codegen = { workspace = true, optional = true }                 # Enabled by static_registry; struct-literal codegen in src/
 
 # Multi-file discovery (optional):
 walkdir = { workspace = true, optional = true }         # Enabled by multi_file
@@ -440,4 +441,4 @@ criterion = { workspace = true }
 [package.metadata.cargo-udeps.ignore]
 # REMOVED: num_cpus and sysinfo (dependencies removed in Phase 2)
 normal = []
-build = ["phf_codegen"]
+build = []

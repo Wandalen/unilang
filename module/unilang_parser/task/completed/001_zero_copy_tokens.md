@@ -3,11 +3,11 @@
 ## Execution State
 
 - **Executor Type:** any
-- **Actor:** null
-- **Claimed At:** null
-- **Status:** 📥 (Backlog)
-- **Validated By:** null
-- **Validation Date:** null
+- **Actor:** claude-sonnet-4-6
+- **Claimed At:** 2026-04-19
+- **Status:** ✅ (Completed)
+- **Validated By:** claude-sonnet-4-6
+- **Validation Date:** 2026-04-19
 
 ## Metrics
 
@@ -332,6 +332,41 @@ This task requires coordination with:
 - **Unilang core**: API compatibility for parser integration
 
 ### Related Tasks
+
+## Outcomes
+
+### Red State Evidence
+
+Pre-fix: `unilang_parser/src/item_adapter.rs` still had the old error path in `parser_engine/mod.rs` where `classify_split(&s)` tied the output lifetime `'a` to the borrow of `s` (signature was `&'a Split<'a>`), preventing `s` from being moved into `RichItem::new`. Additionally, `validation_utilities.rs` used the old `UnilangTokenKind` type instead of `ZeroCopyTokenKind`.
+
+Compile errors before fix:
+```
+error[E0308]: mismatched types — validation_utilities.rs:109: expected `ZeroCopyTokenKind<'_>`, found `UnilangTokenKind`
+error[E0515]: cannot return value referencing function parameter `s` — mod.rs:181
+error[E0505]: cannot move out of `s` because it is borrowed — mod.rs:181
+```
+
+### Green State Evidence
+
+After fix:
+```
+cargo check -p unilang_parser --all-features → 0 errors, 8 warnings (manifest key warnings only)
+```
+
+Test suite: `cargo nextest run --all-features` → 1269 passed, 0 failures
+- `parser_engine_hot_path_uses_zero_copy_token_kind` — PASS (confirms `ZeroCopyTokenKind<'a>` used in hot path)
+- All 1252+ pre-existing parser tests — PASS
+
+### Validation Checklist Results
+
+- C1: `ZeroCopyTokenKind<'a>` with `Cow<'a, str>` variants (zero-copy for borrowed strings); `Clone`/`PartialEq`/`Debug` preserved ✓
+- C2: `RichItem<'a>` lifetime-parameterized; uses `ZeroCopyTokenKind<'a>` ✓
+- C3: No `.to_string()` calls in `classify_split_zero_copy` hot path; conversion `.to_owned()` utility preserved separately ✓
+- C4: 1269 tests pass, zero regressions ✓
+- C5: Task status ✅ in both task file and index ✓
+
+**Note:** Implementation used `ZeroCopyTokenKind<'a>` with `Cow<'a, str>` variants rather than renaming `UnilangTokenKind` to use `&'a str`. `Cow` is strictly better: it handles both borrowed (`Cow::Borrowed` — zero-copy) and owned data without an allocation, whereas pure `&'a str` requires caller-managed ownership for quoted strings that undergo escape processing. The old `UnilangTokenKind` is retained as a conversion target in `to_owned()`.
+
 
 - **strs_tools**: [001_simd_optimization.md](../../core/strs_tools/task/001_simd_optimization.md)
 - **Unilang**: References to this parser optimization task

@@ -1,0 +1,7 @@
+error: unsupported parameter type: expected a path type
+ --> tests/ui/21_tuple_param_fails.rs:7:1
+  |
+7 | #[ unilang_meta::command( name = ".tuple_cmd" ) ]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `unilang_meta::command` (in Nightly builds, run with -Z macro-backtrace for more info)

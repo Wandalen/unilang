@@ -53,4 +53,4 @@ unilang = { workspace = true, features = [ "enabled" ] }
 
 [dev-dependencies]
 test_tools = { workspace = true, features = [ "full" ] }
-trybuild = "1"
+trybuild = { workspace = true }

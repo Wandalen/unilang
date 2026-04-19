@@ -127,6 +127,7 @@ Each domain directory contains **all test types** relevant to that domain:
 | `output_truncation.rs` | Output truncation: long output trimming behavior |
 | `parser.rs` | Parser domain entry point: tokenization, SIMD, and string interning tests |
 | `parser_reexport_test.rs` | Re-export: `unilang::parser` public API surface accessibility |
+| `phf_codegen_no_leaked_dep_test.rs` | Codegen: `generate_static_registry_source()` emits no bare `phf_map!` |
 | `phf_reexport_test.rs` | Re-export: `unilang::phf` types available without direct phf dependency |
 | `registry.rs` | Registry domain entry point: static/dynamic registry and lookup tests |
 | `regression.rs` | Regression domain entry point: critical bug prevention tests |

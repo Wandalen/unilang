@@ -34,7 +34,8 @@ tests/
 ├── task_026_mre_tests.rs                   # Task 026: Empty value tokenization
 ├── value_context_tests.rs                  # Value-context tokenization: Bug #006/#007 (::value as atomic unit)
 ├── parse_from_argv_boundary_test.rs        # Issue-087: parse_from_argv greedy absorption of path-value positionals
-└── cli_misuse_detection_test.rs            # Issue-086: --flag/-f/= syntax misuse detection and CliParser consistency
+├── cli_misuse_detection_test.rs            # Issue-086: --flag/-f/= syntax misuse detection and CliParser consistency
+└── zero_copy_token_test.rs                 # Parser-001: parser_engine hot path uses ZeroCopyTokenKind (no String alloc)
 ```
 
 ## Domain Map
@@ -56,6 +57,7 @@ Tests are organized into these functional domains:
 | **Value Context** | `value_context_tests.rs` | Value-context tokenization: atomic `::value` units (Bug #006/#007) |
 | **Argv Boundary** | `parse_from_argv_boundary_test.rs` | Token-boundary absorption: issue-087 path-value positional fix |
 | **CLI Misuse Detection** | `cli_misuse_detection_test.rs` | issue-086: `--flag`, `-f`, `=`, single-colon misuse errors + API consistency |
+| **Zero-Copy Tokens** | `zero_copy_token_test.rs` | parser-001: parser_engine hot path uses `ZeroCopyTokenKind` (no `String` alloc) |
 | **End-to-End** | `comprehensive_tests.rs` | Complete parsing scenarios combining multiple features |
 
 ## Test File Categories

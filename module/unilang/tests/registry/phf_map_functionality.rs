@@ -314,16 +314,15 @@ fn test_multi_yaml_aggregator_static_registry_generation()
   // Generate static registry source code
   let source_code = aggregator.generate_static_registry_source();
 
-  // Verify static registry structure
+  // Verify static registry structure — Fix B: struct literal, no phf_map! macro
   assert!( source_code.contains("use unilang::phf::{self, Map}") );
   assert!( source_code.contains("StaticCommandDefinition") );
-  assert!( source_code.contains("phf_map!") );
+  // phf_codegen generates struct literal: no phf_map! macro invocation
+  assert!( !source_code.contains("phf_map!") );
+  assert!( source_code.contains("Map") );
 
   // Print content for debugging
   println!( "Generated static registry source:\n{source_code}" );
-
-  // Verify the content has basic structure (the exact type name may vary)
-  assert!( source_code.contains("phf_map") || source_code.contains("Map") );
 }
 
 #[test]

@@ -8,7 +8,7 @@ use crate ::
 {
   config ::UnilangParserOptions,
   error :: { ErrorKind, ParseError, SourceLocation },
-  item_adapter :: { RichItem, UnilangTokenKind },
+  item_adapter :: { RichItem, ZeroCopyTokenKind },
   instruction ::Argument,
 };
 use alloc ::vec :: { Vec, IntoIter };
@@ -100,7 +100,7 @@ pub( super ) fn inject_empty_quoted_string_tokens< 'a >(
             was_quoted: true,
           };
 
-          let token_kind = UnilangTokenKind::Identifier( String::new() );
+          let token_kind = ZeroCopyTokenKind::Identifier( alloc ::borrow ::Cow ::Owned( String::new() ) );
           let source_location = SourceLocation::StrSpan {
             start: quotes_start_pos,
             end: quotes_end_pos,

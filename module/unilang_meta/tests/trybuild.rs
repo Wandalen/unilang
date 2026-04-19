@@ -19,6 +19,13 @@
 //! | T13 | ui/13_applied_to_struct_fails.rs        | compile_fail | Macro on struct produces error |
 //! | T14 | ui/14_option_unsupported_inner_fails.rs | compile_fail | Option<Vec<String>> unsupported inner type |
 //! | T15 | ui/15_reference_param_fails.rs          | compile_fail | `&str` reference param produces error |
+//! | T16 | ui/16_hint_value_stored.rs              | pass         | hint attr value accessible via def.hint() |
+//! | T17 | ui/17_optional_wrong_type_is_none.rs    | pass         | Optional + wrong Value type → None, Ok (not Err) |
+//! | T18 | ui/18_integer_bool_pathbuf_runtime.rs   | pass         | Runtime extraction: i32/usize/bool/PathBuf via wrapper |
+//! | T19 | ui/19_f64_param_fails.rs                | compile_fail | f64 param produces error |
+//! | T20 | ui/20_i8_param_fails.rs                 | compile_fail | i8 param produces error |
+//! | T21 | ui/21_tuple_param_fails.rs              | compile_fail | Tuple param produces error |
+//! | T22 | ui/22_register_fn_idempotent.rs         | pass         | Register fn returns same pointer on repeated calls |
 
 #[ test ]
 fn ui_tests()
@@ -39,4 +46,11 @@ fn ui_tests()
   t.compile_fail( "tests/ui/13_applied_to_struct_fails.rs" );
   t.compile_fail( "tests/ui/14_option_unsupported_inner_fails.rs" );
   t.compile_fail( "tests/ui/15_reference_param_fails.rs" );
+  t.pass( "tests/ui/16_hint_value_stored.rs" );
+  t.pass( "tests/ui/17_optional_wrong_type_is_none.rs" );
+  t.pass( "tests/ui/18_integer_bool_pathbuf_runtime.rs" );
+  t.compile_fail( "tests/ui/19_f64_param_fails.rs" );
+  t.compile_fail( "tests/ui/20_i8_param_fails.rs" );
+  t.compile_fail( "tests/ui/21_tuple_param_fails.rs" );
+  t.pass( "tests/ui/22_register_fn_idempotent.rs" );
 }

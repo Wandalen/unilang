@@ -262,6 +262,10 @@ impl MultiYamlAggregator
   pub fn generate_static_registry_source( &self ) -> String
   {
     let mut source_code = String::new();
+    // Fix(dev-001): use {self, Map} not {phf_map, Map} so downstream sees qualified phf::phf_map!
+    // Root cause: importing phf_map by name forced bare invocation that expands to ::phf:: absolute
+    //   paths, requiring every downstream crate to add phf as a direct Cargo.toml dependency
+    // Pitfall: phf::phf_map! works via re-export only with phf >= 0.11 ($crate:: hygiene)
     source_code.push_str( "use unilang::phf::{self, Map};\n" );
     source_code.push_str( "use unilang::static_data::{StaticCommandDefinition, StaticArgumentDefinition, StaticArgumentAttributes, StaticKind};\n\n" );
 
@@ -328,17 +332,40 @@ impl MultiYamlAggregator
       source_code.push_str( "};\n\n" );
     }
 
-    // Generate optimized static map
-    source_code.push_str( "pub static AGGREGATED_COMMANDS: Map<&'static str, &'static StaticCommandDefinition> = phf::phf_map! {\n" );
-    for cmd_name in self.commands.keys()
+    // Fix(issue-001): Use phf_codegen struct-literal generation — no phf_map! macro.
+    // Root cause: phf_map! proc-macro expands to ::phf::Map absolute paths at downstream
+    //   compile time, forcing every consumer to list phf as a direct Cargo.toml dep even
+    //   though unilang already re-exports phf via pub use phf. Qualifying as phf::phf_map!
+    //   does not help — the macro's internal expansion hardcodes ::phf:: regardless.
+    // Pitfall: If phf_codegen dep is removed or phf_path changes from "phf", downstream
+    //   builds break; keep phf_codegen in the static_registry feature and path as "phf".
+
+    // Generate optimized static map using phf_codegen struct literal (no macro invocation)
+    #[ cfg( feature = "static_registry" ) ]
     {
-      let const_name = format!(
-        "{}_CMD",
-        cmd_name.replace( [ '.', '-' ], "_" ).to_uppercase()
-      );
-      source_code.push_str( &format!( "  \"{}\" => &{},\n", Self::escape_string( cmd_name ), const_name ) );
+      let mut sorted_names: Vec< String > = self.commands.keys().cloned().collect();
+      sorted_names.sort();  // deterministic output order
+
+      let mut map_builder = phf_codegen::Map::new();
+      // phf_path("phf") → `phf::Map { ... }` where phf = use unilang::phf::{self, Map}
+      map_builder.phf_path( "phf" );
+      for cmd_name in &sorted_names
+      {
+        let const_name = format!(
+          "{}_CMD",
+          cmd_name.replace( [ '.', '-' ], "_" ).to_uppercase()
+        );
+        map_builder.entry( cmd_name.as_str(), format!( "&{}", const_name ) );
+      }
+
+      source_code.push_str( "pub static AGGREGATED_COMMANDS: Map<&'static str, &'static StaticCommandDefinition> = " );
+      source_code.push_str( &format!( "{}", map_builder.build() ) );
+      source_code.push_str( ";\n" );
     }
-    source_code.push_str( "};\n" );
+    #[ cfg( not( feature = "static_registry" ) ) ]
+    {
+      source_code.push_str( "// static_registry feature required for AGGREGATED_COMMANDS\n" );
+    }
 
     source_code
   }
