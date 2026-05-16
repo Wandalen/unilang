@@ -5,6 +5,9 @@
 //! into lists, regardless of the `multiple` attribute setting. This implements the core
 //! functionality from the critical Task 024 fix.
 //!
+//! ## FR Coverage
+//! - FR-ARG-7 (FT-4): multiple-parameter collection accumulates repeated values into list
+//!
 //! ## Coverage
 //! - Basic multiple parameter collection
 //! - Mixed parameter types with multiple values

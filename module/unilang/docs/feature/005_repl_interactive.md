@@ -7,7 +7,15 @@
 - **In Scope:** REPL behavior requirements, interactive mode requirements, WASM modality
 - **Out of Scope:** REPL implementation details, feature flag configuration (see architecture/006)
 
-Functional requirements for REPL-style execution, interactive argument prompting, and WebAssembly modality.
+### Design
+
+The REPL design rests on the stateless execution loop guarantee: the `Parser`, `SemanticAnalyzer`, and `Interpreter` components are fully reusable across multiple invocations within a single process. No state accumulates between command executions. This means REPL session length has no effect on per-command processing overhead, and memory usage does not grow with session activity.
+
+The interactive argument protocol integrates with the REPL loop at the error-interception layer. When a mandatory argument with `interactive: true` is absent, the semantic analyzer returns a distinct `ArgumentInteractiveRequired` signal — not a validation failure — allowing the REPL layer to intercept it, prompt the user for the missing value (using secure input for sensitive arguments), and re-submit the command with the value supplied. Optional arguments with defaults never trigger this protocol.
+
+The two-tier feature structure (`repl` base feature + `enhanced_repl` extension) allows integrators to choose between a minimal standard-IO implementation and a readline-enhanced implementation without changing application code. The base tier provides all REPL functional behavior; the enhanced tier adds terminal navigation (history, arrow keys, tab completion) via an optional dependency. See `architecture/006_repl_implementation.md` for configuration details.
+
+The WASM modality requires that the core library compiles to `wasm32-unknown-unknown` without platform-specific dependencies, enabling browser-hosted REPL instances.
 
 ### FR-REPL-1 (REPL Support)
 
@@ -17,58 +25,15 @@ The framework's core components (`Pipeline`, `Parser`, `SemanticAnalyzer`, `Inte
 - Pipeline components are fully stateless and reusable
 - Each command execution is independent with no state accumulation
 - Memory efficient operation verified through performance benchmarks
-- Reference implementations available in `examples/12_repl_loop.rs`, `examples/15_interactive_repl_mode.rs`, `examples/17_advanced_repl_features.rs`
+- Reference implementations available in the examples directory
 
 **Implementation status:** ✅ Implemented with comprehensive examples and verified stateless operation.
-
-### REPL Technical Requirements
-
-**Stateless Operation Requirements:**
-- Each command execution cycle must be completely independent
-- No state accumulation between command executions to prevent memory leaks
-- Components (`Parser`, `SemanticAnalyzer`, `Interpreter`) must be reusable without internal state corruption
-- Performance requirement: Command execution overhead must remain constant regardless of session length
-
-**Interactive Argument Handling:**
-- The error code `UNILANG_ARGUMENT_INTERACTIVE_REQUIRED` must be catchable at the REPL level
-- REPL implementations must handle secure input (passwords, API keys) without logging or state persistence
-- Optional interactive arguments with defaults must not trigger interactive prompts
-- Interactive argument validation must occur during semantic analysis, not execution
-
-**Memory Management Insights:**
-- Pipeline component reuse provides 20-50% performance improvement over creating new instances
-- Command history storage should be bounded to prevent unbounded memory growth
-- Large command outputs should be handled with streaming or pagination for long-running REPL sessions
-
-**Error Recovery Patterns:**
-- Parse errors should provide contextual suggestions for command correction
-- Semantic analysis errors should indicate available commands and proper syntax
-- Execution errors should not terminate the REPL session
-- Error history tracking enables improved user experience with "last-error" functionality
-
-**User Experience Requirements:**
-- Auto-completion suggestions require command registry introspection capabilities
-- Command history must support search and replay functionality
-- Session statistics provide valuable debugging information
-- Clear screen and session reset capabilities are essential for productive use
-
-**Performance Considerations:**
-- Optimized static command registry provides zero-cost lookups even in REPL context
-- Dynamic command registration during REPL sessions should be supported for development workflows
-- Batch command processing capabilities enable script-like functionality within REPL
-- Command validation without execution supports syntax checking workflows
 
 ### FR-INTERACTIVE-1 (Interactive Argument Prompting)
 
 When a mandatory argument with the `interactive: true` attribute is not provided, the `Semantic Analyzer` **must** return a distinct, catchable error (`UNILANG_ARGUMENT_INTERACTIVE_REQUIRED`). This allows the calling modality to intercept the error and prompt the user for input.
 
-**Implementation Notes:**
-- Error code `UNILANG_ARGUMENT_INTERACTIVE_REQUIRED` is returned as specified
-- Implemented in `src/semantic.rs`
-- Comprehensive test coverage in `tests/inc/phase5/interactive_args_test.rs`
-- REPL examples demonstrate proper error handling and secure input simulation
-
-**Implementation status:** ✅ Implemented in semantic analyzer with comprehensive test coverage and REPL integration.
+**Implementation status:** ✅ Implemented in the semantic analyzer with comprehensive test coverage and REPL integration.
 
 ### FR-MOD-WASM-REPL (WebAssembly REPL Modality)
 
@@ -76,12 +41,34 @@ The framework **must** support a web-based REPL modality that can operate entire
 
 **Implementation status:** ❌ Not yet implemented.
 
-This requirement is also connected to NFR-PLATFORM-1 (WASM Compatibility), which requires the core logic of the `unilang` and `unilang_parser` crates to be platform-agnostic and fully compatible with the `wasm32-unknown-unknown` target. See `docs/invariant/002_non_functional_requirements.md` for the full NFR.
+This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requires the core logic of the `unilang` and `unilang_parser` crates to be platform-agnostic and fully compatible with the `wasm32-unknown-unknown` target.
 
-### Cross-References
+### Analysis Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [feature/003_pipeline.md](003_pipeline.md) | Pipeline used by REPL for command processing |
-| doc | [invariant/002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFR-PLATFORM-1 WASM compatibility requirement |
-| doc | [architecture/006_repl_implementation.md](../architecture/006_repl_implementation.md) | REPL implementation guide and feature flags |
+| File | Relationship |
+|------|--------------|
+| [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability improvements for REPL and interactive patterns |
+
+### Architecture Instances
+
+| File | Relationship |
+|------|--------------|
+| [006_repl_implementation.md](../architecture/006_repl_implementation.md) | REPL implementation guide and feature flags |
+
+### Feature Instances
+
+| File | Relationship |
+|------|--------------|
+| [003_pipeline.md](003_pipeline.md) | Pipeline used by REPL for command processing |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFR-PLATFORM-1 WASM compatibility requirement |
+
+### API Instances
+
+| File | Relationship |
+|------|--------------|
+| [002_error_codes.md](../api/002_error_codes.md) | ArgumentInteractiveRequired error code surfaced by REPL |

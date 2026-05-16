@@ -14,10 +14,10 @@
 
 Introduce `ShellArgv(Vec<String>)` and `ReplInput(String)` as zero-cost newtype wrappers in `unilang_parser`, export them from both `unilang_parser` and `unilang`, and add `Parser::parse_cli(&ShellArgv)` and `Parser::parse_repl(&ReplInput)` as type-safe entry points. After this task, passing a `Vec<String>` directly to `parse_repl` is a compile-time error.
 
-**Motivated:** DEMAND 5 from task 086 requires compile-time enforcement of argv-vs-string separation.
-**Observable:** `grep -c "pub struct ShellArgv\|pub struct ReplInput" module/unilang_parser/src/argv_types.rs` → 2; types in `cargo doc`.
-**Scoped:** New file `argv_types.rs` in `unilang_parser/src/`; 2 new methods in `mod.rs`; re-exports in both crates.
-**Testable:** `cargo nextest run -p unilang_parser -- argv_types` → PASS (≥2 tests).
+- **Motivated:** DEMAND 5 from task 086 requires compile-time enforcement of argv-vs-string separation.
+- **Observable:** `grep -c "pub struct ShellArgv\|pub struct ReplInput" module/unilang_parser/src/argv_types.rs` → 2; types in `cargo doc`.
+- **Scoped:** New file `argv_types.rs` in `unilang_parser/src/`; 2 new methods in `mod.rs`; re-exports in both crates.
+- **Testable:** `cargo nextest run -p unilang_parser -- argv_types` → PASS (≥2 tests).
 
 ## In Scope
 

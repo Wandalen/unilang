@@ -50,15 +50,12 @@ impl From< StaticCommandRegistry > for CommandRegistry
           );
         }
       }
-      else
+      else if let Err( e ) = registry.register( cmd )
       {
-        if let Err( e ) = registry.register( cmd )
-        {
-          log::warn!(
-            "Unexpected: Command '{}' registration failed during StaticCommandRegistry conversion: {}",
-            name, e
-          );
-        }
+        log::warn!(
+          "Unexpected: Command '{}' registration failed during StaticCommandRegistry conversion: {}",
+          name, e
+        );
       }
     }
 

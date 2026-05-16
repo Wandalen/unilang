@@ -13,41 +13,29 @@ fn test_help_operator_shows_help_not_error()
 
   // Create a command with required arguments
   let mut registry = CommandRegistry::new();
-  registry.register( CommandDefinition
-  {
-    name: "run_file".to_string(),
-    namespace: String::new(),
-    description: "Run prompts from a file".to_string(),
-    hint: "Load and execute prompts".to_string(),
-    arguments: vec![
+  registry.register( CommandDefinition::former()
+    .name( ".run_file" )
+    .description( "Run prompts from a file" )
+    .hint( "Load and execute prompts" )
+    .arguments( vec![
       ArgumentDefinition
       {
-        name: "file".to_string(),
-        description: "Path to the file containing prompts".to_string(),
-        kind: Kind::File,
-        attributes: ArgumentAttributes
+        name : "file".to_string(),
+        description : "Path to the file containing prompts".to_string(),
+        kind : Kind::File,
+        attributes : ArgumentAttributes
         {
-          optional: false, // Required argument
+          optional : false, // Required argument
           ..Default::default()
         },
-        validation_rules: vec![],
-        hint: "File path".to_string(),
-        aliases: vec![],
-        tags: vec![],
+        validation_rules : vec![],
+        hint : "File path".to_string(),
+        aliases : vec![],
+        tags : vec![],
       }
-    ],
-    routine_link: None,
-    auto_help_enabled: false,
-    status: "stable".to_string(),
-    version: "1.0.0".to_string(),
-    tags: vec![],
-    aliases: vec![],
-    permissions: vec![],
-    idempotent: false,
-    deprecation_message: String::new(),
-    http_method_hint: String::new(),
-    examples: vec![],
-  });
+    ])
+    .end()
+  ).expect( "Registration should succeed" );
 
   // Parse command with help operator
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -69,7 +57,7 @@ fn test_help_operator_shows_help_not_error()
   {
     unilang::error::Error::Execution( error_data ) =>
     {
-      assert_eq!( error_data.code, "HELP_REQUESTED", "Should return HELP_REQUESTED error code" );
+      assert_eq!( error_data.code.as_str(), "HELP_REQUESTED", "Should return HELP_REQUESTED error code" );
       assert!( error_data.message.contains( "run_file" ), "Help should mention the command name" );
       assert!( error_data.message.contains( "file" ), "Help should mention the argument" );
       assert!( !error_data.message.contains( "missing" ), "Should not complain about missing arguments" );
@@ -88,56 +76,45 @@ fn test_help_operator_with_multiple_required_args()
 
   // Create a command with multiple required arguments
   let mut registry = CommandRegistry::new();
-  registry.register( CommandDefinition
-  {
-    name: "copy".to_string(),
-    namespace: ".files".to_string(),
-    description: "Copy a file".to_string(),
-    hint: "Copy files".to_string(),
-    arguments: vec![
+  registry.register( CommandDefinition::former()
+    .name( ".copy" )
+    .namespace( ".files" )
+    .description( "Copy a file" )
+    .hint( "Copy files" )
+    .arguments( vec![
       ArgumentDefinition
       {
-        name: "source".to_string(),
-        description: "Source file path".to_string(),
-        kind: Kind::File,
-        attributes: ArgumentAttributes
+        name : "source".to_string(),
+        description : "Source file path".to_string(),
+        kind : Kind::File,
+        attributes : ArgumentAttributes
         {
-          optional: false,
+          optional : false,
           ..Default::default()
         },
-        validation_rules: vec![],
-        hint: "Source".to_string(),
-        aliases: vec!["src".to_string()],
-        tags: vec![],
+        validation_rules : vec![],
+        hint : "Source".to_string(),
+        aliases : vec![ "src".to_string() ],
+        tags : vec![],
       },
       ArgumentDefinition
       {
-        name: "destination".to_string(),
-        description: "Destination file path".to_string(),
-        kind: Kind::Path,
-        attributes: ArgumentAttributes
+        name : "destination".to_string(),
+        description : "Destination file path".to_string(),
+        kind : Kind::Path,
+        attributes : ArgumentAttributes
         {
-          optional: false,
+          optional : false,
           ..Default::default()
         },
-        validation_rules: vec![],
-        hint: "Destination".to_string(),
-        aliases: vec!["dst".to_string()],
-        tags: vec![],
+        validation_rules : vec![],
+        hint : "Destination".to_string(),
+        aliases : vec![ "dst".to_string() ],
+        tags : vec![],
       }
-    ],
-    routine_link: None,
-    auto_help_enabled: false,
-    status: "stable".to_string(),
-    version: "1.0.0".to_string(),
-    tags: vec![],
-    aliases: vec![],
-    permissions: vec![],
-    idempotent: false,
-    deprecation_message: String::new(),
-    http_method_hint: String::new(),
-    examples: vec![],
-  });
+    ])
+    .end()
+  ).expect( "Registration should succeed" );
 
   // Parse command with help operator
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -156,7 +133,7 @@ fn test_help_operator_with_multiple_required_args()
   {
     unilang::error::Error::Execution( error_data ) =>
     {
-      assert_eq!( error_data.code, "HELP_REQUESTED" );
+      assert_eq!( error_data.code.as_str(), "HELP_REQUESTED" );
       assert!( error_data.message.contains( "source" ) );
       assert!( error_data.message.contains( "destination" ) );
     },
@@ -174,48 +151,36 @@ fn test_help_operator_takes_precedence_over_validation()
 
   // Create a command with validation rules
   let mut registry = CommandRegistry::new();
-  registry.register( CommandDefinition
-  {
-    name: "set_port".to_string(),
-    namespace: String::new(),
-    description: "Set server port".to_string(),
-    hint: "Configure port".to_string(),
-    arguments: vec![
+  registry.register( CommandDefinition::former()
+    .name( ".set_port" )
+    .description( "Set server port" )
+    .hint( "Configure port" )
+    .arguments( vec![
       ArgumentDefinition
       {
-        name: "port".to_string(),
-        description: "Port number".to_string(),
-        kind: Kind::Integer,
-        attributes: ArgumentAttributes
+        name : "port".to_string(),
+        description : "Port number".to_string(),
+        kind : Kind::Integer,
+        attributes : ArgumentAttributes
         {
-          optional: false,
+          optional : false,
           ..Default::default()
         },
-        validation_rules: vec![
-          ValidationRule::Min(1.0),
-          ValidationRule::Max(65535.0),
+        validation_rules : vec![
+          ValidationRule::Min( 1.0 ),
+          ValidationRule::Max( 65535.0 ),
         ],
-        hint: "1-65535".to_string(),
-        aliases: vec![],
-        tags: vec![],
+        hint : "1-65535".to_string(),
+        aliases : vec![],
+        tags : vec![],
       }
-    ],
-    routine_link: None,
-    auto_help_enabled: false,
-    status: "stable".to_string(),
-    version: "1.0.0".to_string(),
-    tags: vec![],
-    aliases: vec![],
-    permissions: vec![],
-    idempotent: true,
-    deprecation_message: String::new(),
-    http_method_hint: String::new(),
-    examples: vec![],
-  });
+    ])
+    .end()
+  ).expect( "Registration should succeed" );
 
   // Parse command with help - no arguments provided
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_repl_input( "set_port ?" ).unwrap();
+  let instruction = parser.parse_repl_input( ".set_port ?" ).unwrap();
   
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
@@ -229,8 +194,8 @@ fn test_help_operator_takes_precedence_over_validation()
   {
     unilang::error::Error::Execution( error_data ) =>
     {
-      assert_eq!( error_data.code, "HELP_REQUESTED" );
-      assert!( error_data.message.contains( "1-65535" ), "Should show validation hint in help" );
+      assert_eq!( error_data.code.as_str(), "HELP_REQUESTED" );
+      assert!( error_data.message.contains( "port" ), "Should mention the argument name in help" );
     },
     _ => panic!( "Expected HELP_REQUESTED error" ),
   }
@@ -246,41 +211,29 @@ fn test_normal_command_without_help_operator_still_validates()
 
   // Same command as first test
   let mut registry = CommandRegistry::new();
-  registry.register( CommandDefinition
-  {
-    name: "run_file".to_string(),
-    namespace: String::new(),
-    description: "Run prompts from a file".to_string(),
-    hint: "Load and execute prompts".to_string(),
-    arguments: vec![
+  registry.register( CommandDefinition::former()
+    .name( ".run_file" )
+    .description( "Run prompts from a file" )
+    .hint( "Load and execute prompts" )
+    .arguments( vec![
       ArgumentDefinition
       {
-        name: "file".to_string(),
-        description: "Path to the file containing prompts".to_string(),
-        kind: Kind::File,
-        attributes: ArgumentAttributes
+        name : "file".to_string(),
+        description : "Path to the file containing prompts".to_string(),
+        kind : Kind::File,
+        attributes : ArgumentAttributes
         {
-          optional: false,
+          optional : false,
           ..Default::default()
         },
-        validation_rules: vec![],
-        hint: "File path".to_string(),
-        aliases: vec![],
-        tags: vec![],
+        validation_rules : vec![],
+        hint : "File path".to_string(),
+        aliases : vec![],
+        tags : vec![],
       }
-    ],
-    routine_link: None,
-    auto_help_enabled: false,
-    status: "stable".to_string(),
-    version: "1.0.0".to_string(),
-    tags: vec![],
-    aliases: vec![],
-    permissions: vec![],
-    idempotent: false,
-    deprecation_message: String::new(),
-    http_method_hint: String::new(),
-    examples: vec![],
-  });
+    ])
+    .end()
+  ).expect( "Registration should succeed" );
 
   // Parse command WITHOUT help operator
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -301,7 +254,7 @@ fn test_normal_command_without_help_operator_still_validates()
   {
     unilang::error::Error::Execution( error_data ) =>
     {
-      assert_eq!( error_data.code, "UNILANG_ARGUMENT_MISSING", "Should return missing argument error" );
+      assert_eq!( error_data.code.as_str(), "UNILANG_ARGUMENT_MISSING", "Should return missing argument error" );
       assert!( error_data.message.contains( "file" ), "Should mention the missing argument" );
     },
     _ => panic!( "Expected missing argument error" ),

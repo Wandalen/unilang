@@ -31,49 +31,38 @@ fn main()
   }
 }
 
-#[allow(clippy::field_reassign_with_default)]
-#[allow(clippy::too_many_lines)]
-fn run() -> Result< (), unilang::error::Error >
+fn cmd_math_add() -> ( CommandDefinition, CommandRoutine )
 {
-  // 1. Initialize Command Registry
-    let mut registry = CommandRegistry::new();
-
-  // 2. Define and Register Commands with Routines
-
-  // .math.add command
-  let math_add_def = CommandDefinition::former()
+  let def = CommandDefinition::former()
   .name( ".add" )
-  .namespace( ".math".to_string() ) // Changed to String
+  .namespace( ".math".to_string() )
   .description( "Adds two numbers.".to_string() )
   .hint( "Adds two numbers." )
   .status( "stable" )
   .version( "1.0.0".to_string() )
   .aliases( vec![ "sum".to_string(), "plus".to_string() ] )
   .tags( vec![ "math".to_string(), "calculation".to_string() ] )
-  .permissions( vec![] ) // Added
-  .idempotent( true ) // Added
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![] ) // Added
-  .arguments
-  (
-    vec!
-    [
-      ArgumentDefinition::former()
-      .name( "a" )
-      .kind( ArgumentKind::Integer )
-      .hint( "First number." )
-      .end(),
-      ArgumentDefinition::former()
-      .name( "b" )
-      .kind( ArgumentKind::Integer )
-      .hint( "Second number." )
-      .end(),
-    ]
-  )
+  .permissions( vec![] )
+  .idempotent( true )
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![] )
+  .arguments( vec!
+  [
+    ArgumentDefinition::former()
+    .name( "a" )
+    .kind( ArgumentKind::Integer )
+    .hint( "First number." )
+    .end(),
+    ArgumentDefinition::former()
+    .name( "b" )
+    .kind( ArgumentKind::Integer )
+    .hint( "Second number." )
+    .end(),
+  ])
   .end();
 
-  let math_add_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let a = cmd.arguments.get( "a" ).unwrap();
     let b = cmd.arguments.get( "b" ).unwrap();
@@ -85,52 +74,49 @@ fn run() -> Result< (), unilang::error::Error >
       {
         content : result.to_string(),
         format : "text".to_string(),
-      execution_time_ms : None,
+        execution_time_ms : None,
       });
     }
-
     unreachable!();
   });
-    registry.command_add_runtime( &math_add_def, math_add_routine )?;
 
-  // .math.sub command
-  let math_sub_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_math_sub() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".sub" )
-  .namespace( ".math".to_string() ) // Changed to String
+  .namespace( ".math".to_string() )
   .description( "Subtracts two numbers.".to_string() )
   .hint( "Subtracts two numbers." )
   .status( "beta" )
   .version( "0.9.0".to_string() )
   .aliases( vec![ "minus".to_string() ] )
-  .permissions( vec![] ) // Added
-  .idempotent( true ) // Added
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![] ) // Added
-  .arguments
-  (
-    vec!
-    [
-      ArgumentDefinition::former()
-      .name( "x" )
-      .kind( ArgumentKind::Integer )
-      .hint( "Minuend." )
-      .end(),
-      ArgumentDefinition::former()
-      .name( "y" )
-      .kind( ArgumentKind::Integer )
-      .hint( "Subtrahend." )
-      .end(),
-    ]
-  )
+  .permissions( vec![] )
+  .idempotent( true )
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![] )
+  .arguments( vec!
+  [
+    ArgumentDefinition::former()
+    .name( "x" )
+    .kind( ArgumentKind::Integer )
+    .hint( "Minuend." )
+    .end(),
+    ArgumentDefinition::former()
+    .name( "y" )
+    .kind( ArgumentKind::Integer )
+    .hint( "Subtrahend." )
+    .end(),
+  ])
   .end();
 
-  let math_sub_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let x = cmd.arguments.get( "x" ).unwrap();
-
     let y = cmd.arguments.get( "y" ).unwrap();
-
     if let ( Value::Integer( val_x ), Value::Integer( val_y ) ) = ( x, y )
     {
       let result = val_x - val_y;
@@ -139,27 +125,30 @@ fn run() -> Result< (), unilang::error::Error >
       {
         content : result.to_string(),
         format : "text".to_string(),
-      execution_time_ms : None,
+        execution_time_ms : None,
       });
     }
     unreachable!();
   });
-    registry.command_add_runtime( &math_sub_def, math_sub_routine )?;
 
-  // .greet command
-  let greet_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_greet() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".greet" )
-  .namespace( String::new() ) // Changed to String (global namespace)
+  .namespace( String::new() )
   .description( "Greets the specified person.".to_string() )
   .hint( "Greets the specified person." )
   .status( "stable" )
   .version( "1.0.0".to_string() )
-  .aliases( vec![ "hi".to_string() ] ) // Added alias for testing
-  .permissions( vec![] ) // Added
-  .idempotent( true ) // Added
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![ "greet name::\"John\"".to_string(), "greet".to_string() ] ) // Added
+  .aliases( vec![ "hi".to_string() ] )
+  .permissions( vec![] )
+  .idempotent( true )
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![ "greet name::\"John\"".to_string(), "greet".to_string() ] )
   .arguments( vec!
   [
     ArgumentDefinition::former()
@@ -176,7 +165,7 @@ fn run() -> Result< (), unilang::error::Error >
   ])
   .end();
 
-  let greet_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let name = match cmd.arguments.get( "name" )
     {
@@ -184,7 +173,6 @@ fn run() -> Result< (), unilang::error::Error >
       _ => "World".to_string(),
     };
     let result = format!( "Hello, {name}!" );
-
     println!( "{result}" );
     Ok( OutputData
     {
@@ -193,22 +181,25 @@ fn run() -> Result< (), unilang::error::Error >
       execution_time_ms : None,
     })
   });
-    registry.command_add_runtime( &greet_def, greet_routine )?;
 
-  // .config.set command
-  let config_set_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_config_set() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".set" )
-  .namespace( ".config".to_string() ) // Changed to String
+  .namespace( ".config".to_string() )
   .description( "Sets a configuration value.".to_string() )
   .hint( "Sets a configuration value." )
   .status( "experimental" )
   .version( "0.1.0".to_string() )
-  .aliases( vec![] ) // Added
-  .permissions( vec![] ) // Added
-  .idempotent( false ) // Added
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![] ) // Added
+  .aliases( vec![] )
+  .permissions( vec![] )
+  .idempotent( false )
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![] )
   .arguments( vec!
   [
     ArgumentDefinition::former()
@@ -230,10 +221,9 @@ fn run() -> Result< (), unilang::error::Error >
   ])
   .end();
 
-  let config_set_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let key = cmd.arguments.get( "key" ).unwrap();
-
     let value = cmd.arguments.get( "value" ).unwrap();
     let result = format!( "Setting config: {key} = {value}" );
     println!( "{result}" );
@@ -244,23 +234,26 @@ fn run() -> Result< (), unilang::error::Error >
       execution_time_ms : None,
     })
   });
-    registry.command_add_runtime( &config_set_def, config_set_routine )?;
 
-  // .system.echo command
-  let echo_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_echo() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".echo" )
-  .namespace( ".system".to_string() ) // Changed to String
+  .namespace( ".system".to_string() )
   .description( "Echoes a message".to_string() )
   .hint( "Echoes back the provided arguments.".to_string() )
   .status( "stable".to_string() )
   .version( "1.0.0".to_string() )
-  .tags( vec![ "utility".to_string() ] ) // Added tag for testing
+  .tags( vec![ "utility".to_string() ] )
   .aliases( vec![ "e".to_string() ] )
-  .permissions( vec![ "admin".to_string() ] ) // Added permission for testing
+  .permissions( vec![ "admin".to_string() ] )
   .idempotent( true )
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![ "system.echo \"Hello\"".to_string() ] ) // Added
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![ "system.echo \"Hello\"".to_string() ] )
   .arguments( vec!
   [
     ArgumentDefinition::former()
@@ -277,7 +270,7 @@ fn run() -> Result< (), unilang::error::Error >
   .routine_link( Some( ".system.echo".to_string() ) )
   .end();
 
-  let echo_routine : CommandRoutine = Box::new( | _cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | _cmd, _ctx |
   {
     println!( "Echo command executed!" );
     Ok( OutputData
@@ -287,23 +280,26 @@ fn run() -> Result< (), unilang::error::Error >
       execution_time_ms : None,
     })
   });
-    registry.command_add_runtime( &echo_def, echo_routine )?;
 
-  // .files.cat command
-  let cat_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_cat() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".cat" )
-  .namespace( ".files".to_string() ) // Changed to String
+  .namespace( ".files".to_string() )
   .description( "Read and display file contents".to_string() )
   .hint( "Print file contents to stdout".to_string() )
   .status( "stable".to_string() )
   .version( "1.0.0".to_string() )
-  .tags( vec![ "filesystem".to_string() ] ) // Added tag for testing
-  .aliases( vec![ "type".to_string() ] ) // Added alias for testing
-  .permissions( vec![ "read_file".to_string() ] ) // Added permission for testing
+  .tags( vec![ "filesystem".to_string() ] )
+  .aliases( vec![ "type".to_string() ] )
+  .permissions( vec![ "read_file".to_string() ] )
   .idempotent( true )
-  .deprecation_message( String::new() ) // Added
-  .http_method_hint( String::new() ) // Added
-  .examples( vec![ "files.cat path::/etc/hosts".to_string() ] ) // Added
+  .deprecation_message( String::new() )
+  .http_method_hint( String::new() )
+  .examples( vec![ "files.cat path::/etc/hosts".to_string() ] )
   .arguments( vec!
   [
     ArgumentDefinition::former()
@@ -311,24 +307,21 @@ fn run() -> Result< (), unilang::error::Error >
     .description( "The path to the file to read".to_string() )
     .hint( "File path".to_string() )
     .kind( ArgumentKind::String )
-    .aliases( vec![ "p".to_string() ] ) // Added alias for testing
-    .tags( vec![ "required".to_string() ] ) // Added tag for testing
-    .attributes
-    (
-      ArgumentAttributes
-      {
-        optional : false,
-        interactive : false,
-        sensitive : false,
-        ..Default::default()
-      }
-    )
+    .aliases( vec![ "p".to_string() ] )
+    .tags( vec![ "required".to_string() ] )
+    .attributes( ArgumentAttributes
+    {
+      optional : false,
+      interactive : false,
+      sensitive : false,
+      ..Default::default()
+    })
     .end()
   ])
   .routine_link( Some( ".files.cat".to_string() ) )
   .end();
 
-  let cat_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let path = cmd.arguments.get( "path" ).unwrap();
     if let Value::String( path_str ) = path
@@ -340,7 +333,7 @@ fn run() -> Result< (), unilang::error::Error >
         {
           content : contents,
           format : "text".to_string(),
-      execution_time_ms : None,
+          execution_time_ms : None,
         })
       }
       else
@@ -360,10 +353,13 @@ fn run() -> Result< (), unilang::error::Error >
       ))
     }
   });
-    registry.command_add_runtime( &cat_def, cat_routine )?;
 
-  // .video.search command (user's specific request)
-  let video_search_def = CommandDefinition::former()
+  ( def, routine )
+}
+
+fn cmd_video_search() -> ( CommandDefinition, CommandRoutine )
+{
+  let def = CommandDefinition::former()
   .name( ".search" )
   .namespace( ".video".to_string() )
   .description( "Search for videos with query and optional filters".to_string() )
@@ -376,10 +372,11 @@ fn run() -> Result< (), unilang::error::Error >
   .idempotent( true )
   .deprecation_message( String::new() )
   .http_method_hint( String::new() )
-  .examples( vec![
+  .examples( vec!
+  [
     ".video.search query::\"rust programming\"".to_string(),
     ".video.search query::\"llm rust\" title::\"Tutorial\"".to_string()
-  ] )
+  ])
   .arguments( vec!
   [
     ArgumentDefinition::former()
@@ -418,27 +415,24 @@ fn run() -> Result< (), unilang::error::Error >
   .routine_link( Some( ".video.search".to_string() ) )
   .end();
 
-  let video_search_routine : CommandRoutine = Box::new( | cmd, _ctx |
+  let routine : CommandRoutine = Box::new( | cmd, _ctx |
   {
     let query = cmd.arguments.get( "query" ).unwrap();
     let title = cmd.arguments.get( "title" );
-
     if let Value::String( query_str ) = query
     {
       let mut result = format!( "Query: {query_str}" );
-
       if let Some( Value::String( title_str ) ) = title
       {
         use core::fmt::Write;
         write!( &mut result, "\nTitle: {title_str}" ).unwrap();
       }
-
       println!( "{result}" );
       Ok( OutputData
       {
         content : result,
         format : "text".to_string(),
-      execution_time_ms : None,
+        execution_time_ms : None,
       })
     }
     else
@@ -449,12 +443,44 @@ fn run() -> Result< (), unilang::error::Error >
       ))
     }
   });
-  registry.command_add_runtime( &video_search_def, video_search_routine )?;
 
-  // 3. Parse Command Line Arguments
+  ( def, routine )
+}
+
+fn build_registry() -> Result< CommandRegistry, unilang::error::Error >
+{
+  let mut registry = CommandRegistry::new();
+
+  let ( def, routine ) = cmd_math_add();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_math_sub();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_greet();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_config_set();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_echo();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_cat();
+  registry.command_add_runtime( &def, routine )?;
+
+  let ( def, routine ) = cmd_video_search();
+  registry.command_add_runtime( &def, routine )?;
+
+  Ok( registry )
+}
+
+fn run() -> Result< (), unilang::error::Error >
+{
+  let registry = build_registry()?;
+
   let args : Vec< String > = std::env::args().skip( 1 ).collect();
 
-  // Handle case when no arguments are provided
   if args.is_empty()
   {
     let help_generator = HelpGenerator::from_env( &registry );
@@ -470,24 +496,18 @@ fn run() -> Result< (), unilang::error::Error >
     return Ok( () );
   }
 
-  // Check for verbosity environment variable
   let verbosity = std::env::var( "UNILANG_VERBOSITY" )
   .ok()
   .and_then( | v | v.parse::< u8 >().ok() )
-  .unwrap_or( 1 ); // Default to normal verbosity
+  .unwrap_or( 1 );
 
-  // Debug: print the raw arguments from the shell
   if verbosity > 1
   {
     eprintln!( "DEBUG: Raw shell arguments: {args:?}" );
   }
 
-  let mut parser_options = UnilangParserOptions::default();
-  parser_options.verbosity = verbosity;
-  
-  let parser = Parser::new( parser_options );
+  let parser = Parser::new( UnilangParserOptions { verbosity, ..Default::default() } );
 
-  // Build alias map for CLI resolution
   let mut alias_map : HashMap< String, String > = HashMap::new();
   for ( full_name, cmd_def ) in &registry.commands()
   {
@@ -506,7 +526,6 @@ fn run() -> Result< (), unilang::error::Error >
     }
   }
 
-  // Handle '--help' flag
   if processed_args.first().is_some_and( | arg | arg == "--help" )
   {
     let help_generator = HelpGenerator::from_env( &registry );
@@ -514,7 +533,6 @@ fn run() -> Result< (), unilang::error::Error >
     return Ok( () );
   }
 
-  // Handle 'help' command manually
   if processed_args.first().is_some_and( | arg | arg == "help" )
   {
     let help_generator = HelpGenerator::from_env( &registry );
@@ -542,35 +560,33 @@ fn run() -> Result< (), unilang::error::Error >
     return Ok( () );
   }
 
-  // Parse command using argv-aware parser to properly handle multi-word parameter values.
-  // The shell removes quotes from arguments like query::"llm rust", resulting in
-  // argv = ["query::llm rust"] (one token). Using parse_from_argv() preserves these
-  // token boundaries, while parse_single_instruction() would re-tokenize on spaces.
   if verbosity > 1
   {
     eprintln!( "DEBUG: Processing argv: {processed_args:?}" );
   }
+
+  // Parse using argv-aware parser to properly handle multi-word parameter values.
+  // The shell removes quotes from arguments like query::"llm rust", resulting in
+  // argv = ["query::llm rust"] (one token). Using parse_from_argv() preserves these
+  // token boundaries, while parse_single_instruction() would re-tokenize on spaces.
   let instruction = parser.parse_from_argv( &processed_args )?;
   let instructions = &[ instruction ][ .. ];
 
-  // 4. Semantic Analysis
   let semantic_analyzer = SemanticAnalyzer::new( instructions, &registry );
   let commands = match semantic_analyzer.analyze()
   {
     Ok( commands ) => commands,
     Err( unilang::error::Error::Execution( error_data ) ) if error_data.code == unilang::data::ErrorCode::HelpRequested =>
     {
-      // Special handling for help requests - print the help and exit successfully
       println!( "{}", error_data.message );
       return Ok( () );
     },
     Err( e ) => return Err( e ),
   };
 
-  // 5. Interpret and Execute
   let interpreter = Interpreter::new( &commands, &registry );
   let mut context = ExecutionContext::default();
   interpreter.run( &mut context )?;
 
-  Ok(())
+  Ok( () )
 }

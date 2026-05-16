@@ -1,5 +1,18 @@
 # Task Plan: Phase 3 - Architectural Unification (Elaborated)
 
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
+
 ### Goal
 *   To execute Phase 3 of the `unilang` roadmap. This involves a critical refactoring to unify the framework's architecture by removing all legacy parsing components and making the `unilang_parser` crate the single source of truth for syntactic analysis. The plan also includes aligning the core data models (`CommandDefinition`, `ArgumentDefinition`) with the formal specification, updating the help generator, enhancing test coverage for the new features, and updating the `spec.md` document to reflect the final, as-built architecture.
 
@@ -291,3 +304,49 @@
 *   [Increment 12 | 2025-07-26T16:08:53.133Z] Updated spec.md with unified architecture and complete data models.
 *   [Increment 13 | 2025-07-26T16:09:18.133Z] Detailed planning for Increment 13: Finalization and Legacy Code Removal.
 *   [Increment 13 | 2025-07-28T21:30:43.520Z] `cargo test -p unilang` failed. Updated `### Tests` section with failing tests: `command_registry_debug_test`, `command_loader_test`, `complex_types_and_attributes_test`, `runtime_command_registration_test`.
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Acceptance Criteria
+
+_N/A — pre-template task. See ## Outcomes for what was delivered._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

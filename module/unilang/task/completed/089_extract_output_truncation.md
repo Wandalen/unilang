@@ -1,11 +1,20 @@
 # Extract Output Truncation Utilities to unilang
 
-**Date**: 2025-11-19
-**Completed**: 2025-11-22
-**Priority**: HIGH - Reduces Code Duplication
-**Category**: API Enhancement
-**Status**: Completed
-**Source**: wplan_client/src/cli/output_config.rs
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Date**: 2025-11-19
+- **Completed**: 2025-11-22
+- **Priority**: HIGH - Reduces Code Duplication
+- **Category**: API Enhancement
+- **Status**: Completed
+- **Source**: wplan_client/src/cli/output_config.rs
 
 **⚠️ CRITICAL**: This task is INCOMPLETE without follow-up adoption. Task will be CANCELED if adoption not implemented.
 
@@ -13,6 +22,10 @@
 - [wplan_client/001](../../../../../willbe/module/wplan_client/task/001_adopt_output_truncation_from_unilang.md) - Replace local truncation with unilang
 
 ---
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Executive Summary
 
@@ -24,8 +37,8 @@ Extract the output truncation utilities from `wplan_client` to `unilang` as reus
 
 ### Current Location
 
-**File**: `wplan_client/src/cli/output_config.rs`
-**Functionality**:
+- **File**: `wplan_client/src/cli/output_config.rs`
+- **Functionality**:
 - Head truncation (first N lines)
 - Tail truncation (last N lines)
 - Width truncation (max visible characters per line)
@@ -416,6 +429,48 @@ layer output;
 
 ---
 
-**Resolution Date**: 2025-11-22
-**Test Coverage**: 33 new tests
-**Files Created**: 3 (mod.rs, truncation.rs, output_truncation.rs)
+- **Resolution Date**: 2025-11-22
+- **Test Coverage**: 33 new tests
+- **Files Created**: 3 (mod.rs, truncation.rs, output_truncation.rs)
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

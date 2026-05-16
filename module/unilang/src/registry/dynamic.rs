@@ -14,7 +14,6 @@ use super::builder::CommandRegistryBuilder;
 /// while dynamic commands are stored in an optimized `DynamicCommandMap` with
 /// intelligent caching for runtime flexibility and performance.
 ///
-#[ allow( missing_debug_implementations ) ]
 pub struct CommandRegistry
 {
   /// Optimized dynamic command storage with intelligent caching
@@ -22,6 +21,17 @@ pub struct CommandRegistry
   /// A map of command names to their executable routines.
   routines : HashMap< String, CommandRoutine >,
   // NOTE: help_conventions_enabled field removed - help is now mandatory for all commands
+}
+
+impl std::fmt::Debug for CommandRegistry
+{
+  fn fmt( &self, f : &mut std::fmt::Formatter< '_ > ) -> std::fmt::Result
+  {
+    f.debug_struct( "CommandRegistry" )
+      .field( "dynamic_commands", &self.dynamic_commands )
+      .field( "routines_count", &self.routines.len() ) // CommandRoutine is Box<dyn Fn>, which doesn't impl Debug
+      .finish()
+  }
 }
 
 impl CommandRegistry

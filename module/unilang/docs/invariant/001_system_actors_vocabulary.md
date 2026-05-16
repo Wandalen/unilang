@@ -7,23 +7,21 @@
 - **In Scope:** Human actors, software actors, ubiquitous language terms and their invariant meanings
 - **Out of Scope:** Feature requirements, implementation patterns, design decisions
 
-Stable definitions for all actors and canonical vocabulary terms used throughout the unilang framework.
-
 ### System Actors
 
 An Actor is any entity that plays a distinct role and participates in an interaction within the system's architecture.
 
-### Human Actors
+#### Human Actors
 
 - **`Integrator (Developer)`**: The primary human actor who uses the `unilang` framework crates (`unilang`, `unilang_parser`, `unilang_meta`) to build a `utility1` application. Their responsibilities include defining commands, implementing routines, and configuring the framework.
 - **`End User`**: A human actor who interacts with the compiled `utility1` application through one of its exposed `Modalities` (e.g., by typing commands into a CLI).
 
-### External System Actors
+#### External System Actors
 
 - **`Operating System`**: A system actor that provides the execution environment for `utility1`, including the CLI shell, file system, and environment variables.
 - **`External Service`**: Any external system (e.g., a database, a web API) that a command `Routine` might interact with. The `unilang` framework does not interact with these services directly, but it facilitates the execution of routines that do.
 
-### Internal System Actors
+#### Internal System Actors
 
 - **`Build Script (build.rs)`**: A critical internal actor responsible for compile-time operations. Its primary role is to process static command definitions (from code or manifests) and generate optimized static command maps (using Perfect Hash Functions internally) wrapped in `StaticCommandMap`, enabling the zero-overhead static command registry while hiding implementation details from downstream crates.
 - **`Command Registry`**: An internal actor that serves as the runtime database for all command definitions. It manages both the static (`StaticCommandMap` wrapper) and dynamic (HashMap) command sets and provides the lookup service used by the `Semantic Analyzer`.
@@ -61,9 +59,14 @@ All actors and terms defined in this document MUST have exactly one meaning thro
 
 Term collision causes: (1) ambiguous API contracts, (2) incorrect test assumptions, (3) documentation drift from implementation.
 
-### Cross-References
+### Invariant Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [invariant/003_governing_principles.md](003_governing_principles.md) | Principles that govern how terms are used |
-| doc | [architecture/003_vision_scope.md](../architecture/003_vision_scope.md) | System context that defines these actors |
+| File | Relationship |
+|------|--------------|
+| [003_governing_principles.md](003_governing_principles.md) | Principles that govern how terms are used |
+
+### Architecture Instances
+
+| File | Relationship |
+|------|--------------|
+| [003_vision_scope.md](../architecture/003_vision_scope.md) | System context that defines these actors |

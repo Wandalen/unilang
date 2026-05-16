@@ -3,6 +3,10 @@
 //! This test validates that the `CommandRegistry::from_static_commands()` method
 //! works correctly and that both `CommandRegistry` and `StaticCommandRegistry`
 //! implement the `CommandRegistryTrait` properly.
+//!
+//! ## FR Coverage
+//! - FR-REG-1 (FT-1): static PHF registry lookup returns registered command
+//! - FR-REG-8 (FT-7): `StaticCommandRegistry` and `CommandRegistry` return identical definitions
 
 #![ allow( deprecated ) ]
 
@@ -37,6 +41,7 @@ const TEST_STATIC_COMMANDS_INTERNAL: phf::Map<&'static str, &'static StaticComma
 /// Public wrapper for test static commands
 static TEST_STATIC_COMMANDS: StaticCommandMap = StaticCommandMap::from_phf_internal(&TEST_STATIC_COMMANDS_INTERNAL);
 
+/// FR-REG-1 (FT-1): Static PHF registry lookup returns registered command
 #[test]
 fn test_command_registry_from_static_commands_basic() {
   // Test that CommandRegistry can be created from static commands

@@ -5,6 +5,9 @@
 
 mod cli {
   mod cli_builder_api;
+  mod cli_integration;
   mod ergonomic_apis;
+  mod multiword_params;
+  mod shell_argument_parsing;
   mod verbosity_control;
 }

@@ -1,12 +1,25 @@
 # Unilang CRITICAL: Make Argv Misuse Impossible - API Redesign Required
 
-**Date**: 2025-10-26
-**Priority**: CRITICAL - API Design Flaw
-**Category**: Make Misuse Impossible
-**Status**: DESIGN FLAW - DEMANDS IMMEDIATE ACTION
-**Affected**: ALL CLI applications using unilang
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Date**: 2025-10-26
+- **Priority**: CRITICAL - API Design Flaw
+- **Category**: Make Misuse Impossible
+- **Status**: DESIGN FLAW - DEMANDS IMMEDIATE ACTION
+- **Affected**: ALL CLI applications using unilang
 
 ---
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Executive Summary
 
@@ -24,9 +37,9 @@ This violates unilang's core principle: **"The most important principle is makin
 
 ### What Happened in willbe3
 
-**File**: `willbe3/src/main.rs`
-**Lines Wasted**: 110 lines of broken code
-**Impact**: `.crates.for.each` completely non-functional for 90% of use cases
+- **File**: `willbe3/src/main.rs`
+- **Lines Wasted**: 110 lines of broken code
+- **Impact**: `.crates.for.each` completely non-functional for 90% of use cases
 
 **The Developer's Reasoning** (perfectly logical but WRONG):
 
@@ -63,8 +76,8 @@ pub fn parse_single_instruction(&self, input: &str) -> Result<...>
 pub fn parse_from_argv(&self, argv: &[String]) -> Result<...>
 ```
 
-**Question**: Which should I use?
-**Answer**: NOT OBVIOUS from the signatures!
+- **Question**: Which should I use?
+- **Answer**: NOT OBVIOUS from the signatures!
 
 **2. String-Based API Seems More Fundamental**
 
@@ -575,8 +588,8 @@ fn test_documentation_examples() {
 
 ### Phase 1: Documentation (1 week)
 
-**Priority**: CRITICAL - Prevent future occurrences
-**Effort**: 1-2 days
+- **Priority**: CRITICAL - Prevent future occurrences
+- **Effort**: 1-2 days
 
 1. Add prominent CLI integration guide to lib.rs
 2. Create docs/cli-integration.md with examples
@@ -587,8 +600,8 @@ fn test_documentation_examples() {
 
 ### Phase 2: Runtime Detection (2 weeks)
 
-**Priority**: HIGH - Catch existing bugs
-**Effort**: 3-5 days
+- **Priority**: HIGH - Catch existing bugs
+- **Effort**: 3-5 days
 
 1. Add validation to detect quote characters in argv tokens
 2. Provide helpful error messages
@@ -599,8 +612,8 @@ fn test_documentation_examples() {
 
 ### Phase 3: API Improvements (1 month)
 
-**Priority**: MEDIUM - Long-term API clarity
-**Effort**: 1-2 weeks
+- **Priority**: MEDIUM - Long-term API clarity
+- **Effort**: 1-2 weeks
 
 1. Add `parse_cli_argv` and `parse_repl_line` with clear names
 2. Deprecate `parse_single_instruction` with migration guide
@@ -611,8 +624,8 @@ fn test_documentation_examples() {
 
 ### Phase 4: Tooling (Future)
 
-**Priority**: LOW - Nice to have
-**Effort**: 2-4 weeks
+- **Priority**: LOW - Nice to have
+- **Effort**: 2-4 weeks
 
 1. Create clippy lint to detect the pattern
 2. Add IDE quick-fixes for detected issues
@@ -626,8 +639,8 @@ fn test_documentation_examples() {
 
 ### Lesson 1: Pit of Success
 
-**Current**: Two APIs, unclear guidance → Pit of Failure
-**Target**: One obvious API, clear alternatives → Pit of Success
+- **Current**: Two APIs, unclear guidance → Pit of Failure
+- **Target**: One obvious API, clear alternatives → Pit of Success
 
 The "happy path" should be:
 - The simplest approach
@@ -636,8 +649,8 @@ The "happy path" should be:
 
 ### Lesson 2: Fail Loudly
 
-**Current**: Misuse compiles, fails cryptically at runtime
-**Target**: Misuse is detected and explained clearly
+- **Current**: Misuse compiles, fails cryptically at runtime
+- **Target**: Misuse is detected and explained clearly
 
 When developers make mistakes:
 - Detect it immediately
@@ -647,8 +660,8 @@ When developers make mistakes:
 
 ### Lesson 3: Documentation is Not Enough
 
-**Current**: Documentation exists but is buried
-**Target**: Documentation is LOUD and UNAVOIDABLE
+- **Current**: Documentation exists but is buried
+- **Target**: Documentation is LOUD and UNAVOIDABLE
 
 For critical pitfalls:
 - Warn in the function docs
@@ -658,8 +671,8 @@ For critical pitfalls:
 
 ### Lesson 4: Names Matter
 
-**Current**: `parse_single_instruction` sounds primary
-**Target**: Names clearly indicate purpose
+- **Current**: `parse_single_instruction` sounds primary
+- **Target**: Names clearly indicate purpose
 
 Good names:
 - `parse_cli_argv` - Obviously for CLI apps
@@ -783,3 +796,45 @@ Per original task Phase 3-4 categorization, these remain optional:
 ### Validation
 
 All 792 tests pass (ctest3). No breaking changes introduced.
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

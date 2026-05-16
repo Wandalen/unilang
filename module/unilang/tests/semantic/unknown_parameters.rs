@@ -5,6 +5,9 @@
 //!
 //! Bug reproduction: Currently unilang silently ignores named parameters that don't match
 //! any defined argument in the command definition.
+//!
+//! ## FR Coverage
+//! - FR-ARG-8 (FT-2): unknown parameter produces error with Levenshtein suggestion
 
 #![ allow( deprecated ) ]
 
@@ -38,9 +41,7 @@ fn create_test_command() -> CommandDefinition
     .end()
 }
 
-/// TEST: Unknown named parameter should cause error with suggestion
-///
-/// Tests that unilang detects typos and provides helpful "Did you mean..." suggestions
+/// FR-ARG-8 (FT-2): unknown named parameter with close Levenshtein distance produces suggestion
 #[test]
 fn test_unknown_named_parameter_with_suggestion()
 {

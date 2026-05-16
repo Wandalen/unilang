@@ -5,10 +5,10 @@
 | Type | Purpose | Master File | Instances |
 |------|---------|-------------|----------:|
 | `analysis/` | Codebase analysis and usability findings | [analysis/readme.md](analysis/readme.md) | 2 |
-| `api/` | Public programmatic interfaces | [api/readme.md](api/readme.md) | 1 |
+| `api/` | Public programmatic interfaces | [api/readme.md](api/readme.md) | 2 |
 | `architecture/` | Architectural decisions and rationale | [architecture/readme.md](architecture/readme.md) | 6 |
 | `feature/` | Behavioral feature requirements (FR-*) | [feature/readme.md](feature/readme.md) | 5 |
-| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 4 |
+| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 5 |
 
 ## Master Doc Instances Table
 
@@ -17,6 +17,7 @@
 | analysis | 001 | API Analysis | [analysis/001_api_analysis.md](analysis/001_api_analysis.md) |
 | analysis | 002 | Usability Improvements | [analysis/002_usability_improvements.md](analysis/002_usability_improvements.md) |
 | api | 001 | Public Types | [api/001_public_types.md](api/001_public_types.md) |
+| api | 002 | Error Codes | [api/002_error_codes.md](api/002_error_codes.md) |
 | architecture | 001 | Mandates | [architecture/001_mandates.md](architecture/001_mandates.md) |
 | architecture | 002 | Benchmark Separation | [architecture/002_benchmark_separation.md](architecture/002_benchmark_separation.md) |
 | architecture | 003 | Vision & Scope | [architecture/003_vision_scope.md](architecture/003_vision_scope.md) |
@@ -32,3 +33,4 @@
 | invariant | 002 | Non-Functional Requirements | [invariant/002_non_functional_requirements.md](invariant/002_non_functional_requirements.md) |
 | invariant | 003 | Governing Principles | [invariant/003_governing_principles.md](invariant/003_governing_principles.md) |
 | invariant | 004 | Workspace Dependency Standards | [invariant/004_workspace_dependency_standards.md](invariant/004_workspace_dependency_standards.md) |
+| invariant | 005 | Command Naming | [invariant/005_command_naming.md](invariant/005_command_naming.md) |

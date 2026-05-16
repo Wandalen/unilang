@@ -7,8 +7,6 @@
 - **In Scope:** Architectural mandates, system diagrams, crate responsibility boundaries
 - **Out of Scope:** Feature requirements, API contracts, implementation specifics
 
-*This section describes the recommended internal architecture and implementation strategies. These are best-practice starting points, and the development team has the flexibility to modify them as needed.*
-
 ### Architectural Mandates & Design Principles
 
 It is recommended that the `unilang` ecosystem adhere to the following principles:
@@ -24,7 +22,7 @@ It is recommended that the `unilang` ecosystem adhere to the following principle
 
 ### Architectural Diagrams
 
-### Use Case Diagram
+#### Use Case Diagram
 
 ```mermaid
 graph TD
@@ -49,7 +47,7 @@ graph TD
     actorEndUser --> UC6
 ```
 
-### System Context Diagram
+#### System Context Diagram
 
 ```mermaid
 graph TD
@@ -72,7 +70,7 @@ graph TD
     EndUser -- "Interacts with" --> Utility1
 ```
 
-### C4 Container Diagram
+#### C4 Container Diagram
 
 ```mermaid
 C4Context
@@ -94,7 +92,7 @@ C4Context
     Rel(unilang_core, unilang_parser, "Uses for parsing")
 ```
 
-### High-Level Architecture (Hybrid Registry)
+#### High-Level Architecture (Hybrid Registry)
 
 ```mermaid
 graph TD
@@ -127,7 +125,7 @@ graph TD
     end
 ```
 
-### Sequence Diagram: Unified Processing Pipeline
+#### Sequence Diagram: Unified Processing Pipeline
 
 ```mermaid
 sequenceDiagram
@@ -164,10 +162,31 @@ sequenceDiagram
 - **`unilang_parser` (Parser):** Recommended to be the dedicated lexical and syntactic analyzer. It should be stateless and have no knowledge of command definitions.
 - **`unilang_meta` (Macros):** Recommended to provide procedural macros for a simplified, compile-time developer experience.
 
-### Cross-References
+### Type-Safe API Redesign
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [invariant/003_governing_principles.md](../invariant/003_governing_principles.md) | Principles that mandates enforce |
-| doc | [architecture/002_benchmark_separation.md](002_benchmark_separation.md) | Benchmark architecture mandate |
-| doc | [architecture/004_implementation_details.md](004_implementation_details.md) | Compile-time optimization strategy |
+The `CommandDefinition` public type underwent a complete type-safe redesign (v3.1.0) implementing the "parse don't validate" principle. Invalid states are now impossible to represent at compile time.
+
+The old API allowed commands to be constructed in invalid states that only failed at runtime during registration. The redesign moves all validation to construction time:
+
+- **Private fields with getter methods:** All `CommandDefinition` fields are now private; access is via getter methods, preventing mutation after construction.
+- **Validated newtypes:** `CommandName` guarantees dot prefix; `NamespaceType` guarantees valid namespace; `VersionType` guarantees non-empty version; `CommandStatus` is an enum (`Active`, `Deprecated`, `Experimental`, `Internal`) replacing the former string field.
+- **Type-state builder:** `CommandDefinition::former()` uses phantom types to enforce required fields at compile time. The `end()` method requires only `name` and `description` with defaults. The `build()` method requires all fields explicitly.
+- **Breaking changes:** Field access changed from direct (`cmd.name`) to getter methods (`cmd.name()`); invalid commands panic at construction, not registration.
+
+This mandate is motivated by the "Make Illegal States Unrepresentable" governing principle in `invariant/003`.
+
+### Architecture Instances
+
+| File | Relationship |
+|------|--------------|
+| [002_benchmark_separation.md](002_benchmark_separation.md) | Benchmark architecture mandate |
+| [003_vision_scope.md](003_vision_scope.md) | Vision that these mandates implement |
+| [004_implementation_details.md](004_implementation_details.md) | Compile-time optimization strategy |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs that mandates enforce |
+| [003_governing_principles.md](../invariant/003_governing_principles.md) | Principles these mandates enforce |
+| [004_workspace_dependency_standards.md](../invariant/004_workspace_dependency_standards.md) | `enabled` feature gate mandate source |

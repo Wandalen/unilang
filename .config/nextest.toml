@@ -1,0 +1,19 @@
+# Nextest configuration for unilang workspace
+#
+# The `validation` test binary runs external cargo processes (clippy, doc tests,
+# feature gate checks, etc.). These must not run concurrently to avoid build
+# artifact lock contention. The `test-group` mechanism enforces sequential
+# execution for this binary.
+
+[profile.default.junit]
+path = "test-results/nextest.xml"
+
+# Group for validation tests: max 1 concurrent test to avoid cargo lock contention
+[test-groups.validation-sequential]
+max-threads = 1
+
+[[profile.default.overrides]]
+# Run validation tests sequentially: each test spawns an external cargo process,
+# and concurrent cargo invocations compete for the same target directory locks.
+filter = "binary_id(unilang::validation)"
+test-group = "validation-sequential"

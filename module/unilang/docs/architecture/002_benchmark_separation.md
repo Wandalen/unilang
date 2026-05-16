@@ -13,101 +13,48 @@ Performance benchmarks for unilang are maintained in a separate workspace crate 
 
 ### Rationale
 
-### Dependency Isolation
+#### Dependency Isolation
 
-Benchmark tooling requires specialized dependencies that production users never need:
+Benchmark tooling requires specialized dependencies that production users never need — benchmark frameworks with statistical analysis, CLI argument parsing for benchmark runners, CPU detection for parallel benchmarking, random data generation for realistic test scenarios, and system information gathering. By separating benchmarks into their own crate, these dependencies never pollute production dependency trees, do not increase compilation time for end users, do not bloat production binaries, and can be versioned independently.
 
-- `benchkit` - Benchmark framework with statistical analysis
-- `clap`, `pico-args` - CLI argument parsing for benchmark runners
-- `num_cpus` - CPU detection for parallel benchmarking
-- `rand` - Random data generation for realistic test scenarios
-- `sysinfo` - System information gathering
+#### Build Performance
 
-By separating benchmarks into their own crate, these dependencies:
-- Never pollute production dependency trees
-- Don't increase compilation time for end users
-- Don't bloat production binaries
-- Allow independent versioning
+Production builds of `unilang` are faster because they have fewer optional features to check, a smaller dependency graph, no benchmark code in compilation units, and a cleaner feature flag matrix.
 
-### Build Performance
+#### Maintenance Benefits
 
-Production builds of `unilang` are faster because:
-- Fewer optional features to check
-- Smaller dependency graph
-- No benchmark code in compilation units
-- Cleaner feature flag matrix
-
-### Maintenance Benefits
-
-Separation provides:
-- Clear boundary between production and performance testing code
-- Independent benchmark versioning and releases
-- Easier benchmark infrastructure evolution
-- Clearer API surface for production users
+Separation provides a clear boundary between production and performance testing code, enables independent benchmark versioning and releases, simplifies benchmark infrastructure evolution, and presents a cleaner API surface for production users.
 
 ### Structure
 
-```
-wTools/module/move/
-├── unilang/                    # Main crate (production)
-│   ├── src/
-│   ├── tests/                 # Functional tests only
-│   └── Cargo.toml             # No benchmark dependencies
-│
-└── unilang_benchmarks/         # Benchmark crate
-    ├── src/
-    │   ├── benchmark_config.rs
-    │   ├── benchmark_data_sizes.rs
-    │   └── realistic_test_data.rs
-    ├── benches/               # All performance benchmarks
-    │   ├── throughput_benchmark.rs
-    │   ├── simd_json_benchmark.rs
-    │   └── ...
-    ├── tests/                 # Benchmark validation tests
-    └── Cargo.toml             # All benchmark dependencies
-```
+The main `unilang` crate lives at `module/unilang/` with source, functional tests, and no benchmark dependencies in its manifest. The `unilang_benchmarks` crate at `module/unilang_benchmarks/` contains benchmark configuration and data modules (e.g., `benchmark_config.rs`, `benchmark_data_sizes.rs`, `realistic_test_data.rs`), all performance benchmark suites (throughput, SIMD JSON, etc.) in the `benches/` directory, benchmark validation tests, and all benchmark-specific dependencies.
 
 ### Usage
 
-### Running Benchmarks
+#### Running Benchmarks
 
-```sh
-# From workspace root
-cargo bench -p unilang_benchmarks
+Run all benchmarks with `cargo bench -p unilang_benchmarks` from the workspace root. Target a specific benchmark suite by name. Configure the benchmark environment via the `BENCHMARK_ENV` variable.
 
-# Specific benchmark
-cargo bench -p unilang_benchmarks --bench throughput_benchmark
+#### Adding New Benchmarks
 
-# With environment configuration
-BENCHMARK_ENV=production cargo bench -p unilang_benchmarks
-```
+Add benchmark code to `unilang_benchmarks/benches/`, import common utilities from `unilang_benchmarks::prelude::*`, follow benchkit conventions for measurement, and document the benchmark's purpose and methodology.
 
-### Adding New Benchmarks
-
-1. Add benchmark code to `unilang_benchmarks/benches/`
-2. Use `unilang_benchmarks::prelude::*` for common imports
-3. Follow benchkit conventions for measurement
-4. Document benchmark purpose and methodology
-
-### Benchmark Development
+#### Benchmark Development
 
 The `unilang_benchmarks` crate imports `unilang` with `features = ["full"]` to access all functionality for comprehensive performance testing.
 
 ### Migration Notes
 
-- All benchmark code moved from `unilang/benches/` → `unilang_benchmarks/benches/`
-- Benchmark modules moved from `unilang/src/` → `unilang_benchmarks/src/`
-- Feature flags `benchmarks` and `advanced_benchmarks` removed from main crate
-- Documentation updated to reference separate benchmark crate
+All benchmark code moved from `unilang/benches/` to `unilang_benchmarks/benches/`. Benchmark modules moved from `unilang/src/` to `unilang_benchmarks/src/`. Feature flags `benchmarks` and `advanced_benchmarks` were removed from the main crate. Documentation updated to reference the separate benchmark crate.
 
-### See Also
+### Architecture Instances
 
-- `unilang_benchmarks/readme.md` - Benchmark crate documentation
-- `docs/optimization_guide.md` - Optimization techniques
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](001_mandates.md) | Broader architectural mandates |
 
-### Cross-References
+### Invariant Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [architecture/001_mandates.md](001_mandates.md) | Broader architectural mandates |
-| doc | [invariant/002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs validated by benchmarks |
+| File | Relationship |
+|------|--------------|
+| [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs validated by benchmarks |

@@ -1,7 +1,15 @@
 # Remove obsolete throughput benchmark original
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 The original throughput benchmark in `benchmarks/throughput_benchmark_original.rs` uses legacy manual timing implementation and is superseded by the modernized benchkit version in `throughput_benchmark.rs`. This creates redundancy and confusion in the benchmark suite.
 
 The legacy file should be removed since the benchkit-compliant version already provides superior statistical analysis and performance validation. Keeping both versions creates maintenance overhead and potential inconsistencies.
@@ -24,6 +32,40 @@ Related to audit findings of skipped benchmark tests that need benchkit complian
 -   Confirm that the benchkit version covers all use cases from the original
 -   Remove any imports or dependencies that were specific to the original version
 -   Ensure clean build with no dangling references
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
 
 ## Outcomes
 

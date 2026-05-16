@@ -5,8 +5,16 @@
 
 mod data {
   mod api_consistency;
+  mod category_field_backward_compat;
+  mod category_field_codegen;
+  mod category_field_conversion;
+  mod category_field_edge_cases;
+  mod category_field_unit;
   mod command_definition;
+  mod config_extraction;
+  mod data_model_features;
   mod error_handling;
+  mod get_string_normalized;
   mod loader;
   mod static_data;
   mod types;

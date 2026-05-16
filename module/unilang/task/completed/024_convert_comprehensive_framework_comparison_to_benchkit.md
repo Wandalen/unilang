@@ -1,7 +1,15 @@
 # Convert comprehensive framework comparison to benchkit
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 The comprehensive framework comparison benchmark in `benchmarks/comprehensive_framework_comparison.rs` uses manual timing measurements instead of leveraging benchkit's professional benchmarking infrastructure. The test compares Unilang vs Clap vs Pico-Args across different command counts but lacks statistical rigor and proper measurement methodology.
 
 The test needs to be modernized to use benchkit's `BenchmarkSuite` framework to provide statistically rigorous validation of framework performance characteristics with clear performance metrics and comparative analysis.
@@ -26,6 +34,40 @@ Related to audit findings of skipped benchmark tests that need benchkit complian
 -   Test compiles and runs successfully with proper feature flags
 -   Update ignore attribute to reference correct benchmark feature requirements
 -   Maintain existing multi-framework comparison capabilities with statistical rigor
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
 
 ## Outcomes
 

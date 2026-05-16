@@ -53,7 +53,6 @@ use super::traits::{ CommandRoutine, RegistryMode, format_command_help };
 /// // Or create with specific mode
 /// let mut static_only = StaticCommandRegistry::with_mode(RegistryMode::StaticOnly);
 /// ```
-#[allow(missing_debug_implementations)]
 pub struct StaticCommandRegistry {
   /// Compile-time optimized static command storage
   static_commands: Option<&'static crate::static_data::StaticCommandMap>,
@@ -65,6 +64,20 @@ pub struct StaticCommandRegistry {
   mode: RegistryMode,
   /// Performance metrics for monitoring
   metrics: PerformanceMetrics,
+}
+
+impl std::fmt::Debug for StaticCommandRegistry
+{
+  fn fmt( &self, f : &mut std::fmt::Formatter< '_ > ) -> std::fmt::Result
+  {
+    f.debug_struct( "StaticCommandRegistry" )
+      .field( "has_static_commands", &self.static_commands.is_some() )
+      .field( "mode", &self.mode )
+      .field( "metrics", &self.metrics )
+      .field( "dynamic_commands", &self.dynamic_commands )
+      .field( "routines_count", &self.routines.len() ) // CommandRoutine is Box<dyn Fn>, which doesn't impl Debug
+      .finish()
+  }
 }
 
 impl StaticCommandRegistry {

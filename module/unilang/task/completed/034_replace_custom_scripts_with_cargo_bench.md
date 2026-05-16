@@ -1,7 +1,15 @@
 # Replace Custom Scripts with Cargo Bench Workflow
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 **HIGH PRIORITY VIOLATION**: Usage.md **Recommendation** - Always use `cargo bench` as primary interface. Don't rely on custom scripts or runners.
 
 **Current Violations**:
@@ -39,3 +47,41 @@ cargo run --bin my-benchmark-runner
 -   [ ] CI/CD integration uses `cargo bench` workflow
 -   [ ] Quick vs comprehensive benchmark modes available through cargo bench options
 -   [ ] All benchmark features work correctly with standard Rust tooling
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

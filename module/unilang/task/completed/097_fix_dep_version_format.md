@@ -14,10 +14,10 @@
 
 Rewrite every version string in the workspace-root `Cargo.toml` to comply with R1 of invariant `004_workspace_dependency_standards.md`: external deps → `^X.Y` (caret, major.minor only); internal path deps → `=X.Y.Z` (exact pin). Bare strings (`"1"`, `"0.4"`) and tilde strings (`"~0.39.0"`) are FORBIDDEN.
 
-**Motivated:** Invariant 004 R1 requires explicit caret semantics for external deps and exact pins for internal path deps; current bare and tilde strings leave resolution policy ambiguous and make dep audits unreliable.
-**Observable:** `grep -P 'version = "~|version = "[0-9]' Cargo.toml | grep -v '# pin:' | wc -l` → 0.
-**Scoped:** Single file edit — workspace-root `Cargo.toml` only; no source code changes.
-**Testable:** `cargo check --workspace --all-features` → exit 0 (all crates still compile after reformat).
+- **Motivated:** Invariant 004 R1 requires explicit caret semantics for external deps and exact pins for internal path deps; current bare and tilde strings leave resolution policy ambiguous and make dep audits unreliable.
+- **Observable:** `grep -P 'version = "~|version = "[0-9]' Cargo.toml | grep -v '# pin:' | wc -l` → 0.
+- **Scoped:** Single file edit — workspace-root `Cargo.toml` only; no source code changes.
+- **Testable:** `cargo check --workspace --all-features` → exit 0 (all crates still compile after reformat).
 
 ## In Scope
 
@@ -104,3 +104,10 @@ Rewrite every version string in the workspace-root `Cargo.toml` to comply with R
 ## Requirements
 
 Apply all rulebooks discovered via `kbase .role name::dev`. Key references: `crate_distribution.rulebook.md § R1 Version Format`; `docs/invariant/004_workspace_dependency_standards.md`.
+
+## Outcomes
+
+- All workspace `Cargo.toml` version strings migrated to `^X.Y` / `=X.Y.Z` format per invariant 004 R1
+- Internal path deps use exact `=X.Y.Z` pin format; wTools ecosystem deps use `^X.Y` caret-minor format; external deps use `^X.Y` caret-minor format
+- Enforcement grep (`grep -P 'version = "~|version = "[0-9]'`) returns 0 — no bare or tilde version strings remain
+- `cargo check --workspace --all-features` exits 0

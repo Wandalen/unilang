@@ -1,7 +1,15 @@
 # Enable Static Command Examples
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 Enable the static command examples that were disabled during the test-clean process. This includes `static_01_basic_compile_time.rs`, `static_02_yaml_build_integration.rs`, and `static_03_performance_comparison.rs`. These examples demonstrate the zero-overhead PHF-based static command system and validate the performance requirements.
 
 Links to related tasks: Depends on task 063 (registry integration), leads to CLI builder tasks.
@@ -22,3 +30,41 @@ Links to related tasks: Depends on task 063 (registry integration), leads to CLI
 -   All examples must run successfully with `cargo run --example <name>`
 -   Examples must demonstrate compile-time command registration workflow
 -   No clippy warnings when running `cargo clippy --examples --all-features -- -D warnings`
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

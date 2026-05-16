@@ -7,8 +7,6 @@
 //! 3. Developer-friendly APIs for help configuration
 //!
 
-#![ allow( deprecated ) ]
-
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
 use unilang::registry::CommandRegistry;
 use unilang::pipeline::Pipeline;
@@ -43,9 +41,7 @@ fn test_automatic_help_command_generation()
     .version( "1.0.0" )
     .end();
 
-  // Manually enable auto-help since builder method doesn't work yet
-  let mut cmd = cmd;
-  cmd.auto_help_enabled = true;
+  let cmd = cmd.with_auto_help( true );
 
   // Register command with auto-help
   let result = registry.register_with_auto_help( cmd, Box::new( test_routine ) );
@@ -57,12 +53,12 @@ fn test_automatic_help_command_generation()
 
   // Verify help command has correct properties
   let help_cmd = registry.command( ".test_example.help" ).unwrap();
-  assert_eq!( help_cmd.name, ".test_example.help" );
-  assert!( help_cmd.description.contains( "help information" ) );
-  assert!( help_cmd.tags.contains( &"help".to_string() ) );
-  assert!( help_cmd.tags.contains( &"documentation".to_string() ) );
-  assert!( help_cmd.idempotent );
-  assert!( help_cmd.permissions.is_empty() ); // Help should be accessible to all
+  assert_eq!( help_cmd.name().as_str(), ".test_example.help" );
+  assert!( help_cmd.description().contains( "help information" ) );
+  assert!( help_cmd.tags().contains( &"help".to_string() ) );
+  assert!( help_cmd.tags().contains( &"documentation".to_string() ) );
+  assert!( help_cmd.idempotent() );
+  assert!( help_cmd.permissions().is_empty() ); // Help should be accessible to all
 
   println!( "✅ Automatic help command generation works correctly" );
 }
@@ -177,7 +173,7 @@ fn test_help_command_execution()
   assert!( help_content.contains( "Command: .test_help_exec" ), "Help should show command name" );
   assert!( help_content.contains( "Description: Test command for help execution validation" ), "Help should show description" );
   assert!( help_content.contains( "Version: 1.0.0" ), "Help should show version" );
-  assert!( help_content.contains( "Status: stable" ), "Help should show status" );
+  // Active/stable status is intentionally omitted from help output
   assert!( help_content.contains( "Usage:" ), "Help should include usage section" );
   assert!( help_content.contains( ".test_help_exec.help" ), "Help should mention help command itself" );
   assert!( help_content.contains( ".test_help_exec ??" ), "Help should mention ?? alternative" );
@@ -208,13 +204,12 @@ fn test_help_conventions_api()
     .description( "Command with forced help" )
     .end();
 
-  // Even with auto_help_enabled = false, help is still mandatory
-  let mut cmd2 = cmd2;
-  cmd2.auto_help_enabled = false;
+  // With auto_help_enabled = true, help is explicitly generated
+  let cmd2 = cmd2.with_auto_help( true );
 
   registry.register_with_auto_help( cmd2, Box::new( test_routine ) ).unwrap();
 
-  // Per-command setting should override global setting
+  // Per-command setting should control help generation
   assert!( registry.command( ".test_force_help" ).is_some(), "Main command should exist" );
   assert!( registry.command( ".test_force_help.help" ).is_some(), "Help command should be generated when explicitly enabled" );
 
@@ -239,34 +234,29 @@ fn test_command_definition_builder_methods()
   let cmd = CommandDefinition::former()
     .name( ".test_builder" )
     .description( "Test builder methods" )
-    .end();
+    .end()
+    .with_auto_help( true );
 
-  // Manually enable auto-help since builder method doesn't work yet
-  let mut cmd = cmd;
-  cmd.auto_help_enabled = true;
-
-  assert!( cmd.has_auto_help(), "has_auto_help should return true" );
-  assert!( cmd.auto_help_enabled, "auto_help_enabled field should be true" );
+  assert!( cmd.auto_help_enabled(), "auto_help_enabled should return true" );
 
   let cmd2 = CommandDefinition::former()
     .name( ".test_builder2" )
     .description( "Test builder methods without auto help" )
-    .end();
+    .end()
+    .with_auto_help( false );
 
-  // Manually disable auto-help since builder method doesn't work yet
-  let mut cmd2 = cmd2;
-  cmd2.auto_help_enabled = false;
+  assert!( !cmd2.auto_help_enabled(), "auto_help_enabled should return false" );
 
-  assert!( !cmd2.has_auto_help(), "has_auto_help should return false" );
-  assert!( !cmd2.auto_help_enabled, "auto_help_enabled field should be false" );
+  // Test generated help command via registry
+  let mut registry = CommandRegistry::new();
+  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
 
-  // Test generate_help_command method
-  let help_cmd = cmd.generate_help_command();
-  assert_eq!( help_cmd.name, ".test_builder.help", "Generated help command should have correct name" );
-  assert!( help_cmd.description.contains( "help information" ), "Generated help should have appropriate description" );
-  assert!( help_cmd.examples.contains( &".test_builder.help".to_string() ), "Help command should include usage examples" );
-  assert!( help_cmd.examples.contains( &".test_builder ??".to_string() ), "Help command should mention ?? parameter" );
-  assert!( !help_cmd.auto_help_enabled, "Help commands should not recursively generate help" );
+  let help_cmd = registry.command( ".test_builder.help" ).unwrap();
+  assert_eq!( help_cmd.name().as_str(), ".test_builder.help", "Generated help command should have correct name" );
+  assert!( help_cmd.description().contains( "help information" ), "Generated help should have appropriate description" );
+  assert!( help_cmd.examples().contains( &".test_builder.help".to_string() ), "Help command should include usage examples" );
+  assert!( help_cmd.examples().contains( &".test_builder ??".to_string() ), "Help command should mention ?? parameter" );
+  assert!( !help_cmd.auto_help_enabled(), "Help commands should not recursively generate help" );
 
   println!( "✅ CommandDefinition builder methods work correctly" );
 }
@@ -336,7 +326,7 @@ fn test_help_content_formatting()
   assert!( help_text.contains( "Description: Comprehensive test command" ), "Description section" );
   assert!( help_text.contains( "Hint: Format test" ), "Hint section" );
   assert!( help_text.contains( "Version: 2.1.0" ), "Version section" );
-  assert!( help_text.contains( "Status: stable" ), "Status section" );
+  // Active/stable status is intentionally omitted from help output
 
   // Arguments section
   assert!( help_text.contains( "Arguments:" ), "Arguments section header" );

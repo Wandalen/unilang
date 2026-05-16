@@ -530,8 +530,8 @@ impl< Namespace, Hint, Status, Version > CommandDefinitionBuilder< Set, Set, Nam
   {
     let name_str = self.name.unwrap();
     let description_str = self.description.unwrap();
-    let namespace_str = self.namespace.unwrap_or_else( || String::new() );
-    let hint_str = self.hint.unwrap_or_else( || String::new() );
+    let namespace_str = self.namespace.unwrap_or_default();
+    let hint_str = self.hint.unwrap_or_default();
     let status_str = self.status.unwrap_or_else( || "active".to_string() );
     let version_str = self.version.unwrap_or_else( || "1.0.0".to_string() );
 

@@ -14,10 +14,10 @@
 
 Add `optional = true` to every dependency in `unilang`, `unilang_parser`, and `unilang_meta`, and wire the `enabled` feature to activate all deps via `dep:name` syntax. After this task, `cargo build -p <lib_crate> --no-default-features` produces zero external-dep compilations — the crates compile to empty libraries.
 
-**Motivated:** Invariant 004 R3/R4 mandate optional deps and no-op-when-disabled pattern; currently `cargo build -p unilang --no-default-features` compiles serde, url, chrono, regex, error_tools, mod_interface, former, and 8 other heavy crates even though nothing is enabled, defeating the `enabled`/`full` feature isolation architecture.
-**Observable:** `cargo build -p unilang --no-default-features 2>&1 | grep "Compiling" | grep -v " unilang " | wc -l` → 0; same pattern for `unilang_parser` and `unilang_meta`.
-**Scoped:** Six files across three library crates — `Cargo.toml` and `src/lib.rs` for each of `unilang_parser`, `unilang`, and `unilang_meta`.
-**Testable:** `w3 .test level::3` from workspace root → 0 failures, 0 warnings after all changes.
+- **Motivated:** Invariant 004 R3/R4 mandate optional deps and no-op-when-disabled pattern; currently `cargo build -p unilang --no-default-features` compiles serde, url, chrono, regex, error_tools, mod_interface, former, and 8 other heavy crates even though nothing is enabled, defeating the `enabled`/`full` feature isolation architecture.
+- **Observable:** `cargo build -p unilang --no-default-features 2>&1 | grep "Compiling" | grep -v " unilang " | wc -l` → 0; same pattern for `unilang_parser` and `unilang_meta`.
+- **Scoped:** Six files across three library crates — `Cargo.toml` and `src/lib.rs` for each of `unilang_parser`, `unilang`, and `unilang_meta`.
+- **Testable:** `w3 .test level::3` from workspace root → 0 failures, 0 warnings after all changes.
 
 ## In Scope
 
@@ -144,3 +144,12 @@ Add `optional = true` to every dependency in `unilang`, `unilang_parser`, and `u
 ## Requirements
 
 Apply all rulebooks discovered via `kbase .role name::dev`. Key references: `crate_distribution.rulebook.md § R3 Optional Dependencies`, `§ R4 No-Op When Disabled`, `§ A2 enabled Feature Anti-Pattern`; `docs/invariant/004_workspace_dependency_standards.md`; `docs/architecture/001_mandates.md § enabled feature gate mandate`.
+
+## Outcomes
+
+- All core dependencies in `unilang`, `unilang_parser`, and `unilang_meta` marked `optional = true` (11+ in unilang, 3 in parser, 4 in meta)
+- `dep:name` activation syntax used throughout — no sub-feature indirection
+- `cargo build -p unilang --no-default-features` compiles with 0 transitive deps (serde, regex, url not compiled)
+- `cargo build -p unilang_parser --no-default-features` and `cargo build -p unilang_meta --no-default-features` each compile with 0 transitive deps
+- `cargo build -p cargo_unilang` unaffected (binary crate uses default features)
+- `w3 .test level::3` passes with 0 failures, 0 warnings

@@ -5,6 +5,12 @@
 //! This covers the critical logic that maps parser output to typed command arguments
 //! with validation and type conversion.
 //!
+//! ## FR Coverage
+//! - FR-ARG-3 (FT-1): named `param::value` binding extracts correct typed value
+//! - FR-ARG-2 (FT-5): positional binding assigns value by position when no name given
+//! - FR-ARG-5 (FT-3): default value is used when optional argument is absent
+//! - FR-ARG-1 (FT-6): type coercion converts token into typed `Kind` value
+//!
 //! ## Coverage
 //! - Basic argument binding (named, positional)
 //! - Type conversion and validation

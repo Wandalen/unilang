@@ -1,7 +1,15 @@
 # Update benchkit integration demo ignore message
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 The benchkit integration demo test in `benchmarks/throughput_benchmark.rs` is already properly implemented using benchkit but has a generic ignore message that doesn't follow the standardized format for benchkit integration tests. The message should be updated to be consistent with other benchkit tests.
 
 This is a minor but important consistency fix to ensure all benchmark tests follow the same ignore message pattern for clarity and maintainability.
@@ -23,6 +31,40 @@ Related to audit findings of skipped benchmark tests that need benchkit complian
 -   Maintain all existing benchkit functionality and statistical analysis
 -   Ensure ignore message accurately describes the test's purpose
 -   Follow standardized naming convention for benchkit integration tests
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
 
 ## Outcomes
 

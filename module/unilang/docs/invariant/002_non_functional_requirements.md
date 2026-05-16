@@ -23,41 +23,41 @@ NFR violation = performance regression, security hole, or modularity collapse. A
 
 ### Non-Functional Requirements
 
-### NFR-PERF-1 (Startup Time)
+#### NFR-PERF-1 (Startup Time)
 
 For a utility with 1,000,000+ statically compiled commands, the framework **must** introduce zero runtime overhead for command registration. Application startup time **must not** be proportional to the number of static commands. This **must** be achieved via compile-time generation of optimized static lookup tables (using Perfect Hash Functions).
 
-### NFR-PERF-2 (Lookup Latency)
+#### NFR-PERF-2 (Lookup Latency)
 
 The p99 latency for resolving a command `FullName` and its arguments **must** be less than 100 nanoseconds for any registry size.
 
-### NFR-PERF-3 (Throughput)
+#### NFR-PERF-3 (Throughput)
 
 The framework **must** be capable of processing over 5,000,000 simple command lookups per second on a standard developer machine.
 
-### NFR-SEC-1 (Sensitive Data)
+#### NFR-SEC-1 (Sensitive Data)
 
 Argument values marked as `sensitive: true` **must not** be displayed in logs or user interfaces unless explicitly required by a secure context.
 
-### NFR-ROBUST-1 (Error Reporting)
+#### NFR-ROBUST-1 (Error Reporting)
 
 All user-facing errors **must** be returned as a structured `ErrorData` object and provide clear, actionable messages. Internal panics **must** be caught and converted to a user-friendly `UNILANG_INTERNAL_ERROR`.
 
-### NFR-PLATFORM-1 (WASM Compatibility)
+#### NFR-PLATFORM-1 (WASM Compatibility)
 
 The core logic of the `unilang` and `unilang_parser` crates **must** be platform-agnostic and fully compatible with the WebAssembly (`wasm32-unknown-unknown`) target. This implies that the core crates **must not** depend on libraries or functionalities that are tied to a specific native OS (e.g., native threading, direct file system access that cannot be abstracted) unless those features are conditionally compiled and disabled for the WASM target.
 
-### NFR-MODULARITY-1 (Granular Features)
+#### NFR-MODULARITY-1 (Granular Features)
 
 All non-essential framework functionality **must** be gated behind Cargo features. This includes support for complex types (`Url`, `DateTime`), declarative loading (`serde_yaml`, `serde_json`), and other features that introduce dependencies.
 
-### NFR-MODULARITY-2 (Lightweight Core)
+#### NFR-MODULARITY-2 (Lightweight Core)
 
 When compiled with `default-features = false`, the `unilang` framework **must** have a minimal dependency footprint, comparable in lightness (dependencies, compile time) to the `pico-args` crate. The core functionality **must** be contained within the `enabled` feature.
 
 ### Cross-Cutting Concerns
 
-### Error Handling
+#### Error Handling
 
 All recoverable errors **must** be propagated as `unilang::Error`, which wraps an `ErrorData` struct containing a machine-readable `code` (typed `ErrorCode` enum) and a human-readable `message`. The framework defines the following standard error codes via the `ErrorCode` enum:
 
@@ -78,29 +78,27 @@ All recoverable errors **must** be propagated as `unilang::Error`, which wraps a
 
 The `ErrorCode` enum provides compile-time type safety and prevents typos in error code strings. The `ErrorData::new()` method requires an `ErrorCode` enum variant instead of a string.
 
-### Security
+#### Security
 
 The framework **must** provide a `permissions` field in `CommandDefinition` for integrators to implement role-based access control. The `sensitive` attribute on arguments **must** be respected.
 
-### Verbosity
+#### Verbosity
 
 The framework **must** support at least three verbosity levels (`quiet`, `normal`, `debug`) configurable via environment variable (`UNILANG_VERBOSITY`) or programmatically.
 
-### Shell Integration
+#### Shell Integration
 
-CLI applications **should** use the argv-based API (`Pipeline::process_command_from_argv`) when receiving command-line arguments from the shell (see FR-PIPE-4). This API preserves argument boundaries from the OS and eliminates information loss, enabling natural shell syntax without special quoting requirements. The string-based API (`process_command_simple`) is recommended for REPL/interactive applications where input comes as a single string.
+CLI applications **should** use the argv-based API when receiving command-line arguments from the shell (see FR-PIPE-4). This API preserves argument boundaries from the OS and eliminates information loss, enabling natural shell syntax without special quoting requirements. The string-based API is recommended for REPL/interactive applications where input comes as a single string.
 
-**Legacy Approach:** For applications using the string-based API with shell arguments, integrators must implement argument preprocessing to re-quote values containing spaces before passing them to the parser, but the argv-based API eliminates this requirement entirely.
-
-### Feature Flags & Modularity
+#### Feature Flags and Modularity
 
 The framework **must** be highly modular, allowing integrators to select only the features they need to minimize binary size and compile times.
 
-### The `enabled` Feature
+#### The `enabled` Feature
 
 Every crate in the `unilang` ecosystem (`unilang`, `unilang_parser`, `unilang_meta`) **must** expose an `enabled` feature. This feature **must** be part of the `default` feature set. Disabling the `enabled` feature (`--no-default-features`) **must** effectively remove all of the crate's code and dependencies from the compilation, allowing it to be "turned off" even when included as a non-optional dependency in a workspace.
 
-### Opinionated Defaults Strategy
+#### Opinionated Defaults Strategy
 
 The framework implements an **opinionated defaults strategy** where only **Approach #2** (Multi-YAML Build-Time Static) is enabled by default. This design choice:
 
@@ -111,7 +109,7 @@ The framework implements an **opinionated defaults strategy** where only **Appro
 
 To use any approach other than #2, integrators **must** explicitly enable the corresponding feature flag.
 
-### Feature Architecture
+#### Feature Architecture
 
 The framework uses a two-tier feature architecture:
 
@@ -154,44 +152,31 @@ These are enabled automatically by approach features and should not be used dire
 | `default` | Default features: `enabled`, `simd`, `repl`, `enhanced_repl`, `approach_yaml_multi_build` | Yes |
 | `full` | All features except dev-only | No |
 
-### Usage Examples
+### Feature Instances
 
-**Using the default (Approach #2):**
-```toml
-[dependencies]
-unilang = "0.28"  # Only YAML multi-file enabled
-```
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-9 build-time validation satisfies NFR-PERF-1 |
+| [005_repl_interactive.md](../feature/005_repl_interactive.md) | REPL uses shell integration guidance from this invariant |
 
-**Using alternative approach:**
-```toml
-[dependencies]
-unilang = { version = "0.28", default-features = false, features = [
-  "enabled",
-  "approach_json_single_build"  # Switch to JSON single-file
-]}
-```
+### Invariant Instances
 
-**Using multiple approaches:**
-```toml
-[dependencies]
-unilang = { version = "0.28", features = [
-  "approach_yaml_multi_build",   # Default
-  "approach_json_runtime"         # Add runtime JSON loading
-]}
-```
+| File | Relationship |
+|------|--------------|
+| [003_governing_principles.md](003_governing_principles.md) | Principles that these NFRs embody |
+| [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Dependency standards enable no-op compile pattern |
 
-**Minimal configuration (no parsers):**
-```toml
-[dependencies]
-unilang = { version = "0.28", default-features = false, features = [
-  "enabled"  # Only Rust DSL builder API (Approach #7)
-]}
-```
+### Architecture Instances
 
-### Cross-References
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates that enforce NFRs |
+| [002_benchmark_separation.md](../architecture/002_benchmark_separation.md) | Benchmark isolation satisfying NFR-MODULARITY-1 |
+| [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF implementation enabling NFR-PERF-1 |
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [feature/001_command_registry.md](../feature/001_command_registry.md) | FR-REG-9 connects to NFR-PERF-1 |
-| doc | [architecture/001_mandates.md](../architecture/001_mandates.md) | Architectural mandates enforcing NFRs |
-| doc | [architecture/004_implementation_details.md](../architecture/004_implementation_details.md) | PHF implementation enabling NFR-PERF-1 |
+### API Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | ErrorCode type definition |
+| [002_error_codes.md](../api/002_error_codes.md) | Error codes stable API contract |

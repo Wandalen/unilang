@@ -7,616 +7,176 @@
 - **In Scope:** Argument extraction patterns, builder patterns, error handling, type safety issues
 - **Out of Scope:** Implementation of fixes (see feature/ instances for requirements)
 
-- **Thoroughness Level:** Very Thorough
-- **Date:** 2025_01_19
-
----
-
 ### Executive Summary
 
-The Unilang framework is a command-line utility language framework designed to provide a unified way to define commands once and use them everywhere (CLI, REPL, TUI, Web APIs). The codebase exhibits several well-designed patterns but also contains several API design opportunities and potential error-prone patterns that could benefit from stronger compile-time guarantees.
+The Unilang framework is a command-line utility language framework designed to provide a unified way to define commands once and use them everywhere (CLI, REPL, TUI, Web APIs). The codebase exhibits several well-designed patterns but also contains API design opportunities and error-prone patterns that could benefit from stronger compile-time guarantees.
 
 **Key Findings:**
 - Boilerplate-heavy argument extraction patterns throughout examples
 - Type-safe builder patterns implemented with good ergonomics
-- Several unwrap() calls in production examples that could be silent failures
+- Several `unwrap()` calls in production examples that could be silent failures
 - Missing standardized helper methods for common argument access patterns
 - String-based error codes that could benefit from typed error enums
 - Inconsistent error handling between different example patterns
 
----
-
 ### Part 1: Common Boilerplate Code Patterns
 
-### Pattern 1: Repetitive Argument Extraction (Most Common)
+#### Pattern 1: Repetitive Argument Extraction (Most Common)
 
-**Location:** All examples with multiple argument types
-**Instances:** 15+ examples
+The pattern appearing in approximately 90% of command routines involves three steps: getting an argument by name from the arguments map, using conditional pattern matching to extract the inner typed value from the `Value` enum variant, and providing a default via `unwrap_or`. The same 4-line construction repeats for every argument type (String, Boolean, Float), with minor variations — some examples use `and_then()`, some use `map_or_else()`, some use `unwrap()` directly.
 
-```rust
-// This pattern repeats in ~90% of command routines
-let name = cmd.arguments.get("name")
-  .and_then(|v| if let Value::String(s) = v { Some(s) } else { None })
-  .unwrap_or(&default_name);
+Issues: (1) repetitive boilerplate in virtually every command routine; (2) type safety disconnect — developers manually assert the expected `Value` variant; (3) silent failures — type mismatches fall back to defaults without error; (4) inconsistent patterns across examples.
 
-let verbose = cmd.arguments.get("verbose")
-  .and_then(|v| if let Value::Boolean(b) = v { Some(b) } else { None })
-  .unwrap_or(&false);
+Affected locations include examples for basic command registration, command execution, DSL inline closures, and REPL comparison.
 
-let dividend = cmd.arguments.get("dividend")
-  .and_then(|v| if let Value::Float(f) = v { Some(f) } else { None })
-  .unwrap_or(&0.0);
-```
+#### Pattern 2: Builder Configuration Boilerplate
 
-**Issues:**
-1. **Repetitive boilerplate:** The same pattern appears in virtually every command routine
-2. **Type safety disconnect:** Developers must manually assert the expected `Value` variant
-3. **Silent failures:** Using `unwrap_or` with defaults means type mismatches fail silently
-4. **Inconsistent patterns:** Different examples use different approaches:
-   - Some use `and_then()` + manual if-let
-   - Some use `map_or_else()`
-   - Some use direct `unwrap()`
+`CommandDefinition` registration requires specifying many fields even when most should share sensible defaults — namespace, hint, status, version, aliases, tags, permissions, idempotent flag, deprecation message, http_method_hint, examples, and arguments. Issues: (1) many required fields; (2) constant `.to_string()` conversions for static strings; (3) verbose empty collections (`vec![]`, `String::new()`); (4) no shared defaults across commands.
 
-**Examples affected:**
-- `/examples/01_basic_command_registration.rs` line 100
-- `/examples/09_command_execution.rs` lines 65-67, 118-120, 201-207
-- `/examples/20_rust_dsl_inline_closures.rs` lines 42-50
-- `/examples/repl_comparison.rs` multiple locations
+#### Pattern 3: Argument Definition Template Repetition
 
-### Pattern 2: Builder Configuration Boilerplate
-
-**Location:** `CommandDefinition` registration in examples
-**Instances:** Every example that creates commands
-
-```rust
-let greet_command = CommandDefinition::former()
-  .name(".greet")
-  .namespace(String::new())
-  .description("A simple greeting command".to_string())
-  .hint("Greets a person by name")
-  .status("stable")
-  .version("1.0.0")
-  .aliases(vec![".hello".to_string()])
-  .tags(vec!["greeting".to_string(), "demo".to_string()])
-  .permissions(vec![])
-  .idempotent(true)
-  .deprecation_message(String::new())
-  .http_method_hint("GET".to_string())
-  .examples(vec![".greet name::\"Alice\"".to_string()])
-  .arguments(vec![/* ... */])
-  .end();
-```
-
-**Issues:**
-1. **Many required fields:** 6 required fields in type-state builder
-2. **String conversions:** Constant `.to_string()` calls for static strings
-3. **Empty collections:** `vec![]`, `String::new()`, `vec![String::new()]` are verbose
-4. **Inconsistent empty values:** Empty namespace as `String::new()` vs `""` vs `.namespace("")`
-5. **No shared defaults:** Every command must specify identical values for `status`, `version`, `deprecation_message`, etc.
-
-### Pattern 3: Argument Definition Template Repetition
-
-**Location:** Examples 02_argument_types.rs, others
-**Instances:** Whenever multiple argument types are defined
-
-```rust
-ArgumentDefinition {
-  name: "text".to_string(),
-  description: "A text string argument".to_string(),
-  kind: Kind::String,
-  hint: "Any text string".to_string(),
-  attributes: ArgumentAttributes { optional: true, ..Default::default() },
-  validation_rules: vec![ValidationRule::MinLength(3)],
-  aliases: vec!["t".to_string()],
-  tags: vec!["string".to_string()],
-}
-```
-
-**Issues:**
-1. **Repetitive struct construction:** The same structure appears for each argument
-2. **`.to_string()` proliferation:** String literals constantly converted
-3. **Spread pattern usage:** `..Default::default()` is used almost universally
-4. **Manual alias construction:** `vec!["t".to_string()]` is verbose
-
----
+Defining each `ArgumentDefinition` via struct literal repeats the same fields: name, description, kind, hint, attributes (typically using spread `..Default::default()`), validation rules, aliases, and tags — all requiring `.to_string()` conversions. The spread pattern is used almost universally because most optional fields share the same defaults.
 
 ### Part 2: Public API Surface Analysis
 
-### Exposed in `src/lib.rs` prelude:
+The `src/lib.rs` prelude exposes: `CommandDefinition`, `ArgumentDefinition`, `ArgumentAttributes`, `Kind`, `OutputData`, `ErrorData`, `CommandRegistry`, `CommandRegistryBuilder`, `StaticCommandRegistry`, `RegistryMode`, and `PerformanceMetrics`.
 
-```rust
-prelude use private::CommandDefinition;
-prelude use private::ArgumentDefinition;
-prelude use private::ArgumentAttributes;
-prelude use private::Kind;
-prelude use private::OutputData;
-prelude use private::ErrorData;
-prelude use private::CommandRegistry;
-prelude use private::CommandRegistryBuilder;
-prelude use private::StaticCommandRegistry;
-prelude use private::RegistryMode;
-prelude use private::PerformanceMetrics;
-```
+**Core Flow:**
+1. `CommandRegistry` — main API for runtime command registration
+2. `CommandDefinition` — command metadata
+3. `ArgumentDefinition` — argument metadata
+4. `Value` enum — runtime argument values
+5. `VerifiedCommand` — commands after semantic analysis
+6. `Pipeline` — high-level orchestration API
 
-### Core Flow:
-1. **CommandRegistry** - Main API for runtime command registration
-2. **CommandDefinition** - Command metadata
-3. **ArgumentDefinition** - Argument metadata
-4. **Value enum** - Runtime argument values
-5. **VerifiedCommand** - Commands after semantic analysis
-6. **Pipeline** - High-level orchestration API
-
-### Most Used Pattern (Registry Building):
-```rust
-let mut registry = CommandRegistry::new();
-registry.command_add_runtime(&cmd_def, routine)?;
-```
-
-or using builder:
-```rust
-let registry = CommandRegistry::builder()
-  .command_with_routine(".greet", "description", |cmd, ctx| { ... })
-  .build();
-```
-
----
+The most common usage patterns are: creating a registry then calling `command_add_runtime()` per command, or using the fluent builder API with `CommandRegistry::builder()`.
 
 ### Part 3: Error-Prone API Patterns
 
-### Issue 1: Unwrap() in Example Code
+#### Issue 1: `unwrap()` in Example Code
 
-**Severity:** Medium (Examples show bad practices)
-**Locations:**
-- `/examples/00_pipeline_basics.rs:` `result.error.as_ref().unwrap()`
-- `/examples/11_pipeline_api.rs:` Multiple `.unwrap()` calls on timestamps
-- `/examples/20_rust_dsl_inline_closures.rs` line 61: `registry.command(".greet").unwrap().description`
-- `/examples/full_cli_example.rs:` Multiple `.unwrap()` on argument access
-- `/examples/23_help_verbosity_demo.rs:` `.unwrap()` on command registration and help access
+Multiple examples call `.unwrap()` on results — on error references, timestamps, command lookups, argument access, and registration results. Examples using `unwrap()` teach users bad error handling patterns. Users copy-paste these patterns into production code, producing panics on missing arguments instead of graceful error handling.
 
-**Problem:** Examples using `unwrap()` teach users bad error handling patterns.
+#### Issue 2: Type Confusion in Argument Handling
 
-**Impact:**
-- Users copy-paste these patterns into production code
-- Panics on missing arguments instead of graceful error handling
-- No way to distinguish between legitimate `None` and unexpected failures
+When argument extraction uses a conditional match on the `Value` variant and falls back to a default with `unwrap_or`, a type mismatch (e.g., the parser returning `Value::Enum("Alice")` when `Value::String("Alice")` was expected) causes the default to be used silently. There is no type validation between semantic analysis and routine execution.
 
-### Issue 2: Type Confusion in Argument Handling
+#### Issue 3: String-Based Error Codes
 
-**Severity:** High (Silent failures)
-**Pattern:**
-```rust
-// Semantic analyzer might return Value::String("Alice")
-let name = cmd.arguments.get("name")
-  .and_then(|v| if let Value::String(s) = v { Some(s) } else { None })
-  .unwrap_or(&"default");  // Silently uses default if type is wrong
-```
+Error codes throughout the framework are string constants. String comparisons for error detection in the pipeline, typos in error codes not caught at compile time, and no type-safe way to pattern match on specific errors are all consequences. Documentation lists codes but the implementation uses untyped `ErrorData`.
 
-**Problems:**
-1. If parser returns `Value::Enum("Alice")` instead of `Value::String("Alice")`, it silently falls back to default
-2. No type validation between parser/semantic analyzer and routine execution
-3. Different examples use incompatible extraction patterns
+#### Issue 4: Missing Compile-Time Argument Validation
 
-### Issue 3: String-Based Error Codes
-
-**Severity:** Medium (Fragile error handling)
-**Examples:**
-```rust
-// From semantic.rs and pipeline.rs
-"UNILANG_ARGUMENT_INTERACTIVE_REQUIRED"
-"UNILANG_COMMAND_NOT_FOUND"
-"UNILANG_TYPE_MISMATCH"
-"UNILANG_VALIDATION_RULE_FAILED"
-"UNILANG_UNKNOWN_PARAMETER"
-"DIVISION_BY_ZERO"
-```
-
-**Problems:**
-1. String comparisons for error detection in pipeline.rs
-2. Typos in error codes not caught at compile time
-3. No type-safe way to pattern match on specific errors
-4. Documentation lists codes but implementation uses untyped `ErrorData`
-
-### Issue 4: Missing Compile-Time Argument Validation
-
-**Severity:** High (Runtime failures expected)
-**Pattern:**
-```rust
-// At compile time, the command expects "name" and "count" arguments
-// But at runtime, the routine might access "username" instead:
-let cmd_def = CommandDefinition::former()
-  .name(".test")
-  .arguments(vec![
-    ArgumentDefinition { name: "name".to_string(), ... }
-  ])
-  .end();
-
-let routine = Box::new(|cmd: VerifiedCommand, _ctx| {
-  // This compiles fine but will panic/fail at runtime:
-  let user = cmd.arguments.get("username")  // Oops! Wrong key!
-    .unwrap_or(&default);
-});
-```
-
-**Impact:** No compile-time verification that argument names match
-
----
+A command's routine can reference argument names that were never defined in the `CommandDefinition`. The mismatch compiles successfully but produces wrong behavior at runtime — the argument access silently returns `None` instead of failing at compile time.
 
 ### Part 4: Builder Pattern Usage Analysis
 
-### CommandRegistry::builder() Pattern
+#### CommandRegistry Builder Pattern
 
-**Strengths:**
-- Fluent API for inline command registration
-- Type-safe via `CommandRegistryBuilder`
-- Supports mixing YAML loading and inline closures
+Strengths: fluent API for inline command registration, type-safe via `CommandRegistryBuilder`, supports mixing YAML loading and inline closures. Weakness: the `build()` method silently swallows registration errors — failures are only logged with `eprintln!`, not returned to the builder user. The `build_checked()` alternative is available but underused.
 
-**Weaknesses:**
-```rust
-// Error handling is silently swallowed:
-let registry = CommandRegistry::builder()
-  .command_with_routine(".cmd", "desc", |_cmd, _ctx| { ... })
-  .build();  // If registration fails, you won't know!
-```
+#### CommandDefinition Builder Pattern (Type-State)
 
-Code from `registry.rs` line 972-975:
-```rust
-if let Err(e) = self.registry.command_add_runtime(&cmd, Box::new(routine)) {
-  eprintln!("Warning: Failed to register command '{}': {}", name, e);
-}
-```
+Strengths: compile-time enforcement of required fields, clear type-state transitions, impossible to build incomplete definitions. Weaknesses: users must remember all 6 required fields, many optional fields requiring repeated initialization.
 
-**Problem:** Errors are only logged with `eprintln!`, not returned to builder users!
+#### DynamicCommandMap and Registry Mode
 
-### CommandDefinition::builder() Pattern (Type-State)
+The `RegistryMode` enum adds complexity without clear use cases in examples. Performance metrics are tracked but examples never use them. Cache management is exposed but rarely needed.
 
-**Strengths:**
-- Compile-time enforcement of required fields
-- Clear type-state transitions
-- Can't build incomplete definitions
+### Part 5: Type Safety Issues and Missing Compile-Time Checks
 
-**Weaknesses:**
-```rust
-// 6 required fields must be provided in order:
-CommandDefinition::builder()
-  .name("...")
-  .description("...")
-  .namespace("...")
-  .hint("...")
-  .status("...")
-  .version("...")
-  .build()  // Only valid here
-```
+#### Issue 1: Value Enum Pattern Matching
 
-1. Users must remember all 6 required fields
-2. No builder method ordering flexibility once implemented
-3. Many optional fields with repeated initialization
+In every routine, there is no way to enforce at compile time that a specific argument name holds a `String` value. Pattern matching on `Value` variants is boilerplate that every developer must write correctly.
 
-### DynamicCommandMap & Registry Mode Pattern
+#### Issue 2: Namespace vs. Name Confusion
 
-**Issues:**
-- `RegistryMode` enum adds complexity without clear use cases in examples
-- Performance metrics are tracked but examples never use them
-- Cache management exposed but rarely needed in examples
+FR-REG-6 documents two valid formats: compound name (e.g., `name: ".session.list"`, `namespace: ""`) and separate namespace (e.g., `name: "list"`, `namespace: ".session"`). Both are valid but create different semantics and the distinction is easy to confuse.
 
----
+#### Issue 3: Missing Argument Access Helper Methods
 
-### Part 5: Type Safety Issues & Missing Compile-Time Checks
+The `Value` enum has no helper methods for safe typed extraction. Developers must write the same conditional match pattern for every argument access.
 
-### Issue 1: Value Enum Pattern Matching
+#### Issue 4: Interactive Argument Pattern
 
-**Current Pattern:**
-```rust
-// In every routine:
-match cmd.arguments.get("name") {
-  Some(Value::String(s)) => { /* ... */ },
-  Some(Value::Integer(i)) => { /* wrong type */ },
-  _ => { /* fall back */ },
-}
-```
-
-**Problem:** No way to enforce that "name" argument is definitely a `String` at compile time.
-
-### Issue 2: Namespace vs. Name Confusion
-
-**Severity:** Medium (Confusing API)
-
-From feature/001_command_registry.md FR-REG-6:
-- Format 1: `name: ".session.list"`, `namespace: ""`
-- Format 2: `name: "list"`, `namespace: ".session"`
-
-Both are valid but create different semantics:
-- Users must understand both formats
-- YAML manifests might use different formats
-- Runtime API validation differs from build-time behavior
-
-### Issue 3: Missing Argument Access Helper Methods
-
-**Problem:** The `Value` enum lacks helper methods for safe extraction:
-
-```rust
-// Current (unsafe):
-cmd.arguments.get("name")
-  .and_then(|v| if let Value::String(s) = v { Some(s) } else { None })
-
-// Should support:
-cmd.arguments_string("name")?
-cmd.arguments_integer("count")?
-cmd.arguments_bool("verbose")?
-```
-
-### Issue 4: Interactive Argument Pattern
-
-**Pattern from ArgumentAttributes:**
-```rust
-pub struct ArgumentAttributes {
-  pub optional: bool,
-  pub multiple: bool,
-  pub default: Option<String>,
-  pub sensitive: bool,
-  pub interactive: bool,  // Special handling needed!
-}
-```
-
-**Issues:**
-1. `interactive: true` requires special REPL-level handling
-2. No type-safe way to communicate this requirement
-3. Error code `UNILANG_ARGUMENT_INTERACTIVE_REQUIRED` is detected via string matching
-4. Documentation warns but no compile-time enforcement
-
----
+The `ArgumentAttributes::interactive: true` flag requires special REPL-level handling. There is no type-safe way to communicate this requirement. The required-interactive error code is detected via string matching.
 
 ### Part 6: Opportunities for Better API Design
 
-### Opportunity 1: Argument Extraction Helpers
+#### Opportunity 1: Argument Extraction Helpers
 
-**Suggested API:**
-```rust
-impl<'a> HashMap<String, Value> {
-  pub fn string(&self, name: &str) -> Result<&str, ArgumentError> { /* ... */ }
-  pub fn integer(&self, name: &str) -> Result<i64, ArgumentError> { /* ... */ }
-  pub fn float(&self, name: &str) -> Result<f64, ArgumentError> { /* ... */ }
-  pub fn boolean(&self, name: &str) -> Result<bool, ArgumentError> { /* ... */ }
-  pub fn optional_string(&self, name: &str) -> Result<Option<&str>, ArgumentError> { /* ... */ }
-}
-```
+Adding typed extraction helpers to `VerifiedCommand` would eliminate 90% of boilerplate in routines. Methods like `get_string()`, `require_string()`, `get_integer()`, etc. would prevent type mismatch silent failures and standardize extraction across all routines. This improvement has been implemented — see api/001.
 
-**Would eliminate:**
-- 90% of boilerplate in routines
-- Type mismatch silent failures
-- Inconsistent extraction patterns
+#### Opportunity 2: Typed Error Codes
 
-### Opportunity 2: Typed Error Codes
+Replacing string-based error codes with a typed `ErrorCode` enum enables compile-time checking, eliminates typos, and allows type-safe pattern matching. This improvement has been implemented — see api/002.
 
-**Current:**
-```rust
-ErrorData::new("UNILANG_COMMAND_NOT_FOUND", "...")
-```
+#### Opportunity 3: Builder Error Propagation
 
-**Suggested:**
-```rust
-#[derive(Debug)]
-pub enum UnilangErrorCode {
-  CommandNotFound(String),
-  ArgumentMissing { command: String, argument: String },
-  TypeMismatch { argument: String, expected: String, got: String },
-  ValidationFailed { argument: String, rule: String },
-  InteractiveRequired(String),
-  // ...
-}
+The `build_checked()` alternative to `build()` provides proper error propagation from `CommandRegistryBuilder`. Using `build_checked()` catches registration failures instead of swallowing them.
 
-impl ErrorData {
-  pub fn new_typed(code: UnilangErrorCode, message: &str) -> Self { /* ... */ }
-  pub fn error_code(&self) -> Option<UnilangErrorCode> { /* ... */ }
-}
-```
+#### Opportunity 4: Command Definition Defaults
 
-### Opportunity 3: Builder Error Propagation
+A builder method that provides sensible defaults for status, version, deprecation message, and http_method_hint would reduce repetition across all command definitions.
 
-**Current (silently fails):**
-```rust
-CommandRegistry::builder()
-  .command_with_routine(".cmd", "desc", |_| { Ok(OutputData::default()) })
-  .build()  // Errors are swallowed!
-```
+#### Opportunity 5: Compile-Time Argument Validation
 
-**Suggested:**
-```rust
-// Return Result from builder instead:
-CommandRegistry::builder()
-  .command_with_routine(".cmd", "desc", |_| { Ok(OutputData::default()) })
-  .build_checked()  // Returns Result
-```
+A proc macro approach (e.g., `#[command(...)]`) could validate that argument names in the routine match those declared in the `CommandDefinition`, moving this class of bug from runtime to compile time. This is the responsibility of `unilang_meta`.
 
-### Opportunity 4: Command Definition Defaults
+#### Opportunity 6: Structured Argument Validation
 
-**Current (verbose):**
-```rust
-CommandDefinition::former()
-  .status("stable")  // Repeated everywhere
-  .version("1.0.0")  // Repeated everywhere
-  .http_method_hint("GET".to_string())  // String::new() -> wastes space
-  .deprecation_message(String::new())  // Repeated everywhere
-```
-
-**Suggested:**
-```rust
-// Provide defaults() builder method:
-CommandDefinition::builder_with_defaults()
-  .name(".cmd")
-  .description("...")
-  // status/version/http_method_hint already set to sensible defaults
-```
-
-### Opportunity 5: Compile-Time Argument Validation
-
-**Problem:** Routines can access wrong argument names at runtime
-
-**Suggested macro approach:**
-```rust
-#[command(
-  name = ".greet",
-  arguments = [
-    { name: "name", kind = "String", optional = true },
-  ]
-)]
-fn handle_greet(cmd: &VerifiedCommand, name: &str) -> Result<OutputData, ErrorData> {
-  // name: &str - compiler ensures .greet has "name" argument
-  Ok(OutputData::default())
-}
-```
-
-### Opportunity 6: Structured Argument Validation
-
-**Current (string-based):**
-```rust
-validation_rules: vec![ValidationRule::MinLength(3)]
-```
-
-**Issues:**
-- Error messages are generic
-- Can't extract constraint information programmatically
-- No relationship between rule and argument type
-
-**Suggested:**
-```rust
-// Enum-based with typed constraints:
-pub enum ArgumentConstraint {
-  Length { min: usize, max: Option<usize> },
-  Range { min: f64, max: f64 },
-  OneOf(Vec<String>),  // type-safe enum
-  Regex(String),
-  Items { min: usize, max: Option<usize> },
-}
-
-// Compile-time validation:
-ArgumentDefinition {
-  kind: Kind::String,
-  constraints: [
-    ArgumentConstraint::Length { min: 3, max: Some(100) }
-  ]
-}
-```
-
----
+An enum-based approach to validation constraints with typed parameters would enable programmatic constraint extraction and generate better error messages than the current `ValidationRule` approach.
 
 ### Part 7: Missing API Patterns Found in Examples
 
-### Pattern 1: Interactive Argument Handling (Not in Public API)
+#### Pattern 1: Interactive Argument Handling
 
-From pipeline.rs, but not clearly exposed:
-```rust
-// Error code used to signal interactive input needed:
-"UNILANG_ARGUMENT_INTERACTIVE_REQUIRED"
+The interactive argument signal is used in examples but not formally part of the public API. There are no helper methods to check whether a result requires interactive input, what argument name is needed, or how to communicate the REPL retry protocol.
 
-// But there's no:
-// - Helper to check if argument needs interactive input
-// - Helper to mark an argument as interactive
-// - Clear protocol for REPL loops
-```
+#### Pattern 2: Help Request Detection
 
-### Pattern 2: Help Request Detection
+The semantic analyzer's help detection signal is visible only via a specific error code string. There is no public API to check if help was requested before semantic analysis completes or to construct help responses directly.
 
-From semantic.rs:
-```rust
-if instruction.help_requested || has_double_question_mark {
-  // Detected via error code "HELP_REQUESTED"
-}
-```
+#### Pattern 3: Static Command Management
 
-But there's no:
-- Public API to check if help was requested before semantic analysis
-- Helper to construct help responses
-- Type-safe help request detection
+The include-at-compile-time pattern for consuming build.rs output is used internally but has no clear public documentation showing integrators how to use static commands, integrate `build.rs`, or compare static vs. dynamic performance.
 
-### Pattern 3: Static Command Management
+### Conclusions
 
-From registry.rs static data loading:
-```rust
-include!(concat!(env!("OUT_DIR"), "/static_commands.rs"));
-```
+**Why boilerplate is heavy:** No type-safe extraction helpers force users to write manual `Value` enum matching repeatedly. Verbose builder initialization requires specifying all fields. String literals require `.to_string()` conversions. No shared defaults force each command to duplicate common metadata.
 
-But there's no:
-- Clear documentation of how to use static commands
-- Example of build.rs integration
-- Comparison of static vs dynamic performance
+**Why error handling is fragile:** String-based error codes have no compile-time checking. Silent failures in builders swallow errors with only `eprintln!`. Type mismatches hidden by `unwrap_or` go undetected. Different examples use incompatible error extraction patterns.
 
----
+**Why type safety is weak:** No argument name validation allows routines to reference wrong names. No argument type validation allows extracting wrong `Value` variants silently. Interactive argument handling is detected via error codes rather than types.
 
-### Part 8: Recommended Priority Fixes
+**Feature alignment status:** FR-ARG-6 (Validation Rule Enforcement) implemented but error messages are weak. FR-REG-6 (Explicit Command Names) enforced with clear error handling. FR-ARG-8 (Unknown Parameter Detection) implemented but only via error string matching. Interactive argument handling implemented but documentation is sparse and entirely error-based.
 
-### High Priority (Fixes pain points)
-1. **Add argument extraction helpers** - Would eliminate 90% of boilerplate
-2. **Fix builder error swallowing** - Silent failures in `command_with_routine`
-3. **Add typed error codes** - Enable safer error handling
+**Priority fixes implemented:** Typed argument extraction helpers on `VerifiedCommand` eliminate 90% of boilerplate. `build_checked()` on `CommandRegistryBuilder` prevents silent failures. `ErrorCode` enum enables safer error matching.
 
-### Medium Priority (Quality of life)
-4. **Add command definition defaults** - Reduce repetition
-5. **Improve interactive argument API** - Clear protocol for REPL
-6. **Add static command documentation** - Show performance benefits
+**Outstanding opportunities:** Compile-time argument validation via proc macro. `impl Into<String>` acceptance in builders. Formalized interactive argument protocol in public API. Clear static command integration documentation.
 
-### Low Priority (Nice to have)
-7. **Compile-time macro for command definitions** - Would validate argument names
-8. **Structured validation constraints** - Better error messages
-9. **Command registry introspection helpers** - Easier debugging
+### Analysis Instances
 
----
+| File | Relationship |
+|------|--------------|
+| [002_usability_improvements.md](002_usability_improvements.md) | Prioritized recommendations based on these findings |
 
-### Part 9: Feature Alignment Issues
+### Feature Instances
 
-From feature review:
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 requirement analyzed in Part 5 |
+| [002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
+| [004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
 
-1. **FR-ARG-6 (Validation Rule Enforcement):** ✅ Implemented via `ValidationRule` enum, but error messages are weak
-2. **FR-REG-6 (Explicit Command Names):** ✅ Enforced in runtime API, clear error handling
-3. **FR-ARG-8 (Unknown Parameter Detection):** ✅ Implemented but only via error string matching
-4. **Interactive Argument Handling:** ✅ Implemented but documentation is sparse and error-based
+### API Instances
 
-**Missing from API:**
-- Clear protocol for compile-time vs. runtime command registration
-- Performance characteristics guidance (when to use static vs. dynamic)
-- Example code showing best practices for common patterns
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | Public Value types and structures being analyzed |
 
----
+### Architecture Instances
 
-### Part 10: Summary of Root Causes
-
-### Why boilerplate is heavy:
-1. **No type-safe extraction helpers** - Users write their own repeatedly
-2. **Verbose builder initialization** - Too many required/optional fields
-3. **String literals need `.to_string()`** - No Into<String> shortcuts
-4. **No shared defaults** - Each command duplicates metadata
-
-### Why error handling is fragile:
-1. **String-based error codes** - No compile-time checking
-2. **Silent failures in builders** - Errors swallowed with eprintln
-3. **Type mismatches not detected** - `unwrap_or` hides problems
-4. **Error extraction patterns inconsistent** - Different examples use different approaches
-
-### Why type safety is weak:
-1. **No argument name validation** - Routines can reference wrong names
-2. **No argument type validation** - Extracting wrong `Value` variant fails silently
-3. **Value enum matching required** - Boilerplate for every argument access
-4. **Interactive argument handling** - Detected via error codes, not types
-
----
-
-### Conclusion
-
-The Unilang framework has excellent foundational design with support for both compile-time and runtime command registration. However, the public API could be significantly improved by:
-
-1. **Adding type-safe argument extraction methods** - Single biggest boilerplate reducer
-2. **Fixing builder error handling** - Prevent silent failures
-3. **Implementing typed error codes** - Enable safer error matching
-4. **Providing command definition defaults** - Reduce repetition
-5. **Improving documentation** - Show performance tradeoffs clearly
-
-These improvements would make the API more ergonomic, safer, and more discoverable for users while maintaining backward compatibility.
-
-### Cross-References
-
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [api/001_public_types.md](../api/001_public_types.md) | Public Value types and structures being analyzed |
-| doc | [feature/001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 requirement analyzed in Part 5 |
-| doc | [feature/002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
-| doc | [feature/004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
-| doc | [architecture/004_implementation_details.md](../architecture/004_implementation_details.md) | Static registry implementation referenced in Part 7 |
+| File | Relationship |
+|------|--------------|
+| [004_implementation_details.md](../architecture/004_implementation_details.md) | Static registry implementation referenced in Part 7 |

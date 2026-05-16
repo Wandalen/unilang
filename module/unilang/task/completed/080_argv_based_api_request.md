@@ -1,13 +1,26 @@
 # Task: Add Argv-Based API to Unilang for Proper CLI Integration
 
-**Priority:** ⚠️ **HIGH** - Architectural flaw affecting all CLI applications using unilang
-**Status:** Feature Request
-**Category:** API Design / Architecture
-**Affects:** unilang v0.23.0 - v0.25.0 (current)
-**Reporter:** willbe3 development team
-**Date:** 2025-01-12
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Priority:** ⚠️ **HIGH** - Architectural flaw affecting all CLI applications using unilang
+- **Status:** Feature Request
+- **Category:** API Design / Architecture
+- **Affects:** unilang v0.23.0 - v0.25.0 (current)
+- **Reporter:** willbe3 development team
+- **Date:** 2025-01-12
 
 ---
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Executive Summary
 
@@ -457,10 +470,10 @@ rustc --edition 2021 unilang_argv_api_request_mre.rs -o mre
 
 ## Contact / Discussion
 
-**Reporter:** willbe3 development team
-**Repository:** https://github.com/Wandalen/wTools
-**Module:** unilang
-**Version affected:** 0.25.0 (and earlier)
+- **Reporter:** willbe3 development team
+- **Repository:** https://github.com/Wandalen/wTools
+- **Module:** unilang
+- **Version affected:** 0.25.0 (and earlier)
 
 **Questions?** Comment on this task or open discussion in wTools repository.
 
@@ -491,3 +504,49 @@ rustc --edition 2021 unilang_argv_api_request_mre.rs -o mre
 This is a fundamental architectural issue that affects every CLI application using unilang. The fix is straightforward (add argv-based API), fully backward compatible, and eliminates entire categories of workarounds.
 
 **Recommendation:** Accept as HIGH priority feature request and include in next release.
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Acceptance Criteria
+
+_N/A — pre-template task. See ## Outcomes for what was delivered._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

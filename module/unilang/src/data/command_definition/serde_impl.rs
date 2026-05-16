@@ -306,7 +306,7 @@ impl< 'de > serde::Deserialize< 'de > for CommandDefinition
         let description = description.ok_or_else( || de::Error::missing_field( "description" ) )?;
 
         // Optional fields with defaults
-        let namespace = namespace.unwrap_or_else( || String::new() );
+        let namespace = namespace.unwrap_or_default();
 
         // Validate namespace using NamespaceType validation rules
         NamespaceType::new( &namespace ).map_err( de::Error::custom )?;

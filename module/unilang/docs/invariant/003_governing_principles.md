@@ -21,13 +21,9 @@ All principles defined in this document MUST be respected in every code change, 
 
 Principle violation leads to: predictability loss, API inconsistency, silent failures, and maintenance burden accumulation.
 
-Framework-level governing principles and core development principles that guide all architectural decisions.
-
 ### Framework Governing Principles
 
-The unilang framework is built on fundamental principles that guide all architectural decisions and implementation details.
-
-### Minimum Implicit Magic
+#### Minimum Implicit Magic
 
 The framework **must** minimize implicit behavior and transformations to maximize predictability:
 
@@ -36,7 +32,7 @@ The framework **must** minimize implicit behavior and transformations to maximiz
 - **Clear APIs**: Function behavior should be obvious from signatures and documentation
 - **No Surprising Side Effects**: Commands and functions should behave exactly as documented
 
-### Single Source of Truth
+#### Single Source of Truth
 
 Each piece of information **must** have exactly one authoritative source:
 
@@ -44,7 +40,7 @@ Each piece of information **must** have exactly one authoritative source:
 - **Configuration**: One canonical location for each configuration setting
 - **Documentation**: Single authoritative source for each concept or procedure
 
-### Fail-Fast Validation
+#### Fail-Fast Validation
 
 The framework **must** detect and report errors as early as possible:
 
@@ -53,7 +49,7 @@ The framework **must** detect and report errors as early as possible:
 - **Semantic Analysis**: Type and validation errors caught before execution
 - **Clear Error Messages**: All errors include actionable guidance for resolution
 
-### Explicit Dependencies
+#### Explicit Dependencies
 
 All dependencies and relationships **must** be made explicit:
 
@@ -61,7 +57,7 @@ All dependencies and relationships **must** be made explicit:
 - **Type Dependencies**: Explicit type requirements and conversions
 - **System Dependencies**: Clear documentation of external requirements
 
-### Consistent Help Access
+#### Consistent Help Access
 
 The framework **must** provide standardized, predictable help access for all commands:
 
@@ -70,47 +66,46 @@ The framework **must** provide standardized, predictable help access for all com
 - **Help Convention APIs**: Developer-friendly APIs make following help conventions effortless
 - **Discoverability**: Users can always find help through predictable patterns
 
-These principles serve as the foundation for all design decisions and implementation choices throughout the framework.
+#### Make Illegal States Unrepresentable
 
-### Make Illegal States Unrepresentable
-
-The framework **must** make invalid domain states impossible to construct, not just rejected after construction. Triggered by the wplan bug (Task 085), where `multiple:true` with non-List storage caused silent data loss:
+The framework **must** make invalid domain states impossible to construct, not just rejected after construction. This principle was reinforced by a discovered bug where `multiple:true` with non-List storage caused silent data loss:
 
 - **Parse, Don't Validate**: Accept only data that's already valid by type construction
-- **Prefer Compile-Time Errors**: Catch bugs during `cargo build`, not during execution
+- **Prefer Compile-Time Errors**: Catch bugs during compilation, not during execution
 - **Prefer Runtime Errors Over Silent Failures**: If compile-time prevention isn't possible, fail loudly
 - **No Partial Initialization**: Every constructed value must be fully valid
 
-**Three-layer defense:**
+Three-layer defense:
+
 | Layer | When | Mechanism |
 |-------|------|-----------|
-| Build-Time | `cargo build` | `build/codegen.rs` validates YAML/JSON manifests |
-| Registration-Time | Runtime API calls | `validate_command_for_registration()` |
+| Build-Time | During compilation | YAML/JSON manifest validation |
+| Registration-Time | Runtime API calls | Registration-time API validation |
 | Execution-Time | Command execution | Interpreter checks for handler presence |
 
 ### Core Principles of Development
 
-### Repository as SSOT
+#### Repository as SSOT
 
 The project's Git repository **must** be the absolute single source of truth for all project-related information. This includes specifications, documentation, source code, configuration files, and architectural diagrams.
 
-### Documentation-First Development
+#### Documentation-First Development
 
 All changes to the system's functionality or architecture **must** be documented in the relevant specification files *before* implementation begins.
 
-### Review-Driven Change Control
+#### Review-Driven Change Control
 
 All modifications to the repository, without exception, **must** go through a formal Pull Request review.
 
-### Radical Transparency and Auditability
+#### Radical Transparency and Auditability
 
 The development process **must** be fully transparent and auditable. All significant decisions and discussions **must** be captured in writing within the relevant Pull Request or a linked issue tracker. The repository's history should provide a clear, chronological narrative of the project's evolution.
 
-### File Naming Conventions
+#### File Naming Conventions
 
 All file names within the project repository **must** use lowercase `snake_case`.
 
-### Explicit Command Naming Principle
+#### Explicit Command Naming Principle
 
 The framework **must** adhere to the principle of explicit command naming with minimal implicit transformations:
 
@@ -120,10 +115,25 @@ The framework **must** adhere to the principle of explicit command naming with m
 - **No Implicit Behavior**: The system **must not** automatically add dots, modify namespaces, or transform command names during registration or execution
 - **Principle of Least Surprise**: Command behavior should be predictable — what you register is exactly what gets executed
 
-### Cross-References
+### Feature Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [invariant/001_system_actors_vocabulary.md](001_system_actors_vocabulary.md) | Vocabulary these principles govern |
-| doc | [invariant/002_non_functional_requirements.md](002_non_functional_requirements.md) | NFRs that embody these principles |
-| doc | [architecture/001_mandates.md](../architecture/001_mandates.md) | Architectural mandates derived from these principles |
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | Registry implements fail-fast validation principle |
+| [004_help_system.md](../feature/004_help_system.md) | Help system embodies consistent help access principle |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_system_actors_vocabulary.md](001_system_actors_vocabulary.md) | Vocabulary terms governed by ubiquitous language principle |
+| [002_non_functional_requirements.md](002_non_functional_requirements.md) | NFRs that embody these principles |
+| [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Explicit dependencies principle source of R2 requirement |
+| [005_command_naming.md](005_command_naming.md) | Command naming invariant derived from explicit naming principle |
+
+### Architecture Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates derived from these principles |
+| [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Minimum implicit magic principle motivates help decoupling |

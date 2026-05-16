@@ -1,14 +1,13 @@
 # Fix `From<StaticCommandRegistry>` Routine Transfer + Doctest
 
-✅ (Completed)
-
-<!-- task_metadata
-value: 8
-easiness: 7
-priority: 2
-safety: 8
-advisability: 0
--->
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** claude-sonnet-4-6
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** w3 .test level::3
+- **Validation Date:** N/A (pre-template)
 
 ## Goal
 
@@ -189,3 +188,29 @@ non-functional without this fix. Once 0.49.0 ships with this fix:
 
 **Note**: `approach_yaml_multi_build` (will_clean's current feature) already enables
 `static_registry` transitively — no feature change needed on the consumer side.
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Outcomes
+
+- `StaticCommandRegistry::into_routines(self) -> HashMap<String, CommandRoutine>` added as `pub` under `#[cfg(feature = "static_registry")]`
+- `From<StaticCommandRegistry> for CommandRegistry` now transfers all routines via `into_routines()` loop — silent data loss eliminated
+- `Pipeline::from_static()` doctest changed from `rust,ignore` to `rust,no_run`
+- All 6 acceptance-criteria test scenarios pass under `w3 .test level::3`
+- Directly unblocks `will_clean ARCH-3` tech debt: callers can now use `Pipeline::from_static(static_reg)` without re-registering routines

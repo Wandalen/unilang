@@ -1,7 +1,15 @@
 # Fix Benchmarks Directory Structure
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 **CRITICAL VIOLATION**: The project uses `benchmarks/` directory structure which is explicitly prohibited by benchkit usage.md. Benchkit **actively discourages** using framework-specific directories like `benchmarks/` and requires using standard Rust directories instead.
 
 **Current State**: 
@@ -29,6 +37,40 @@
 -   [x] Cargo.toml [[bench]] sections updated to reflect new file locations
 -   [x] Documentation updated to reference new benchmark locations
 -   [x] No benchkit runtime warnings when executing benchmarks
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
 
 ## Outcomes
 

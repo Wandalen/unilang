@@ -58,29 +58,38 @@ fn create_run_command() -> CommandDefinition
     .name( ".run" )
     .description( "Execute multiple commands" )
     .arguments( vec![
-      ArgumentDefinition::former()
-        .name( "command" )
-        .kind( Kind::String )
-        .attributes( ArgumentAttributes
+      ArgumentDefinition
+      {
+        name : "command".to_string(),
+        kind : Kind::List( Box::new( Kind::String ), None ),
+        attributes : ArgumentAttributes
         {
-          optional: true,
-          multiple: true,
+          optional : true,
+          multiple : true,
           ..Default::default()
-        })
-        .description( "Commands to execute" )
-        .end(),
-
-      ArgumentDefinition::former()
-        .name( "parallel" )
-        .kind( Kind::Integer )
-        .attributes( ArgumentAttributes
+        },
+        description : "Commands to execute".to_string(),
+        hint : String::new(),
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      },
+      ArgumentDefinition
+      {
+        name : "parallel".to_string(),
+        kind : Kind::Integer,
+        attributes : ArgumentAttributes
         {
-          optional: true,
-          default: Some( "2".to_string() ),
+          optional : true,
+          default : Some( "2".to_string() ),
           ..Default::default()
-        })
-        .description( "Parallel count" )
-        .end(),
+        },
+        description : "Parallel count".to_string(),
+        hint : String::new(),
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      },
     ])
     .end()
 }
@@ -98,9 +107,8 @@ fn test_fixed_shell_args_two_commands()
   println!( "Fixed instruction text: {instruction_text}" );
   assert_eq!( instruction_text, r#".run command::"echo a" command::"echo b" parallel::2"# );
 
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
-  registry.register( create_run_command() );
+  registry.register( create_run_command() ).expect( "Registration should succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( &instruction_text )
@@ -146,9 +154,8 @@ fn test_fixed_shell_args_four_commands()
   println!( "Fixed instruction text: {instruction_text}" );
   assert_eq!( instruction_text, r#".run command::"echo a" command::"echo b" command::"echo c" command::"echo d" parallel::2"# );
 
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
-  registry.register( create_run_command() );
+  registry.register( create_run_command() ).expect( "Registration should succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( &instruction_text )
@@ -190,9 +197,8 @@ fn test_fixed_real_cargo_commands()
 
   println!( "Fixed instruction text: {instruction_text}" );
 
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
-  registry.register( create_run_command() );
+  registry.register( create_run_command() ).expect( "Registration should succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( &instruction_text )
@@ -237,9 +243,8 @@ fn test_fixed_single_word_commands()
   // Single words dont need quoting
   assert_eq!( instruction_text, ".run command::pwd command::whoami command::date command::hostname parallel::2" );
 
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
-  registry.register( create_run_command() );
+  registry.register( create_run_command() ).expect( "Registration should succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( &instruction_text )

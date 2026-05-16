@@ -5,10 +5,14 @@
 
 mod semantic {
   mod argument_binding;
+  mod auto_categorize_decoupling;
+  mod centralized_validation;
   mod command_validation;
+  mod format_category_name_decoupling;
   mod multiple_parameters;
+  mod parameter_storage_validation;
+  mod parameter_typo_suggestion;
   mod parser_semantic;
   mod unknown_parameters;
   mod unknown_parameters_edge_cases;
-  mod parameter_storage_validation;
 }

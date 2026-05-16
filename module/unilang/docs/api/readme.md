@@ -14,3 +14,4 @@ Public programmatic interfaces exposed to external callers of the `unilang` crat
 | ID | Name | Purpose | Status |
 |----|------|---------|--------|
 | 001 | [Public Types](001_public_types.md) | Public data structures, API reference, and environment variables | ✅ |
+| 002 | [Error Codes](002_error_codes.md) | Typed ErrorCode enum values and their meaning | ✅ |

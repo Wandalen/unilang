@@ -14,3 +14,6 @@ Tests for command validation, argument binding, type checking, and typo suggesti
 | `parser_semantic.rs` | Interaction between parser output and semantic layer |
 | `unknown_parameters.rs` | Error handling for unrecognized parameters |
 | `unknown_parameters_edge_cases.rs` | Edge cases in unknown parameter detection |
+| `centralized_validation.rs` | Cross-path validation: all construction paths share validation rules |
+| `auto_categorize_decoupling.rs` | Auto-categorize logic decoupled from output formatting |
+| `format_category_name_decoupling.rs` | Category name formatting decoupled from semantic model |

@@ -1,7 +1,15 @@
 # Implement CliBuilder API
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 Implement the `CliBuilder` fluent API for ergonomic CLI aggregation in the `src/multi_yaml/` module. This builder enables combining multiple CLI tools into unified commands with prefix management, namespace isolation, and conflict detection. The implementation must support both static and dynamic command sources.
 
 Links to related tasks: Depends on task 065 (tests), leads to task 067 (multi-YAML system).
@@ -23,3 +31,41 @@ Links to related tasks: Depends on task 065 (tests), leads to task 067 (multi-YA
 -   All tests from task 065 must pass after implementation
 -   Must integrate with `StaticCommandRegistry` for zero-overhead lookup
 -   No clippy warnings when running `cargo clippy --all-targets --all-features -- -D warnings`
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

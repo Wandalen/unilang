@@ -1,12 +1,21 @@
 # Extract Config Extraction Functions to unilang_parser
 
-**Date**: 2025-11-19
-**Completed**: 2025-11-22
-**Priority**: MEDIUM - Reduces Code Duplication
-**Category**: API Enhancement
-**Status**: Completed
-**Source**: wplan_agent/src/config.rs, wplan_client/src/config.rs
-**Actual Location**: unilang/src/config_extraction.rs (moved from unilang_parser due to serde_json dependency)
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Date**: 2025-11-19
+- **Completed**: 2025-11-22
+- **Priority**: MEDIUM - Reduces Code Duplication
+- **Category**: API Enhancement
+- **Status**: Completed
+- **Source**: wplan_agent/src/config.rs, wplan_client/src/config.rs
+- **Actual Location**: unilang/src/config_extraction.rs (moved from unilang_parser due to serde_json dependency)
 
 **⚠️ CRITICAL**: This task is INCOMPLETE without follow-up adoption. Task will be CANCELED if adoption not implemented.
 
@@ -15,6 +24,10 @@
 - [wplan_agent/001](../../../../../willbe/module/wplan_agent/task/001_adopt_config_extraction_from_unilang.md) - Replace local config extraction with unilang
 
 ---
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Executive Summary
 
@@ -437,6 +450,48 @@ layer config_extraction;
 
 ---
 
-**Resolution Date**: 2025-11-22
-**Test Coverage**: 33 new tests
-**Files Created**: 2 (config_extraction.rs, tests/config_extraction.rs)
+- **Resolution Date**: 2025-11-22
+- **Test Coverage**: 33 new tests
+- **Files Created**: 2 (config_extraction.rs, tests/config_extraction.rs)
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

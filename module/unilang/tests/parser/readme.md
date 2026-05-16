@@ -17,3 +17,4 @@ Tests for tokenization, argument parsing, SIMD paths, and string interning.
 | `string_interning.rs` | String interner behavior and cache semantics |
 | `static_data_structures.rs` | PHF and static lookup structure correctness |
 | `command_sequence_scalability.rs` | Parser performance with many commands |
+| `reexport.rs` | Parser types accessible via unilang re-export |

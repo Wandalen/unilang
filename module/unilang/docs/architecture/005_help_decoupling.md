@@ -23,47 +23,9 @@ This migration successfully removed all application-specific coupling from the u
 
 ### Target Architecture
 
-**Before (Coupled):**
-```rust
-fn auto_categorize( &self, name : &str ) -> String
-{
-  if name.starts_with( ".git" ) { "git_operations".to_string() }
-  else if name.starts_with( ".remove" ) { "removal_operations".to_string() }
-  // ... 12+ more domain-specific patterns
-}
+**Before (Coupled):** The `auto_categorize()` function contained 12+ domain-specific pattern matches on command name prefixes (e.g., `.git`, `.remove`), returning domain-specific category strings such as `"git_operations"` and `"removal_operations"`. The `format_category_name()` function contained 15+ hardcoded category-to-display-name mappings (e.g., `"repository_management"` → `"REPOSITORY MANAGEMENT"`).
 
-fn format_category_name( &self, category : &str ) -> String
-{
-  match category {
-    "repository_management" => "REPOSITORY MANAGEMENT".to_string(),
-    "git_operations" => "GIT OPERATIONS".to_string(),
-    // ... 15+ hardcoded mappings
-  }
-}
-```
-
-**After (Generic):**
-```rust
-fn auto_categorize( &self, name : &str ) -> String
-{
-  String::new()  // Categories must be explicit, never inferred
-}
-
-fn format_category_name( &self, category : &str ) -> String
-{
-  category
-    .split( '_' )
-    .map( |word| {
-      let mut chars = word.chars();
-      match chars.next() {
-        None => String::new(),
-        Some( first ) => first.to_uppercase().collect::<String>() + chars.as_str(),
-      }
-    })
-    .collect::<Vec<_>>()
-    .join( " " )
-}
-```
+**After (Generic):** `auto_categorize()` returns an empty string — categories must be specified explicitly via `CommandDefinition::category()`; the framework never infers categories from command names. `format_category_name()` uses a generic snake_case → Title Case transformation: split on underscores, capitalize the first character of each word, rejoin with spaces.
 
 ### Migration Phases
 
@@ -76,7 +38,7 @@ fn format_category_name( &self, category : &str ) -> String
 
 **Phase 1a: TDD — auto_categorize Simplification** ✅ COMPLETE
 - Created failing tests expecting empty string return (5 tests)
-- Replaced pattern matching with `String::new()`
+- Replaced pattern matching with empty string return
 - Documented architectural requirement: categories must be explicit
 - Result: Eliminated all domain-specific pattern matching
 
@@ -98,10 +60,10 @@ fn format_category_name( &self, category : &str ) -> String
 - Module names: `math_cli_static`, `MathCliModule` → `cmd1_cli_static`, `Cmd1CliModule`
 
 **Source Files (5 files):**
-- `help.rs`: Comment examples `.math.add` → `.cmd1.add`
+- `help.rs`: Comment examples genericized
 - `registry.rs`: Help examples genericized, application attribution removed
 - `simd_tokenizer.rs`: Test strings genericized
-- `command_validation.rs`: Doc examples genericized, "wplan bug pattern" → "silent data loss"
+- `command_validation.rs`: Doc examples genericized, domain-specific bug references replaced with generic descriptions
 - `pipeline.rs`: Doc comment examples genericized
 
 **Verification Results:**
@@ -166,9 +128,14 @@ Final verification results:
 **Files Modified:** `src/help.rs`, 2 new test files, 1 existing test updated
 **Breaking Changes:** Applications relying on auto-categorization must now specify categories explicitly
 
-### Cross-References
+### Feature Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [feature/004_help_system.md](../feature/004_help_system.md) | FR-HELP-* requirements this migration supports |
-| doc | [invariant/003_governing_principles.md](../invariant/003_governing_principles.md) | Minimum implicit magic principle motivating this |
+| File | Relationship |
+|------|--------------|
+| [004_help_system.md](../feature/004_help_system.md) | FR-HELP-* requirements this migration supports |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [003_governing_principles.md](../invariant/003_governing_principles.md) | Minimum implicit magic principle motivating this migration |

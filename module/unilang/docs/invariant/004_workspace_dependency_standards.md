@@ -32,59 +32,25 @@ The workspace `Cargo.toml` and all library member crates MUST continuously compl
 
 ### Enforcement Mechanism
 
-```bash
-# R1: Zero bare or tilde version strings in workspace manifest
-# Note: pattern scoped to "version = " to avoid false positives from non-dep fields (e.g. resolver = "2")
-grep -Pn 'version\s*=\s*"(~|[0-9])' Cargo.toml | grep -v '# pin:' | wc -l  # → 0
-
-# R3: No non-optional normal deps in library crates (build-deps and dev-deps are exempt)
-# Check each crate's [dependencies] section manually or use:
-grep 'optional = true' module/unilang_parser/Cargo.toml | wc -l  # → 3 (all deps optional)
-grep 'optional = true' module/unilang_meta/Cargo.toml | wc -l    # → 4 (all deps optional)
-grep 'optional = true' module/unilang/Cargo.toml | wc -l         # → ≥ 11 (all normal deps optional)
-
-# R4: No-op verification (zero external crate compilations under --no-default-features)
-cargo build -p unilang_parser --no-default-features 2>&1 | grep "Compiling" | grep -v "unilang_parser" | wc -l  # → 0
-cargo build -p unilang_meta --no-default-features 2>&1 | grep "Compiling" | grep -v "unilang_meta" | wc -l      # → 0
-cargo build -p unilang --no-default-features 2>&1 | grep "Compiling" | grep -v " unilang " | wc -l              # → 0
-```
+- **R1:** Audit `[workspace.dependencies]` in the workspace `Cargo.toml` for bare version strings (e.g. `"1.0"`) or tilde-prefixed strings (e.g. `"~0.39"`). Zero matches required.
+- **R3:** Audit `[dependencies]` in each library crate's `Cargo.toml` to confirm every entry declares `optional = true`. Build and dev dependencies are exempt.
+- **R4:** Build each library crate with `--no-default-features` and confirm zero external crate compilations occur (only the target crate itself compiles).
 
 ### Violation Consequences
 
 **R1 violation:** Hidden resolution policy makes dependency audits ambiguous; bare `"1"` does not communicate whether compatible-update semantics are intended; tilde on external deps over-constrains the resolver to patch-level range (wrong for external deps).
 
-**R3/R4 violation:** `cargo build -p unilang --no-default-features` still compiles serde, url, chrono, regex, and 7 other heavy crates even though nothing is enabled. This defeats the `enabled`/`full` feature isolation architecture mandated in [architecture/001_mandates.md](../architecture/001_mandates.md) and described as a RIGID AND NON-NEGOTIABLE RULE in `crate_distribution.rulebook.md § Cargo Features Management : Mandatory Enabled and Full Features`.
+**R3/R4 violation:** Building a library crate with `--no-default-features` still compiles heavy transitive dependencies even though nothing is enabled. This defeats the `enabled`/`full` feature isolation architecture mandated in [architecture/001_mandates.md](../architecture/001_mandates.md).
 
-### Known Violations
+### Invariant Instances
 
-No active violations — all previously known violations resolved.
+| File | Relationship |
+|------|--------------|
+| [002_non_functional_requirements.md](002_non_functional_requirements.md) | Performance NFRs enabled by no-op compile pattern |
+| [003_governing_principles.md](003_governing_principles.md) | Explicit Dependencies principle source of R2 requirement |
 
-### Resolved Violations (resolved 2026-04-19)
+### Architecture Instances
 
-**V1–V3 — Version Format — `Cargo.toml` (workspace root)** — ✅ Fixed by task [097](../../task/completed/097_fix_dep_version_format.md)
-
-43 deps had bare strings or tilde prefix; all rewritten to `^X.Y` (external) or `=X.Y.Z` (internal path deps).
-
-**V4 — Non-Optional Core Deps — 3 library crates** — ✅ Fixed by task [098](../../task/completed/098_implement_optional_dep_pattern.md)
-
-18 deps across `unilang`, `unilang_parser`, `unilang_meta` were non-optional; `enabled` feature activated nothing. All deps are now `optional = true` and `enabled` activates them via `dep:name` syntax. Crate-level code gated under `#[cfg(feature = "enabled")]`.
-
-**Verification (post-fix):**
-```bash
-# R1: Zero bare/tilde versions
-grep -Pn 'version\s*=\s*"(~|[0-9])' Cargo.toml  # → 0 matches
-
-# R4: No runtime deps under --no-default-features
-cargo tree -p unilang --no-default-features  # → [build-dependencies] only; zero runtime deps
-cargo build -p unilang_parser --no-default-features  # → 0 external compilations
-cargo build -p unilang_meta --no-default-features    # → 0 external compilations
-```
-
-### Cross-References
-
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [architecture/001_mandates.md](../architecture/001_mandates.md) | `enabled` feature gate mandate (source of R4) |
-| doc | [invariant/002_non_functional_requirements.md](002_non_functional_requirements.md) | Performance NFRs enabled by no-op compile pattern |
-| doc | [invariant/003_governing_principles.md](003_governing_principles.md) | Explicit Dependencies principle (source of R2) |
-| rulebook | `crate_distribution.rulebook.md` | Complete dependency rules R1–R8, anti-patterns A1–A4 |
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](../architecture/001_mandates.md) | `enabled` feature gate mandate source of R4 requirement |

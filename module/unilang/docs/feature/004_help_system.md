@@ -7,7 +7,15 @@
 - **In Scope:** Help generation requirements, auto-help conventions, help parameter behavior
 - **Out of Scope:** Help rendering implementation, UI formatting specifics
 
-Functional requirements governing the help generator, help access methods, and verbosity control.
+### Design
+
+The help system uses a decoupled `HelpGenerator` that operates exclusively on `CommandDefinition` metadata without any knowledge of the domain or application using the framework. This makes the generator reusable across any command set without modification.
+
+Three access methods exist for every registered command and are guaranteed to be consistent with each other: the `?` operator (appended as the final token to any command string), the `??` quoted parameter (passable as any argument value), and the `.command.help` auto-generated command. All three methods produce identical output for the same command and verbosity level. Help generation is mandatory — every registered command automatically receives a `.command.help` companion with no opt-out.
+
+The five verbosity levels (Minimal through Comprehensive) form a progressive disclosure ladder. Higher levels add more detail rather than replacing existing information, so a user who finds Level 2 output sufficient need not learn new output structure when switching to Level 3. The default is Level 2 (Standard), which is optimized for terminal use: concise, with a USAGE line, parameter list with descriptions, and example invocations. The verbosity level is configurable via environment variable `UNILANG_HELP_VERBOSITY`.
+
+For the full CLI command language syntax including the `?` operator and `??` parameter parsing rules, see the canonical specification in `architecture/003_vision_scope.md § CLI Modality: Language Syntax & Processing`.
 
 ### FR-HELP-1 (Command List)
 
@@ -61,7 +69,7 @@ The framework **must** support configurable help verbosity levels to accommodate
 
 - **Level 0 (Minimal):** Command name and brief description only — for quick reference
 - **Level 1 (Basic):** Add parameters list with types — for syntax lookup
-- **Level 2 (Standard — DEFAULT):** Concise format with USAGE, PARAMETERS with descriptions, and EXAMPLES sections — optimized for terminal use like unikit
+- **Level 2 (Standard — DEFAULT):** Concise format with USAGE, PARAMETERS with descriptions, and EXAMPLES sections — optimized for terminal use
 - **Level 3 (Detailed):** Full metadata including version, aliases, tags, validation rules — comprehensive documentation
 - **Level 4 (Comprehensive):** Extensive format with rationale, use cases, and detailed explanations — for learning and documentation
 
@@ -74,20 +82,35 @@ The verbosity level **must** be parseable from integers 0-4 via `HelpVerbosity::
 
 **Configurable via environment variable:** `UNILANG_HELP_VERBOSITY` (0=Minimal, 1=Basic, 2=Standard/DEFAULT, 3=Detailed, 4=Comprehensive).
 
-**Implementation status:** ✅ Implemented in `src/help.rs` with `HelpVerbosity` enum (Minimal, Basic, Standard, Detailed, Comprehensive), `HelpGenerator::with_verbosity()`, `set_verbosity()`, and `verbosity()` methods. Default is Standard (Level 2). Comprehensive test coverage in `tests/help_verbosity.rs` with 9 tests verifying all verbosity levels and progressive information display.
+**Implementation status:** ✅ Implemented with `HelpVerbosity` enum (Minimal, Basic, Standard, Detailed, Comprehensive), `HelpGenerator::with_verbosity()`, `set_verbosity()`, and `verbosity()` methods. Default is Standard (Level 2). Comprehensive test coverage with 9 tests verifying all verbosity levels and progressive information display.
 
-### CLI Language Syntax for Help Access
+### Analysis Instances
 
-From the CLI modality language spec (§6):
+| File | Relationship |
+|------|--------------|
+| [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of help request detection patterns |
 
-- **Rule 4 (Help Operator):** The `?` operator, if present, **must** be the final token and triggers the help system.
-- **Rule 5 (Double Question Mark Parameter):** The `??` parameter, if present as any argument, **must** trigger help display for the command, identical to calling `.command.help`.
-- **Rule 6 (Special Case — Discovery):** A standalone dot (`.`) **must** be interpreted as a request to list all available commands.
+### Architecture Instances
 
-### Cross-References
+| File | Relationship |
+|------|--------------|
+| [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Migration that decoupled help from domain |
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [feature/001_command_registry.md](001_command_registry.md) | Commands that help describes |
-| doc | [architecture/005_help_decoupling.md](../architecture/005_help_decoupling.md) | Help system decoupling migration |
-| doc | [invariant/003_governing_principles.md](../invariant/003_governing_principles.md) | Consistent help access principle |
+### Feature Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](001_command_registry.md) | Commands that help describes |
+| [003_pipeline.md](003_pipeline.md) | Pipeline that intercepts help requests |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [003_governing_principles.md](../invariant/003_governing_principles.md) | Consistent help access principle |
+
+### API Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | HelpGenerator and HelpVerbosity public types |

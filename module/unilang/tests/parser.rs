@@ -10,6 +10,7 @@ mod parser {
   mod extended_ascii_safety;
   mod file_path_parsing;
   mod quoted_values;
+  mod reexport;
   mod simd_json;
   mod simd_tokenization;
   mod static_data_structures;

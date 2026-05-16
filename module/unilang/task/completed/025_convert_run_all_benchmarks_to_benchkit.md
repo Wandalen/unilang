@@ -1,7 +1,15 @@
 # Convert run all benchmarks suite to benchkit
 
-## Description
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
 
+## Goal
 The run all benchmarks test in `benchmarks/run_all_benchmarks.rs` is a meta-test that runs other benchmarks using manual timing and timeout-based approaches instead of proper benchkit orchestration. It creates circular dependencies by calling other test functions and lacks proper statistical analysis of results.
 
 The test needs to be converted to use benchkit's `BenchmarkSuite` to orchestrate comprehensive performance testing with statistical rigor, removing circular dependencies and providing meaningful performance validation for the entire unilang framework.
@@ -26,6 +34,40 @@ Related to audit findings of skipped benchmark tests that need benchkit complian
 -   Test compiles and runs successfully with benchmarks feature enabled
 -   Update ignore attribute to reference correct benchmark feature requirements
 -   Provide actionable performance insights and recommendations
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
 
 ## Outcomes
 

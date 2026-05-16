@@ -5,6 +5,7 @@
 
 mod system {
   mod api_compatibility;
+  mod argv_api;
   mod comprehensive_workflow;
   mod end_to_end;
   mod external_usage;

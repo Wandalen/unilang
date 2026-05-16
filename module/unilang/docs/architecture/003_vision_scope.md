@@ -50,10 +50,21 @@ The `unilang_parser` crate **must** be the reference implementation for this sec
 - **Rule 5 (Double Question Mark Parameter):** The `??` parameter, if present as any argument, **must** trigger help display for the command, identical to calling `.command.help`. This provides a consistent alternative to the `?` operator.
 - **Rule 6 (Special Case — Discovery):** A standalone dot (`.`) **must** be interpreted as a request to list all available commands.
 
-### Cross-References
+### Feature Instances
 
-| Type | File | Responsibility |
-|------|------|----------------|
-| doc | [feature/001_command_registry.md](../feature/001_command_registry.md) | Core registration requirement from this vision |
-| doc | [invariant/001_system_actors_vocabulary.md](../invariant/001_system_actors_vocabulary.md) | Actors defined for this scope |
-| doc | [architecture/001_mandates.md](001_mandates.md) | Mandates implementing this vision |
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | Core registration requirement from this vision |
+
+### Invariant Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_system_actors_vocabulary.md](../invariant/001_system_actors_vocabulary.md) | Actors defined for this scope |
+
+### Architecture Instances
+
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](001_mandates.md) | Mandates implementing this vision |
+| [006_repl_implementation.md](006_repl_implementation.md) | REPL modality implementation of this vision |

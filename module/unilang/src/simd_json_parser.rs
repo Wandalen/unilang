@@ -165,7 +165,7 @@ mod private
           SerdeValue::Number( serde_json::Number::from_f64( n ).unwrap_or_else( || 0.into() ) ),
         OwnedValue::String( s ) => SerdeValue::String( s ),
         OwnedValue::Array( arr ) =>
-          SerdeValue::Array( arr.into_iter().map( | v | Self::simd_to_serde( v ) ).collect() ),
+          SerdeValue::Array( arr.into_iter().map( Self::simd_to_serde ).collect() ),
         OwnedValue::Object( obj ) =>
           SerdeValue::Object( obj.into_iter().map( |( k, v )| ( k, Self::simd_to_serde( v ) ) ).collect() ),
       }

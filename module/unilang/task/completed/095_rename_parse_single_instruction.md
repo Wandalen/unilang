@@ -14,10 +14,10 @@
 
 Add `parse_repl_input` as a new public method on `Parser` that delegates to the existing `parse_single_instruction`; migrate all 302 call sites in the workspace from `.parse_single_instruction(` to `.parse_repl_input(`; then mark `parse_single_instruction` as `#[deprecated]` with a forwarding shim to `parse_repl_input`. After this task, `parse_repl_input` is the canonical name for REPL/string input parsing.
 
-**Motivated:** The name `parse_single_instruction` is misleading — it sounds primary but is only correct for REPL/string input. DEMAND 2 from task 086 requires this rename.
-**Observable:** `grep -c "pub fn parse_repl_input" module/unilang_parser/src/parser_engine/mod.rs` → 1; `grep -r "\.parse_single_instruction(" module/ --include="*.rs" | grep -v "pub fn\|#\[deprecated" | wc -l` → 0.
-**Scoped:** `unilang_parser` crate (source) + all callers in `unilang` crate; no other crates.
-**Testable:** `w3 .test level::3` passes with 0 failures and 0 warnings after all three phases.
+- **Motivated:** The name `parse_single_instruction` is misleading — it sounds primary but is only correct for REPL/string input. DEMAND 2 from task 086 requires this rename.
+- **Observable:** `grep -c "pub fn parse_repl_input" module/unilang_parser/src/parser_engine/mod.rs` → 1; `grep -r "\.parse_single_instruction(" module/ --include="*.rs" | grep -v "pub fn\|#\[deprecated" | wc -l` → 0.
+- **Scoped:** `unilang_parser` crate (source) + all callers in `unilang` crate; no other crates.
+- **Testable:** `w3 .test level::3` passes with 0 failures and 0 warnings after all three phases.
 
 ## In Scope
 

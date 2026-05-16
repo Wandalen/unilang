@@ -1,9 +1,22 @@
 # Unilang Critical Issue: Make Command/Help Divergence Unrepresentable
 
-**Date**: 2025-10-21
-**Priority**: CRITICAL
-**Category**: API Design - Prevent Misuse
-**Status**: Completed (Phase 1 + Phase 2 implemented; Phase 3 superseded — see RESOLUTION)
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Date**: 2025-10-21
+- **Priority**: CRITICAL
+- **Category**: API Design - Prevent Misuse
+- **Status**: Completed (Phase 1 + Phase 2 implemented; Phase 3 superseded — see RESOLUTION)
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Problem Statement
 
@@ -610,9 +623,9 @@ def hello(name):
 
 ---
 
-**Status**: Awaiting review and approval for implementation
-**Priority**: CRITICAL - This prevents users from shipping broken CLI applications
-**Effort**: Medium (2-3 weeks for all phases)
+- **Status**: Awaiting review and approval for implementation
+- **Priority**: CRITICAL - This prevents users from shipping broken CLI applications
+- **Effort**: Medium (2-3 weeks for all phases)
 
 ---
 
@@ -664,3 +677,45 @@ The `auto_help_enabled = true` default makes divergence impossible in normal use
 ### Key Design Decision
 
 Auto-generation (Phase 2 style, implemented without breaking changes) is architecturally superior to type-state for this use case. Auto-generation makes correct usage the ONLY easy path. Type-state would require users to acknowledge every help generation explicitly, adding friction without proportional benefit.
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._

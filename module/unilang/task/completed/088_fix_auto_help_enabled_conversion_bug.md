@@ -1,12 +1,25 @@
 # Unilang Critical Bug: `auto_help_enabled` Lost During Static-to-Dynamic Conversion
 
-**Date**: 2025-11-06
-**Completed**: 2025-11-06
-**Priority**: HIGH
-**Category**: Bug Fix - Data Integrity
-**Status**: Completed
-**Affects**: v0.35.0+
-**Discovered In**: willbe/will_crates integration
+## Execution State
+- **Status:** ✅ (Completed)
+- **Executor Type:** AI
+- **Actor:** N/A (pre-template)
+- **Claimed At:** N/A (pre-template)
+- **Priority:** 0
+- **Validated By:** N/A (pre-template)
+- **Validation Date:** N/A (pre-template)
+
+- **Date**: 2025-11-06
+- **Completed**: 2025-11-06
+- **Priority**: HIGH
+- **Category**: Bug Fix - Data Integrity
+- **Status**: Completed
+- **Affects**: v0.35.0+
+- **Discovered In**: willbe/will_crates integration
+
+## Goal
+
+_N/A — pre-template task. See task body for objective details._
 
 ## Problem Statement
 
@@ -94,8 +107,8 @@ registry.command(".crates.list.help")  // ❌ Exists in PHF, NO HANDLER
 
 ### Location of Bug
 
-**File**: `unilang/src/data.rs` (assumed - needs verification)
-**Code**: `impl From<StaticCommandDefinition> for CommandDefinition`
+- **File**: `unilang/src/data.rs` (assumed - needs verification)
+- **Code**: `impl From<StaticCommandDefinition> for CommandDefinition`
 
 ```rust
 // Current (BUGGY) implementation
@@ -359,12 +372,12 @@ From `will_crates/src/registration.rs:51-54`:
 
 ### Evidence
 
-**Discovery**: willbe workspace integration testing
-**Command**: `w3 .crates.list.help`
-**Expected**: Help output
-**Actual**: `Error: The command '.crates.list.help' was not found`
-**Investigation**: Showed PHF contains help command, but registry has no handler
-**Root cause**: Conversion discards `auto_help_enabled`, breaking auto-registration logic
+- **Discovery**: willbe workspace integration testing
+- **Command**: `w3 .crates.list.help`
+- **Expected**: Help output
+- **Actual**: `Error: The command '.crates.list.help' was not found`
+- **Investigation**: Showed PHF contains help command, but registry has no handler
+- **Root cause**: Conversion discards `auto_help_enabled`, breaking auto-registration logic
 
 ## Priority Justification
 
@@ -533,8 +546,50 @@ The fix is **production-ready**:
 
 ---
 
-**Resolution Date**: 2025-11-06
-**Resolved By**: TDD Bug-Fix Workflow with Ultrathink Validation
-**Test Coverage**: 3 bug reproducers + 1 updated conversion test + 600+ regression tests
-**Files Modified**: 10 files (3 core, 7 supporting)
-**Lines Changed**: ~200 lines total (50 implementation, 150 tests/docs)
+- **Resolution Date**: 2025-11-06
+- **Resolved By**: TDD Bug-Fix Workflow with Ultrathink Validation
+- **Test Coverage**: 3 bug reproducers + 1 updated conversion test + 600+ regression tests
+- **Files Modified**: 10 files (3 core, 7 supporting)
+- **Lines Changed**: ~200 lines total (50 implementation, 150 tests/docs)
+
+## In Scope
+
+_N/A — pre-template task. Scope not formally documented._
+
+## Out of Scope
+
+_N/A — pre-template task._
+
+## Work Procedure
+
+_N/A — pre-template task. See git history for changes made._
+
+## Test Matrix
+
+_N/A — pre-template task. Testing not formally documented._
+
+## Validation
+
+### Checklist
+
+_N/A — pre-template task._
+
+### Measurements
+
+_N/A — pre-template task._
+
+### Invariants
+
+_N/A — pre-template task._
+
+### Anti-faking Checks
+
+_N/A — pre-template task._
+
+## Requirements
+
+_N/A — pre-template task._
+
+## Outcomes
+
+_Pre-template task — outcomes not formally recorded. See task body for implementation details._
