@@ -134,6 +134,7 @@ mod private
 {
 }
 
+#[ cfg( feature = "enabled" ) ]
 mod_interface::mod_interface!
 {
   /// Core data structures and types.
@@ -225,12 +226,14 @@ mod_interface::mod_interface!
 /// use unilang::parser::{Parser, UnilangParserOptions};
 /// use unilang::parser::cli_parser::{parse_cli_args, CliParams};
 /// ```
+#[ cfg( feature = "enabled" ) ]
 pub use unilang_parser as parser;
 
 /// Re-export of input marker newtypes from `unilang_parser`.
 ///
 /// Provides direct access to [`ShellArgv`] and [`ReplInput`] without requiring
 /// users to import from `unilang::parser::argv_types` directly.
+#[ cfg( feature = "enabled" ) ]
 pub use unilang_parser ::{ ShellArgv, ReplInput };
 
 /// Re-export of PHF (Perfect Hash Function) types for generated code.

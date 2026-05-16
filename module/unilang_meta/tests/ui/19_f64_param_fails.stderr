@@ -1,0 +1,5 @@
+error: unsupported parameter type: f64
+ --> tests/ui/19_f64_param_fails.rs:8:20
+  |
+8 | fn floaty( value : f64 ) -> String
+  |                    ^^^

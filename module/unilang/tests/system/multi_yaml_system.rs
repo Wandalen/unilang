@@ -161,8 +161,8 @@ fn test_static_registry_generation()
   // Generate static registry source code
   let source_code = aggregator.generate_static_registry_source();
 
-  // Should contain static registry structure
-  assert!( source_code.contains("phf_map") );
+  // Should contain static registry structure — Fix B: struct literal, no phf_map! macro
+  assert!( !source_code.contains("phf_map!") );
   assert!( source_code.contains("Map") );
 }
 

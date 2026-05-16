@@ -1,0 +1,7 @@
+error: unsupported parameter type: expected a path type
+ --> tests/ui/15_reference_param_fails.rs:6:1
+  |
+6 | #[ unilang_meta::command( name = ".ref_param" ) ]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `unilang_meta::command` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -5,7 +5,6 @@
 
 use crate ::error :: { ParseError, SourceLocation };
 use alloc ::borrow ::Cow;
-use alloc ::string :: { String, ToString };
 use core ::fmt;
 
 /// Split representation compatible with `strs_tools` Split
@@ -80,7 +79,7 @@ impl< 'a > ZeroCopyRichItem< 'a >
   #[ must_use ]
   pub fn to_owned( &self ) -> RichItem< 'a >
   {
-  RichItem ::new( self.inner.clone(), self.kind.to_owned(), self.adjusted_source_location.clone() )
+  RichItem ::new( self.inner.clone(), self.kind.clone(), self.adjusted_source_location.clone() )
  }
 }
 
@@ -92,7 +91,7 @@ pub struct RichItem< 'a >
   /// The original string split.
   pub inner: Split< 'a >,
   /// The classified kind of the token.
-  pub kind: UnilangTokenKind,
+  pub kind: ZeroCopyTokenKind< 'a >,
   /// The source location adjusted for things like quotes.
   pub adjusted_source_location: SourceLocation,
 }
@@ -104,7 +103,7 @@ impl< 'a > RichItem< 'a >
   pub fn new
   (
   inner: Split< 'a >,
-  kind: UnilangTokenKind,
+  kind: ZeroCopyTokenKind< 'a >,
   adjusted_source_location: SourceLocation,
  )
   ->
@@ -131,48 +130,48 @@ impl< 'a > RichItem< 'a >
 pub enum ZeroCopyTokenKind< 'a >
 {
   /// An identifier (e.g., a command name, argument name, or unquoted value).
-  Identifier( &'a str ),
+  Identifier( alloc ::borrow ::Cow< 'a, str > ),
   /// A number literal.
-  Number( &'a str ),
+  Number( alloc ::borrow ::Cow< 'a, str > ),
 
   /// An operator (e.g., ` :: `, `?`).
   Operator( &'static str ),
   /// A delimiter (e.g., space, dot, newline).
   Delimiter( &'static str ),
   /// An unrecognized token, indicating a parsing error.
-  Unrecognized( &'a str ),
+  Unrecognized( alloc ::borrow ::Cow< 'a, str > ),
 }
 
 /// Represents the classified kind of a unilang token.
 #[ derive( Debug, PartialEq, Eq, Clone ) ]
-pub enum UnilangTokenKind
+pub enum UnilangTokenKind< 'a >
 {
   /// An identifier (e.g., a command name, argument name, or unquoted value).
-  Identifier( String ),
+  Identifier( Cow< 'a, str > ),
   /// A number literal.
-  Number( String ),
+  Number( Cow< 'a, str > ),
 
   /// An operator (e.g., ` :: `, `?`).
   Operator( &'static str ),
   /// A delimiter (e.g., space, dot, newline).
   Delimiter( &'static str ),
   /// An unrecognized token, indicating a parsing error.
-  Unrecognized( String ),
+  Unrecognized( Cow< 'a, str > ),
 }
 
-impl ZeroCopyTokenKind< '_ >
+impl< 'a > ZeroCopyTokenKind< 'a >
 {
   /// Converts a zero-copy token to an owned token.
   #[ must_use ]
-  pub fn to_owned( &self ) -> UnilangTokenKind
+  pub fn to_owned( &self ) -> UnilangTokenKind< 'a >
   {
   match self
   {
-   ZeroCopyTokenKind ::Identifier( s ) => UnilangTokenKind ::Identifier( (*s).to_string() ),
-   ZeroCopyTokenKind ::Number( s ) => UnilangTokenKind ::Number( (*s).to_string() ),
+   ZeroCopyTokenKind ::Identifier( s ) => UnilangTokenKind ::Identifier( s.clone() ),
+   ZeroCopyTokenKind ::Number( s ) => UnilangTokenKind ::Number( s.clone() ),
    ZeroCopyTokenKind ::Operator( s ) => UnilangTokenKind ::Operator( s ),
    ZeroCopyTokenKind ::Delimiter( s ) => UnilangTokenKind ::Delimiter( s ),
-   ZeroCopyTokenKind ::Unrecognized( s ) => UnilangTokenKind ::Unrecognized( (*s).to_string() ),
+   ZeroCopyTokenKind ::Unrecognized( s ) => UnilangTokenKind ::Unrecognized( s.clone() ),
  }
  }
 }
@@ -183,12 +182,16 @@ impl fmt ::Display for ZeroCopyTokenKind< '_ >
   {
   match self
   {
-   ZeroCopyTokenKind ::Identifier( s ) | ZeroCopyTokenKind ::Unrecognized( s ) | ZeroCopyTokenKind ::Number( s ) | ZeroCopyTokenKind ::Operator( s ) | ZeroCopyTokenKind ::Delimiter( s ) => write!( f, "{s}" ),
+   ZeroCopyTokenKind ::Identifier( s )
+   | ZeroCopyTokenKind ::Unrecognized( s )
+   | ZeroCopyTokenKind ::Number( s ) => write!( f, "{}", s.as_ref() ),
+   ZeroCopyTokenKind ::Operator( s )
+   | ZeroCopyTokenKind ::Delimiter( s ) => write!( f, "{s}" ),
  }
  }
 }
 
-impl fmt ::Display for UnilangTokenKind
+impl fmt ::Display for UnilangTokenKind< '_ >
 {
   fn fmt( &self, f: &mut fmt ::Formatter< '_ > ) -> fmt ::Result
   {
@@ -215,12 +218,19 @@ fn is_valid_identifier( s: &str ) -> bool
 }
 
 /// Classifies a `strs_tools ::Split` into a zero-copy `ZeroCopyTokenKind` and returns its adjusted source location.
-/// This function eliminates string allocations during token classification.
+///
+/// Token strings are `Cow::Borrowed` — no heap allocation for input-derived tokens.
 ///
 /// # Errors
-/// Returns a `ParseError` if the split represents an invalid escape sequence.
-pub fn classify_split_zero_copy< 'a >( s: &'a Split< 'a > ) -> Result< ( ZeroCopyTokenKind< 'a >, SourceLocation ), ParseError >
+/// Returns a `ParseError` if the split represents an invalid token.
+pub fn classify_split_zero_copy< 'a >( s: &Split< 'a > ) -> Result< ( ZeroCopyTokenKind< 'a >, SourceLocation ), ParseError >
 {
+  // Fix(parser-001): return Cow::Borrowed for Identifier/Number/Unrecognized — zero allocation on hot path
+  // Root cause: prior ZeroCopyTokenKind variants held &'a str, preventing use in synthetic merged
+  //   tokens (merge_value_context_tokens) which create new Strings; fix changed variants to
+  //   Cow<'a, str> so both borrowed (input) and owned (synthetic) tokens share one type
+  // Pitfall: s.string.clone() on Cow::Borrowed copies the &str pointer (cheap); on Cow::Owned it
+  //   clones the String (expected only for synthetic tokens that bypass classify_split entirely)
   let original_location = SourceLocation ::StrSpan
   {
   start: s.start,
@@ -239,45 +249,42 @@ pub fn classify_split_zero_copy< 'a >( s: &'a Split< 'a > ) -> Result< ( ZeroCop
   Cow ::Borrowed( "\r" ) => Ok( ( ZeroCopyTokenKind ::Delimiter( "\r" ), original_location ) ),
   Cow ::Borrowed( "\n" ) => Ok( ( ZeroCopyTokenKind ::Delimiter( "\n" ), original_location ) ),
   Cow ::Borrowed( "#" ) => Ok( ( ZeroCopyTokenKind ::Delimiter( "#" ), original_location ) ),
-  Cow ::Borrowed( "!" ) => Ok( ( ZeroCopyTokenKind ::Unrecognized( "!" ), original_location ) ),
+  Cow ::Borrowed( "!" ) => Ok( ( ZeroCopyTokenKind ::Unrecognized( alloc ::borrow ::Cow ::Borrowed( "!" ) ), original_location ) ),
   _ =>
   {
    if s.typ == SplitType ::Delimiter
    {
   if s.was_quoted
   {
-   Ok( ( ZeroCopyTokenKind ::Identifier( s.string.as_ref() ), original_location ) )
+   Ok( ( ZeroCopyTokenKind ::Identifier( s.string.clone() ), original_location ) )
  }
   else if s.string.parse :: < i64 >().is_ok()
   {
-   Ok( ( ZeroCopyTokenKind ::Number( s.string.as_ref() ), original_location ) )
+   Ok( ( ZeroCopyTokenKind ::Number( s.string.clone() ), original_location ) )
  }
   else if is_valid_identifier( s.string.as_ref() )
   {
-   Ok( ( ZeroCopyTokenKind ::Identifier( s.string.as_ref() ), original_location ) )
+   Ok( ( ZeroCopyTokenKind ::Identifier( s.string.clone() ), original_location ) )
  }
   else
   {
-   Ok( ( ZeroCopyTokenKind ::Unrecognized( s.string.as_ref() ), original_location ) )
+   Ok( ( ZeroCopyTokenKind ::Unrecognized( s.string.clone() ), original_location ) )
  }
  }
    else
    {
-  Ok( ( ZeroCopyTokenKind ::Unrecognized( s.string.as_ref() ), original_location ) )
+  Ok( ( ZeroCopyTokenKind ::Unrecognized( s.string.clone() ), original_location ) )
  }
  }
  };
   result
 }
 
-/// Classifies a `strs_tools ::Split` into a `UnilangTokenKind` and returns its adjusted source location.
-/// Classifies a `strs_tools ::Split` into a `UnilangTokenKind` and adjusts its `SourceLocation`.
+/// Classifies a `strs_tools ::Split` into a `ZeroCopyTokenKind` and returns its adjusted source location.
 ///
 /// # Errors
 /// Returns a `ParseError` if the split represents an invalid escape sequence.
-pub fn classify_split( s: &Split< '_ > ) -> Result< ( UnilangTokenKind, SourceLocation ), ParseError >
+pub fn classify_split< 'a >( s: &Split< 'a > ) -> Result< ( ZeroCopyTokenKind< 'a >, SourceLocation ), ParseError >
 {
-  // Use zero-copy classification and then convert to owned
-  let ( zero_copy_token, location ) = classify_split_zero_copy( s )?;
-  Ok( ( zero_copy_token.to_owned(), location ) )
+  classify_split_zero_copy( s )
 }

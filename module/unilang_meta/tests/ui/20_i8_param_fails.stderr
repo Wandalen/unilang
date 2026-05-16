@@ -1,0 +1,5 @@
+error: unsupported parameter type: i8
+ --> tests/ui/20_i8_param_fails.rs:9:19
+  |
+9 | fn narrow( tiny : i8 ) -> String
+  |                   ^^

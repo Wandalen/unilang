@@ -6,8 +6,8 @@ Task tracking for the `unilang_meta` proc-macro crate.
 
 | Entry | Responsibility |
 |-------|---------------|
-| `backlog/` | Tasks not yet prioritized — reviewed, metrics assigned, pending promotion |
 | `completed/` | Tasks that passed full validation |
+| `backlog/` | Tasks not yet prioritized — reviewed, metrics assigned, pending promotion |
 | `cancelled/` | Tasks stopped or abandoned with documented reason |
 
 ---
@@ -16,7 +16,7 @@ Task tracking for the `unilang_meta` proc-macro crate.
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Executor | Task | Purpose |
 |-------|----|--------------|-------|----------|--------|----------|--------|----------|------|---------|
-| 1 | 094 | 512 | 8 | 4 | 8 | 2 | 📥 | any | [Implement `#[unilang::command]` procedural macro](094_implement_command_macro.md) | Eliminate CommandDefinition boilerplate via proc-macro |
+| 1 | 094 | 512 | 8 | 4 | 8 | 2 | ✅ | claude-sonnet-4-6 | [Implement `#[unilang::command]` procedural macro](completed/094_implement_command_macro.md) | Eliminate CommandDefinition boilerplate via proc-macro |
 
 ---
 
@@ -36,16 +36,16 @@ Task tracking for the `unilang_meta` proc-macro crate.
 <!-- task_system_metadata
 type: local
 total_tasks: 1
-completed: 0
+completed: 1
 active: 0
-backlog: 1
-last_updated: 2026-04-18
+backlog: 0
+last_updated: 2026-04-19
 -->
 
 ## Task System Metadata
 
-- **Last Updated:** 2026-04-18
+- **Last Updated:** 2026-04-19
 - **Total Tasks:** 1
-- **Completed:** 0
+- **Completed:** 1
 - **Active:** 0
-- **Backlog:** 1
+- **Backlog:** 0

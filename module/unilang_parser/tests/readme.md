@@ -25,13 +25,17 @@ tests/
 ├── tests.rs                            # General test infrastructure
 ├── underscore_command_test.rs          # Underscore in command names
 │
-├── argv_types.rs                       # ShellArgv and ReplInput marker type tests
-├── argv_multiword_bug_test.rs          # Argv handling edge cases (bug reproduction)
-├── diagnostic_real_bug.rs              # ISSUE-CMD-PATH: Command path lookahead (diagnostic + comprehensive)
-├── issue_084_mre.rs                    # Issue 084: Quote handling (MRE + comprehensive)
-├── path_with_dots_regression_test.rs   # Regression: dot handling in paths
-├── task_026_mre_tests.rs               # Task 026: Empty value tokenization
-└── -validate_hypothesis.rs             # Hypothesis validation for investigations
+├── argv_types.rs                           # ShellArgv and ReplInput marker type tests
+├── argv_multiword_bug_test.rs              # Argv handling edge cases (bug reproduction)
+├── diagnostic_real_bug.rs                  # ISSUE-CMD-PATH: Command path lookahead (diagnostic + comprehensive)
+├── example_flag_syntax_regression_test.rs  # Regression: Unix-style --flag syntax rejection
+├── issue_084_mre.rs                        # Issue 084: Quote handling (MRE + comprehensive)
+├── path_with_dots_regression_test.rs       # Regression: dot handling in paths
+├── task_026_mre_tests.rs                   # Task 026: Empty value tokenization
+├── value_context_tests.rs                  # Value-context tokenization: Bug #006/#007 (::value as atomic unit)
+├── parse_from_argv_boundary_test.rs        # Issue-087: parse_from_argv greedy absorption of path-value positionals
+├── cli_misuse_detection_test.rs            # Issue-086: --flag/-f/= syntax misuse detection and CliParser consistency
+└── zero_copy_token_test.rs                 # Parser-001: parser_engine hot path uses ZeroCopyTokenKind (no String alloc)
 ```
 
 ## Domain Map
@@ -49,7 +53,11 @@ Tests are organized into these functional domains:
 | **Argv Integration** | `argv_types.rs`, `argv_multiword_bug_test.rs` | ShellArgv/ReplInput marker types, shell argv parsing and reconstruction |
 | **Marker Types** | `argv_types.rs` | ShellArgv and ReplInput newtypes, parse_cli/parse_repl entry points |
 | **Quote Handling** | `issue_084_mre.rs` | Quote escaping, inner quotes, quote workarounds |
-| **Edge Cases & Regressions** | `path_with_dots_regression_test.rs`, `task_026_mre_tests.rs` | Historical bugs, corner cases, boundary conditions |
+| **Edge Cases & Regressions** | `path_with_dots_regression_test.rs`, `task_026_mre_tests.rs`, `example_flag_syntax_regression_test.rs` | Historical bugs, corner cases, boundary conditions |
+| **Value Context** | `value_context_tests.rs` | Value-context tokenization: atomic `::value` units (Bug #006/#007) |
+| **Argv Boundary** | `parse_from_argv_boundary_test.rs` | Token-boundary absorption: issue-087 path-value positional fix |
+| **CLI Misuse Detection** | `cli_misuse_detection_test.rs` | issue-086: `--flag`, `-f`, `=`, single-colon misuse errors + API consistency |
+| **Zero-Copy Tokens** | `zero_copy_token_test.rs` | parser-001: parser_engine hot path uses `ZeroCopyTokenKind` (no `String` alloc) |
 | **End-to-End** | `comprehensive_tests.rs` | Complete parsing scenarios combining multiple features |
 
 ## Test File Categories
@@ -70,7 +78,8 @@ Tests are organized into these functional domains:
 - **diagnostic_real_bug.rs:** ISSUE-CMD-PATH command path lookahead bug (12 tests covering named-only args, operator variants, API consistency)
 - **issue_084_mre.rs:** Quote handling in argv (13 tests covering all quote scenarios)
 - **argv_multiword_bug_test.rs:** Argv reconstruction edge cases
-- **-validate_hypothesis.rs:** Hypothesis validation tests for deep investigations
+- **example_flag_syntax_regression_test.rs:** Unix-style `--flag` syntax rejection (regression guard)
+- **value_context_tests.rs:** Atomic value tokenization after `::` operator (Bug #006/#007)
 
 ### Configuration & Integration
 - **parser_config_entry_tests.rs:** Parser options and settings
@@ -166,11 +175,6 @@ See `issue_084_mre.rs` for comprehensive example of test documentation.
 
 ## Notes
 
-- **Test count baseline:** 178 tests (172 + 6 CLI parameter syntax validation)
-- **Recent additions:**
-  - 12 tests in `diagnostic_real_bug.rs` (ISSUE-CMD-PATH coverage)
-  - 2 tests in `-validate_hypothesis.rs` (investigation validation)
 - **No disabled tests** without explicit permission
 - **Bug reproducers** marked with `// test_kind: bug_reproducer(issue-XXX)` or `// test_kind: mre`
-- **Specification alignment:** `spec.md` is source of truth for expected behavior
 - **Key patterns documented:** Iterator lookahead pattern in `parser_engine.rs` module docs

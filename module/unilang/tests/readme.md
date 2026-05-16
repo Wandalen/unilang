@@ -96,7 +96,55 @@ Each domain directory contains **all test types** relevant to that domain:
 - Each test file should have a module doc comment explaining its scope
 - Tests should be grouped logically within files using mod blocks if needed
 
-## Support Files
+## Responsibility Table
+
+### Top-Level Test Files
+
+| File | Responsibility |
+|------|----------------|
+| `acceptance.rs` | Acceptance domain entry point: user-facing CLI acceptance criteria |
+| `argv_api.rs` | Argv-based API: `parse_cli`/`parse_repl` entry points via ShellArgv/ReplInput |
+| `auto_categorize_decoupling_test.rs` | Decoupling: `auto_categorize` independence from internal modules |
+| `build.rs` | Build domain entry point: build-time code generation and static registry tests |
+| `build_helpers_hint_generator.rs` | `build_helpers::hint_generator` — PHF compile-error hint generation |
+| `build_helpers_type_analyzer.rs` | `build_helpers::type_analyzer` — Rust type analysis for codegen |
+| `build_validation_test.rs` | Build-time validation of command definitions in YAML/JSON sources |
+| `category_field_backward_compat.rs` | Category field: backward compatibility with pre-category data |
+| `category_field_codegen.rs` | Category field: build-time code generation output correctness |
+| `category_field_conversion.rs` | Category field: type conversion between representations |
+| `category_field_edge_cases.rs` | Category field: boundary conditions and edge case handling |
+| `category_field_unit.rs` | Category field: unit-level behavior of the category data type |
+| `cli.rs` | CLI domain entry point: builder APIs and ergonomic interface tests |
+| `cli_multiword_params_test.rs` | CLI binary: multi-word parameter round-trip via `unilang_cli` binary |
+| `config_extraction.rs` | Config extraction: retrieving configuration from command definitions |
+| `data.rs` | Data domain entry point: data model, serialization, and validation tests |
+| `feature_parity_test.rs` | Feature parity: `StaticCommandRegistry` vs `CommandRegistry` equivalence |
+| `format_category_name_decoupling_test.rs` | Decoupling: `format_category_name` independence from internal modules |
+| `help.rs` | Help domain entry point: help generation and formatting tests |
+| `help_verbosity.rs` | Help verbosity: detail level control in generated help output |
+| `interpreter.rs` | Interpreter domain entry point: command execution and context tests |
+| `multi_yaml_conflict_detection.rs` | Multi-YAML: conflict detection when merging multiple YAML command sources |
+| `output_truncation.rs` | Output truncation: long output trimming behavior |
+| `parser.rs` | Parser domain entry point: tokenization, SIMD, and string interning tests |
+| `parser_reexport_test.rs` | Re-export: `unilang::parser` public API surface accessibility |
+| `phf_codegen_no_leaked_dep_test.rs` | Codegen: `generate_static_registry_source()` emits no bare `phf_map!` |
+| `phf_reexport_test.rs` | Re-export: `unilang::phf` types available without direct phf dependency |
+| `registry.rs` | Registry domain entry point: static/dynamic registry and lookup tests |
+| `regression.rs` | Regression domain entry point: critical bug prevention tests |
+| `semantic.rs` | Semantic domain entry point: validation, argument binding, type checking |
+| `show_version_in_help.rs` | Version display: `--version`/`-V` flag presence in generated help |
+| `static_registry_conversion_test.rs` | Static registry: `StaticCommandRegistry` → `CommandRegistry` conversion bridge |
+| `system.rs` | System domain entry point: cross-cutting end-to-end workflow tests |
+| `task084_verification_test.rs` | Task 084: command macro implementation verification |
+| `validation_abi_compatibility.rs` | Validation: cross-crate type ABI compatibility (external build) |
+| `validation_clippy.rs` | Validation: crate passes clippy with `-D warnings` (external build) |
+| `validation_core_test.rs` | Validation core module: internal validation logic unit tests |
+| `validation_direct_import.rs` | Validation: direct import works without feature-gate ceremony |
+| `validation_doc_examples.rs` | Validation: documentation examples compile and produce expected output |
+| `validation_feature_gate.rs` | Validation: `enabled`/`full` feature gates enable/disable correctly |
+| `validation_phf_indirect.rs` | Validation: PHF usable via unilang re-export, no direct dep required |
+
+### Support Files
 
 | File | Responsibility |
 |------|----------------|

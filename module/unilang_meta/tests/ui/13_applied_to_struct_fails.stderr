@@ -1,0 +1,5 @@
+error: unilang::command can only be applied to functions
+ --> tests/ui/13_applied_to_struct_fails.rs:7:1
+  |
+7 | struct Foo;
+  | ^^^^^^

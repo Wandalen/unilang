@@ -17,9 +17,6 @@ Define your command-line utility interface once and get consistent interaction a
 categories = [ "command-line-interface", "command-line-utilities" ]
 keywords = [ "wtools", "CLI", "CUI", "user-interface" ]
 build = "build/main.rs"
-dependencies = {}
-dev-dependencies = {}
-build-dependencies = {}
 # Note: stress_test_bin in tests/ causes a harmless warning about duplicate targets
 
 [package.metadata.docs.rs]
@@ -88,7 +85,7 @@ approach_inline_literals = [ "static_registry", "const_parsing" ]              #
 # - PHF types (phf::Map, phf::phf_map, etc.) are re-exported via unilang::phf
 # - No need to add phf as a direct dependency
 # See readme.md "PHF Re-export" section for usage examples.
-static_registry = [ "dep:phf" ]              # Static command registry infrastructure
+static_registry = [ "dep:phf", "dep:phf_codegen" ]  # Static command registry infrastructure
 phf_error_hint = []                          # Documentation feature for PHF compile error hint (no dependencies)
 yaml_parser = [ "dep:serde_yaml" ]           # YAML parsing support (build-time + runtime)
 json_parser = [ "dep:serde_json" ]           # JSON parsing support (build-time + runtime)
@@ -160,7 +157,12 @@ all_runtime_approaches = [
 # Core & Performance Features
 # ========================================
 
-enabled = []
+enabled = [
+  "dep:serde", "dep:url", "dep:chrono", "dep:regex",
+  "dep:error_tools", "dep:mod_interface", "dep:former",
+  "dep:unilang_parser", "unilang_parser/enabled",
+  "dep:log", "dep:indexmap", "dep:lru",
+]
 # NOTE: Benchmark features removed - use unilang_benchmarks workspace crate instead
 advanced_cli_tests = [ ]
 
@@ -168,7 +170,7 @@ advanced_cli_tests = [ ]
 wasm = [ "enabled" ]
 
 # SIMD performance optimizations - enabled by default for maximum performance
-simd = [ "simd-json", "memchr", "bytecount", "unilang_parser/simd" ]
+simd = [ "enabled", "simd-json", "memchr", "bytecount", "unilang_parser/simd" ]
 
 # REPL (Read-Eval-Print Loop) support
 repl = []
@@ -178,11 +180,11 @@ enhanced_repl = [ "repl", "dep:rustyline" ]
 on_unknown_suggest = [ ]
 
 [dependencies]
-# Core dependencies (always compiled):
-serde = { workspace = true, features = ["derive"] }
-url = { workspace = true }
-chrono = { workspace = true, features = ["serde"] }
-regex = { workspace = true }
+# Core dependencies (gated by `enabled` feature):
+serde = { workspace = true, features = ["derive"], optional = true }
+url = { workspace = true, optional = true }
+chrono = { workspace = true, features = ["serde"], optional = true }
+regex = { workspace = true, optional = true }
 
 # Format parsers (optional, gated by infrastructure features):
 serde_json = { workspace = true, optional = true }      # Enabled by json_parser
@@ -192,6 +194,7 @@ ron = { workspace = true, optional = true }             # Enabled by ron_parser 
 
 # Static registry infrastructure (optional):
 phf = { workspace = true, features = ["macros"], optional = true }  # Enabled by static_registry
+phf_codegen = { workspace = true, optional = true }                 # Enabled by static_registry; struct-literal codegen in src/
 
 # Multi-file discovery (optional):
 walkdir = { workspace = true, optional = true }         # Enabled by multi_file
@@ -206,16 +209,16 @@ bincode = { workspace = true, optional = true }         # Enabled by binary_seri
 # REMOVED: num_cpus - only used in deleted cv_analysis.rs benchmark file (Phase 1)
 
 ## internal
-error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_untyped" ] }
-mod_interface = { workspace = true, features = [ "enabled" ] }
-former = { workspace = true, features = [ "enabled", "derive_former" ] }
-unilang_parser = { workspace = true } # SIMD features controlled by main unilang features
+error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_untyped" ], optional = true }
+mod_interface = { workspace = true, features = [ "enabled" ], optional = true }
+former = { workspace = true, features = [ "enabled", "derive_former" ], optional = true }
+unilang_parser = { workspace = true, optional = true } # SIMD features controlled by main unilang features
 
 ## external
-log = { workspace = true }
+log = { workspace = true, optional = true }
 rustyline = { workspace = true, optional = true } # Enhanced REPL with history and arrow keys
-indexmap = { workspace = true }
-lru = { workspace = true } # LRU cache for hot command optimization
+indexmap = { workspace = true, optional = true }
+lru = { workspace = true, optional = true } # LRU cache for hot command optimization
 
 # Performance optimization dependencies
 simd-json = { workspace = true, optional = true } # SIMD-optimized JSON parsing
@@ -229,6 +232,7 @@ bytecount = { workspace = true, optional = true } # SIMD byte counting and opera
 [[bin]]
 name = "unilang_cli"
 path = "src/bin/unilang_cli.rs"
+required-features = ["enabled"]
 
 
 
@@ -440,4 +444,4 @@ criterion = { workspace = true }
 [package.metadata.cargo-udeps.ignore]
 # REMOVED: num_cpus and sysinfo (dependencies removed in Phase 2)
 normal = []
-build = ["phf_codegen"]
+build = []
