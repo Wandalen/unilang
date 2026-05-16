@@ -54,7 +54,7 @@ toml_edit = { version = "0.25" }
 # ========================================
 error_tools = { version = "~0.38.0" }
 mod_interface = { version = "~0.59.0" }
-former = { version = "~2.43.0" }
+former = { version = "2.45.0" }
 strs_tools = { version = "~0.44.0" }
 iter_tools = { version = "~0.47.0" }
 macro_tools = { version = "~0.82.0" }
