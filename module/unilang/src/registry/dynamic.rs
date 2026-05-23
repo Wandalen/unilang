@@ -580,7 +580,12 @@ impl CommandRegistry
     .with_auto_help( false ) // Prevent recursive help for help command
     .with_category( "help" )
     .with_short_desc( "Show help for all commands" )
-    .with_hidden_from_list( false )
+    // Fix(BUG-102): Hide .help from its own listing.
+    // Root cause: .help registered here with hidden_from_list=false, so interpreter's
+    // list_commands_filtered showed .help listing itself — self-referential noise.
+    // Pitfall: command_add_runtime(.help) always fails (already registered here), so
+    // the only place to set hidden_from_list is this mandatory registration.
+    .with_hidden_from_list( true )
     .with_priority( 0 )
     .with_group( "" );
 

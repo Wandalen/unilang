@@ -391,3 +391,72 @@ fn test_help_content_comprehensive()
 
   println!( "✅ Help content is comprehensive and includes all mandatory sections" );
 }
+
+/// Bug reproducer for BUG-102: `.help` visible in its own help listing.
+///
+/// ## Root Cause
+///
+/// `register_mandatory_global_help_command()` in `src/registry/dynamic.rs:583` set
+/// `.with_hidden_from_list( false )` on the `.help` command definition. The interpreter
+/// special-cases `.help` and calls `HelpGenerator::list_commands_filtered(None)`,
+/// which filters by `!cmd.hidden_from_list()`. With the flag false, `.help` passed the
+/// filter and appeared in its own listing — self-referential noise.
+///
+/// ## Why Not Caught
+///
+/// No test in unilang's suite asserted `.help` is absent from `list_commands_filtered`
+/// output. The dream crate's smoke test caught the count mismatch (33 vs 32) but runs
+/// in a separate crate, invisible during unilang-only development.
+///
+/// ## Fix Applied
+///
+/// `dynamic.rs:583`: `.with_hidden_from_list( false )` → `.with_hidden_from_list( true )`.
+/// Single-line change at the mandatory registration site — the ONLY effective place,
+/// because `command_add_runtime(.help)` always returns `CommandAlreadyExists`.
+///
+/// ## Prevention
+///
+/// All meta-commands whose purpose is to enumerate other commands must be hidden from
+/// their own listings. Default `hidden_from_list` for such commands should be `true`.
+/// This test catches regressions if the registration flag is accidentally reset.
+///
+/// ## Pitfall
+///
+/// A boolean flag defaulting to the wrong value is invisible at the registration site —
+/// only observable in rendered output. The only effective fix point is the mandatory
+/// registration in `register_mandatory_global_help_command()`; `command_add_runtime`
+/// for `.help` always fails silently (suppressed at `lib.rs:150`).
+///
+// test_kind: bug_reproducer(BUG-102)
+#[ test ]
+fn test_help_not_self_referential_bug_102()
+{
+  let registry = CommandRegistry::new();
+  let help_gen = unilang::help::HelpGenerator::new( &registry );
+
+  let listing = help_gen.list_commands_filtered( None );
+
+  // The listing must NOT contain ".help" as a listed command entry.
+  // .help is a meta-command that lists other commands — it must not list itself.
+  // If this assertion fails, the hidden_from_list flag regressed to false.
+  let self_referential_lines : Vec< &str > = listing
+    .lines()
+    .filter( |line| line.trim_start().starts_with( ".help" ) )
+    .collect();
+
+  assert!(
+    self_referential_lines.is_empty(),
+    "BUG-102 regression: .help appears in its own listing.\n\
+     Self-referential lines:\n{}\n\
+     Fix: set .with_hidden_from_list( true ) in dynamic.rs:583",
+    self_referential_lines.join( "\n" )
+  );
+
+  // .help must still be registered (the fix hides it from listings, not removes it)
+  assert!(
+    registry.command( ".help" ).is_some(),
+    "Over-fix: .help must remain registered even when hidden from listing"
+  );
+
+  println!( "✅ BUG-102: .help is not self-referential in its own listing" );
+}

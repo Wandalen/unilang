@@ -4,7 +4,8 @@
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Executor | Task | Purpose |
 |-------|----|--------------:|------:|---------:|-------:|---------:|--------|----------|------|-------------|
-| 1 | 098 | 0 | 9 | 4 | 6 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [098_implement_optional_dep_pattern](./completed/098_implement_optional_dep_pattern.md) | Make all library crate deps optional; wire `enabled` feature with `dep:name` syntax for no-op-when-disabled |
+| 1 | 103 | 0 | 7 | 9 | 9 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [103_fix_help_self_referential_visibility](./completed/103_fix_help_self_referential_visibility.md) | Fix .help visible in its own listing — `hidden_from_list: false` → `true` in dynamic.rs; closes BUG-102 |
+| 2 | 098 | 0 | 9 | 4 | 6 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [098_implement_optional_dep_pattern](./completed/098_implement_optional_dep_pattern.md) | Make all library crate deps optional; wire `enabled` feature with `dep:name` syntax for no-op-when-disabled |
 | 2 | 097 | 0 | 6 | 9 | 9 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [097_fix_dep_version_format](./completed/097_fix_dep_version_format.md) | Rewrite workspace Cargo.toml version strings to `^X.Y` / `=X.Y.Z` format per invariant 004 R1 |
 | 3 | 096 | 0 | 8 | 6 | 7 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [096_add_marker_types](./completed/096_add_marker_types.md) | Add ShellArgv/ReplInput newtypes and parse_cli/parse_repl type-safe entry points |
 | 4 | 095 | 0 | 9 | 5 | 7 | 0 | ✅ (Completed) | claude-sonnet-4-6 | [095_rename_parse_single_instruction](./completed/095_rename_parse_single_instruction.md) | Rename parse_single_instruction → parse_repl_input with deprecation shim across 302 call sites |
@@ -99,7 +100,10 @@
 
 | ID | Title | Related Task | Status |
 |----|-------|--------------|--------|
+| BUG-102 | [.help command visible in its own help listing](./bug/102_help_self_referential_visibility.md) | — | Verified |
 
 ## Issues
 
-No open issues.
+| ID | Severity | Status | Title |
+|----|----------|--------|-------|
+| BUG-102 | Minor | Verified | [`.help` registered with `hidden_from_list: false` — appears in its own listing](./bug/102_help_self_referential_visibility.md) |
