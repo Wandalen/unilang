@@ -219,16 +219,16 @@ impl MultiYamlAggregator
       content.push_str( &format!( "  examples: {},\n", examples_const_name ) );
     }
 
-    // Fix(issue-088): Include auto_help_enabled field
+    // Fix(BUG-088): Include auto_help_enabled field
     // Root cause: MultiYamlAggregator was not updated when StaticCommandDefinition struct gained this field
     // Pitfall: When adding fields to StaticCommandDefinition, ALL code generators must be updated:
     //   1. build.rs (direct PHF generation) - FIXED
     //   2. MultiYamlAggregator::generate_command_definition_body() - FIXED HERE
     content.push_str( &format!( "  auto_help_enabled: {},\n", cmd.auto_help_enabled() ) );
 
-    // Fix(issue-089): Include category field
+    // Fix(BUG-089): Include category field
     // Root cause: MultiYamlAggregator wasnt updated when StaticCommandDefinition gained category field
-    // Pitfall: Same as issue-088. When adding fields to StaticCommandDefinition, ALL code generators
+    // Pitfall: Same as BUG-088. When adding fields to StaticCommandDefinition, ALL code generators
     // must be updated, including this method and any direct PHF generation in build.rs files
     content.push_str( &format!( "  category: \"{}\",\n", Self::escape_string( cmd.category() ) ) );
 
@@ -262,7 +262,7 @@ impl MultiYamlAggregator
   pub fn generate_static_registry_source( &self ) -> String
   {
     let mut source_code = String::new();
-    // Fix(dev-001): use {self, Map} not {phf_map, Map} so downstream sees qualified phf::phf_map!
+    // Fix(BUG-090): use {self, Map} not {phf_map, Map} so downstream sees qualified phf::phf_map!
     // Root cause: importing phf_map by name forced bare invocation that expands to ::phf:: absolute
     //   paths, requiring every downstream crate to add phf as a direct Cargo.toml dependency
     // Pitfall: phf::phf_map! works via re-export only with phf >= 0.11 ($crate:: hygiene)
@@ -332,7 +332,7 @@ impl MultiYamlAggregator
       source_code.push_str( "};\n\n" );
     }
 
-    // Fix(issue-001): Use phf_codegen struct-literal generation — no phf_map! macro.
+    // Fix(BUG-090): Use phf_codegen struct-literal generation — no phf_map! macro.
     // Root cause: phf_map! proc-macro expands to ::phf::Map absolute paths at downstream
     //   compile time, forcing every consumer to list phf as a direct Cargo.toml dep even
     //   though unilang already re-exports phf via pub use phf. Qualifying as phf::phf_map!

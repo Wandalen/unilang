@@ -1,13 +1,18 @@
 # Move Completed Tasks to Completed Directory
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 Move completed tasks from the active task directory to the completed directory and update the task index accordingly. These tasks were completed but the files were not moved to maintain proper task lifecycle management.
@@ -28,7 +33,7 @@ Related to proper task system organization and lifecycle management.
 
 ## Acceptance Criteria
 
--   [x] Completed tasks 033, 034, 035 moved to completed/ directory  
+-   [x] Completed tasks 033, 034, 035 moved to completed/ directory
 -   [x] Task 044 properly moved to completed/ directory with updated status
 -   [x] Task directory structure properly organized
 -   [x] Task index reflects correct file paths for completed tasks
@@ -38,7 +43,7 @@ Related to proper task system organization and lifecycle management.
 
 **Tasks Moved:**
 - Task 033: fix_generic_section_naming_violations.md → completed/
-- Task 034: replace_custom_scripts_with_cargo_bench.md → completed/  
+- Task 034: replace_custom_scripts_with_cargo_bench.md → completed/
 - Task 035: implement_statistical_significance_testing.md → completed/
 - Task 044: fix_documentation_warnings_and_debug_implementations.md → completed/
 
@@ -46,8 +51,6 @@ Related to proper task system organization and lifecycle management.
 - Task directory properly organized with completed tasks in correct location
 - Task index maintains accurate paths for all completed tasks
 - File moves preserve all content and git history
-
-**Status:** ✅ Completed
 
 ## In Scope
 
@@ -86,3 +89,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Move Completed Tasks to Completed Directory.

@@ -34,7 +34,7 @@ log = { version = "^0.4" }
 # Format Parsers
 # ========================================
 serde_json = { version = "^1.0" }
-serde_yaml = { version = "^0.9" }  # deprecated upstream; migrate to serde_yml when capacity allows
+serde_yaml_ng = { version = "^0.10" }
 toml = { version = "^1.0" }
 ron = { version = "^0.12" }
 
@@ -57,7 +57,6 @@ strs_tools = { version = "^0.46" }
 iter_tools = { version = "^0.50" }
 macro_tools = { version = "^0.87" }
 component_model_types = { version = "^0.56" }
-cli_fmt = { version = "^0.3" }
 test_tools = { version = "^0.17" }
 
 # ========================================

@@ -56,7 +56,7 @@ fn main() -> Result< (), unilang::error::Error >
   // Define a command that showcases different types of validation rules.
   // This command demonstrates how validation rules are applied to arguments
   // and how they prevent invalid data from reaching the command execution.
-  // Fix(issue-namespace-format): Namespace must have dot prefix
+  // Fix(BUG-092): Namespace must have dot prefix
   // Root cause: Validation requires non-empty namespaces start with '.'
   // Pitfall: All namespaces must be either empty "" or start with dot
   let validation_demo = CommandDefinition::former()

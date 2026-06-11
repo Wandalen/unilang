@@ -24,7 +24,7 @@
 //! # Suggestion: Use kind: Boolean with default: true (no quotes)
 //! ```
 
-use serde_yaml::Value;
+use serde_yaml_ng::Value;
 use crate::data::{ ArgumentDefinition, Kind };
 
 /// Analyzes argument definitions for potential type issues

@@ -1,19 +1,18 @@
 # Task 017: Command Runtime Registration Failure
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
-
-- **Responsible:** @user
-- **Created:** 2025-08-10
-- **Category:** Bug Fix / Critical Runtime Issue
-
----
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -41,7 +40,7 @@ _N/A — pre-template task. See task body for objective details._
 
 ### Evidence of Systematic Failure
 Commands tested that ALL fail identically:
-- `.chat` → "No executable routine found for command 'chat'"  
+- `.chat` → "No executable routine found for command 'chat'"
 - `.version` → "No executable routine found for command 'version'"
 - All other dot-prefixed commands exhibit same behavior
 
@@ -58,7 +57,7 @@ let chat_cmd = CommandDefinition {
     routine_link: None,  // This is correct for runtime registration
 };
 
-// Runtime registration - APPEARS CORRECT  
+// Runtime registration - APPEARS CORRECT
 registry.command_add_runtime(&chat_cmd, Box::new(handle_chat_command))?;
 ```
 
@@ -78,7 +77,7 @@ Available commands:
   .chat                Start a multi-agent chat session with Initiative-based turn-taking
   # ... other commands
 
-# Command help works - shows .chat details  
+# Command help works - shows .chat details
 $ assistant .chat ?
 Usage: .chat (v0.1.0)
 # ... detailed help output
@@ -99,7 +98,7 @@ The issue appears to be in **unilang's runtime command resolution mechanism**:
 
 This suggests either:
 - Bug in unilang's command name normalization during execution
-- Inconsistency between registration and lookup key generation  
+- Inconsistency between registration and lookup key generation
 - Version mismatch in unilang dependencies
 - Runtime registry internal storage issue
 
@@ -122,7 +121,7 @@ cargo build --bin assistant
 cargo run -- .
 # Expected: Lists .chat in available commands ✅
 
-# 3. Get command help (this works)  
+# 3. Get command help (this works)
 cargo run -- .chat ?
 # Expected: Shows detailed .chat command help ✅
 
@@ -137,7 +136,7 @@ cargo run -- .chat
 | Phase | Expected | Actual | Status |
 |-------|----------|---------|--------|
 | Registration | Command registered as ".chat" | ✅ Works | ✅ |
-| Discovery | ".chat" appears in listings | ✅ Works | ✅ |  
+| Discovery | ".chat" appears in listings | ✅ Works | ✅ |
 | Help | `.chat ?` shows help | ✅ Works | ✅ |
 | Execution | `.chat` executes handler | ❌ Fails | ❌ |
 
@@ -161,7 +160,7 @@ cargo run -- .chat
 - [ ] Compare registration keys vs runtime lookup keys
 - [ ] Check if dot prefix is being stripped during execution phase
 
-### 2. Registry Internal State  
+### 2. Registry Internal State
 - [ ] Examine runtime registry storage mechanism
 - [ ] Verify commands are actually stored with correct keys
 - [ ] Check for key normalization inconsistencies
@@ -208,7 +207,7 @@ let chat_cmd = CommandDefinition {
 ### 2. Direct Pipeline Testing
 Create isolated test to verify registry functionality:
 ```rust
-#[test] 
+#[test]
 fn test_command_runtime_resolution() {
     let registry = setup_command_registry().unwrap();
     let pipeline = Pipeline::new(registry);
@@ -225,7 +224,7 @@ fn test_command_runtime_resolution() {
 
 ### Key Functions
 - `setup_command_registry()` - Command registration logic
-- `handle_chat_command()` - Example failing command handler  
+- `handle_chat_command()` - Example failing command handler
 - `main()` - Command processing pipeline
 
 ## Success Criteria
@@ -241,7 +240,7 @@ fn test_command_runtime_resolution() {
 ```bash
 # All these should work after fix:
 assistant .chat
-assistant .version  
+assistant .version
 assistant .session.list
 assistant .run prompts::"test"
 ```
@@ -267,7 +266,7 @@ assistant .run prompts::"test"
 
 ## References
 - **Source**: Comprehensive testing initiative in `/home/user1/pro/lib/llm_tools/module/assistant`
-- **Related**: Assistant CLI implementation using unilang command framework  
+- **Related**: Assistant CLI implementation using unilang command framework
 - **Context**: Multi-agent chat system with Initiative-based turn-taking
 
 ## In Scope
@@ -315,3 +314,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Task 017: Command Runtime Registration Failure.

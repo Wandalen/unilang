@@ -2,6 +2,14 @@
 
 Comprehensive examples demonstrating unilang framework usage patterns and features.
 
+## Responsibility Table
+
+| Directory | Responsibility |
+|-----------|----------------|
+| `assess_quality_cli/` | Example binary: test organization quality assessment |
+| `validate_organization/` | Example binary: test organization validation |
+| `wasm-repl/` | WebAssembly REPL example sub-crate |
+
 ## Quick Start Examples (00_*)
 
 - `00_minimal.rs` - Absolute minimum working example

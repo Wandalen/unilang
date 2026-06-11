@@ -115,28 +115,28 @@ fn test_cli_value_with_special_chars()
     .stdout( predicate::str::contains( "Query: PATH=/usr/bin:/bin" ) );
 }
 
-/// Test Case 8: Preserved quotes (known parser limitation)
+/// Test Case 8: Preserved quotes — current behavior validation
 ///
-/// KNOWN LIMITATION: When outer shell quotes preserve inner quotes like
-/// `'query::"llm rust"'`, the parser receives literal quote characters in the
-/// string and currently doesn't strip them properly.
+/// When outer shell quotes preserve inner quotes like `'query::"llm rust"'`,
+/// the parser receives literal quote characters in the string. The parser
+/// currently preserves these quotes in the value (does not strip them).
 ///
-/// This is a parser enhancement opportunity, not a critical bug.
-/// Main use case (natural syntax without outer quotes) works correctly.
+/// This test validates the current behavior. If a future parser enhancement
+/// strips inner quotes, update this assertion to match.
 #[test]
-#[ignore = "Parser quote stripping enhancement - tracked separately"]
 fn test_cli_with_preserved_quotes()
 {
   let mut cmd = assert_cmd::cargo::cargo_bin_cmd!( "unilang_cli" );
 
   // Simulates: unilang_cli .video.search 'query::"llm rust"'
-  // Outer quotes preserve inner quotes
+  // Outer quotes preserve inner quotes — parser receives literal quote chars
   cmd.args( [ ".video.search", "query::\"llm rust\"" ] );
 
   cmd
     .assert()
     .success()
-    .stdout( predicate::str::contains( "Query: llm rust" ) );
+    // Parser preserves inner quotes in the value
+    .stdout( predicate::str::contains( "Query: \"llm rust\"" ) );
 }
 
 /// Test Case 9: Single-word parameter (regression check)

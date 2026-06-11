@@ -29,9 +29,9 @@ pub fn check_duplicate_deps( project_path : &Path ) -> CheckResult
   // Check [dependencies]
   if let Some( Item::Table( deps ) ) = doc.get( "dependencies" )
   {
-    if deps.contains_key( "serde_yaml" )
+    if deps.contains_key( "serde_yaml_ng" )
     {
-      duplicates.push( "serde_yaml" );
+      duplicates.push( "serde_yaml_ng" );
     }
     if deps.contains_key( "walkdir" )
     {
@@ -46,9 +46,9 @@ pub fn check_duplicate_deps( project_path : &Path ) -> CheckResult
   // Check [build-dependencies]
   if let Some( Item::Table( build_deps ) ) = doc.get( "build-dependencies" )
   {
-    if build_deps.contains_key( "serde_yaml" ) && !duplicates.contains( &"serde_yaml" )
+    if build_deps.contains_key( "serde_yaml_ng" ) && !duplicates.contains( &"serde_yaml_ng" )
     {
-      duplicates.push( "serde_yaml" );
+      duplicates.push( "serde_yaml_ng" );
     }
     if build_deps.contains_key( "walkdir" ) && !duplicates.contains( &"walkdir" )
     {

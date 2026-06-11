@@ -1,11 +1,16 @@
 # PHF Dependency Elimination - API Cleanup
 
 ## Execution State
-- **Status:** 📄 (Doc artifact — not an executable task)
-- **Executor Type:** N/A
-- **Actor:** N/A
-- **Claimed At:** N/A
+
+- **Executor Type:** any
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
 - **Validated By:** N/A
 - **Validation Date:** N/A
 
@@ -257,3 +262,7 @@ Downstream crates no longer need to know or care about PHF - they simply use `St
 ## Outcomes
 
 _Doc artifact — not an executable task. See file body for content._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A. PHF Dependency Elimination - API Cleanup.

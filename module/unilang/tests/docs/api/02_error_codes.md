@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify the public error code taxonomy defined in `docs/api/002_error_codes.md` — typed variants, string representations, and stability guarantees
 - **Responsibility:** Test cases confirming that each `ErrorCode` variant is produced under its documented condition, that string representations match the catalog, and that the enum derives are present
-- **In Scope:** `CommandNotFound`, `ArgumentMissing`, `ArgumentTypeMismatch`, `TooManyArguments`, `UnknownParameter`, `ValidationRuleFailed`, `ArgumentInteractiveRequired`, `CommandAlreadyExists`, `CommandNotImplemented`, `HelpRequested` (pipeline converts to output), `InternalError`; string form stability; `ErrorCode` derives (`Display`, `Debug`, `Clone`, `PartialEq`, `Eq`)
+- **In Scope:** `CommandNotFound`, `ArgumentMissing`, `ArgumentTypeMismatch`, `TooManyArguments`, `UnknownParameter`, `ValidationRuleFailed`, `ArgumentInteractiveRequired`, `CommandAlreadyExists`, `CommandNotImplemented`, `TypeMismatch`, `HelpRequested` (pipeline converts to output), `InternalError`; string form stability; `ErrorCode` derives (`Display`, `Debug`, `Clone`, `PartialEq`, `Eq`)
 - **Out of Scope:** Error logging or tracing configuration; panic recovery; internal error wrapping mechanics; behavioral feature tests (covered in `feature/`)
 
 ### AP-1: CommandNotFound is returned for an unregistered command path
@@ -42,3 +42,51 @@
 - **Given:** Two instances of `ErrorCode::CommandNotFound`
 - **When:** `a == b` is evaluated and `a.clone() == a` is evaluated
 - **Then:** Both expressions return `true`; the code compiles without deriving these manually
+
+### AP-7: TooManyArguments is returned for excess positional arguments
+
+- **Given:** A `Pipeline` with `.cmd` registered; `.cmd` has exactly one positional argument; input is `".cmd val1 val2 val3"` (three values for one slot)
+- **When:** `pipeline.run(".cmd val1 val2 val3")` is called
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::TooManyArguments`
+
+### AP-8: ValidationRuleFailed is returned for constraint violation
+
+- **Given:** A `Pipeline` with `.cmd` registered; argument `"count"` of `Kind::I64` has `ValidationRule::Min(1)`; input is `".cmd count::0"`
+- **When:** `pipeline.run(".cmd count::0")` is called
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::ValidationRuleFailed`; `error_data.message` references the violated rule
+
+### AP-9: ArgumentInteractiveRequired is returned for missing interactive argument
+
+- **Given:** A `Pipeline` with `.login` registered; argument `"password"` has `interactive: true` and is required with no default; input is `".login"`
+- **When:** `pipeline.run(".login")` is called
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::ArgumentInteractiveRequired`; `error_data.message` contains `"password"`
+
+### AP-10: CommandNotImplemented is returned for command with no bound routine
+
+- **Given:** A `CommandRegistry` where `.stub` is registered with a definition but no `Routine` closure bound
+- **When:** The pipeline attempts to execute `.stub`
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::CommandNotImplemented`
+
+### AP-11: HelpRequested is converted to successful OutputData by pipeline
+
+- **Given:** A `Pipeline` with `.greet` registered; input is `".greet ??"`
+- **When:** `pipeline.run(".greet ??")` is called
+- **Then:** Returns `Ok(output_data)` (not `Err`); the pipeline converts the internal `HelpRequested` signal to a successful `OutputData` containing help text
+
+### AP-12: InternalError produced for unexpected system error
+
+- **Given:** A scenario that triggers an unexpected internal failure (e.g., corrupted registry state or an internal invariant violation)
+- **When:** The framework catches the unexpected condition
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::InternalError`; `error_data.message` is non-empty and does not expose internal implementation details
+
+### AP-13: TypeMismatch is returned for internal type conversion error
+
+- **Given:** A scenario triggering a `TypeMismatch` condition — e.g., attempting to extract a `Value::String` as an integer via typed extraction methods
+- **When:** The type conversion fails
+- **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::TypeMismatch`; `error_data.message` is non-empty
+
+### AP-14: ErrorCode string representations match the documented catalog
+
+- **Given:** Each `ErrorCode` variant (`CommandNotFound`, `ArgumentMissing`, `TooManyArguments`, etc.)
+- **When:** `format!("{}", error_code)` or `.to_string()` is called on each variant
+- **Then:** `CommandNotFound` produces `"UNILANG_COMMAND_NOT_FOUND"`, `ArgumentMissing` produces `"UNILANG_ARGUMENT_MISSING"`, `HelpRequested` produces `"HELP_REQUESTED"`, and all others match their documented `UNILANG_*` string representation

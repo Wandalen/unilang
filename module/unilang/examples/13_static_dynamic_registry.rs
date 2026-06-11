@@ -37,7 +37,7 @@ fn main() -> Result< (), unilang::error::Error >
     tags: &["required"],
   };
 
-  // Fix(issue-command-name-format): Command name must have dot prefix
+  // Fix(BUG-092): Command name must have dot prefix
   // Root cause: Validation requires all command names start with '.'
   // Pitfall: Static command names need '.' prefix just like dynamic registration
   static STATIC_CMD: StaticCommandDefinition = StaticCommandDefinition {

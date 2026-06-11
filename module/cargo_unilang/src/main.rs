@@ -2,7 +2,7 @@
 //!
 //! Prevents common mistakes when using unilang framework:
 //! - Custom build.rs (unilang provides this automatically)
-//! - Duplicate dependencies (`serde_yaml`, walkdir, phf)
+//! - Duplicate dependencies (`serde_yaml_ng`, walkdir, phf)
 //! - Deprecated API (`CommandRegistry::new()`)
 //!
 //! This tool itself is built using unilang, demonstrating correct usage and

@@ -1,41 +1,39 @@
+//! Bug-reproducer tests for BUG-089: `category` field loss during
+//! `StaticCommandDefinition` → `CommandDefinition` conversion.
 //!
-//! # Category Field Conversion Tests
+//! Also guards against regression of BUG-088 (`auto_help_enabled` — same pattern).
 //!
-//! ## What This Tests
+//! ## Root Cause
 //!
-//! This test suite validates that the `category` field is properly preserved during
-//! conversion from `StaticCommandDefinition` to `CommandDefinition` via the `From` trait.
-//! The conversion is a critical step in the data flow:
+//! The `From<&StaticCommandDefinition>` impl hardcoded `.with_category( "" )` instead
+//! of copying `static_cmd.category`, discarding all YAML-configured category values.
+//! Data flow: YAML → build.rs → `StaticCommandDefinition` → **From conversion** → `CommandDefinition`.
 //!
-//! YAML → Build Script → `StaticCommandDefinition` → **From conversion** → `CommandDefinition`
+//! ## Why Not Caught
 //!
-//! ## Why This Matters
+//! Most test commands used empty-string categories (the default). The hardcoded `""`
+//! happened to match, so conversion tests passed. Only commands with explicit non-empty
+//! `category` values in YAML were silently broken — and no test asserted a non-default value.
 //!
-//! Issue-089 root cause: The conversion was hardcoding empty string for category,
-//! discarding the value from YAML. This broke command grouping in help output.
+//! ## Fix Applied
 //!
-//! All fields added to `StaticCommandDefinition` must be explicitly mapped in the
-//! `From` conversion, otherwise YAML configuration is silently ignored. These tests prevent:
-//! - Category values being lost during conversion
-//! - Empty categories becoming unexpected default values
-//! - Category being overwritten by other field conversions
-//! - Unexpected transformations (trim, lowercase, etc.)
-//! - Regression of issue-088 fix (`auto_help_enabled` pattern)
+//! Changed `.with_category( "" )` to `.with_category( static_cmd.category )` in the
+//! `From<&StaticCommandDefinition>` impl. Updated `MultiYamlAggregator` codegen to emit
+//! the category field. Same fix pattern as BUG-088 (`auto_help_enabled`).
 //!
-//! ## Failure Interpretation
+//! ## Prevention
 //!
-//! - `from_static_preserves_non_empty_category()` fails: Conversion losing category value (issue-089 root cause)
-//! - `from_static_preserves_empty_category()` fails: Empty string not preserved, becoming null or default
-//! - `from_static_with_all_fields_preserves_category()` fails: Category overwritten by other field conversions
-//! - `conversion_doesnt_modify_category()` fails: Category being transformed unexpectedly
-//! - `issue_088_regression_both_fields_preserved()` fails: New fix broke old fix (critical regression)
+//! Every field added to `StaticCommandDefinition` must have a dedicated conversion test
+//! asserting non-default values survive the round-trip. These tests cover: non-empty
+//! category, empty category, special characters, all-fields-populated, and cross-field
+//! regression (both `category` and `auto_help_enabled` preserved simultaneously).
 //!
-//! ## Related
+//! ## Pitfall
 //!
-//! - Issue-089: Category field conversion fix
-//! - Issue-088: Auto help enabled conversion fix (same pattern)
-//! - `tests/category_field_unit_tests.rs` - Tests struct and builder
-//! - `tests/category_field_backward_compat_tests.rs` - CRITICAL backward compatibility
+//! **Silent Field Loss Pattern (BUG-088 + BUG-089):** When adding fields to
+//! `StaticCommandDefinition`, ALL code paths must be updated: struct field, build.rs
+//! extraction, PHF generation, Static→Dynamic conversion, MultiYamlAggregator generation.
+//! Testing only default values masks hardcoded defaults masquerading as correct conversions.
 
 use unilang::static_data::*;
 use unilang::data::CommandDefinition;
@@ -46,8 +44,8 @@ use unilang::data::CommandDefinition;
 
 /// Verifies that conversion preserves non-empty category value.
 ///
-/// This prevents loss of category during conversion (was issue-089 root cause).
-// test_kind: bug_reproducer(issue-089)
+/// This prevents loss of category during conversion (was BUG-089 root cause).
+// test_kind: bug_reproducer(BUG-089)
 #[ test ]
 fn from_static_preserves_non_empty_category()
 {
@@ -192,14 +190,14 @@ fn conversion_doesnt_modify_category()
 }
 
 //
-// Test: issue-088 regression - both fields preserved
+// Test: BUG-088 regression - both fields preserved
 //
 
 /// Verifies that both `auto_help_enabled` AND `category` are preserved in conversion.
 ///
-/// This prevents regression of issue-088 fix when adding issue-089 fix.
-// test_kind: bug_reproducer(issue-088)
-// test_kind: bug_reproducer(issue-089)
+/// This prevents regression of BUG-088 fix when adding BUG-089 fix.
+// test_kind: bug_reproducer(BUG-088)
+// test_kind: bug_reproducer(BUG-089)
 #[ test ]
 fn issue_088_regression_both_fields_preserved()
 {
@@ -227,6 +225,6 @@ fn issue_088_regression_both_fields_preserved()
 
   let dynamic_cmd : CommandDefinition = ( &STATIC_CMD ).into();
 
-  assert!( !dynamic_cmd.auto_help_enabled(), "Issue-088 regression: auto_help_enabled not preserved" );
-  assert_eq!( dynamic_cmd.category(), "test", "Issue-089: category not preserved" );
+  assert!( !dynamic_cmd.auto_help_enabled(), "BUG-088 regression: auto_help_enabled not preserved" );
+  assert_eq!( dynamic_cmd.category(), "test", "BUG-089: category not preserved" );
 }

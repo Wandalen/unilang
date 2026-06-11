@@ -3,7 +3,7 @@
 ### Scope
 
 - **Purpose:** Define behavioral requirements for command help generation and discovery
-- **Responsibility:** FR-HELP-1 through FR-HELP-7: help generation, auto-help, ?? parameter
+- **Responsibility:** FR-HELP-1 through FR-HELP-8: help generation, auto-help, ?? parameter, self-exclusion
 - **In Scope:** Help generation requirements, auto-help conventions, help parameter behavior
 - **Out of Scope:** Help rendering implementation, UI formatting specifics
 
@@ -92,33 +92,45 @@ The `.help` system command **must not** appear in its own listing when the user 
 
 **Implementation status:** ✅ Implemented — `.help` is registered with `hidden_from_list: true` in the dynamic registry build (fixed in BUG-102).
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of help request detection patterns |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Migration that decoupled help from domain |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](001_command_registry.md) | Commands that help describes |
 | [003_pipeline.md](003_pipeline.md) | Pipeline that intercepts help requests |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [003_governing_principles.md](../invariant/003_governing_principles.md) | Consistent help access principle |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | HelpGenerator and HelpVerbosity public types |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/help.rs` | Help text generation and formatting |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/help/` | Help generation, formatting, conventions, verbosity tests |

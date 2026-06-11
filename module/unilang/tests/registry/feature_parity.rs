@@ -60,12 +60,15 @@ use unilang::prelude::*;
 // H2: StaticCommandRegistry::register() validation tests
 // ============================================================================
 
+/// FT-3: Dot prefix is mandatory; command without leading dot is rejected.
+///
 /// Validation happens in `CommandDefinition` builder - you can't create invalid commands.
 /// This test verifies the builder catches invalid names at build time, which means
 /// `StaticCommandRegistry::register()` never receives invalid commands.
 ///
 /// This is CORRECT behavior per H2 - validation at the earliest possible point.
 /// The builder validates, so `register()` doesn't need to re-validate.
+// test_kind: ft_spec(FT-3)
 #[cfg(feature = "static_registry")]
 #[test]
 fn test_static_register_validates_command_name()
@@ -237,7 +240,10 @@ fn test_static_registry_no_help_for_help()
 // H8: Alias resolution tests
 // ============================================================================
 
+/// FT-4: Alias resolution returns canonical command definition.
+///
 /// Command aliases should be resolvable for static commands.
+// test_kind: ft_spec(FT-4)
 #[cfg(feature = "static_registry")]
 #[test]
 fn test_alias_resolution_works_for_static()

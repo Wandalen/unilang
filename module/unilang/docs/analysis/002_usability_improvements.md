@@ -123,16 +123,23 @@ After implementing these improvements:
 - API guides users toward correct usage
 - Misuse becomes difficult or impossible
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [001_api_analysis.md](001_api_analysis.md) | Detailed API analysis backing these recommendations |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](../feature/001_command_registry.md) | Registry requirements relevant to builder issues |
 | [002_argument_system.md](../feature/002_argument_system.md) | Argument system requirements relevant to type safety |
 | [005_repl_interactive.md](../feature/005_repl_interactive.md) | Interactive argument handling requirements |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/semantic/` | Usability analysis target: validation messages |
+| `src/help.rs` | Usability analysis target: help output |

@@ -9,4 +9,5 @@ mod build {
   mod validation;
   mod phf_codegen_no_leaked_dep;
   mod dependency_standards;
+  mod build_runtime_separation;
 }

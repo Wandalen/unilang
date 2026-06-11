@@ -495,7 +495,7 @@ unilang = { version = "0.28", features = ["full"] }
 | Feature Flag | Purpose | Enables Dependency |
 |--------------|---------|-------------------|
 | `static_registry` | Static command registry | (internal) |
-| `yaml_parser` | YAML parsing | `serde_yaml` |
+| `yaml_parser` | YAML parsing | `serde_yaml_ng` |
 | `json_parser` | JSON parsing | `serde_json` |
 | `multi_file` | Multi-file discovery | `walkdir` |
 

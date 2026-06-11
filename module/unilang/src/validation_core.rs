@@ -6,7 +6,7 @@
 //!
 //! # Usage in build.rs
 //!
-//! ```ignore
+//! ```text
 //! // In build.rs, include this module:
 //! include!("src/validation_core.rs");
 //!

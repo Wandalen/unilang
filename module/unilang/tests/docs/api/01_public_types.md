@@ -54,3 +54,15 @@
 - **Given:** `UNILANG_HELP_VERBOSITY=2` set in the environment and the help API called
 - **When:** The help output is generated
 - **Then:** The verbosity is applied (output is at level 2, between minimal and maximal); the env var name `UNILANG_HELP_VERBOSITY` is stable and not renamed between patch versions
+
+### AP-9: process_command_from_argv preserves argument boundaries without re-quoting
+
+- **Given:** A `Pipeline` with `.echo` registered; `echo` has one `String` argument `"msg"` and argv array `["prog", ".echo", "msg::hello world"]`
+- **When:** `pipeline.process_command_from_argv(argv)` is called
+- **Then:** Returns `Ok` with `arguments["msg"] == Value::String("hello world")`; the space is preserved because argv boundaries prevent shell re-splitting
+
+### AP-10: process_batch collects all results regardless of individual failures
+
+- **Given:** A `Pipeline` with `.ok` (always succeeds) and `.fail` (always errors) registered; batch input `[".fail", ".ok", ".fail"]`
+- **When:** `pipeline.process_batch(inputs)` is called
+- **Then:** Returns a list of 3 results: `[Err, Ok, Err]`; all three commands are executed and no short-circuiting occurs

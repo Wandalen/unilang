@@ -15,7 +15,7 @@
 /// ```
 ///
 /// ✅ **CORRECT** use for production monitoring:
-/// ```ignore
+/// ```text
 /// // Production code monitoring
 /// let metrics = registry.performance_metrics();
 /// log::info!("Cache hit rate: {:.2}%", metrics.cache_hit_rate());

@@ -87,7 +87,7 @@ approach_inline_literals = [ "static_registry", "const_parsing" ]              #
 # See readme.md "PHF Re-export" section for usage examples.
 static_registry = [ "dep:phf", "dep:phf_codegen" ]  # Static command registry infrastructure
 phf_error_hint = []                          # Documentation feature for PHF compile error hint (no dependencies)
-yaml_parser = [ "dep:serde_yaml" ]           # YAML parsing support (build-time + runtime)
+yaml_parser = [ "dep:serde_yaml_ng" ]        # YAML parsing support (build-time + runtime)
 json_parser = [ "dep:serde_json" ]           # JSON parsing support (build-time + runtime)
 multi_file = [ "dep:walkdir" ]               # Multi-file auto-discovery (any format)
 
@@ -188,7 +188,7 @@ regex = { workspace = true, optional = true }
 
 # Format parsers (optional, gated by infrastructure features):
 serde_json = { workspace = true, optional = true }      # Enabled by json_parser
-serde_yaml = { workspace = true, optional = true }      # Enabled by yaml_parser
+serde_yaml_ng = { workspace = true, optional = true }   # Enabled by yaml_parser
 toml = { workspace = true, optional = true }            # Enabled by toml_parser (future)
 ron = { workspace = true, optional = true }             # Enabled by ron_parser (future)
 
@@ -420,7 +420,7 @@ path = "examples/assess_quality_cli.rs"
 [build-dependencies]
 # Core (always available):
 serde = { workspace = true }
-serde_yaml = { workspace = true }  # Always available for build.rs (only used when static_registry enabled)
+serde_yaml_ng = { workspace = true }  # Always available for build.rs (only used when static_registry enabled)
 
 # Build-time format parsers (optional, gated by infrastructure features):
 serde_json = { workspace = true, optional = true }     # Enabled by json_parser

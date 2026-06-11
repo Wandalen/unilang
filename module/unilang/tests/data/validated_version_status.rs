@@ -10,15 +10,20 @@ use unilang::data::{ VersionType, CommandStatus };
 // VersionType Tests
 //
 
+/// TC-1 / TC-3 / TC-4: Non-empty version strings are accepted (including single char
+/// and arbitrary non-empty formats).
+// test_kind: tc_spec(TC-1, TC-3, TC-4)
 #[ test ]
 fn version_valid_construction()
 {
   let versions = vec!
   [
+    "1",
     "1.0.0",
     "2.1",
     "0.1.0-alpha",
     "1.2.3+build.456",
+    "beta-rc.1+build.42",
     "v1.0",
   ];
 
@@ -40,6 +45,8 @@ fn version_valid_construction()
   }
 }
 
+/// TC-2: Empty string is rejected.
+// test_kind: tc_spec(TC-2)
 #[ test ]
 fn version_rejects_empty_string()
 {
@@ -111,6 +118,8 @@ fn version_serde_json_deserialize_valid()
   assert_eq!( ver.as_str(), "1.0.0" );
 }
 
+/// TC-5: Serde deserialization rejects empty version string.
+// test_kind: tc_spec(TC-5)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn version_serde_json_deserialize_rejects_empty()
@@ -125,20 +134,20 @@ fn version_serde_json_deserialize_rejects_empty()
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn version_serde_yaml_deserialize_valid()
+fn version_serde_yaml_ng_deserialize_valid()
 {
   let yaml = "1.0.0";
-  let ver : VersionType = serde_yaml::from_str( yaml )
+  let ver : VersionType = serde_yaml_ng::from_str( yaml )
     .expect( "YAML deserialization should succeed" );
   assert_eq!( ver.as_str(), "1.0.0" );
 }
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn version_serde_yaml_deserialize_rejects_empty()
+fn version_serde_yaml_ng_deserialize_rejects_empty()
 {
   let yaml_empty = "\"\"";
-  let result : Result< VersionType, _ > = serde_yaml::from_str( yaml_empty );
+  let result : Result< VersionType, _ > = serde_yaml_ng::from_str( yaml_empty );
   assert!(
     result.is_err(),
     "YAML deserialization should fail for empty version"
@@ -149,6 +158,8 @@ fn version_serde_yaml_deserialize_rejects_empty()
 // CommandStatus Tests
 //
 
+/// TC-1: Active variant is default and queryable.
+// test_kind: tc_spec(TC-1)
 #[ test ]
 fn command_status_active()
 {
@@ -162,6 +173,8 @@ fn command_status_active()
   assert_eq!( format!( "{}", active ), "active" );
 }
 
+/// TC-6: Experimental variant is queryable.
+// test_kind: tc_spec(TC-6)
 #[ test ]
 fn command_status_experimental()
 {
@@ -175,6 +188,8 @@ fn command_status_experimental()
   assert_eq!( format!( "{}", experimental ), "experimental" );
 }
 
+/// TC-7: Internal variant is queryable.
+// test_kind: tc_spec(TC-7)
 #[ test ]
 fn command_status_internal()
 {
@@ -188,6 +203,8 @@ fn command_status_internal()
   assert_eq!( format!( "{}", internal ), "internal" );
 }
 
+/// TC-2: Deprecated variant carries metadata.
+// test_kind: tc_spec(TC-2)
 #[ test ]
 fn command_status_deprecated_full()
 {
@@ -260,6 +277,8 @@ fn command_status_clone_and_equality()
   assert_eq!( deprecated1, deprecated2 );
 }
 
+/// TC-3: Simple variant serde roundtrip (lowercase string).
+// test_kind: tc_spec(TC-3)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn command_status_serde_json_active()
@@ -299,6 +318,8 @@ fn command_status_serde_json_internal()
   assert_eq!( internal, deserialized );
 }
 
+/// TC-4: Deprecated variant serde roundtrip (map form).
+// test_kind: tc_spec(TC-4)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn command_status_serde_json_deprecated()
@@ -348,9 +369,32 @@ fn command_status_serde_json_backward_compatible()
   }
 }
 
+/// TC-5: Case-insensitive deserialization.
+// test_kind: tc_spec(TC-5)
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn command_status_serde_json_case_insensitive()
+{
+  let test_cases = vec!
+  [
+    ( "\"ACTIVE\"", CommandStatus::Active ),
+    ( "\"Active\"", CommandStatus::Active ),
+    ( "\"EXPERIMENTAL\"", CommandStatus::Experimental ),
+    ( "\"Internal\"", CommandStatus::Internal ),
+    ( "\"DEPRECATED\"", CommandStatus::Deprecated { reason : String::new(), since : None, replacement : None } ),
+  ];
+
+  for ( json, expected ) in test_cases
+  {
+    let deserialized : CommandStatus = serde_json::from_str( json )
+      .expect( &format!( "case-insensitive deserialization of {} should succeed", json ) );
+    assert_eq!( deserialized, expected, "Case-insensitive failed for JSON: {}", json );
+  }
+}
+
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn command_status_serde_yaml_simple()
+fn command_status_serde_yaml_ng_simple()
 {
   let test_cases = vec!
   [
@@ -363,7 +407,7 @@ fn command_status_serde_yaml_simple()
 
   for ( yaml, expected ) in test_cases
   {
-    let deserialized : CommandStatus = serde_yaml::from_str( yaml )
+    let deserialized : CommandStatus = serde_yaml_ng::from_str( yaml )
       .expect( &format!( "YAML deserialization of {} should succeed", yaml ) );
     assert_eq!( deserialized, expected, "Failed for YAML: {}", yaml );
   }
@@ -371,7 +415,7 @@ fn command_status_serde_yaml_simple()
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn command_status_serde_yaml_deprecated_object()
+fn command_status_serde_yaml_ng_deprecated_object()
 {
   let yaml = r"
 status: deprecated
@@ -380,7 +424,7 @@ since: 2.0.0
 replacement: .new
 ";
 
-  let deserialized : CommandStatus = serde_yaml::from_str( yaml )
+  let deserialized : CommandStatus = serde_yaml_ng::from_str( yaml )
     .expect( "YAML deserialization should succeed" );
 
   assert!( deserialized.is_deprecated() );

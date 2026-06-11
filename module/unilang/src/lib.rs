@@ -190,7 +190,7 @@ mod_interface::mod_interface!
 ///
 /// # Example
 ///
-/// ```rust,ignore
+/// ```rust,no_run
 /// use unilang::parser::{Parser, UnilangParserOptions};
 /// use unilang::parser::cli_parser::{parse_cli_args, CliParams};
 /// ```
@@ -215,7 +215,7 @@ pub use unilang_parser ::{ ShellArgv, ReplInput };
 /// # Generated Code Pattern
 ///
 /// The build script generates code like:
-/// ```rust,ignore
+/// ```text
 /// use unilang::phf::{self, Map};
 ///
 /// static COMMANDS: Map<&'static str, CommandDefinition> = phf::phf_map! {
@@ -226,7 +226,7 @@ pub use unilang_parser ::{ ShellArgv, ReplInput };
 ///
 /// # Usage Example
 ///
-/// ```rust,ignore
+/// ```text
 /// // In your crate's Cargo.toml:
 /// [dependencies]
 /// unilang = { version = "0.46", features = ["static_registry"] }

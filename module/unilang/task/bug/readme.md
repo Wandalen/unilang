@@ -7,7 +7,7 @@ Bug reports for the `unilang` command framework library.
 | File | Responsibility |
 |------|----------------|
 | readme.md | Bug index and open bugs tracking |
-| closed/102_help_self_referential_visibility.md | `.help` registered with `hidden_from_list: false` — appears in its own listing |
+| closed/ | Resolved bug reports |
 
 ## Open Bugs
 

@@ -1,6 +1,6 @@
 //! API public types contract tests.
 //!
-//! Implements AP-1..8 specification cases from `tests/docs/api/01_public_types.md`.
+//! Implements AP-1..10 specification cases from `tests/docs/api/01_public_types.md`.
 //!
 //! ## Compile-Time Cases (AP-1, AP-5)
 //!
@@ -300,4 +300,116 @@ fn test_help_verbosity_env_var_recognized()
     HelpVerbosity::Standard,
     "UNILANG_HELP_VERBOSITY=2 must produce HelpVerbosity::Standard"
   );
+}
+
+/// AP-9: `process_command_from_argv` preserves argument boundaries without re-quoting.
+///
+/// Argv-based processing preserves spaces within argument values because the OS
+/// keeps them in a single argv element. The pipeline must not re-split them.
+// test_kind: ap_spec(AP-9)
+#[ test ]
+fn test_ap9_process_command_from_argv_preserves_boundaries()
+{
+  #[ allow( deprecated ) ]
+  let mut registry = CommandRegistry::new();
+
+  let echo_command = CommandDefinition::former()
+    .name( ".echo" )
+    .namespace( String::new() )
+    .description( "Echo a message".to_string() )
+    .hint( "Echo" )
+    .status( "stable" )
+    .version( "1.0.0" )
+    .aliases( vec![] )
+    .tags( vec![] )
+    .permissions( vec![] )
+    .idempotent( true )
+    .deprecation_message( String::new() )
+    .http_method_hint( String::new() )
+    .examples( vec![] )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "msg".to_string(),
+        kind : Kind::String,
+        description : "Message".to_string(),
+        hint : String::new(),
+        attributes : ArgumentAttributes { optional : false, ..Default::default() },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  let routine : Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync > =
+    Box::new( | cmd, _ctx |
+  {
+    let msg = cmd.arguments.get( "msg" )
+      .and_then( | v | if let Value::String( s ) = v { Some( s.clone() ) } else { None } )
+      .unwrap_or_default();
+    Ok( OutputData { content : msg, format : "text".to_string(), execution_time_ms : None } )
+  });
+
+  #[ allow( deprecated ) ]
+  registry.command_add_runtime( &echo_command, routine ).unwrap();
+
+  let pipeline = Pipeline::new( registry );
+  let argv : Vec< String > = vec![
+    ".echo".to_string(),
+    "msg::hello world".to_string(),
+  ];
+  let result = pipeline.process_command_from_argv( &argv, ExecutionContext::default() );
+
+  assert!( result.success, "Argv-based processing must succeed; error: {:?}", result.error );
+  assert_eq!( result.outputs.len(), 1 );
+  assert_eq!(
+    result.outputs[ 0 ].content,
+    "hello world",
+    "Space must be preserved because argv boundaries prevent re-splitting"
+  );
+}
+
+/// AP-10: `process_batch` collects all results regardless of individual failures.
+///
+/// Batch mode must execute ALL commands without short-circuiting on failures.
+/// Three commands `[".nonexistent", ".ok", ".also_nonexistent"]` must produce
+/// exactly 3 results: `[Err, Ok, Err]`.
+// test_kind: ap_spec(AP-10)
+#[ test ]
+fn test_ap10_process_batch_collects_all_results()
+{
+  #[ allow( deprecated ) ]
+  let mut registry = CommandRegistry::new();
+
+  let ok_command = CommandDefinition::former()
+    .name( ".ok" )
+    .description( "Always succeeds".to_string() )
+    .status( "stable" )
+    .version( "1.0.0" )
+    .end();
+
+  let ok_routine : Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync > =
+    Box::new( | _cmd, _ctx |
+    Ok( OutputData { content : "ok".to_string(), format : "text".to_string(), execution_time_ms : None } )
+  );
+
+  #[ allow( deprecated ) ]
+  registry.command_add_runtime( &ok_command, ok_routine ).unwrap();
+
+  let pipeline = Pipeline::new( registry );
+  let commands = vec![ ".nonexistent", ".ok", ".also_nonexistent" ];
+  let batch_result = pipeline.process_batch( &commands, ExecutionContext::default() );
+
+  assert_eq!(
+    batch_result.total_commands, 3,
+    "Batch must record all 3 commands"
+  );
+  assert_eq!(
+    batch_result.results.len(), 3,
+    "All 3 results must be collected — no short-circuiting"
+  );
+  assert!( !batch_result.results[ 0 ].success, "First (nonexistent) must fail" );
+  assert!( batch_result.results[ 1 ].success, "Second (.ok) must succeed" );
+  assert!( !batch_result.results[ 2 ].success, "Third (nonexistent) must fail" );
 }

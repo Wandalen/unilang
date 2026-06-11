@@ -60,8 +60,12 @@ use unilang::validation_core::{
 // Test that validation_core functions work correctly with test fixture data
 // ============================================================================
 
+/// FT-9: Build-time validation rejects YAML with invalid command names.
+/// IN-3: validation_core shared logic produces identical results in both contexts.
+///
 /// Verify that the validation functions correctly reject the invalid fixture.
 /// This simulates what build.rs should do when processing `invalid_missing_dot.yaml`
+// test_kind: ft_spec(FT-9), in_spec(IN-3)
 #[test]
 fn test_fixture_missing_dot_prefix_rejected()
 {

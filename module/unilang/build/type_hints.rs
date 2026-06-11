@@ -1,4 +1,4 @@
-use serde_yaml::Value;
+use serde_yaml_ng::Value;
 
 /// Analyzes argument definitions for potential type issues
 pub struct TypeAnalyzer

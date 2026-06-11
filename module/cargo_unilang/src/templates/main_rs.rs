@@ -8,7 +8,7 @@ r#"#![allow(clippy::all)]
 //!
 //! This demonstrates the CORRECT way to use unilang:
 //! - NO custom build.rs (unilang provides it)
-//! - NO serde_yaml, walkdir, phf dependencies (unilang includes them)
+//! - NO serde_yaml_ng, walkdir, phf dependencies (unilang includes them)
 //! - Using StaticCommandRegistry::from_commands() (NOT ::new())
 
 use unilang::prelude::*;

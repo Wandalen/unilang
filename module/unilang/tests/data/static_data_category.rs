@@ -1,4 +1,4 @@
-//! Bug-reproducer tests for Issue-089: `category` field loss during
+//! Bug-reproducer tests for BUG-089: `category` field loss during
 //! `StaticCommandDefinition` → `CommandDefinition` conversion.
 
 use unilang::static_data::*;
@@ -10,12 +10,29 @@ use unilang::static_data::*;
 /// The `From<&StaticCommandDefinition>` impl hardcoded `.with_category( "" )` instead
 /// of using `static_cmd.category`, discarding all YAML-configured category values.
 ///
+/// ## Why Not Caught
+///
+/// Most test commands used empty-string categories (the default). The hardcoded `""`
+/// happened to match, so conversion tests passed. Only commands with explicit
+/// non-empty `category` values in YAML were silently broken.
+///
+/// ## Fix Applied
+///
+/// Changed `.with_category( "" )` to `.with_category( static_cmd.category )` in the
+/// `From<&StaticCommandDefinition>` impl. Updated `MultiYamlAggregator` codegen to
+/// emit the category field.
+///
+/// ## Prevention
+///
+/// Conversion tests must assert non-default values survive the round-trip. Testing
+/// only default values masks hardcoded defaults masquerading as correct conversions.
+///
 /// ## Pitfall
 ///
-/// **Silent Field Loss Pattern (Issue-088 + Issue-089):** When adding fields to
+/// **Silent Field Loss Pattern (BUG-088 + BUG-089):** When adding fields to
 /// `StaticCommandDefinition`, ALL code paths must be updated: struct field, build.rs
 /// extraction, PHF generation, Static→Dynamic conversion, MultiYamlAggregator generation.
-// test_kind: bug_reproducer(issue-089)
+// test_kind: bug_reproducer(BUG-089)
 #[ test ]
 fn test_category_conversion_preserves_non_empty_value()
 {
@@ -57,7 +74,7 @@ fn test_category_conversion_preserves_non_empty_value()
 /// **Untested Boundary Conditions:** Just because current code "works" for
 /// boundary cases doesnt mean its intentional. Explicit tests prevent
 /// accidental breakage and document expected behavior.
-// test_kind: bug_reproducer(issue-089)
+// test_kind: bug_reproducer(BUG-089)
 #[ test ]
 fn test_category_conversion_preserves_empty_string()
 {
@@ -99,7 +116,7 @@ fn test_category_conversion_preserves_empty_string()
 /// **String Field Transformations:** Never assume string fields should be
 /// normalized (trim, lowercase, sanitize). Preserve exact user input unless
 /// the spec explicitly requires transformation.
-// test_kind: bug_reproducer(issue-089)
+// test_kind: bug_reproducer(BUG-089)
 #[ test ]
 fn test_category_conversion_preserves_special_characters()
 {

@@ -1,7 +1,34 @@
-//! Test demonstrating the correct way to register dot-prefixed commands
-//! 
-//! This test shows the solution to issue 017: register commands without dot prefix,
-//! let the interpreter add it automatically.
+//! Regression test for dot-prefixed command registration (issue 017).
+//!
+//! ## Root Cause
+//!
+//! Commands were registered without the required dot prefix (e.g., `"chat"`
+//! instead of `".chat"`). The interpreter expected dot-prefixed names for
+//! lookup but registration accepted bare names silently, causing "command
+//! not found" at execution time.
+//!
+//! ## Why Not Caught
+//!
+//! Registration succeeded without error (no dot-prefix validation at
+//! registration time), so unit tests for registration passed. Only
+//! end-to-end execution exposed the mismatch between registered name
+//! and lookup name.
+//!
+//! ## Fix Applied
+//!
+//! Commands must now be registered with explicit dot prefix (e.g., `".chat"`).
+//! The convention is documented: dot prefix is the callers responsibility.
+//!
+//! ## Prevention
+//!
+//! These tests verify that dot-prefixed registration works end-to-end:
+//! register, lookup, and execute through the pipeline.
+//!
+//! ## Pitfall
+//!
+//! Registration silently accepts any name format. The dot-prefix
+//! requirement is only enforced at lookup time, creating a gap between
+//! "registered successfully" and "actually works."
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( clippy::inefficient_to_string ) ]

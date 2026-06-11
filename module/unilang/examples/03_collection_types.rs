@@ -18,7 +18,7 @@ fn main() -> Result< (), unilang::error::Error >
 
   let mut registry = CommandRegistry::new();
 
-  // Fix(issue-namespace-format): Namespace must have dot prefix
+  // Fix(BUG-092): Namespace must have dot prefix
   // Root cause: Validation requires non-empty namespaces start with '.'
   // Pitfall: All namespaces must be either empty "" or start with dot ".collections"
   // Step 1: Command demonstrating List types

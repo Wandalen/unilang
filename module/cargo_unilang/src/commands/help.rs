@@ -11,7 +11,7 @@ r"cargo_unilang - Scaffolding and health check tool for unilang projects
 
 Prevents common mistakes when using unilang CLI framework:
   ❌ Custom build.rs (unilang provides this automatically)
-  ❌ Duplicate dependencies (serde_yaml, walkdir, phf)
+  ❌ Duplicate dependencies (serde_yaml_ng, walkdir, phf)
   ❌ Deprecated API (CommandRegistry::new())
 
 USAGE:
@@ -139,7 +139,7 @@ CHECKS PERFORMED:
      Fix: Delete build.rs
 
   2. Duplicate dependencies in Cargo.toml
-     Issue: serde_yaml, walkdir, phf already in unilang
+     Issue: serde_yaml_ng, walkdir, phf already in unilang
      Fix: Remove from [dependencies] or [build-dependencies]
 
   3. Deprecated API usage

@@ -43,32 +43,46 @@ The framework **must** support a web-based REPL modality that can operate entire
 
 This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requires the core logic of the `unilang` and `unilang_parser` crates to be platform-agnostic and fully compatible with the `wasm32-unknown-unknown` target.
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability improvements for REPL and interactive patterns |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [006_repl_implementation.md](../architecture/006_repl_implementation.md) | REPL implementation guide and feature flags |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [003_pipeline.md](003_pipeline.md) | Pipeline used by REPL for command processing |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFR-PLATFORM-1 WASM compatibility requirement |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [002_error_codes.md](../api/002_error_codes.md) | ArgumentInteractiveRequired error code surfaced by REPL |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/bin/unilang_cli.rs` | REPL loop implementation |
+| `src/interpreter.rs` | Command execution used by REPL |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `examples/wasm-repl/` | WASM REPL example |
+| `tests/manual/readme.md` | Manual REPL testing plan |

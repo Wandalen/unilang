@@ -69,6 +69,8 @@ fn parse_and_bind( registry : &CommandRegistry, input : &str ) -> Result< Vec< V
   analyzer.analyze().map_err( |e| format!( "Binding error: {e:?}" ) )
 }
 
+/// FT-1: Named binding with `param::value` syntax extracts correct value.
+// test_kind: ft_spec(FT-1)
 #[test]
 fn test_basic_named_argument_binding()
 {
@@ -104,6 +106,8 @@ fn test_basic_named_argument_binding()
   }
 }
 
+/// FT-5: Positional binding assigns value by position when no name given.
+// test_kind: ft_spec(FT-5)
 #[test]
 fn test_positional_argument_binding()
 {
@@ -220,6 +224,9 @@ fn test_mixed_named_and_positional_binding()
   assert_eq!( pos2_value, &Value::String( "last".to_string() ) );
 }
 
+/// FT-6: Type coercion — integer token parsed into Kind::Integer value.
+/// FT-11: Type coercion — float token parsed into Kind::Float value.
+// test_kind: ft_spec(FT-6, FT-11)
 #[test]
 fn test_type_conversion_binding()
 {
@@ -320,6 +327,8 @@ fn test_optional_argument_binding()
   assert_eq!( verified_cmd.arguments.get( "optional" ).unwrap(), &Value::String( "opt".to_string() ) );
 }
 
+/// FT-3: Default value is used when optional argument is absent.
+// test_kind: ft_spec(FT-3)
 #[test]
 fn test_default_value_binding()
 {
@@ -355,6 +364,8 @@ fn test_default_value_binding()
   assert_eq!( verified_cmd.arguments.get( "param" ).unwrap(), &Value::String( "custom".to_string() ) );
 }
 
+/// FT-8: Alias-based named binding resolves to canonical argument.
+// test_kind: ft_spec(FT-8)
 #[test]
 fn test_alias_binding()
 {
@@ -394,6 +405,9 @@ fn test_alias_binding()
   assert_eq!( verified_cmd.arguments.get( "parameter" ).unwrap(), &Value::String( "alias2".to_string() ) );
 }
 
+/// FT-9: ValidationRule MinLength rejects too-short value.
+/// FT-13: ValidationRule Max rejects over-limit integer value.
+// test_kind: ft_spec(FT-9, FT-13)
 #[test]
 fn test_validation_rule_enforcement()
 {
@@ -441,6 +455,8 @@ fn test_validation_rule_enforcement()
   assert!( result.is_err(), "Out of range value should fail validation" );
 }
 
+/// FT-7: Missing required argument produces structured error.
+// test_kind: ft_spec(FT-7)
 #[test]
 fn test_missing_required_argument_error()
 {
@@ -563,4 +579,67 @@ fn test_binding_performance()
 
   let verified_cmd = &result.unwrap()[0];
   assert_eq!( verified_cmd.arguments.len(), 50, "All default arguments should be bound" );
+}
+
+/// FT-10: ValidationRule Pattern rejects non-matching value.
+// test_kind: ft_spec(FT-10)
+#[test]
+fn test_pattern_validation_rejects_non_matching()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "email".to_string(),
+      description : "Email address".to_string(),
+      kind : Kind::String,
+      hint : "Valid email".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![ ValidationRule::Pattern( r"^[a-z]+@[a-z]+\.[a-z]+$".to_string() ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Valid email passes
+  let result = parse_and_bind( &registry, r#".test email::"user@example.com""# );
+  assert!( result.is_ok(), "Valid email should pass pattern validation" );
+
+  // Invalid email fails
+  let result = parse_and_bind( &registry, r#".test email::"INVALID""# );
+  assert!( result.is_err(), "Non-matching value should fail pattern validation" );
+}
+
+/// FT-12: Type coercion — path token parsed into Kind::Path value.
+// test_kind: ft_spec(FT-12)
+#[test]
+fn test_path_type_coercion()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "file".to_string(),
+      description : "File path".to_string(),
+      kind : Kind::Path,
+      hint : "Path to file".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let verified_commands = parse_and_bind( &registry, r#".test file::"/tmp/data.csv""# )
+    .expect( "Path coercion should succeed" );
+
+  let verified_cmd = &verified_commands[0];
+  let file_value = verified_cmd.arguments.get( "file" ).expect( "file should be bound" );
+
+  match file_value
+  {
+    Value::Path( p ) => assert_eq!( p.to_string_lossy(), "/tmp/data.csv" ),
+    _ => panic!( "Expected Path value, got: {file_value:?}" ),
+  }
 }

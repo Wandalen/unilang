@@ -204,7 +204,7 @@ let result = process_output(stdout, stderr, &config);
 **Knowledge Preserved:**
 - Module documentation with "Silent Field Loss" pitfall and prevention strategies
 - Build script documentation with "Three-Layer Data Integrity Chain" warning
-- Permanent bug reproducer tests marked with `// test_kind: bug_reproducer(issue-088)`
+- Permanent bug reproducer tests marked with `// test_kind: bug_reproducer(BUG-088)`
 
 ### 2025-06-28 - Increment 6: Implement CLI Argument Parsing and Execution
 *   **Description:** Integrated the `unilang` core into a basic CLI application (`src/bin/unilang_cli.rs`). Implemented a `main` function to initialize `CommandRegistry`, register sample commands, parse command-line arguments, and use `Lexer`, `Parser`, `SemanticAnalyzer`, and `Interpreter` for execution. Handled errors by printing to `stderr` and exiting with a non-zero status code. Corrected `CommandDefinition` and `ArgumentDefinition` `former` usage. Implemented `as_integer` and `as_path` helper methods on `Value` in `src/types.rs`. Updated `CommandRoutine` signatures and return types in `src/bin/unilang_cli.rs` to align with `Result<OutputData, ErrorData>`. Corrected `Parser`, `SemanticAnalyzer`, and `Interpreter` instantiation and usage. Updated `cli_integration_test.rs` to match new `stderr` output format. Removed unused `std::path::PathBuf` import. Addressed Clippy lints (`unnecessary_wraps`, `needless_pass_by_value`, `uninlined_format_args`).

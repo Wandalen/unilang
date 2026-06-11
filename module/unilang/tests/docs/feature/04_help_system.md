@@ -54,3 +54,21 @@
 - **Given:** A `Pipeline` whose registry includes the `.help` system command
 - **When:** `pipeline.run(".help")` is called (or `pipeline.run("?")`)
 - **Then:** The returned output does NOT contain `.help` as a listed command entry; all other registered commands are still visible in the listing
+
+### FT-9: Default verbosity level is Level 2 (Standard)
+
+- **Given:** A `Pipeline` with `.greet` registered (one argument `"name"` with description, type, and default); `UNILANG_HELP_VERBOSITY` is NOT set in the environment
+- **When:** `pipeline.run(".greet ??")` is called (triggering help with default verbosity)
+- **Then:** Output includes USAGE line and PARAMETERS section with argument descriptions (Level 2 content); output does NOT include version, aliases, or tags metadata (Level 3+ content)
+
+### FT-10: UNILANG_HELP_VERBOSITY=1 produces Basic level output
+
+- **Given:** A `Pipeline` with `.greet` registered (one argument `"name"` with description, type, default, and aliases); `UNILANG_HELP_VERBOSITY=1` set in the environment
+- **When:** `pipeline.run(".greet ??")` is called
+- **Then:** Output includes command name and parameters list with types (syntax lookup); output does NOT include full PARAMETERS descriptions, EXAMPLES sections, or version metadata (Level 1 = Basic, adding parameter types beyond Level 0's name-only output)
+
+### FT-11: UNILANG_HELP_VERBOSITY=3 produces Detailed level output with metadata
+
+- **Given:** A `Pipeline` with `.greet` registered (one argument `"name"` with description, type, default, version set to `"1.0"`, and aliases `["g"]`); `UNILANG_HELP_VERBOSITY=3` set in the environment
+- **When:** `pipeline.run(".greet ??")` is called
+- **Then:** Output includes USAGE line, PARAMETERS section with argument descriptions AND type information, and version metadata; output is strictly more detailed than Level 2 output

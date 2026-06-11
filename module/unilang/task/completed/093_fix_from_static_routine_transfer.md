@@ -1,13 +1,18 @@
 # Fix `From<StaticCommandRegistry>` Routine Transfer + Doctest
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** claude-sonnet-4-6
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
 - **Validated By:** w3 .test level::3
-- **Validation Date:** N/A (pre-template)
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -214,3 +219,7 @@ _N/A — pre-template task._
 - `Pipeline::from_static()` doctest changed from `rust,ignore` to `rust,no_run`
 - All 6 acceptance-criteria test scenarios pass under `w3 .test level::3`
 - Directly unblocks `will_clean ARCH-3` tech debt: callers can now use `Pipeline::from_static(static_reg)` without re-registering routines
+
+## History
+
+- **N/A** `COMPLETED` — Validated by w3 .test level::3. Fix `From<StaticCommandRegistry>` Routine Transfer + Doctest.

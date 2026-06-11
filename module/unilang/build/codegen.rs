@@ -31,7 +31,7 @@ pub fn generate_empty_phf( dest_path : &Path )
 
 #[cfg(feature = "static_registry")]
 #[allow(clippy::too_many_lines)]
-pub fn generate_static_commands( dest_path : &Path, command_definitions : &[ serde_yaml::Value ] )
+pub fn generate_static_commands( dest_path : &Path, command_definitions : &[ serde_yaml_ng::Value ] )
 {
   let mut f = BufWriter::new( File::create( dest_path ).unwrap() );
 
@@ -236,7 +236,7 @@ pub fn generate_static_commands( dest_path : &Path, command_definitions : &[ ser
 }
 
 #[cfg(feature = "static_registry")]
-fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value : &serde_yaml::Value )
+fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value : &serde_yaml_ng::Value )
 {
   let name = cmd_value[ "name" ].as_str().unwrap_or( "" );
   let namespace = cmd_value[ "namespace" ].as_str().unwrap_or( "" );
@@ -247,9 +247,9 @@ fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value 
   let idempotent = cmd_value[ "idempotent" ].as_bool().unwrap_or( false );
   let deprecation_message = cmd_value[ "deprecation_message" ].as_str().unwrap_or( "" );
   let http_method_hint = cmd_value[ "http_method_hint" ].as_str().unwrap_or( "" );
-  // Fix(issue-088): Extract auto_help_enabled from YAML (defaults to true)
+  // Fix(BUG-088): Extract auto_help_enabled from YAML (defaults to true)
   let auto_help_enabled = cmd_value[ "auto_help_enabled" ].as_bool().unwrap_or( true );
-  // Fix(issue-089): Extract category from YAML (defaults to empty string)
+  // Fix(BUG-089): Extract category from YAML (defaults to empty string)
   let category = cmd_value[ "category" ].as_str().unwrap_or( "" );
   // Extract show_version_in_help from YAML (defaults to true)
   let show_version_in_help = cmd_value[ "show_version_in_help" ].as_bool().unwrap_or( true );
@@ -314,9 +314,9 @@ fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value 
   writeln!( f, "  deprecation_message: \"{}\",", escape_string( deprecation_message ) ).unwrap();
   writeln!( f, "  http_method_hint: \"{}\",", escape_string( http_method_hint ) ).unwrap();
   writeln!( f, "  examples: CMD_{index}_EXAMPLES," ).unwrap();
-  // Fix(issue-088): Include auto_help_enabled field in generated PHF const
+  // Fix(BUG-088): Include auto_help_enabled field in generated PHF const
   writeln!( f, "  auto_help_enabled: {auto_help_enabled}," ).unwrap();
-  // Fix(issue-089): Include category field in generated PHF const
+  // Fix(BUG-089): Include category field in generated PHF const
   writeln!( f, "  category: \"{}\",", escape_string( category ) ).unwrap();
   // Include show_version_in_help field in generated PHF const
   writeln!( f, "  show_version_in_help: {show_version_in_help}," ).unwrap();
@@ -325,7 +325,7 @@ fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value 
 }
 
 #[cfg(feature = "static_registry")]
-fn generate_argument_const( f : &mut BufWriter< File >, cmd_index : usize, arg_index : usize, arg_value : &serde_yaml::Value )
+fn generate_argument_const( f : &mut BufWriter< File >, cmd_index : usize, arg_index : usize, arg_value : &serde_yaml_ng::Value )
 {
   let name = arg_value[ "name" ].as_str().unwrap_or( "" );
   let description = arg_value[ "description" ].as_str().unwrap_or( "" );
@@ -406,7 +406,7 @@ fn generate_argument_const( f : &mut BufWriter< File >, cmd_index : usize, arg_i
 }
 
 #[cfg(feature = "static_registry")]
-fn generate_string_array( f : &mut BufWriter< File >, const_name : &str, yaml_value : &serde_yaml::Value )
+fn generate_string_array( f : &mut BufWriter< File >, const_name : &str, yaml_value : &serde_yaml_ng::Value )
 {
   if let Some( array ) = yaml_value.as_sequence()
   {

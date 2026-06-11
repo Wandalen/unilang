@@ -37,8 +37,8 @@
 //!
 //! ## Related
 //!
-//! - Issue-089: Category field addition
-//! - Issue-088: Auto help enabled (same pattern)
+//! - BUG-089: Category field addition
+//! - BUG-088: Auto help enabled (same pattern)
 //! - `tests/category_field_conversion_tests.rs` - Tests conversion preserving category
 //! - `tests/category_field_backward_compat_tests.rs` - CRITICAL backward compatibility
 

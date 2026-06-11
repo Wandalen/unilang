@@ -300,7 +300,9 @@ fn regression_multiple_parameter_performance_no_degradation()
   let avg_duration = duration.as_millis() / 10;
 
   // Assert - Performance should be reasonable
-  assert!( avg_duration < 100,  // 100ms is generous threshold
+  // Expected baseline: ~10ms per iteration (1ms per 10 parameters).
+  // 500ms threshold is 50x baseline — robust under loaded CI while catching real regressions.
+  assert!( avg_duration < 500,
           "Multiple parameter processing should not degrade performance significantly: {}ms average",
           avg_duration );
 

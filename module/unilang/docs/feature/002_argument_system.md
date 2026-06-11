@@ -65,22 +65,36 @@ The `Semantic Analyzer` **must** reject any command invocation that contains nam
 
 **Implementation status:** ✅ Implemented with `check_unknown_named_arguments()`, `find_closest_parameter_name()`, and `levenshtein_distance()`. Comprehensive test coverage across core tests and edge case tests covering all boundary conditions, alias matching, distance thresholds, and complex scenarios.
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of argument extraction boilerplate |
 | [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability improvements for argument API |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | ArgumentDefinition and Kind public types |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](001_command_registry.md) | Commands that arguments belong to |
 | [003_pipeline.md](003_pipeline.md) | Pipeline that processes bound arguments |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/semantic/argument_binding.rs` | Two-pass argument binding algorithm |
+| `src/data/argument_types.rs` | Argument type definitions |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/semantic/` | Semantic analysis and argument binding tests |
+| `tests/parser/argument_parsing.rs` | Argument parsing coverage |

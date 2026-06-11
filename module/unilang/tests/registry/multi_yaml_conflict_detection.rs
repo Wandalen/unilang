@@ -112,10 +112,11 @@ fn test_no_conflict_different_commands()
   cleanup_temp_yaml( &file_b );
 }
 
-/// Test: Conflicts detected when modules have same command
+/// FT-5: Multi-YAML conflict detection returns error for duplicate names.
 ///
 /// Module A: `.foo`, Module B: `.foo`
 /// Expected: One conflict detected
+// test_kind: ft_spec(FT-5)
 #[ test ]
 fn test_conflict_same_command_name()
 {

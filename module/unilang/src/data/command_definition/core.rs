@@ -6,7 +6,7 @@
 //!
 //! The old API had public `String` fields that could be mutated freely:
 //!
-//! ```ignore
+//! ```text
 //! let mut cmd = CommandDefinition { name: ".test".to_string(), ... };
 //! cmd.name = "invalid"; // Compiles! No dot prefix, breaks at registration
 //! cmd.namespace = "bad_ns"; // Compiles! Invalid namespace, breaks later
@@ -39,7 +39,9 @@
 //! **Construction patterns:**
 //!
 //! 1. **Direct constructor** (simple commands):
-//! ```ignore
+//! ```
+//! use unilang::data::{ CommandDefinition, CommandName };
+//!
 //! let cmd = CommandDefinition::new(
 //!   CommandName::new(".build").unwrap(),
 //!   "Build the project".to_string(),
@@ -47,7 +49,9 @@
 //! ```
 //!
 //! 2. **Builder with defaults** (tests, simple cases):
-//! ```ignore
+//! ```
+//! use unilang::CommandDefinition;
+//!
 //! let cmd = CommandDefinition::former()
 //!   .name(".build")
 //!   .description("Build the project")
@@ -55,13 +59,15 @@
 //! ```
 //!
 //! 3. **Builder fully explicit** (production):
-//! ```ignore
+//! ```
+//! use unilang::CommandDefinition;
+//!
 //! let cmd = CommandDefinition::former()
 //!   .name(".build")
 //!   .description("Build the project")
 //!   .namespace("")
 //!   .hint("Build hint")
-//!   .status("active")
+//!   .status("stable")
 //!   .version("1.0.0")
 //!   .build(); // No defaults, all fields required
 //! ```

@@ -51,13 +51,13 @@ impl CommandRegistry
   /// - Prototyping and rapid development workflows
   ///
   /// ⚡ **For production CLIs, use instead:**
-  /// ```ignore
+  /// ```text
   /// StaticCommandRegistry::from_commands(&STATIC_COMMANDS)  // 50x faster
   /// ```
   ///
   /// ## Recommended Alternative for Production
   ///
-  /// ```ignore
+  /// ```text
   /// // In build.rs:
   /// let aggregator = MultiYamlAggregator::new(config);
   /// aggregator.write_static_registry(&output_path)?;
@@ -676,7 +676,7 @@ impl CommandRegistry
   /// Consider using `StaticCommandRegistry` directly for better performance.
   ///
   /// # Examples
-  /// ```ignore
+  /// ```text
   /// use unilang::{ registry::CommandRegistry, static_data::StaticCommandMap };
   ///
   /// // Create registry from static commands

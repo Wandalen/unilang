@@ -1,20 +1,18 @@
 # Extract Verbosity Logging to unilang
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
-- **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
 
-- **Date**: 2025-11-19
-- **Priority**: LOW - Nice to Have
-- **Category**: API Enhancement
-- **Status**: Rejected
-- **Rejection Date**: 2025-11-22
-- **Source**: wplan_client/src/cli/verbosity.rs
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
+- **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -419,3 +417,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Extract Verbosity Logging to unilang.

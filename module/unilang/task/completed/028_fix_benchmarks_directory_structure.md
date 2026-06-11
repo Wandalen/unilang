@@ -1,23 +1,28 @@
 # Fix Benchmarks Directory Structure
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 **CRITICAL VIOLATION**: The project uses `benchmarks/` directory structure which is explicitly prohibited by benchkit usage.md. Benchkit **actively discourages** using framework-specific directories like `benchmarks/` and requires using standard Rust directories instead.
 
-**Current State**: 
+**Current State**:
 - `/home/user1/pro/lib/wTools_2/module/move/unilang/benchmarks/` contains 8+ benchmark files
 - This violates benchkit's "📁 Why Not `benches/`? Standard Directory Integration" mandatory requirement
 
 **Required Fix**: Move ALL benchmark files to standard directories:
-- Performance tests → `tests/` directory 
+- Performance tests → `tests/` directory
 - Demonstration benchmarks → `examples/` directory
 - Benchmark executables → `src/bin/` directory
 
@@ -125,3 +130,6 @@ cargo test run_all_benchmarks --release --features benchmarks -- --ignored --noc
 ### Compliance Achievement
 
 The migration eliminates benchkit runtime warnings about prohibited directory usage and aligns with benchkit's philosophy of standard directory integration rather than framework-specific directories.
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Fix Benchmarks Directory Structure.

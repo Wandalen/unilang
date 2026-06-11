@@ -1,6 +1,6 @@
 //! Workspace dependency format standards tests.
 //!
-//! Implements IN-1..3 specification cases from `tests/docs/invariant/04_workspace_dependency_standards.md`.
+//! Implements IN-1..3, IN-5 specification cases from `tests/docs/invariant/04_workspace_dependency_standards.md`.
 //!
 //! Tests verify that all four dependency format rules (R1–R3) defined in
 //! `docs/invariant/004_workspace_dependency_standards.md` hold in the workspace Cargo files.
@@ -199,6 +199,98 @@ fn test_in3_crate_cargo_toml_uses_workspace_inheritance()
     violations.is_empty(),
     "IN-3 violation: crate Cargo.toml must not declare standalone version literals; \
      all deps must use workspace inheritance. Found violations:\n{}",
+    violations.join( "\n" )
+  );
+}
+
+/// IN-4: `--no-default-features` build compiles without errors or warnings.
+///
+/// Runs `cargo check --no-default-features` on the unilang crate and verifies
+/// it exits with code 0. This confirms all optional dependencies are properly gated
+/// and the crate compiles to a no-op with no features enabled.
+// test_kind: in_spec(IN-4)
+#[ test ]
+fn test_in4_no_default_features_builds_cleanly()
+{
+  use std::process::Command;
+
+  let manifest_dir = env!( "CARGO_MANIFEST_DIR" );
+
+  let result = Command::new( "cargo" )
+    .args([ "check", "--no-default-features" ])
+    .current_dir( manifest_dir )
+    .env( "RUSTFLAGS", "-D warnings" )
+    .output()
+    .expect( "Failed to execute cargo check" );
+
+  let stderr = String::from_utf8_lossy( &result.stderr );
+
+  assert!(
+    result.status.success(),
+    "IN-4 violation: `cargo check --no-default-features` must succeed with zero warnings; \
+     exit code: {:?}\nstderr:\n{}",
+    result.status.code(),
+    stderr
+  );
+}
+
+/// IN-5: All library crate dependencies are marked `optional = true`.
+///
+/// Reads the `unilang` crate's `Cargo.toml` and verifies that every entry under
+/// `[dependencies]` includes `optional = true`. Binary crate `cargo_unilang` is exempt.
+/// `[build-dependencies]` and `[dev-dependencies]` are also exempt since they are not
+/// part of the library's public dependency surface.
+// test_kind: in_spec(IN-5)
+#[ test ]
+fn test_in5_library_deps_all_optional()
+{
+  let manifest_dir = env!( "CARGO_MANIFEST_DIR" );
+  let crate_cargo = format!( "{}/Cargo.toml", manifest_dir );
+
+  let content = std::fs::read_to_string( &crate_cargo )
+    .unwrap_or_else( | e | panic!( "Cannot read crate Cargo.toml at {crate_cargo}: {e}" ) );
+
+  let mut in_dependencies = false;
+  let mut violations : Vec< String > = vec![];
+
+  for line in content.lines()
+  {
+    let trimmed = line.trim();
+
+    // Only inspect [dependencies] section — not [build-dependencies] or [dev-dependencies]
+    if trimmed == "[dependencies]"
+    {
+      in_dependencies = true;
+      continue;
+    }
+    if trimmed.starts_with( '[' )
+    {
+      in_dependencies = false;
+    }
+
+    if !in_dependencies { continue; }
+    if trimmed.is_empty() || trimmed.starts_with( '#' ) { continue; }
+    // Skip lines that are sub-table headers like `[dependencies.foo]`
+    if trimmed.starts_with( '[' ) { continue; }
+
+    // Each dependency line should contain `optional = true` (or `optional=true`)
+    // Only check lines that define a dependency (contain `=` and look like `name = { ... }`)
+    if trimmed.contains( '=' ) && !trimmed.starts_with( '#' )
+    {
+      // Lines like `## internal` or continuation comments are fine
+      if trimmed.starts_with( "##" ) { continue; }
+
+      if !trimmed.contains( "optional = true" ) && !trimmed.contains( "optional=true" )
+      {
+        violations.push( format!( "  {trimmed}" ) );
+      }
+    }
+  }
+
+  assert!(
+    violations.is_empty(),
+    "IN-5 violation: all library crate [dependencies] must be optional = true. \
+     Found non-optional deps:\n{}",
     violations.join( "\n" )
   );
 }

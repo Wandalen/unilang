@@ -11,7 +11,7 @@
 
 The `unilang` public API surface provides integrators with `CommandDefinition`, `ArgumentDefinition`, `CommandRegistry`, `Pipeline`, `Value`, `Kind`, `StaticCommandDefinition`, and related types for building multi-modal command-line utilities. The API is organized into type definitions, registration operations, execution operations, and argument extraction operations.
 
-### Types
+### Public Type Surface
 
 The public API exposes the following data structures to integrators:
 
@@ -63,13 +63,13 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 - `StaticCommandDefinition` fields are additive — new fields have defaults (no breaking change)
 - Environment variable names are stable after v1.0
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of public type usage patterns and boilerplate |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
@@ -78,20 +78,44 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 | [003_pipeline.md](../feature/003_pipeline.md) | Pipeline operations |
 | [004_help_system.md](../feature/004_help_system.md) | HelpGenerator and help verbosity |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs that govern API performance |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [004_implementation_details.md](../architecture/004_implementation_details.md) | Internal implementation of StaticCommandMap |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [002_error_codes.md](002_error_codes.md) | Error codes stable API contract |
+
+### Types
+
+| File | Relationship |
+|------|--------------|
+| [001_command_name.md](../type/001_command_name.md) | CommandName validated newtype for command identifiers |
+| [002_namespace_type.md](../type/002_namespace_type.md) | NamespaceType validated newtype for namespace identifiers |
+| [003_version_type.md](../type/003_version_type.md) | VersionType validated newtype for version strings |
+| [004_command_status.md](../type/004_command_status.md) | CommandStatus lifecycle enum for command metadata |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/data/` | Core data types: CommandDefinition, argument types, validated types |
+| `src/registry/` | Registry types: CommandRegistry, StaticCommandMap |
+| `src/pipeline/` | Pipeline types: PipelineResult |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/data/` | Data model and type validation tests |
+| `tests/api/` | Public API contract tests |

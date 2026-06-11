@@ -8,7 +8,7 @@ r#"# Example command definitions for your unilang CLI
 # This file is automatically discovered and processed by unilang's build.rs
 # You DON'T need to:
 # - Create your own build.rs
-# - Add serde_yaml dependency
+# - Add serde_yaml_ng dependency
 # - Write YAML parsing code
 # - Generate PHF maps manually
 #

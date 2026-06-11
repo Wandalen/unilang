@@ -27,7 +27,7 @@ edition = "2021"
 unilang = "0.46"
 
 # ⚠️  IMPORTANT: Do NOT add these - unilang already provides them:
-# ❌ serde_yaml (via yaml_parser feature)
+# ❌ serde_yaml_ng (via yaml_parser feature)
 # ❌ walkdir (via multi_file feature)
 # ❌ phf (via static_registry feature)
 #

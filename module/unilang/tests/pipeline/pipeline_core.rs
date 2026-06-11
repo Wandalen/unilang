@@ -192,3 +192,30 @@ fn test_convenience_functions()
   assert!( validate_single_command( ".test hello", &registry ).is_ok() );
   assert!( validate_single_command( "nonexistent", &registry ).is_err() );
 }
+
+/// FT-1: Stateless REPL — repeated calls produce no state leakage between invocations.
+///
+/// The Pipeline holds no mutable per-call state. Two consecutive calls to
+/// `process_command` with different arguments must produce independent results.
+// test_kind: ft_spec(FT-1)
+#[ test ]
+fn test_ft1_stateless_repl_no_state_leakage()
+{
+  let registry = create_test_registry();
+  let pipeline = Pipeline::new( registry );
+
+  // First call
+  let result1 = pipeline.process_command( ".test first", ExecutionContext::default() );
+  assert!( result1.success );
+  assert_eq!( result1.outputs[ 0 ].content, "first" );
+
+  // Second call with different argument — must be independent
+  let result2 = pipeline.process_command( ".test second", ExecutionContext::default() );
+  assert!( result2.success );
+  assert_eq!( result2.outputs[ 0 ].content, "second" );
+
+  // Third call uses default — must not retain "second"
+  let result3 = pipeline.process_command( ".test", ExecutionContext::default() );
+  assert!( result3.success );
+  assert_eq!( result3.outputs[ 0 ].content, "hello", "Default value must be used, not leaked state" );
+}

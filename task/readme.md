@@ -16,7 +16,7 @@ Task tracking for the unilang crate.
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Executor | Task | Purpose |
 |-------|----|--------------|-------|----------|--------|----------|--------|----------|------|---------|
-| 1 | 002 | 280 | 8 | 5 | 7 | 2 | 🎯 | any | [Implement test surface specs](002_implement_test_surface_specs.md) | Implement Rust tests for all 50 spec cases across feature/invariant/api surfaces |
+| 1 | 002 | 280 | 8 | 5 | 7 | 2 | 🎯 | any | [Implement test surface specs](002_implement_test_surface_specs.md) | Implement Rust tests for all 121 spec cases across 17 feature/invariant/api/type spec files |
 | 2 | 001 | 0 | 6 | 4 | 7 | 0 | ✅ | claude-sonnet-4-6 | [Fix phf_map! codegen absolute path expansion](completed/001_fix_phf_map_codegen_absolute_path_expansion.md) | Fix codegen so downstream crates don't need direct phf dependency |
 
 ---
@@ -40,12 +40,12 @@ total_tasks: 2
 completed: 1
 active: 1
 backlog: 0
-last_updated: 2026-05-16
+last_updated: 2026-06-11
 -->
 
 ## Task System Metadata
 
-- **Last Updated:** 2026-05-16
+- **Last Updated:** 2026-06-11
 - **Total Tasks:** 2
 - **Completed:** 1
 - **Active:** 1

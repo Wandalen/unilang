@@ -2,12 +2,15 @@
 
 ## Execution State
 
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** claude-sonnet-4-6
-- **Claimed At:** 2026-05-23
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
 - **Closes:** BUG-102
+- **Blocked Reason:** null
+- **Dir:** .
 - **Validated By:** w3 .test level::3 (container, 153/153 nextest pass)
 - **Validation Date:** 2026-05-23
 
@@ -108,3 +111,7 @@ Apply all rulebooks discovered via `kbase .role name::dev`. Key references:
 - BUG-102 closed (state: Fixed, moved to `task/bug/closed/`)
 - Root cause: `register_mandatory_global_help_command()` set `hidden_from_list: false`; the interpreter's special `.help` handler calls `list_commands_filtered()` which unconditionally checks that flag
 - Key pitfall: `command_add_runtime(.help)` always fails with `CommandAlreadyExists` — the only place to set `hidden_from_list` for `.help` is the mandatory registration in `dynamic.rs`
+
+## History
+
+- **2026-05-23** `COMPLETED` — Validated by w3 .test level::3 (container, 153/153 nextest pass). Fix .help Visible in Its Own Help Listing (BUG-102).

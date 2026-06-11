@@ -33,7 +33,7 @@ pub struct NotSet;
 ///
 /// The old API used public fields with `Default` trait, causing runtime errors:
 ///
-/// ```ignore
+/// ```text
 /// // Old API - compiles but panics at runtime
 /// let cmd = CommandDefinition::default(); // name is empty string!
 /// registry.register(cmd); // Runtime panic: "Invalid command name"
@@ -58,7 +58,7 @@ pub struct NotSet;
 ///
 /// Each type parameter (`Name`, `Description`, etc.) is either `Set` or `NotSet`:
 ///
-/// ```ignore
+/// ```text
 /// CommandDefinitionBuilder<NotSet, NotSet, NotSet, NotSet, NotSet, NotSet> // Initial
 ///   .name(".test") → CommandDefinitionBuilder<Set, NotSet, NotSet, NotSet, NotSet, NotSet>
 ///   .description("Test") → CommandDefinitionBuilder<Set, Set, NotSet, NotSet, NotSet, NotSet>
@@ -67,7 +67,7 @@ pub struct NotSet;
 ///
 /// The `build()` method is only available when ALL type parameters are `Set`:
 ///
-/// ```ignore
+/// ```text
 /// impl CommandDefinitionBuilder<Set, Set, Set, Set, Set, Set> {
 ///   pub fn build(self) -> CommandDefinition { ... }
 /// }

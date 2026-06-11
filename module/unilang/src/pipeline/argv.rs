@@ -45,7 +45,7 @@ impl Pipeline
   /// # Why Use This Method?
   ///
   /// **Problem with string-based API:**
-  /// ```ignore
+  /// ```text
   /// // ❌ BAD: Information loss
   /// let argv = vec!["command::ls", "-la"];
   /// let command_str = argv.join(" ");  // "command::ls -la"

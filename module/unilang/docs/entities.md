@@ -8,7 +8,8 @@
 | `api/` | Public programmatic interfaces | [api/readme.md](api/readme.md) | 2 |
 | `architecture/` | Architectural decisions and rationale | [architecture/readme.md](architecture/readme.md) | 6 |
 | `feature/` | Behavioral feature requirements (FR-*) | [feature/readme.md](feature/readme.md) | 5 |
-| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 5 |
+| `invariant/` | System properties that must always hold | [invariant/readme.md](invariant/readme.md) | 6 |
+| `type/` | Domain types with construction-time validation guarantees | [type/readme.md](type/readme.md) | 4 |
 
 ## Master Doc Instances Table
 
@@ -34,3 +35,8 @@
 | invariant | 003 | Governing Principles | [invariant/003_governing_principles.md](invariant/003_governing_principles.md) |
 | invariant | 004 | Workspace Dependency Standards | [invariant/004_workspace_dependency_standards.md](invariant/004_workspace_dependency_standards.md) |
 | invariant | 005 | Command Naming | [invariant/005_command_naming.md](invariant/005_command_naming.md) |
+| invariant | 006 | Build-Runtime Separation | [invariant/006_build_runtime_separation.md](invariant/006_build_runtime_separation.md) |
+| type | 001 | Command Name | [type/001_command_name.md](type/001_command_name.md) |
+| type | 002 | Namespace Type | [type/002_namespace_type.md](type/002_namespace_type.md) |
+| type | 003 | Version Type | [type/003_version_type.md](type/003_version_type.md) |
+| type | 004 | Command Status | [type/004_command_status.md](type/004_command_status.md) |

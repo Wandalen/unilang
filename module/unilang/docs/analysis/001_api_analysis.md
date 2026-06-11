@@ -155,13 +155,13 @@ The include-at-compile-time pattern for consuming build.rs output is used intern
 
 **Outstanding opportunities:** Compile-time argument validation via proc macro. `impl Into<String>` acceptance in builders. Formalized interactive argument protocol in public API. Clear static command integration documentation.
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [002_usability_improvements.md](002_usability_improvements.md) | Prioritized recommendations based on these findings |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
@@ -169,14 +169,21 @@ The include-at-compile-time pattern for consuming build.rs output is used intern
 | [002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
 | [004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | Public Value types and structures being analyzed |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [004_implementation_details.md](../architecture/004_implementation_details.md) | Static registry implementation referenced in Part 7 |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/data/` | Primary analysis subject: data types |
+| `src/registry/` | Primary analysis subject: registry API |

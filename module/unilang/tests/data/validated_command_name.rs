@@ -238,10 +238,10 @@ fn command_name_serde_json_roundtrip()
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn command_name_serde_yaml_deserialize_valid()
+fn command_name_serde_yaml_ng_deserialize_valid()
 {
   let yaml = ".build";
-  let name : CommandName = serde_yaml::from_str( yaml )
+  let name : CommandName = serde_yaml_ng::from_str( yaml )
     .expect( "YAML deserialization should succeed for valid name" );
 
   assert_eq!(
@@ -253,17 +253,17 @@ fn command_name_serde_yaml_deserialize_valid()
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn command_name_serde_yaml_deserialize_rejects_invalid()
+fn command_name_serde_yaml_ng_deserialize_rejects_invalid()
 {
   let yaml_empty = "\"\"";
-  let result : Result< CommandName, _ > = serde_yaml::from_str( yaml_empty );
+  let result : Result< CommandName, _ > = serde_yaml_ng::from_str( yaml_empty );
   assert!(
     result.is_err(),
     "YAML deserialization should fail for empty name"
   );
 
   let yaml_no_prefix = "build";
-  let result : Result< CommandName, _ > = serde_yaml::from_str( yaml_no_prefix );
+  let result : Result< CommandName, _ > = serde_yaml_ng::from_str( yaml_no_prefix );
   assert!(
     result.is_err(),
     "YAML deserialization should fail for name without dot prefix"
@@ -306,6 +306,23 @@ fn command_name_long_names()
     result.unwrap().as_str(),
     long_name.as_str(),
     "Long name should be preserved exactly"
+  );
+}
+
+#[ test ]
+fn command_name_single_dot()
+{
+  let result = CommandName::new( "." );
+
+  assert!(
+    result.is_ok(),
+    "CommandName::new(\".\") should succeed - single dot is valid"
+  );
+
+  assert_eq!(
+    result.unwrap().as_str(),
+    ".",
+    "Single dot should be preserved"
   );
 }
 

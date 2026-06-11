@@ -209,7 +209,7 @@ pub fn execute( params : NewParams ) -> Result< i32, String >
       println!( "  └── commands.yaml (example command)" );
       println!();
       println!( "✅ You did NOT need to write build.rs" );
-      println!( "✅ You did NOT need to add serde_yaml, walkdir, or phf" );
+      println!( "✅ You did NOT need to add serde_yaml_ng, walkdir, or phf" );
       println!();
       println!( "Next steps:" );
       println!( "  cd {}", params.project );
@@ -217,7 +217,7 @@ pub fn execute( params : NewParams ) -> Result< i32, String >
       println!();
       println!( "⚠️  IMPORTANT:" );
       println!( "  - Do NOT create build.rs" );
-      println!( "  - Do NOT add serde_yaml, walkdir, or phf to Cargo.toml" );
+      println!( "  - Do NOT add serde_yaml_ng, walkdir, or phf to Cargo.toml" );
       println!( "  - Use CommandRegistry::with_static_commands() (not ::new())" );
     }
     _ =>
@@ -233,7 +233,7 @@ pub fn execute( params : NewParams ) -> Result< i32, String >
       println!( "  └── commands.yaml" );
       println!();
       println!( "✅ You did NOT need to write build.rs" );
-      println!( "✅ You did NOT need to add serde_yaml, walkdir, or phf" );
+      println!( "✅ You did NOT need to add serde_yaml_ng, walkdir, or phf" );
       println!();
       println!( "Next steps:" );
       println!( "  cd {}", params.project );

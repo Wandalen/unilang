@@ -144,6 +144,8 @@ fn parse_and_analyze( registry : &CommandRegistry, input : &str ) -> Result< Vec
   analyzer.analyze().map_err( |e| format!( "Semantic analysis error: {e:?}" ) )
 }
 
+/// FT-4: Multiple-parameter collection accumulates repeated values into Vec.
+// test_kind: ft_spec(FT-4)
 #[test]
 fn test_basic_multiple_parameter_collection()
 {

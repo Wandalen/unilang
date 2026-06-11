@@ -18,3 +18,4 @@ System properties and constraints that must always hold, regardless of code path
 | 003 | [Governing Principles](003_governing_principles.md) | Framework principles that must always guide design decisions | ✅ |
 | 004 | [Workspace Dependency Standards](004_workspace_dependency_standards.md) | Dep version format, workspace centralization, and optional-dep pattern compliance | ✅ |
 | 005 | [Command Naming](005_command_naming.md) | Dot-prefix requirement and explicit naming conventions for all registered commands | ✅ |
+| 006 | [Build-Runtime Separation](006_build_runtime_separation.md) | Compile-time-only YAML/JSON processing guarantee | ✅ |

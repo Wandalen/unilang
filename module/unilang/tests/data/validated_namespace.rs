@@ -4,6 +4,8 @@
 
 use unilang::data::NamespaceType;
 
+/// TC-1: Empty namespace is accepted (root-level commands).
+// test_kind: tc_spec(TC-1)
 #[ test ]
 fn namespace_valid_empty()
 {
@@ -27,6 +29,8 @@ fn namespace_valid_empty()
   );
 }
 
+/// TC-2 / TC-4: Dot-prefixed namespace is accepted (including nested).
+// test_kind: tc_spec(TC-2, TC-4)
 #[ test ]
 fn namespace_valid_with_dot_prefix()
 {
@@ -61,6 +65,8 @@ fn namespace_valid_with_dot_prefix()
   }
 }
 
+/// TC-3: Non-empty non-dot-prefixed namespace is rejected.
+// test_kind: tc_spec(TC-3)
 #[ test ]
 fn namespace_rejects_missing_dot_prefix()
 {
@@ -153,6 +159,8 @@ fn namespace_serde_json_deserialize_valid()
   assert!( empty.is_root() );
 }
 
+/// TC-5: Serde deserialization rejects non-dot-prefixed namespace.
+// test_kind: tc_spec(TC-5)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn namespace_serde_json_deserialize_rejects_invalid()
@@ -167,15 +175,15 @@ fn namespace_serde_json_deserialize_rejects_invalid()
 
 #[ cfg( feature = "yaml_parser" ) ]
 #[ test ]
-fn namespace_serde_yaml_deserialize_valid()
+fn namespace_serde_yaml_ng_deserialize_valid()
 {
   let yaml = ".video";
-  let ns : NamespaceType = serde_yaml::from_str( yaml )
+  let ns : NamespaceType = serde_yaml_ng::from_str( yaml )
     .expect( "YAML deserialization should succeed" );
   assert_eq!( ns.as_str(), ".video" );
 
   let yaml_empty = "\"\"";
-  let empty : NamespaceType = serde_yaml::from_str( yaml_empty )
+  let empty : NamespaceType = serde_yaml_ng::from_str( yaml_empty )
     .expect( "YAML deserialization of empty namespace should succeed" );
   assert!( empty.is_root() );
 }

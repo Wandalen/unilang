@@ -1,10 +1,30 @@
 //! Regression test for duplicate command registration bug.
 //!
-//! ## Lessons Learned (Bugs Fixed)
+//! ## Root Cause
 //!
-//! - **2026-01-11 (issue-duplicate-commands):** Example tried to merge registries without
-//!   checking for duplicates. Built-in commands (.help, .version) exist in both registries,
-//!   causing duplicate registration errors. Fix: check if command exists before registering.
+//! Example code merged two registries without checking for pre-existing commands.
+//! Built-in commands (`.help`, `.version`) auto-register in every `CommandRegistry::new()`,
+//! so merging two registries always hits duplicate registration errors on built-ins.
+//!
+//! ## Why Not Caught
+//!
+//! No integration test exercised the registry-merging pattern. Unit tests only tested
+//! single-registry registration, missing the multi-registry merge path entirely.
+//!
+//! ## Fix Applied
+//!
+//! Guard each registration with `combined.command(&name).is_none()` before calling
+//! `register()`. This skip-if-exists pattern prevents duplicate errors when merging.
+//!
+//! ## Prevention
+//!
+//! Any code that merges registries must check for existing commands before registering.
+//! This test guards the pattern so future merge helpers get tested against duplicates.
+//!
+//! ## Pitfall
+//!
+//! `CommandRegistry::new()` silently pre-registers mandatory commands (`.help`, `.version`).
+//! Any merge of two fresh registries will always have duplicates on these built-ins.
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( clippy::uninlined_format_args ) ]
@@ -12,7 +32,7 @@
 
 use unilang::{ CommandDefinition, CommandRegistry };
 
-// test_kind: bug_reproducer(issue-duplicate-commands)
+// test_kind: bug_reproducer(BUG-091)
 #[ test ]
 fn test_duplicate_registration_fails()
 {

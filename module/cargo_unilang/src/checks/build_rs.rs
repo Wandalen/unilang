@@ -22,7 +22,7 @@ pub fn check_build_rs( project_path : &Path ) -> CheckResult
   };
 
   // Check for unilang-related keywords
-  let has_yaml_parsing = content.contains( "serde_yaml" )
+  let has_yaml_parsing = content.contains( "serde_yaml_ng" )
     || content.contains( "yaml" )
     || content.contains( "commands.yaml" );
 

@@ -1,29 +1,33 @@
-//! Regression test for example-specific YAML discovery bug.
+//! Regression test for example YAML discovery bug (BUG-094).
 //!
-//! ## Test Matrix
+//! ## Root Cause
 //!
-//! | Test Case | Description | Expected Behavior |
-//! |-----------|-------------|-------------------|
-//! | `test_example_yaml_not_discovered_bug` | Example-specific YAML files in examples/ directory are NOT discovered by build script | Build script excludes examples/ directory, commands not registered |
-//! | `test_shared_registry_commands_available` | Commands from root unilang.commands.yaml ARE available to examples | Global commands like .help, .version work in examples |
+//! Example `00_minimal.rs` claimed to demonstrate "minimal usage" but referenced a
+//! `.greet` command from `examples/00_minimal.commands.yaml`. The build script
+//! excludes `examples/` from YAML discovery (build.rs:473), so the file was never
+//! processed and the command was never registered.
 //!
-//! ## Lessons Learned (Bugs Fixed)
+//! ## Why Not Caught
 //!
-//! - **2026-01-04 (issue-manifest-discovery):** Example `00_minimal.rs` claimed to demonstrate
-//!   "minimal usage" but failed with "command '.greet' not found" error.
-//!   Root cause: Build script excludes examples/ directory from YAML discovery (build.rs:473),
-//!   so `examples/00_minimal.commands.yaml` never processed.
-//!   Prevention: Updated example documentation to clarify all examples share root-level
-//!   unilang.commands.yaml registry, not example-specific YAML files.
+//! No test ran `00_minimal` as a binary. Documentation was written from API knowledge
+//! without verifying the example actually compiled and ran successfully.
 //!
-//! ## Common Pitfalls to Avoid
+//! ## Fix Applied
 //!
-//! - **Example-specific manifests:** Don't create YAML files in examples/ directory.
-//!   Build script intentionally excludes this directory. All commands must be in root
-//!   unilang.commands.yaml or use `UNILANG_STATIC_COMMANDS_PATH` environment variable.
-//! - **Misleading examples:** Example documentation claiming "create foo.commands.yaml"
-//!   implies example-specific manifests work, but they don't. Always verify examples
-//!   actually run before documenting behavior.
+//! Updated `00_minimal.rs` to use commands from the shared root `unilang.commands.yaml`
+//! registry instead of referencing non-existent example-specific commands.
+//!
+//! ## Prevention
+//!
+//! These tests verify that example-specific YAML is NOT discovered (intentional exclusion)
+//! and that shared registry commands ARE available. Always verify examples run before
+//! documenting behavior.
+//!
+//! ## Pitfall
+//!
+//! Build script intentionally excludes `examples/` from YAML discovery. Creating YAML
+//! files in `examples/` has no effect — all commands must come from root
+//! `unilang.commands.yaml` or `UNILANG_STATIC_COMMANDS_PATH`.
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( deprecated ) ]
@@ -113,7 +117,7 @@ use unilang::{ CommandRegistry, Pipeline };
 /// Similar pattern exists in other unilang infrastructure: `tests/` directory excluded for
 /// same reason (fixture pollution prevention). Any crate using compile-time codegen from
 /// user-provided files must clearly document discovery paths.
-// test_kind: bug_reproducer(issue-manifest-discovery)
+// test_kind: bug_reproducer(BUG-094)
 #[ test ]
 fn test_example_yaml_not_discovered_bug()
 {

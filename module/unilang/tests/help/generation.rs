@@ -111,6 +111,8 @@ fn test_command_specific_help_generation()
   assert!( help_content.contains( "Usage:" ), "Help should contain usage section" );
 }
 
+/// FT-2: Detailed help output includes argument names and descriptions.
+// test_kind: ft_spec(FT-2)
 #[test]
 fn test_help_includes_argument_details()
 {
@@ -181,6 +183,8 @@ fn test_help_includes_aliases()
   assert!( help_content.contains( 'o' ) && help_content.contains( "output" ), "Help should mention argument aliases" );
 }
 
+/// FT-1: Command list returns all registered command names.
+// test_kind: ft_spec(FT-1)
 #[test]
 fn test_global_help_listing()
 {

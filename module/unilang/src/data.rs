@@ -15,7 +15,7 @@
 //! runtime during registration. The new API catches errors at construction time, moving
 //! bugs from runtime to compile time.
 //!
-//! ```ignore
+//! ```text
 //! // Old API - compiles but fails at runtime
 //! let cmd = CommandDefinition {
 //!   name: "no_dot".to_string(),        // Invalid! No dot prefix
@@ -28,7 +28,7 @@
 //!
 //! // New API - errors at construction
 //! let cmd = CommandDefinition::former()
-//!   .name("no_dot")          // Compile error: CommandName validates at construction
+//!   .name("no_dot")          // Returns Err: CommandName validates at construction
 //!   .description("Test")
 //!   .end();
 //! ```

@@ -1,36 +1,33 @@
-//! Regression test for validation rule API format bugs.
+//! Regression test for validation rule API format bugs (BUG-095).
 //!
-//! ## Test Matrix
+//! ## Root Cause
 //!
-//! | Test Case | Description | Expected Behavior |
-//! |-----------|-------------|-------------------|
-//! | `test_min_length_underscore_rejected` | `min_length:N` format should be rejected | Unknown validation rule error |
-//! | `test_minlength_no_underscore_accepted` | `minlength:N` format should be accepted | Validation rule parsed successfully |
-//! | `test_regex_keyword_rejected` | `regex:PATTERN` format should be rejected | Unknown validation rule error |
-//! | `test_pattern_keyword_accepted` | `pattern:PATTERN` format should be accepted | Validation rule parsed successfully |
+//! Example `07_yaml_json_loading.rs` used incorrect validation rule keywords in embedded
+//! YAML/JSON: `min_length:1` instead of `minlength:1`, and `regex:^[0-9]` instead of
+//! `pattern:^[0-9]`. `ValidationRule::from_str()` expects specific keywords without
+//! underscores (`minlength`, `maxlength`, `pattern`), but examples used intuitive
+//! English variants that the parser doesnt recognize.
 //!
-//! ## Lessons Learned (Bugs Fixed)
+//! ## Why Not Caught
 //!
-//! - **2026-01-11 (issue-validation-rule-keywords):** Example 07_yaml_json_loading.rs used
-//!   incorrect validation rule formats in embedded YAML/JSON:
-//!   ```yaml
-//!   validation_rules: ["min_length:1"]  # Wrong: should be "minlength:1"
-//!   validation_rules: ["regex:^[0-9]"] # Wrong: should be "pattern:^[0-9]"
-//!   ```
-//!   Parser failed with "Unknown validation rule: min_length:1" and "Unknown validation rule: regex:...".
-//!   Root cause: ValidationRule::from_str() expects specific keywords without underscores
-//!   ("minlength", "maxlength", "pattern"), but examples used intuitive English variants.
-//!   Prevention: Document API clearly or support both variants for better UX.
+//! No test parsed the exact YAML strings from the example. Example code was reviewed
+//! for structure but not executed end-to-end with the embedded validation rules.
 //!
-//! ## Common Pitfalls to Avoid
+//! ## Fix Applied
 //!
-//! - **Intuitive vs actual API:** Users naturally write `min_length` (matches Rust naming),
-//!   but parser expects `minlength`. This naming mismatch creates friction. Consider accepting
-//!   both formats or aligning with Rust conventions.
-//! - **Keyword naming:** `regex` is more specific than `pattern`, but API uses `pattern`.
-//!   Users coming from regex-heavy backgrounds will default to `regex` keyword. Consider alias.
-//! - **Error messages:** "Unknown validation rule" doesn't suggest correct format. Better error:
-//!   "Unknown validation rule 'min_length:1'. Did you mean 'minlength:1'?".
+//! Corrected all validation rule keywords in `07_yaml_json_loading.rs` to match the
+//! parser's expected format: `min_length` → `minlength`, `regex` → `pattern`.
+//!
+//! ## Prevention
+//!
+//! These tests validate that the parser rejects intuitive-but-wrong formats and accepts
+//! the canonical keywords. Any new validation rule must have both accepted/rejected tests.
+//!
+//! ## Pitfall
+//!
+//! Validation rule keywords dont follow Rust snake_case convention (`minlength` not
+//! `min_length`). Users naturally write snake_case variants, which silently fail with
+//! "Unknown validation rule" — the error message doesnt suggest the correct format.
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( clippy::uninlined_format_args ) ]
@@ -98,7 +95,7 @@ use unilang::ValidationRule;
 ///
 /// Either accept common variants or provide clear error messages pointing to correct format.
 /// Rejecting `min_length` with generic "Unknown validation rule" is poor UX.
-// test_kind: bug_reproducer(issue-validation-rule-keywords)
+// test_kind: bug_reproducer(BUG-095)
 #[ test ]
 fn test_min_length_underscore_rejected()
 {
@@ -173,7 +170,7 @@ fn test_minlength_no_underscore_accepted()
 /// Generic names (`pattern`) are flexible but ambiguous. Specific names (`regex`) are clear
 /// but limiting. If implementation only supports regex, using `regex` is more honest. If
 /// future expansion planned, `pattern` is better but needs good documentation.
-// test_kind: bug_reproducer(issue-validation-rule-keywords)
+// test_kind: bug_reproducer(BUG-095)
 #[ test ]
 fn test_regex_keyword_rejected()
 {

@@ -2,11 +2,15 @@
 
 ## Execution State
 
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
+- **Executor Type:** ai
 - **Actor:** null
 - **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
 - **Validated By:** N/A
 - **Validation Date:** 2026-04-18
 
@@ -96,3 +100,7 @@ Apply all rulebooks discovered via `kbase .role name::dev`. Key: code_style.rule
 Delivered as specified. `parse_repl_input` is the canonical REPL entry point in `unilang_parser`. All ~302 call sites migrated from `.parse_single_instruction(` to `.parse_repl_input(`. `parse_single_instruction` marked `#[deprecated(since = "0.33.0", note = "Use parse_repl_input()")]` with a delegation shim for backwards compatibility. `w3 .test level::3` passes with 0 failures and 0 warnings. The only remaining `parse_single_instruction` call site is in `tests/argv_types.rs` under `#[allow(deprecated)]`, deliberately testing the deprecated shim behaviour — this is correct.
 
 **Key learning:** When a method is deprecated with a forwarding shim, one `#[allow(deprecated)]` test is required to verify the shim produces identical output. The AC grep (`grep -v "pub fn\|#\[deprecated"`) did not anticipate `#[allow(deprecated)]` test usages; the AC is effectively satisfied.
+
+## History
+
+- **2026-04-18** `COMPLETED` — Validated by N/A. Rename `parse_single_instruction` → `parse_repl_input` with Deprecation Shim.

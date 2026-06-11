@@ -3,6 +3,8 @@
 //! This module tests that the ? operator shows help instead of
 //! generating missing argument errors.
 
+/// FT-3 / FT-4: `?` and `??` operators produce help output, not errors.
+// test_kind: ft_spec(FT-3, FT-4)
 #[test]
 fn test_help_operator_shows_help_not_error()
 {

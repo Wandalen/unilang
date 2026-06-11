@@ -11,7 +11,7 @@
 A real-world project wrote **220 lines of custom `build.rs`** duplicating logic unilang provides automatically, resulting in:
 
 - **50× performance degradation** — `OnceLock<HashMap>` at runtime instead of compile-time PHF maps
-- **Duplicate dependencies** — `serde_yaml`, `walkdir`, `phf_codegen` already re-exported by unilang
+- **Duplicate dependencies** — `serde_yaml_ng`, `walkdir`, `phf_codegen` already re-exported by unilang
 - **4+ hours of wasted development time**
 
 `cargo_unilang` prevents this class of mistake.
@@ -79,7 +79,7 @@ cargo_unilang .check [path::<dir>] [verbosity::<0-5>]
 Runs three checks:
 
 1. **Custom `build.rs`** — detects unilang keywords, signals duplication of unilang's built-in build system
-2. **Duplicate dependencies** — `serde_yaml`, `walkdir`, `phf` are already provided transitively by unilang
+2. **Duplicate dependencies** — `serde_yaml_ng`, `walkdir`, `phf` are already provided transitively by unilang
 3. **Deprecated API** — `CommandRegistry::new()` replaced by `StaticCommandRegistry::from_commands()`
 
 **Example output** (verbosity 2):
@@ -96,8 +96,8 @@ Checking unilang project: ./my-project
 
   2. Duplicate dependencies
      Location: Cargo.toml [dependencies]
-     Issue: serde_yaml, walkdir already provided by unilang
-     Fix: Remove serde_yaml, walkdir from Cargo.toml
+     Issue: serde_yaml_ng, walkdir already provided by unilang
+     Fix: Remove serde_yaml_ng, walkdir from Cargo.toml
 
 Summary: 2 issue(s) found
 ```
@@ -154,7 +154,7 @@ fn main() {
 # ❌ Wrong
 [dependencies]
 unilang    = "0.53"
-serde_yaml = "0.9"   # already inside unilang
+serde_yaml_ng = "0.10"  # already inside unilang
 walkdir    = "2"     # already inside unilang
 
 [build-dependencies]

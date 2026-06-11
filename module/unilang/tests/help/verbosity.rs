@@ -57,6 +57,8 @@ fn create_test_command() -> CommandDefinition
     .end()
 }
 
+/// FT-5 (partial): UNILANG_HELP_VERBOSITY=0 produces minimal output.
+// test_kind: ft_spec(FT-5)
 #[test]
 fn test_verbosity_level_0_minimal()
 {
@@ -80,6 +82,8 @@ fn test_verbosity_level_0_minimal()
   assert!( !help.contains( "Aliases:" ) );
 }
 
+/// FT-10: UNILANG_HELP_VERBOSITY=1 produces Basic level output.
+// test_kind: ft_spec(FT-10)
 #[test]
 fn test_verbosity_level_1_basic()
 {
@@ -105,6 +109,8 @@ fn test_verbosity_level_1_basic()
   assert!( !help.contains( "Show specific config key" ) );
 }
 
+/// FT-9: Default verbosity level is Level 2 (Standard).
+// test_kind: ft_spec(FT-9)
 #[test]
 fn test_verbosity_level_2_standard_default()
 {
@@ -141,6 +147,8 @@ fn test_verbosity_level_2_standard_default()
   assert!( !help_default.contains( "Tags:" ) );
 }
 
+/// FT-11: UNILANG_HELP_VERBOSITY=3 produces Detailed level output with metadata.
+// test_kind: ft_spec(FT-11)
 #[test]
 fn test_verbosity_level_3_detailed()
 {
@@ -164,6 +172,8 @@ fn test_verbosity_level_3_detailed()
   assert!( help.contains( "Rules:" ) );
 }
 
+/// FT-5 (partial): UNILANG_HELP_VERBOSITY=4 produces Comprehensive output.
+// test_kind: ft_spec(FT-5)
 #[test]
 fn test_verbosity_level_4_comprehensive()
 {
@@ -227,6 +237,8 @@ fn test_verbosity_set_and_get()
   assert!( !help.contains( "USAGE:" ) ); // Minimal format
 }
 
+/// FT-5 coverage: Progressive information — each level strictly more detailed.
+// test_kind: ft_spec(FT-5)
 #[test]
 fn test_verbosity_progressive_information()
 {

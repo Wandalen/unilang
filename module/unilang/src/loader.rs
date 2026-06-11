@@ -26,7 +26,7 @@ mod private
 #[ cfg( feature = "yaml_parser" ) ]
 pub fn load_command_definitions_from_yaml_str( yaml_str : &str ) -> Result< Vec< CommandDefinition >, Error >
 {
-  let definitions : Vec< CommandDefinition > = serde_yaml::from_str( yaml_str ).map_err( Error::Yaml )?;
+  let definitions : Vec< CommandDefinition > = serde_yaml_ng::from_str( yaml_str ).map_err( Error::Yaml )?;
   Ok( definitions )
 }
 

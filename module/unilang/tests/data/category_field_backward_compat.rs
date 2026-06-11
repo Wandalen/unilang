@@ -29,7 +29,7 @@
 //!
 //! ## Related
 //!
-//! - Issue-089: Category field must be optional in YAML
+//! - BUG-089: Category field must be optional in YAML
 //! - Semver: This is a minor version bump (0.39.0 → 0.40.0), must maintain compatibility
 
 use unilang::static_data::*;

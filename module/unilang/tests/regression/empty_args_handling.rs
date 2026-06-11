@@ -1,31 +1,31 @@
-//! Regression test for empty arguments handling bug.
+//! Regression test for empty arguments handling bug (BUG-093).
 //!
-//! ## Test Matrix
+//! ## Root Cause
 //!
-//! | Test Case | Description | Expected Behavior |
-//! |-----------|-------------|-------------------|
-//! | `test_empty_string_parse_error` | Parsing empty string returns HelpRequested error | Error code: HelpRequested |
-//! | `test_empty_args_should_show_help` | CLI with no args should show help gracefully | Exit code 0, display help text |
+//! `full_cli_example.rs` only checked for explicit `"help"` argument before parsing.
+//! Running with no args passed empty string to parser/analyzer, which returned
+//! `HelpRequested` error (exit code 1) instead of showing help gracefully (exit code 0).
 //!
-//! ## Lessons Learned (Bugs Fixed)
+//! ## Why Not Caught
 //!
-//! - **2026-01-11 (issue-empty-args):** Example full_cli_example.rs failed when run without
-//!   arguments: `Error: Execution(ErrorData { code: HelpRequested, ... })` with exit code 1.
-//!   Root cause: Parser/analyzer treats empty string as error condition (HelpRequested), but
-//!   example only checked for explicit "help" argument. Running `cargo run --example full_cli_example`
-//!   with no args passed empty string to parser, triggering error instead of gracefully showing help.
-//!   Prevention: Handle empty args before parsing or treat HelpRequested as success case.
+//! No test ran examples with zero arguments. All integration tests supplied explicit
+//! command names, so the empty-args path was never exercised.
 //!
-//! ## Common Pitfalls to Avoid
+//! ## Fix Applied
 //!
-//! - **Empty input assumptions:** CLI tools often receive empty args (user runs binary without
-//!   arguments). Treating this as error (exit code 1) instead of showing help (exit code 0)
-//!   creates poor UX. Standard practice: empty args → show help with success exit.
-//! - **Error semantics:** HelpRequested is arguably not an error condition - it's a request for
-//!   information. Using `Result::Err` for help requests makes error handling awkward (users must
-//!   special-case HelpRequested to avoid treating it as failure).
-//! - **CLI conventions:** Most CLI tools (`ls`, `grep`, `cargo`) show usage when run with no args
-//!   and exit successfully. Breaking this convention confuses users.
+//! Added `args.is_empty()` check before parsing in `full_cli_example.rs`. When no args
+//! provided, displays help and exits with code 0 instead of propagating `HelpRequested`.
+//!
+//! ## Prevention
+//!
+//! These tests validate that empty input and the `HelpRequested` error code are handled
+//! as success cases. Any CLI entry point must handle the zero-arguments case before parsing.
+//!
+//! ## Pitfall
+//!
+//! `HelpRequested` is semantically a user request, not an error. Using `Result::Err` for
+//! help requests forces callers to special-case it to avoid treating help as failure.
+//! Standard CLI convention: empty args → show help with exit code 0.
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( clippy::uninlined_format_args ) ]
@@ -104,7 +104,8 @@ use unilang::{ CommandRegistry, Pipeline };
 ///
 /// Or handle help display at higher level before calling parser. Current design forces all
 /// callers to special-case HelpRequested, violating DRY principle.
-// test_kind: bug_reproducer(issue-empty-args)
+/// FT-5: Empty REPL input handled without panic.
+// test_kind: ft_spec(FT-5), bug_reproducer(BUG-093)
 #[ test ]
 fn test_empty_string_handling()
 {

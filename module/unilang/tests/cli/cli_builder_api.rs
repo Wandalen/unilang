@@ -139,6 +139,8 @@ fn test_fluent_api_mode_configuration()
 // static_module_with_prefix() Method Tests
 // =============================================================================
 
+/// FT-10: CliBuilder module registration produces prefixed commands.
+// test_kind: ft_spec(FT-10)
 #[test]
 fn test_static_module_with_prefix_basic()
 {
@@ -229,6 +231,8 @@ fn test_static_module_with_prefix_special_characters()
 // Conflict Detection Tests
 // =============================================================================
 
+/// FT-11: CliBuilder conflict detection rejects duplicate command names across modules.
+// test_kind: ft_spec(FT-11)
 #[test]
 fn test_conflict_detection_duplicate_command_names()
 {
@@ -579,6 +583,8 @@ fn test_build_static_zero_overhead_optimization()
   assert_eq!( static_registry.commands().len(), 5 );
 }
 
+/// FT-12: `build()` and `build_static()` produce equivalent command access.
+// test_kind: ft_spec(FT-12)
 #[test]
 fn test_build_static_vs_build_comparison()
 {

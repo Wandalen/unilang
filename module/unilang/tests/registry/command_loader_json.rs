@@ -38,6 +38,8 @@ use unilang::
 // T3.6: Error handling for invalid Map format in YAML
 // T3.7: Error handling for invalid Enum format in YAML
 
+/// FT-13: Declarative JSON loading produces valid CommandDefinition.
+// test_kind: ft_spec(FT-13)
 #[ test ]
 fn test_load_from_json_str_simple_command()
 {

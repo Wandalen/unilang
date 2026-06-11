@@ -2,11 +2,15 @@
 
 ## Execution State
 
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
+- **Executor Type:** ai
 - **Actor:** null
 - **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
 - **Validated By:** N/A
 - **Validation Date:** 2026-04-18
 
@@ -97,3 +101,7 @@ Apply all rulebooks discovered via `kbase .role name::dev`. Key: newtypes not ty
 ## Outcomes
 
 Delivered as specified. `ShellArgv(Vec<String>)` and `ReplInput(String)` newtypes implemented in `module/unilang_parser/src/argv_types.rs`. `Parser::parse_cli(&ShellArgv)` and `Parser::parse_repl(&ReplInput)` type-safe entry points added to `mod.rs`. Both types re-exported from `unilang_parser` prelude and from `unilang`. Test file `tests/argv_types.rs` covers all Test Matrix rows (319 lines). `w3 .test level::3` passes with 0 failures and 0 warnings. Passing a bare `Vec<String>` to `parse_repl` is now a compile-time error as required.
+
+## History
+
+- **2026-04-18** `COMPLETED` — Validated by N/A. Add `ShellArgv`/`ReplInput` Marker Types and `parse_cli`/`parse_repl` Methods.

@@ -304,7 +304,7 @@ fn test_check_exit_0_no_issues()
 fn test_check_exit_1_issues_found()
 {
   let temp = assert_fs::TempDir::new().unwrap();
-  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml::from_str(); }" ).unwrap();
+  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml_ng::from_str(); }" ).unwrap();
   temp.child( "Cargo.toml" ).write_str( "[dependencies]\nunilang = \"0.33\"\n" ).unwrap();
 
   assert_cmd::cargo::cargo_bin_cmd!( "cargo_unilang" )
@@ -480,7 +480,7 @@ fn test_new_includes_warnings_in_cargo_toml()
 fn test_check_detects_custom_build_rs()
 {
   let temp = assert_fs::TempDir::new().unwrap();
-  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml::from_str(); }" ).unwrap();
+  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml_ng::from_str(); }" ).unwrap();
   temp.child( "Cargo.toml" ).write_str( "[dependencies]\nunilang = \"0.33\"\n" ).unwrap();
 
   assert_cmd::cargo::cargo_bin_cmd!( "cargo_unilang" )
@@ -499,7 +499,7 @@ fn test_check_detects_duplicate_dependencies()
   temp.child( "Cargo.toml" ).write_str(
 r#"[dependencies]
 unilang = "0.33"
-serde_yaml = "0.9"
+serde_yaml_ng = "0.10"
 "#
   ).unwrap();
 
@@ -510,7 +510,7 @@ serde_yaml = "0.9"
     .assert()
     .failure()
     .stdout( predicate::str::contains( "Duplicate dependencies" ) )
-    .stdout( predicate::str::contains( "serde_yaml" ) );
+    .stdout( predicate::str::contains( "serde_yaml_ng" ) );
 }
 
 #[test]
@@ -612,7 +612,7 @@ r#"[dependencies]
 unilang = "0.33"
 
 # ⚠️  IMPORTANT: Do NOT add these - unilang already provides them:
-# ❌ serde_yaml (via yaml_parser feature)
+# ❌ serde_yaml_ng (via yaml_parser feature)
 # ❌ walkdir (via multi_file feature)
 "#
   ).unwrap();
@@ -630,11 +630,11 @@ unilang = "0.33"
 fn test_check_multiple_issues()
 {
   let temp = assert_fs::TempDir::new().unwrap();
-  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml::from_str(); }" ).unwrap();
+  temp.child( "build.rs" ).write_str( "fn main() { serde_yaml_ng::from_str(); }" ).unwrap();
   temp.child( "Cargo.toml" ).write_str(
 r#"[dependencies]
 unilang = "0.33"
-serde_yaml = "0.9"
+serde_yaml_ng = "0.10"
 walkdir = "2.0"
 "#
   ).unwrap();
@@ -647,5 +647,5 @@ walkdir = "2.0"
     .failure()
     .stdout( predicate::str::contains( "Custom build.rs" ) )
     .stdout( predicate::str::contains( "Duplicate dependencies" ) )
-    .stdout( predicate::str::contains( "serde_yaml, walkdir" ) );
+    .stdout( predicate::str::contains( "serde_yaml_ng, walkdir" ) );
 }

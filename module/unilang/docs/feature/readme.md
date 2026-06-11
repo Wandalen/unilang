@@ -16,5 +16,5 @@ Behavioral feature requirements (FR-*) that define what the unilang framework mu
 | 001 | [Command Registry](001_command_registry.md) | FR-REG-1 through FR-REG-9: registration requirements | ✅ |
 | 002 | [Argument System](002_argument_system.md) | FR-ARG-1 through FR-ARG-8: argument parsing and types | ✅ |
 | 003 | [Pipeline](003_pipeline.md) | FR-PIPE-1 through FR-PIPE-4: execution pipeline | ✅ |
-| 004 | [Help System](004_help_system.md) | FR-HELP-1 through FR-HELP-7: help and discovery | ✅ |
+| 004 | [Help System](004_help_system.md) | FR-HELP-1 through FR-HELP-8: help generation, auto-help, ?? parameter, self-exclusion | ✅ |
 | 005 | [REPL Interactive](005_repl_interactive.md) | FR-REPL-1, FR-INTERACTIVE-1, FR-MOD-WASM-REPL: modality support | ✅ |

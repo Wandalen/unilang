@@ -191,7 +191,7 @@ fn test_v2_generate_help_command()
 // ============================================================================
 
 #[ test ]
-fn test_v2_serde_yaml_basic()
+fn test_v2_serde_yaml_ng_basic()
 {
   let yaml = r#"
 name: ".build"
@@ -202,7 +202,7 @@ status: "active"
 version: "1.0.0"
 "#;
 
-  let cmd : CommandDefinition = serde_yaml::from_str( yaml ).unwrap();
+  let cmd : CommandDefinition = serde_yaml_ng::from_str( yaml ).unwrap();
 
   assert_eq!( cmd.name().to_string(), ".build" );
   assert_eq!( cmd.description().to_string(), "Build the project" );
@@ -210,7 +210,7 @@ version: "1.0.0"
 }
 
 #[ test ]
-fn test_v2_serde_yaml_with_lists()
+fn test_v2_serde_yaml_ng_with_lists()
 {
   let yaml = r#"
 name: ".test"
@@ -226,7 +226,7 @@ examples:
   - ".test another::example"
 "#;
 
-  let cmd : CommandDefinition = serde_yaml::from_str( yaml ).unwrap();
+  let cmd : CommandDefinition = serde_yaml_ng::from_str( yaml ).unwrap();
 
   assert_eq!( cmd.tags().len(), 2 );
   assert_eq!( cmd.aliases().len(), 2 );
@@ -234,19 +234,19 @@ examples:
 }
 
 #[ test ]
-fn test_v2_serde_yaml_validates_command_name()
+fn test_v2_serde_yaml_ng_validates_command_name()
 {
   let yaml = r#"
 name: "invalid_no_dot"
 description: "Invalid"
 "#;
 
-  let result : Result< CommandDefinition, _ > = serde_yaml::from_str( yaml );
+  let result : Result< CommandDefinition, _ > = serde_yaml_ng::from_str( yaml );
   assert!( result.is_err() );
 }
 
 #[ test ]
-fn test_v2_serde_yaml_validates_namespace()
+fn test_v2_serde_yaml_ng_validates_namespace()
 {
   let yaml = r#"
 name: ".test"
@@ -254,12 +254,12 @@ description: "Test"
 namespace: "invalid_no_dot"
 "#;
 
-  let result : Result< CommandDefinition, _ > = serde_yaml::from_str( yaml );
+  let result : Result< CommandDefinition, _ > = serde_yaml_ng::from_str( yaml );
   assert!( result.is_err() );
 }
 
 #[ test ]
-fn test_v2_serde_yaml_validates_version()
+fn test_v2_serde_yaml_ng_validates_version()
 {
   let yaml = r#"
 name: ".test"
@@ -267,7 +267,7 @@ description: "Test"
 version: ""
 "#;
 
-  let result : Result< CommandDefinition, _ > = serde_yaml::from_str( yaml );
+  let result : Result< CommandDefinition, _ > = serde_yaml_ng::from_str( yaml );
   assert!( result.is_err() );
 }
 
@@ -278,7 +278,7 @@ fn test_v2_missing_required_name()
 description: "No name"
 "#;
 
-  let result : Result< CommandDefinition, _ > = serde_yaml::from_str( yaml );
+  let result : Result< CommandDefinition, _ > = serde_yaml_ng::from_str( yaml );
   assert!( result.is_err() );
 }
 
@@ -289,7 +289,7 @@ fn test_v2_missing_required_description()
 name: ".test"
 "#;
 
-  let result : Result< CommandDefinition, _ > = serde_yaml::from_str( yaml );
+  let result : Result< CommandDefinition, _ > = serde_yaml_ng::from_str( yaml );
   assert!( result.is_err() );
 }
 

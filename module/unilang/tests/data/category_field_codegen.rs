@@ -32,7 +32,7 @@
 //!
 //! ## Related
 //!
-//! - Issue-089: Category field code generation
+//! - BUG-089: Category field code generation
 //! - `build.rs:generate_command_const()` - Code generation implementation
 //! - `tests/category_field_yaml_parsing_tests.rs` - YAML input validation
 

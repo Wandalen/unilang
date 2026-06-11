@@ -1,13 +1,18 @@
 # Implement CliBuilder API
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 Implement the `CliBuilder` fluent API for ergonomic CLI aggregation in the `src/multi_yaml/` module. This builder enables combining multiple CLI tools into unified commands with prefix management, namespace isolation, and conflict detection. The implementation must support both static and dynamic command sources.
@@ -69,3 +74,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Implement CliBuilder API.

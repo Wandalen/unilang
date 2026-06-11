@@ -1,9 +1,33 @@
+//! Regression test for dot command panic.
 //!
-//! Tests for dot command behavior to prevent regression of panic issue.
-//! 
-//! This test specifically covers the issue where entering just "." would cause
-//! a panic due to an empty `command_path_slices` vector.
+//! ## Root Cause
 //!
+//! Entering just `"."` caused a panic because `SemanticAnalyzer` indexed
+//! `command_path_slices[0]` without checking that the vector was non-empty.
+//! The parser produces an empty `command_path_slices` for a bare dot input.
+//!
+//! ## Why Not Caught
+//!
+//! No test sent a bare `"."` through the semantic analyzer. All parser tests
+//! used complete command strings (e.g., `".help"`, `".version"`), so the
+//! empty-vector path was never exercised.
+//!
+//! ## Fix Applied
+//!
+//! Added a bounds check in `SemanticAnalyzer::analyze()` — when
+//! `command_path_slices` is empty, return `HelpRequested` error with a
+//! command listing instead of indexing into the empty vector.
+//!
+//! ## Prevention
+//!
+//! These tests send bare `"."`, empty `command_path_slices`, and minimal
+//! registries through the analyzer to guard the empty-vector path.
+//!
+//! ## Pitfall
+//!
+//! Any code that indexes into parser output vectors without a bounds check
+//! will panic on degenerate input. Parser output is user-controlled and must
+//! be treated as untrusted even within internal analysis passes.
 
 #![ allow( deprecated ) ]
 

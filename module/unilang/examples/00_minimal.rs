@@ -39,7 +39,7 @@ use unilang::prelude::*;
 // Include compile-time generated commands (created automatically by unilang's build.rs)
 include!( concat!( env!( "OUT_DIR" ), "/static_commands.rs" ) );
 
-// Fix(issue-manifest-discovery): Use existing command from shared registry instead of non-existent .greet
+// Fix(BUG-094): Use existing command from shared registry instead of non-existent .greet
 // Root cause: Build script excludes examples/ directory from YAML discovery (build.rs:473)
 // Pitfall: Always verify example code actually runs before documenting as "recommended approach"
 fn main()

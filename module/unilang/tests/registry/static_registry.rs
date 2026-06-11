@@ -242,6 +242,8 @@ fn test_static_command_registry_from_commands()
   assert!( commands.contains_key( ".test.deprecated" ) );
 }
 
+/// FT-1: Static PHF registry lookup returns registered command.
+// test_kind: ft_spec(FT-1)
 #[test]
 fn test_static_command_lookup_functionality()
 {
@@ -346,6 +348,8 @@ fn test_static_command_registry_performance_characteristics()
   println!( "Static registry correctness verified: {total_lookups} successful lookups" );
 }
 
+/// FT-2: Dynamic runtime registration makes command accessible alongside static commands.
+// test_kind: ft_spec(FT-2)
 #[test]
 fn test_static_command_registry_with_dynamic_commands()
 {
@@ -411,6 +415,13 @@ fn test_static_command_registry_static_commands_count()
   }
 }
 
+/// FT-6: Namespace-nested command distinguishable from top-level command.
+///
+/// FT-7: StaticCommandRegistry and CommandRegistry return identical definitions.
+///
+/// Demonstrates that `.test.version` and `.test.dynamic_only` are distinct via
+/// namespace isolation, and that mode switching preserves lookup behavior.
+// test_kind: ft_spec(FT-6, FT-7)
 #[test]
 fn test_static_command_registry_registry_mode_behavior()
 {

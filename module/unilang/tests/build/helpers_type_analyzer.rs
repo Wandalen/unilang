@@ -26,7 +26,7 @@
 //! - ✅ Happy path: Boolean and integer type hints detected correctly
 //! - ✅ Edge cases: Zero-padded numbers, version strings, code templates
 //! - ✅ Error cases: Not applicable (warnings only, never errors)
-//! - ✅ Integration: Tests with `serde_yaml` `Value` objects
+//! - ✅ Integration: Tests with `serde_yaml_ng` `Value` objects
 //! - ✅ Suppression: Both local (per-argument) and global (env var) suppression
 //! - ✅ Context awareness: Name-based heuristics (`dry_run`, count, etc.)
 //! - ✅ False positive prevention: Conservative detection to minimize noise
@@ -45,11 +45,11 @@
 //!
 //! ## Dependencies
 //!
-//! - Requires: `serde_yaml` for `Value` deserialization
+//! - Requires: `serde_yaml_ng` for `Value` deserialization
 //! - Uses: `unilang::build_helpers::type_analyzer` module
 //! - Uses: `unilang` `ArgumentDefinition` and `Kind` types
 
-use serde_yaml::{ Value, from_str };
+use serde_yaml_ng::{ Value, from_str };
 use unilang::build_helpers::type_analyzer::{ TypeAnalyzer, TypeHint };
 
 #[test]

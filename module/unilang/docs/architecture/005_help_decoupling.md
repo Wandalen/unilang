@@ -128,14 +128,26 @@ Final verification results:
 **Files Modified:** `src/help.rs`, 2 new test files, 1 existing test updated
 **Breaking Changes:** Applications relying on auto-categorization must now specify categories explicitly
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [004_help_system.md](../feature/004_help_system.md) | FR-HELP-* requirements this migration supports |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [003_governing_principles.md](../invariant/003_governing_principles.md) | Minimum implicit magic principle motivating this migration |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/help.rs` | Decoupled help module |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/help/` | Help system tests validating decoupling |

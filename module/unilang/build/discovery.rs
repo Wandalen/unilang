@@ -3,10 +3,10 @@ use std::path::{ Path, PathBuf };
 /// Parse command definitions from a file based on its extension.
 ///
 /// Supports:
-/// - `.yaml`, `.yml` → `serde_yaml` parsing
-/// - `.json` → `serde_json` parsing (converted to `serde_yaml::Value` for consistency)
+/// - `.yaml`, `.yml` → `serde_yaml_ng` parsing
+/// - `.json` → `serde_json` parsing (converted to `serde_yaml_ng::Value` for consistency)
 #[cfg(feature = "static_registry")]
-pub fn parse_command_file( file_path : &Path ) -> Result< Vec< serde_yaml::Value >, String >
+pub fn parse_command_file( file_path : &Path ) -> Result< Vec< serde_yaml_ng::Value >, String >
 {
   let content = std::fs::read_to_string( file_path )
     .map_err( |e| format!( "Failed to read file {}: {e}", file_path.display() ) )?;
@@ -20,7 +20,7 @@ pub fn parse_command_file( file_path : &Path ) -> Result< Vec< serde_yaml::Value
   {
     "yaml" | "yml" =>
     {
-      serde_yaml::from_str( &content )
+      serde_yaml_ng::from_str( &content )
         .map_err( |e| format!( "Failed to parse YAML file {}: {e}", file_path.display() ) )
     }
     "json" =>
@@ -36,7 +36,7 @@ pub fn parse_command_file( file_path : &Path ) -> Result< Vec< serde_yaml::Value
         let json_str = serde_json::to_string( &json_value )
           .map_err( |e| format!( "Failed to serialize JSON: {e}" ) )?;
 
-        serde_yaml::from_str( &json_str )
+        serde_yaml_ng::from_str( &json_str )
           .map_err( |e| format!( "Failed to convert JSON to YAML representation: {e}" ) )
       }
       #[cfg(not(feature = "json_parser"))]

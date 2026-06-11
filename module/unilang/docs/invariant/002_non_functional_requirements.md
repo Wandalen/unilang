@@ -49,7 +49,7 @@ The core logic of the `unilang` and `unilang_parser` crates **must** be platform
 
 #### NFR-MODULARITY-1 (Granular Features)
 
-All non-essential framework functionality **must** be gated behind Cargo features. This includes support for complex types (`Url`, `DateTime`), declarative loading (`serde_yaml`, `serde_json`), and other features that introduce dependencies.
+All non-essential framework functionality **must** be gated behind Cargo features. This includes support for complex types (`Url`, `DateTime`), declarative loading (`serde_yaml_ng`, `serde_json`), and other features that introduce dependencies.
 
 #### NFR-MODULARITY-2 (Lightweight Core)
 
@@ -136,7 +136,7 @@ These are enabled automatically by approach features and should not be used dire
 | Infrastructure Feature | Dependencies | Purpose |
 | :--- | :--- | :--- |
 | `static_registry` | `phf` (Perfect Hash Functions) | Zero-overhead static command lookup |
-| `yaml_parser` | `serde_yaml` | YAML deserialization |
+| `yaml_parser` | `serde_yaml_ng` | YAML deserialization |
 | `json_parser` | `serde_json` | JSON deserialization |
 | `multi_file` | `walkdir` | Auto-discovery of command files |
 | `simd` | `simd-json`, `bytecount` | SIMD-optimized parsing (4-25x faster) |
@@ -152,21 +152,22 @@ These are enabled automatically by approach features and should not be used dire
 | `default` | Default features: `enabled`, `simd`, `repl`, `enhanced_repl`, `approach_yaml_multi_build` | Yes |
 | `full` | All features except dev-only | No |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-9 build-time validation satisfies NFR-PERF-1 |
 | [005_repl_interactive.md](../feature/005_repl_interactive.md) | REPL uses shell integration guidance from this invariant |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [003_governing_principles.md](003_governing_principles.md) | Principles that these NFRs embody |
 | [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Dependency standards enable no-op compile pattern |
+| [006_build_runtime_separation.md](006_build_runtime_separation.md) | NFR-PERF-1 depends on build-runtime separation boundary |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
@@ -174,9 +175,24 @@ These are enabled automatically by approach features and should not be used dire
 | [002_benchmark_separation.md](../architecture/002_benchmark_separation.md) | Benchmark isolation satisfying NFR-MODULARITY-1 |
 | [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF implementation enabling NFR-PERF-1 |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | ErrorCode type definition |
 | [002_error_codes.md](../api/002_error_codes.md) | Error codes stable API contract |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `build/codegen.rs` | PHF codegen enabling NFR-PERF-1 |
+| `src/simd_tokenizer.rs` | SIMD tokenizer for NFR-PERF-2 |
+| `src/interner.rs` | String interning for NFR-PERF-3 |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/build/` | Build pipeline validation tests |
+| `tests/parser/simd_tokenization.rs` | SIMD tokenizer correctness |

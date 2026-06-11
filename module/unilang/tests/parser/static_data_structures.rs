@@ -183,7 +183,7 @@ fn test_conversion_static_to_dynamic_command()
   assert_eq!( dynamic_cmd.deprecation_message(), "" );
   assert_eq!( dynamic_cmd.http_method_hint(), "GET" );
   assert_eq!( dynamic_cmd.examples(), &vec![ ".test_cmd --help" ] );
-  // Issue-088: Verify auto_help_enabled is preserved from static definition
+  // BUG-088: Verify auto_help_enabled is preserved from static definition
   assert!( dynamic_cmd.auto_help_enabled(), "auto_help_enabled should be preserved as true from static definition" );
 }
 

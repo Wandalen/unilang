@@ -35,7 +35,7 @@
 //!
 //! ## Related
 //!
-//! - Issue-089: Category field edge case handling
+//! - BUG-089: Category field edge case handling
 //! - Security: Injection prevention
 
 use unilang::static_data::*;

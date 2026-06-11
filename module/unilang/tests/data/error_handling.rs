@@ -32,7 +32,7 @@ fn test_error_registration_display()
 #[test]
 fn test_error_yaml_display()
 {
-  let yaml_error = serde_yaml::from_str::<serde_yaml::Value>("invalid: yaml: {").unwrap_err();
+  let yaml_error = serde_yaml_ng::from_str::<serde_yaml_ng::Value>("invalid: yaml: {").unwrap_err();
   let error = Error::Yaml(yaml_error);
   let error_string = error.to_string();
   assert!(error_string.contains("YAML Deserialization Error"));
@@ -103,7 +103,7 @@ fn test_error_data_conversion()
 #[test]
 fn test_yaml_error_from_conversion()
 {
-  let yaml_error = serde_yaml::from_str::<serde_yaml::Value>("invalid: yaml: content: {").unwrap_err();
+  let yaml_error = serde_yaml_ng::from_str::<serde_yaml_ng::Value>("invalid: yaml: content: {").unwrap_err();
   let error: Error = yaml_error.into();
   
   assert!(matches!(error, Error::Yaml(_)));

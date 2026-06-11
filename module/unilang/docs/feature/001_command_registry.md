@@ -113,28 +113,28 @@ The `build.rs` script **must** validate all command definitions at compile time 
 
 **Implementation status:** ✅ Implemented with `validate_command()`, `validate_version()`, `compute_full_name()`, duplicate detection, parameter storage validation, shared validation logic, and build-time validation with actionable error messages.
 
-### Analysis Instances
+### Analyses
 
 | File | Relationship |
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of this registry's boilerplate patterns |
 | [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability recommendations for this registry API |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [003_vision_scope.md](../architecture/003_vision_scope.md) | Vision that drives registration requirements |
 | [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF static registry internals |
 
-### API Instances
+### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | Public types for registry and commands |
 | [002_error_codes.md](../api/002_error_codes.md) | Error codes from registry operations |
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
@@ -142,10 +142,32 @@ The `build.rs` script **must** validate all command definitions at compile time 
 | [003_pipeline.md](003_pipeline.md) | Pipeline that queries this registry |
 | [004_help_system.md](004_help_system.md) | Help system referencing registered commands |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | Performance NFRs for registry operations |
 | [003_governing_principles.md](../invariant/003_governing_principles.md) | Fail-fast validation principle |
 | [005_command_naming.md](../invariant/005_command_naming.md) | Dot-prefix naming invariant for all registered commands |
+| [006_build_runtime_separation.md](../invariant/006_build_runtime_separation.md) | Build-runtime separation ensures static registry zero parsing overhead |
+
+### Types
+
+| File | Relationship |
+|------|--------------|
+| [001_command_name.md](../type/001_command_name.md) | CommandName validated newtype for registration identifiers |
+| [004_command_status.md](../type/004_command_status.md) | CommandStatus lifecycle enum for command metadata |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/registry/` | Registry module: static, dynamic, builder, bridge |
+| `src/data/command_definition/` | CommandDefinition type and builder |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/registry/` | Registry integration tests |
+| `tests/data/validated_command_name.rs` | CommandName validation coverage |

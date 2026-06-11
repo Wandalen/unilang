@@ -48,3 +48,39 @@
 - **Given:** A command `.cmd` with one required `String` argument `"name"` (no default) and input `[".cmd"]`
 - **When:** The semantic analyzer processes the input
 - **Then:** Returns an error indicating `"name"` is required and missing; no panic occurs
+
+### FT-8: Alias-based named binding resolves to canonical argument
+
+- **Given:** A command `.cmd` with argument `"output"` that has alias `"o"`, and input `[".cmd", "o::result.txt"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** `VerifiedCommand.arguments["output"]` equals `Value::String("result.txt")`; the alias `"o"` is resolved to canonical name `"output"`
+
+### FT-9: ValidationRule MinLength rejects too-short value
+
+- **Given:** A command `.cmd` with argument `"name"` of type `String` with `ValidationRule::MinLength(3)`, and input `[".cmd", "name::ab"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** Returns an error with code `UNILANG_VALIDATION_RULE_FAILED` indicating the value is shorter than the minimum length of 3
+
+### FT-10: ValidationRule Pattern rejects non-matching value
+
+- **Given:** A command `.cmd` with argument `"email"` of type `String` with `ValidationRule::Pattern("^[a-z]+@[a-z]+\\.[a-z]+$")`, and input `[".cmd", "email::INVALID"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** Returns an error with code `UNILANG_VALIDATION_RULE_FAILED` indicating the value does not match the required pattern
+
+### FT-11: Type coercion — float token parsed into Kind::F32 value
+
+- **Given:** A command `.cmd` with argument `"ratio"` of type `Kind::F32` and input `[".cmd", "ratio::3.14"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** `VerifiedCommand.arguments["ratio"]` equals `Value::F32(3.14)` without error
+
+### FT-12: Type coercion — path token parsed into Kind::Path value
+
+- **Given:** A command `.cmd` with argument `"file"` of type `Kind::Path` and input `[".cmd", "file::/tmp/data.csv"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** `VerifiedCommand.arguments["file"]` equals `Value::Path("/tmp/data.csv")` without error
+
+### FT-13: ValidationRule Max rejects over-limit integer value
+
+- **Given:** A command `.cmd` with argument `"count"` of type `Kind::I64` with `ValidationRule::Max(100)`, and input `[".cmd", "count::101"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** Returns an error with code `UNILANG_VALIDATION_RULE_FAILED` indicating the value exceeds the maximum of 100

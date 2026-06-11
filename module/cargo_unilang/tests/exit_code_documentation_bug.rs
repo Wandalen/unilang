@@ -209,7 +209,7 @@ fn exit_code_1_for_check_issues_found()
     .write_str( "[dependencies]\nunilang = \"0.33\"\n" )
     .unwrap();
   temp.child( "problematic-project/build.rs" )
-    .write_str( "fn main() { serde_yaml::from_str(); }" )
+    .write_str( "fn main() { serde_yaml_ng::from_str(); }" )
     .unwrap();
 
   assert_cmd::cargo::cargo_bin_cmd!( "cargo_unilang" )

@@ -1,4 +1,4 @@
-# Invariant: Command Naming Conventions
+# Invariant: Command Naming
 
 ### Scope
 
@@ -22,14 +22,35 @@ Every command name in the system MUST start with a dot prefix (e.g., `.command`,
 
 A command registered without a dot prefix: (1) fails registration with a clear error, preventing silent registration of unreachable commands; (2) cannot be looked up at runtime since the parser always produces dot-prefixed command paths; (3) breaks the "define once, use everywhere" guarantee because CLI input always uses dot syntax.
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 specifies the naming rules this invariant formalizes |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [003_governing_principles.md](003_governing_principles.md) | Explicit Command Naming Principle that this invariant enforces |
+
+### Types
+
+| File | Relationship |
+|------|--------------|
+| [001_command_name.md](../type/001_command_name.md) | CommandName newtype enforces this invariant |
+| [002_namespace_type.md](../type/002_namespace_type.md) | NamespaceType newtype enforces namespace portion of this invariant |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/data/validated_types.rs` | CommandName dot-prefix validation |
+| `src/command_validation.rs` | Command name validation at registration |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/data/validated_command_name.rs` | CommandName construction and validation |
+| `tests/data/validated_namespace.rs` | Namespace format validation |

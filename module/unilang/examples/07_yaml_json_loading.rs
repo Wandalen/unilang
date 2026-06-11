@@ -12,7 +12,7 @@ fn main() -> Result< (), unilang::error::Error >
 {
   println!( "=== YAML and JSON Command Loading Demo ===\n" );
 
-  // Fix(issue-command-name-format): Command names must have dot prefix
+  // Fix(BUG-092): Command names must have dot prefix
   // Root cause: Validation requires all command names start with '.'
   // Pitfall: YAML command names need '.' prefix just like runtime registration
   // Step 1: Define commands in YAML format
@@ -335,7 +335,7 @@ fn main() -> Result< (), unilang::error::Error >
   println!( "\n🔗 Combining registries..." );
   let mut combined_registry = CommandRegistry::new();
 
-  // Fix(issue-duplicate-commands): Skip already-registered commands to avoid duplicate errors
+  // Fix(BUG-091): Skip already-registered commands to avoid duplicate errors
   // Root cause: Builder auto-registers built-in commands (.help, .version, etc.) in both registries
   // Pitfall: When combining registries, built-in commands cause duplicate registration errors
   // Add YAML commands

@@ -1,9 +1,9 @@
 meta:
   description: Cross-reference graph for all doc instances in unilang
-  node_count: 20
-  edge_count: 100
+  node_count: 25
+  edge_count: 122
   component_count: 1
-  generated: 2026-05-16
+  generated: 2026-06-11
 
 nodes:
   - id: analysis/001
@@ -106,8 +106,33 @@ nodes:
     label: Command Naming
     entity: invariant
 
+  - id: invariant/006
+    file: invariant/006_build_runtime_separation.md
+    label: Build-Runtime Separation
+    entity: invariant
+
+  - id: type/001
+    file: type/001_command_name.md
+    label: Command Name
+    entity: type
+
+  - id: type/002
+    file: type/002_namespace_type.md
+    label: Namespace Type
+    entity: type
+
+  - id: type/003
+    file: type/003_version_type.md
+    label: Version Type
+    entity: type
+
+  - id: type/004
+    file: type/004_command_status.md
+    label: Command Status
+    entity: type
+
 edges:
-  # feature/001 outbound (12)
+  # feature/001 outbound (15)
   - { from: feature/001, to: analysis/001,      via: cross_references }
   - { from: feature/001, to: analysis/002,      via: cross_references }
   - { from: feature/001, to: api/001,           via: cross_references }
@@ -120,6 +145,9 @@ edges:
   - { from: feature/001, to: invariant/002,     via: cross_references }
   - { from: feature/001, to: invariant/003,     via: cross_references }
   - { from: feature/001, to: invariant/005,     via: cross_references }
+  - { from: feature/001, to: invariant/006,     via: cross_references }
+  - { from: feature/001, to: type/001,          via: cross_references }
+  - { from: feature/001, to: type/004,          via: cross_references }
 
   # feature/002 outbound (5)
   - { from: feature/002, to: analysis/001,      via: cross_references }
@@ -154,7 +182,7 @@ edges:
   - { from: invariant/001, to: architecture/003, via: cross_references }
   - { from: invariant/001, to: invariant/003,   via: cross_references }
 
-  # invariant/002 outbound (9)
+  # invariant/002 outbound (10)
   - { from: invariant/002, to: api/001,         via: cross_references }
   - { from: invariant/002, to: api/002,         via: cross_references }
   - { from: invariant/002, to: architecture/001, via: cross_references }
@@ -164,6 +192,7 @@ edges:
   - { from: invariant/002, to: feature/005,     via: cross_references }
   - { from: invariant/002, to: invariant/003,   via: cross_references }
   - { from: invariant/002, to: invariant/004,   via: cross_references }
+  - { from: invariant/002, to: invariant/006,   via: cross_references }
 
   # invariant/003 outbound (8)
   - { from: invariant/003, to: architecture/001, via: cross_references }
@@ -180,11 +209,13 @@ edges:
   - { from: invariant/004, to: invariant/002,   via: cross_references }
   - { from: invariant/004, to: invariant/003,   via: cross_references }
 
-  # invariant/005 outbound (2)
+  # invariant/005 outbound (4)
   - { from: invariant/005, to: feature/001,     via: cross_references }
   - { from: invariant/005, to: invariant/003,   via: cross_references }
+  - { from: invariant/005, to: type/001,        via: cross_references }
+  - { from: invariant/005, to: type/002,        via: cross_references }
 
-  # api/001 outbound (8)
+  # api/001 outbound (12)
   - { from: api/001, to: analysis/001,          via: cross_references }
   - { from: api/001, to: api/002,               via: cross_references }
   - { from: api/001, to: architecture/004,      via: cross_references }
@@ -193,6 +224,10 @@ edges:
   - { from: api/001, to: feature/003,           via: cross_references }
   - { from: api/001, to: feature/004,           via: cross_references }
   - { from: api/001, to: invariant/002,         via: cross_references }
+  - { from: api/001, to: type/001,              via: cross_references }
+  - { from: api/001, to: type/002,              via: cross_references }
+  - { from: api/001, to: type/003,              via: cross_references }
+  - { from: api/001, to: type/004,              via: cross_references }
 
   # api/002 outbound (4)
   - { from: api/002, to: api/001,               via: cross_references }
@@ -218,12 +253,13 @@ edges:
   - { from: architecture/003, to: feature/001,  via: cross_references }
   - { from: architecture/003, to: invariant/001, via: cross_references }
 
-  # architecture/004 outbound (5)
+  # architecture/004 outbound (6)
   - { from: architecture/004, to: analysis/001,  via: cross_references }
   - { from: architecture/004, to: api/001,       via: cross_references }
   - { from: architecture/004, to: architecture/001, via: cross_references }
   - { from: architecture/004, to: feature/001,  via: cross_references }
   - { from: architecture/004, to: invariant/002, via: cross_references }
+  - { from: architecture/004, to: invariant/006, via: cross_references }
 
   # architecture/005 outbound (2)
   - { from: architecture/005, to: feature/004,  via: cross_references }
@@ -247,10 +283,31 @@ edges:
   - { from: analysis/002, to: feature/002,      via: cross_references }
   - { from: analysis/002, to: feature/005,      via: cross_references }
 
+  # invariant/006 outbound (3)
+  - { from: invariant/006, to: architecture/004, via: cross_references }
+  - { from: invariant/006, to: feature/001,      via: cross_references }
+  - { from: invariant/006, to: invariant/002,    via: cross_references }
+
+  # type/001 outbound (3)
+  - { from: type/001, to: invariant/005,         via: cross_references }
+  - { from: type/001, to: feature/001,           via: cross_references }
+  - { from: type/001, to: api/001,               via: cross_references }
+
+  # type/002 outbound (2)
+  - { from: type/002, to: invariant/005,         via: cross_references }
+  - { from: type/002, to: api/001,               via: cross_references }
+
+  # type/003 outbound (1)
+  - { from: type/003, to: api/001,               via: cross_references }
+
+  # type/004 outbound (2)
+  - { from: type/004, to: feature/001,           via: cross_references }
+  - { from: type/004, to: api/001,               via: cross_references }
+
 components:
   - id: 1
     label: Main corpus
-    size: 20
+    size: 25
     isolated: false
     nodes:
       - analysis/001
@@ -273,5 +330,10 @@ components:
       - invariant/003
       - invariant/004
       - invariant/005
+      - invariant/006
+      - type/001
+      - type/002
+      - type/003
+      - type/004
 
 dangling_refs: []

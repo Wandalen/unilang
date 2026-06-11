@@ -175,7 +175,7 @@ The old API allowed commands to be constructed in invalid states that only faile
 
 This mandate is motivated by the "Make Illegal States Unrepresentable" governing principle in `invariant/003`.
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
@@ -183,10 +183,17 @@ This mandate is motivated by the "Make Illegal States Unrepresentable" governing
 | [003_vision_scope.md](003_vision_scope.md) | Vision that these mandates implement |
 | [004_implementation_details.md](004_implementation_details.md) | Compile-time optimization strategy |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs that mandates enforce |
 | [003_governing_principles.md](../invariant/003_governing_principles.md) | Principles these mandates enforce |
 | [004_workspace_dependency_standards.md](../invariant/004_workspace_dependency_standards.md) | `enabled` feature gate mandate source |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/lib.rs` | Module structure reflecting mandate boundaries |
+| `build/main.rs` | Build-time mandate enforcement |

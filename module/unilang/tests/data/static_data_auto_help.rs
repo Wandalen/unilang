@@ -1,4 +1,4 @@
-//! Bug-reproducer tests for Issue-088: `auto_help_enabled` field loss during
+//! Bug-reproducer tests for BUG-088: `auto_help_enabled` field loss during
 //! `StaticCommandDefinition` → `CommandDefinition` conversion.
 
 use unilang::static_data::*;
@@ -10,18 +10,30 @@ use unilang::static_data::*;
 /// The `From<&StaticCommandDefinition> for CommandDefinition` implementation
 /// hardcoded `auto_help_enabled: false` instead of reading from the source field.
 ///
+/// # Why Not Caught
+///
+/// Existing conversion tests verified field presence but not field VALUE preservation.
+/// The default `auto_help_enabled: true` in YAML happened to match most test fixtures,
+/// so the hardcoded `false` only broke commands that explicitly set `true` in YAML.
+///
 /// # Fix Applied
 ///
 /// 1. Added `auto_help_enabled: bool` field to `StaticCommandDefinition`
 /// 2. Updated `build.rs` to extract `auto_help_enabled` from YAML (defaults to true)
 /// 3. Updated conversion to copy field value instead of hardcoding
 ///
+/// # Prevention
+///
+/// Every field added to `StaticCommandDefinition` must have a dedicated conversion
+/// test that asserts BOTH true and false (or non-default) values survive the
+/// `From<&StaticCommandDefinition>` round-trip.
+///
 /// # Pitfall
 ///
 /// **Silent Field Loss in Conversions:** Any field in `StaticCommandDefinition` that
 /// isnt explicitly copied in the `From<&StaticCommandDefinition>` impl will be lost
 /// or defaulted, silently breaking user YAML configuration.
-// test_kind: bug_reproducer(issue-088)
+// test_kind: bug_reproducer(BUG-088)
 #[ test ]
 fn test_auto_help_enabled_conversion_preserves_true()
 {
@@ -69,7 +81,7 @@ fn test_auto_help_enabled_conversion_preserves_true()
 /// # Pitfall
 ///
 /// See `test_auto_help_enabled_conversion_preserves_true` for detailed analysis.
-// test_kind: bug_reproducer(issue-088)
+// test_kind: bug_reproducer(BUG-088)
 #[ test ]
 fn test_auto_help_enabled_conversion_preserves_false()
 {
@@ -114,7 +126,7 @@ fn test_auto_help_enabled_conversion_preserves_false()
 ///
 /// **Incomplete Test Coverage:** Even comprehensive-looking tests can miss critical
 /// fields. Systematic verification of ALL struct fields is required.
-// test_kind: bug_reproducer(issue-088)
+// test_kind: bug_reproducer(BUG-088)
 #[ test ]
 fn test_existing_conversion_test_includes_auto_help()
 {

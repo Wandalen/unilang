@@ -2,8 +2,8 @@
 
 ## Metadata
 
-- **Last Updated:** 2026_03_31
-- **Version:** 0.49.0
+- **Last Updated:** 2026_06_11
+- **Version:** 0.54.0
 - **Categories:** 7
 - **Status:** See Overview Table below
 

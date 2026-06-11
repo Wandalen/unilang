@@ -1,23 +1,18 @@
 # Task: Make Illegal States Unrepresentable in Unilang Public API
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
-
-- **Status:** Resolved (Validation Approach) - 8/10 items addressed
-- **Priority:** Critical
-- **Category:** API Design, Type Safety, Correctness
-- **Created:** 2025-10-21
-- **Completed:** 2025-11-24
-- **Triggered By:** wplan CLI parameter parsing bug (multiple `command::` parameters silently overwritten)
-- **Resolution:** Build-time validation prevents illegal states at compile-time
-
----
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -355,7 +350,7 @@ fn test_typestate_prevents_illegal_states() {
 
 ## Audit Results (2025-11-24)
 
-**Status:** PARTIALLY RESOLVED - 8 of 10 items addressed
+**Result:** PARTIALLY RESOLVED - 8 of 10 items addressed
 
 ### Findings Summary
 
@@ -768,3 +763,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Task: Make Illegal States Unrepresentable in Unilang Public API.

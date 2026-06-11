@@ -43,7 +43,7 @@ fn test_yaml_single_file_yaml_extension()
   // In a real build, build.rs would call parse_command_file
   // Here we verify the file is valid YAML
   let content = std::fs::read_to_string( test_file ).unwrap();
-  let commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &content ).unwrap();
+  let commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &content ).unwrap();
 
   assert_eq!( commands.len(), 1, "Expected 1 command in YAML file" );
   assert_eq!( commands[ 0 ][ "name" ].as_str().unwrap(), "build_yaml_cmd" );
@@ -80,7 +80,7 @@ fn test_yaml_single_file_yml_extension()
 
   // Verify parsing
   let content = std::fs::read_to_string( &temp_yml ).unwrap();
-  let commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &content ).unwrap();
+  let commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &content ).unwrap();
 
   assert_eq!( commands.len(), 1 );
   assert_eq!( commands[ 0 ][ "name" ].as_str().unwrap(), "yml_test" );
@@ -105,7 +105,7 @@ fn test_yaml_multi_file_discovery()
     assert!( file_path.exists(), "YAML file missing: {}", file_path.display() );
 
     let content = std::fs::read_to_string( &file_path ).unwrap();
-    let commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &content ).unwrap();
+    let commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &content ).unwrap();
 
     assert_eq!( commands.len(), 1, "Expected 1 command in {yaml_file}" );
   }
@@ -248,7 +248,7 @@ fn test_mixed_yaml_json_multi_file_discovery()
       "yaml" | "yml" =>
       {
         let content = std::fs::read_to_string( entry.path() ).unwrap();
-        let mut commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &content ).unwrap();
+        let mut commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &content ).unwrap();
         all_commands.append( &mut commands );
       }
       "json" =>
@@ -258,7 +258,7 @@ fn test_mixed_yaml_json_multi_file_discovery()
 
         // Convert JSON to YAML Value (same as build.rs does)
         let json_str = serde_json::to_string( &json_value ).unwrap();
-        let mut commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &json_str ).unwrap();
+        let mut commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &json_str ).unwrap();
         all_commands.append( &mut commands );
       }
       _ => {}
@@ -292,7 +292,7 @@ fn test_json_to_yaml_conversion_fidelity()
 
   // Convert to YAML Value (same as build.rs does)
   let json_str = serde_json::to_string( &json_value ).unwrap();
-  let yaml_commands: Vec< serde_yaml::Value > = serde_yaml::from_str( &json_str ).unwrap();
+  let yaml_commands: Vec< serde_yaml_ng::Value > = serde_yaml_ng::from_str( &json_str ).unwrap();
 
   // Verify all fields are preserved
   let cmd = &yaml_commands[ 0 ];

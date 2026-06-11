@@ -21,7 +21,7 @@
 //!    `ValidationRule` conversions must be complete. Missing variant conversions would
 //!    cause runtime errors.
 //!
-//! 5. **Field omissions:** Missing fields in conversion (Issue-088: `auto_help_enabled` was
+//! 5. **Field omissions:** Missing fields in conversion (BUG-088: `auto_help_enabled` was
 //!    lost during conversion, breaking `.command.help` generation for all static commands).
 //!
 //! **How to Interpret Failures:**
@@ -30,7 +30,7 @@
 //! - **Kind conversion fails:** Missing variant in `StaticKind` -> `Kind` mapping
 //! - **Validation rule fails:** Missing variant in `StaticValidationRule` -> `ValidationRule`
 //! - **Nested structure fails:** Complex types (`List`, `Map`, `Enum`) not converting correctly
-//! - **`auto_help_enabled` fails:** Field not preserved from static to dynamic (Issue-088)
+//! - **`auto_help_enabled` fails:** Field not preserved from static to dynamic (BUG-088)
 //!
 //! **Why This Matters:**
 //!
@@ -43,8 +43,8 @@
 //! ## Command Conversion Tests
 //! - `test_static_command_definition_conversion` - Comprehensive field validation
 //! - `test_static_command_definition_with_empty_arrays` - Empty/minimal commands
-//! - `test_auto_help_enabled_conversion_preserves_true` - Issue-088 reproducer (true case)
-//! - `test_auto_help_enabled_conversion_preserves_false` - Issue-088 reproducer (false case)
+//! - `test_auto_help_enabled_conversion_preserves_true` - BUG-088 reproducer (true case)
+//! - `test_auto_help_enabled_conversion_preserves_false` - BUG-088 reproducer (false case)
 //! - `test_existing_conversion_test_includes_auto_help` - Regression prevention
 //!
 //! ## Type Conversion Tests
@@ -63,6 +63,8 @@
 
 use unilang::static_data::*;
 
+/// IN-2: Generated static data is accessible at runtime without parsing.
+// test_kind: in_spec(IN-2)
 #[test]
 fn test_static_command_definition_conversion()
 {
@@ -134,7 +136,7 @@ fn test_static_command_definition_conversion()
   assert!(!arg.attributes.sensitive);
   assert!(!arg.attributes.interactive);
 
-  // Issue-088: Verify auto_help_enabled is preserved during conversion
+  // BUG-088: Verify auto_help_enabled is preserved during conversion
   assert!(dynamic_cmd.auto_help_enabled(), "auto_help_enabled should be preserved from static definition");
   assert!(dynamic_cmd.has_auto_help(), "has_auto_help() should match auto_help_enabled value");
 }

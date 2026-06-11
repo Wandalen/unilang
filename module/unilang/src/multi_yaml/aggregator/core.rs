@@ -330,7 +330,7 @@ impl MultiYamlAggregator
     {
       #[ cfg( feature = "yaml_parser" ) ]
       {
-        serde_yaml::from_str( &config_content )
+        serde_yaml_ng::from_str( &config_content )
           .map_err( |e| Error::Registration( format!( "Failed to parse YAML config: {}", e ) ) )?
       }
       #[ cfg( not( feature = "yaml_parser" ) ) ]
@@ -670,7 +670,7 @@ pub fn aggregate_cli_complex() -> Result< CommandRegistry, Error >
 ///
 /// Then in your code:
 ///
-/// ```ignore
+/// ```text
 /// // Generated at compile-time by build system
 /// include!(concat!(env!("OUT_DIR"), "/static_commands.rs"));
 ///
@@ -680,7 +680,7 @@ pub fn aggregate_cli_complex() -> Result< CommandRegistry, Error >
 ///
 /// ## Example Usage (Runtime Aggregation)
 ///
-/// ```ignore
+/// ```text
 /// use std::path::PathBuf;
 /// use unilang::multi_yaml::create_aggregated_registry;
 ///

@@ -191,7 +191,7 @@ use crate::error::Error;
   ///
   /// **Why not just use String?**
   ///
-  /// ```ignore
+  /// ```text
   /// // Old API - compiles but breaks at runtime
   /// let mut cmd = CommandDefinition { namespace: "video".to_string(), ... };
   /// registry.register(cmd); // Runtime error: "Invalid namespace"
@@ -199,8 +199,10 @@ use crate::error::Error;
   ///
   /// With `NamespaceType`, invalid namespaces are caught at construction:
   ///
-  /// ```ignore
-  /// let ns = NamespaceType::new("video"); // Compile error or immediate panic
+  /// ```
+  /// use unilang::data::NamespaceType;
+  /// let ns = NamespaceType::new("video");
+  /// assert!(ns.is_err()); // Caught immediately, no runtime surprise
   /// ```
   ///
   /// **Migration impact:**
@@ -376,7 +378,7 @@ use crate::error::Error;
   /// Command versions track API changes and help users understand stability.
   /// The old API accepted any String including empty strings, leading to problems:
   ///
-  /// ```ignore
+  /// ```text
   /// // Old API - all compile fine but semantically wrong
   /// let cmd1 = CommandDefinition { version: "".to_string(), ... }; // Empty!
   /// let cmd2 = CommandDefinition { version: "version 1".to_string(), ... }; // Invalid format

@@ -30,7 +30,7 @@ mod private
   #[ cfg( feature = "json_parser" ) ]
   use serde_json;
   #[ cfg( feature = "yaml_parser" ) ]
-  use serde_yaml;
+  use serde_yaml_ng;
   use error_tools::dependency::thiserror;
 
   ///
@@ -52,7 +52,7 @@ mod private
     /// **Requires feature**: `yaml_parser`
     #[ cfg( feature = "yaml_parser" ) ]
     #[ error( "YAML Deserialization Error: {0}" ) ]
-    Yaml( #[ from ] serde_yaml::Error ),
+    Yaml( #[ from ] serde_yaml_ng::Error ),
     /// An error that occurred during JSON deserialization.
     /// **Requires feature**: `json_parser`
     #[ cfg( feature = "json_parser" ) ]

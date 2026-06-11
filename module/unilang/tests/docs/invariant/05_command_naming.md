@@ -24,3 +24,9 @@
 - **Given:** A YAML command entry using the separate `namespace` + `name` fields (e.g., `namespace: "math"`, `name: "add"`)
 - **When:** The build-time `compute_full_name()` function processes this entry
 - **Then:** The resulting full name is `".math.add"` — exactly one leading dot regardless of whether namespace is empty or populated
+
+### IN-4: Build-time validation rejects manifest entry without dot prefix
+
+- **Given:** A YAML manifest containing `name: "invalid"` with `namespace: ""` (produces `"invalid"` — no dot prefix)
+- **When:** The `build.rs` validation pass processes this entry
+- **Then:** The build fails with an actionable error referencing the missing dot prefix and the offending manifest entry; no static command is generated for the invalid entry

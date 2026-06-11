@@ -47,14 +47,20 @@ The `unilang_benchmarks` crate imports `unilang` with `features = ["full"]` to a
 
 All benchmark code moved from `unilang/benches/` to `unilang_benchmarks/benches/`. Benchmark modules moved from `unilang/src/` to `unilang_benchmarks/src/`. Feature flags `benchmarks` and `advanced_benchmarks` were removed from the main crate. Documentation updated to reference the separate benchmark crate.
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [001_mandates.md](001_mandates.md) | Broader architectural mandates |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs validated by benchmarks |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `build/codegen.rs` | PHF codegen whose performance benchmarks motivate separation |

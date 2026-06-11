@@ -13,7 +13,7 @@ Development knowledge, design decisions, and implementation guidance for the `un
 | `analysis/` | Codebase analysis and usability findings |
 | `cli_aggregation.md` | CLI aggregation guide with namespace isolation |
 | `cli_definition_approaches.md` | Guide to all command definition approaches |
-| `development_rules.md` | Contribution rules and standards |
+| `type/` | Domain type documentation: validated newtypes and enums |
 | `features.md` | Feature prioritization and ROI tracking table |
 | `migration.md` | Runtime-to-build-time migration guide |
 | `optimization_guide.md` | Performance optimization best practices |

@@ -35,7 +35,7 @@ fn demonstrate_yaml_loading() -> Result< (), unilang::error::Error >
 {
   println!( "=== YAML Loading Demonstration ===\n" );
 
-  // Fix(issue-command-name-format): All command names must have dot prefix
+  // Fix(BUG-092): All command names must have dot prefix
   // Root cause: Validation requires all command names start with '.'
   // Pitfall: YAML command names need '.' prefix just like runtime registration
   let comprehensive_yaml = r#"

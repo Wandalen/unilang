@@ -30,3 +30,9 @@
 - **Given:** The `unilang` crate
 - **When:** `RUSTFLAGS="-D warnings" cargo check --no-default-features` is run
 - **Then:** Exits with code 0; zero errors and zero warnings; the `enabled` feature gate correctly disables all optional functionality
+
+### IN-5: All library crate dependencies marked optional
+
+- **Given:** The `Cargo.toml` files for library crates `unilang` and `unilang_parser`
+- **When:** Each file's `[dependencies]` section is inspected for `optional` flags
+- **Then:** Every dependency entry includes `optional = true`; no non-optional dependency exists in library crates (binary crate `cargo_unilang` is exempt from this rule)

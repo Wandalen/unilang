@@ -42,15 +42,22 @@ The workspace `Cargo.toml` and all library member crates MUST continuously compl
 
 **R3/R4 violation:** Building a library crate with `--no-default-features` still compiles heavy transitive dependencies even though nothing is enabled. This defeats the `enabled`/`full` feature isolation architecture mandated in [architecture/001_mandates.md](../architecture/001_mandates.md).
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](002_non_functional_requirements.md) | Performance NFRs enabled by no-op compile pattern |
 | [003_governing_principles.md](003_governing_principles.md) | Explicit Dependencies principle source of R2 requirement |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [001_mandates.md](../architecture/001_mandates.md) | `enabled` feature gate mandate source of R4 requirement |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `Cargo.toml` | Workspace dependency centralization |
+| `module/unilang/Cargo.toml` | Feature flag and dependency configuration |

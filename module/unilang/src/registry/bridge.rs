@@ -5,16 +5,16 @@ use super::static_reg::StaticCommandRegistry;
 ///
 /// This enables the pattern: `Pipeline::new(static_registry.into())`
 ///
-/// # Fix(H15): StaticCommandRegistry now converts to CommandRegistry
+/// # Design Rationale
 ///
-/// Root cause: Pipeline requires CommandRegistry but static definitions produce
-/// StaticCommandRegistry. This bridge enables seamless conversion.
+/// Pipeline requires `CommandRegistry` but static definitions produce
+/// `StaticCommandRegistry`. This bridge enables seamless conversion.
 ///
-/// Pitfall: If build.rs validation is disabled, conversion may fail on invalid commands.
+/// **Note:** If build.rs validation is disabled, conversion may fail on invalid commands.
 ///
 /// # Examples
 ///
-/// ```rust,ignore
+/// ```text
 /// use unilang::registry::{StaticCommandRegistry, CommandRegistry};
 /// use unilang::pipeline::Pipeline;
 ///

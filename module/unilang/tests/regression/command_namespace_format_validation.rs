@@ -1,9 +1,31 @@
 //! Regression tests for namespace format validation.
 //!
-//! ## Lessons Learned (Bugs Fixed)
+//! ## Root Cause
 //!
-//! - **2026-01-11 (issue-namespace-format):** Examples used plain string namespaces without
-//!   dot prefix. Validation requires non-empty namespaces start with '.'.
+//! Example code used plain string namespaces (e.g., `"collections"`) without the
+//! required dot prefix. The registry validator rejects non-empty namespaces that
+//! dont start with `'.'`, but examples bypassed the builder and set the field directly.
+//!
+//! ## Why Not Caught
+//!
+//! No test validated namespace format on manually-constructed `CommandDefinition` structs.
+//! Builder-path tests passed because the builder doesnt enforce namespace format; only
+//! `register()` does. Direct field assignment skipped the builder entirely.
+//!
+//! ## Fix Applied
+//!
+//! Corrected all example namespaces to use dot prefix (e.g., `".collections"`).
+//! Added these regression tests to validate both valid and invalid namespace formats.
+//!
+//! ## Prevention
+//!
+//! These tests ensure the dot-prefix requirement is enforced on registration. Any
+//! future namespace format changes must update these tests.
+//!
+//! ## Pitfall
+//!
+//! `CommandDefinition::namespace` is a public `String` field — direct assignment bypasses
+//! all validation. The only enforcement point is `CommandRegistry::register()`.
 
 #![ allow( clippy::unnecessary_wraps ) ]
 #![ allow( clippy::uninlined_format_args ) ]
@@ -11,7 +33,7 @@
 
 use unilang::{ CommandDefinition, CommandRegistry };
 
-// test_kind: bug_reproducer(issue-namespace-format)
+// test_kind: bug_reproducer(BUG-092)
 #[ test ]
 fn test_namespace_requires_dot_prefix()
 {

@@ -34,7 +34,7 @@
 //!
 //! **Missing any location = silent data loss.** YAML values will be read but never reach runtime.
 //!
-//! **Example (Issue-088)**: The `auto_help_enabled` field was missing from steps 1 and 2,
+//! **Example (BUG-088)**: The `auto_help_enabled` field was missing from steps 1 and 2,
 //! causing all static commands to have `auto_help_enabled: false` regardless of YAML configuration.
 //! This broke `.command.help` generation for all users.
 //!
@@ -202,7 +202,7 @@ fn generate_static_registry()
       let default_manifest = "unilang.commands.yaml";
       if let Ok( yaml_content ) = std::fs::read_to_string( default_manifest )
       {
-        match serde_yaml::from_str( &yaml_content )
+        match serde_yaml_ng::from_str( &yaml_content )
         {
           Ok( definitions ) =>
           {
@@ -226,7 +226,7 @@ fn generate_static_registry()
 }
 
 #[cfg(feature = "static_registry")]
-fn analyze_command_types( command_definitions : &[ serde_yaml::Value ] )
+fn analyze_command_types( command_definitions : &[ serde_yaml_ng::Value ] )
 {
   let analyzer = TypeAnalyzer::new();
   let mut all_hints = Vec::new();

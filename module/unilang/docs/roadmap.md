@@ -105,7 +105,7 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Spec Reference:** NFR-MODULARITY-1, NFR-MODULARITY-2
     *   **Deliverable:** A dependency graph mapping features to the libraries they introduce.
     *   **Purpose:** Analyze `Cargo.toml` and the codebase to identify all dependencies that can be made optional.
-    *   **Completed:** 2025_10_19. Identified and made optional: serde_yaml, serde_json, phf, walkdir (~330KB total savings).
+    *   **Completed:** 2025_10_19. Identified and made optional: serde_yaml_ng, serde_json, phf, walkdir (~330KB total savings).
 *   [✅] **M7.2: feature_gate_implement_granular:**
     *   **Prerequisites:** M7.1
     *   **Deliverable:** An updated `Cargo.toml` and codebase where all non-essential functionality is gated by feature flags (e.g., `declarative_loading`, `chrono_types`).

@@ -115,14 +115,14 @@ The framework **must** adhere to the principle of explicit command naming with m
 - **No Implicit Behavior**: The system **must not** automatically add dots, modify namespaces, or transform command names during registration or execution
 - **Principle of Least Surprise**: Command behavior should be predictable — what you register is exactly what gets executed
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [001_command_registry.md](../feature/001_command_registry.md) | Registry implements fail-fast validation principle |
 | [004_help_system.md](../feature/004_help_system.md) | Help system embodies consistent help access principle |
 
-### Invariant Instances
+### Invariants
 
 | File | Relationship |
 |------|--------------|
@@ -131,9 +131,16 @@ The framework **must** adhere to the principle of explicit command naming with m
 | [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Explicit dependencies principle source of R2 requirement |
 | [005_command_naming.md](005_command_naming.md) | Command naming invariant derived from explicit naming principle |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates derived from these principles |
 | [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Minimum implicit magic principle motivates help decoupling |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/data/validated_types.rs` | Make-illegal-states-unrepresentable principle |
+| `src/command_validation.rs` | Fail-fast validation principle |

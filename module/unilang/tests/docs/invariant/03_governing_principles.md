@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify that the five governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time
 - **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, and Consistent Help Access
-- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`?`/`??`/`.cmd.help` equivalence), Single Source of Truth (no duplicate definitions)
+- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`?`/`.cmd.help` equivalence), Single Source of Truth (no duplicate definitions)
 - **Out of Scope:** NFR thresholds (invariant 002); specific FR behaviors (feature specs)
 
 ### IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage
@@ -25,8 +25,15 @@
 - **When:** `registry.get(".help")` or any implicit system command is called
 - **Then:** Returns `None` unless the user explicitly registered `.help`; no hidden system commands exist in the default registry
 
-### IN-4: Consistent Help Access — `?`, `??`, and `.cmd.help` produce equivalent content
+### IN-4: Consistent Help Access — `?` and `.cmd.help` produce equivalent content
 
-- **Given:** A `Pipeline` with `.greet` registered
-- **When:** `help_command(&registry, ".greet")` is called via three routes: `? .greet`, `.greet ??`, and `.greet.help`
-- **Then:** All three outputs contain the same command name and argument descriptions; formatting may differ but no information is exclusive to one route
+- **Given:** A `Pipeline` with `.greet` registered (auto_help_enabled = true by default)
+- **When:** Help is requested via `.greet ?` (parser-level operator) and `.greet.help` (auto-registered sub-command)
+- **Then:** Both outputs contain the same command name and argument descriptions; formatting may differ but no information is exclusive to one route
+- **Note:** `??` as a bare token is rejected by the parser ("Help operator '?' must be the last token"); the two verified working routes are `?` and `.cmd.help`
+
+### IN-5: Single Source of Truth — duplicate command registration is rejected
+
+- **Given:** A `CommandRegistry` that already contains `.dup`
+- **When:** `command_add_runtime` is called a second time with a definition named `".dup"`
+- **Then:** Returns an error with code `CommandAlreadyExists`; the registry retains the original definition unmodified

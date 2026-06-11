@@ -42,7 +42,7 @@
 
 use unilang::multi_yaml::{ MultiYamlAggregator, AggregationConfig };
 
-/// bug_reproducer(issue-001)
+/// bug_reproducer(BUG-090)
 ///
 /// Verifies that `generate_static_registry_source()` emits NO `phf_map!` invocations.
 ///

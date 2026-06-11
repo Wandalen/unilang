@@ -1,13 +1,18 @@
 # Enable Static Command Examples
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
+
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
 - **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 Enable the static command examples that were disabled during the test-clean process. This includes `static_01_basic_compile_time.rs`, `static_02_yaml_build_integration.rs`, and `static_03_performance_comparison.rs`. These examples demonstrate the zero-overhead PHF-based static command system and validate the performance requirements.
@@ -68,3 +73,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Enable Static Command Examples.

@@ -1,21 +1,18 @@
 # Unilang Critical Bug: `auto_help_enabled` Lost During Static-to-Dynamic Conversion
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
-- **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
 
-- **Date**: 2025-11-06
-- **Completed**: 2025-11-06
-- **Priority**: HIGH
-- **Category**: Bug Fix - Data Integrity
-- **Status**: Completed
-- **Affects**: v0.35.0+
-- **Discovered In**: willbe/will_crates integration
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
+- **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -403,7 +400,7 @@ From `will_crates/src/registration.rs:51-54`:
 
 ## RESOLUTION - 2025-11-06
 
-**Status**: ✅ RESOLVED AND VALIDATED
+**Result**: ✅ RESOLVED AND VALIDATED
 
 ### Implementation Summary
 
@@ -412,7 +409,7 @@ Issue-088 was comprehensively fixed using a Test-Driven Development approach fol
 #### Root Causes Identified
 
 1. **Missing Field** - `StaticCommandDefinition` struct missing `auto_help_enabled: bool` field
-2. **Build Script Gap** - `build.rs` not extracting `auto_help_enabled` from YAML 
+2. **Build Script Gap** - `build.rs` not extracting `auto_help_enabled` from YAML
 3. **Conversion Bug** - `From` impl hardcoding `auto_help_enabled: false` instead of reading field
 
 #### Fix Applied
@@ -460,7 +457,7 @@ Issue-088 was comprehensively fixed using a Test-Driven Development approach fol
 
 **Acceptance Criteria** (from line 381-386):
 - ✅ `From<StaticCommandDefinition> for CommandDefinition` preserves `auto_help_enabled` value
-- ✅ Test suite validates conversion for both `true` and `false` values  
+- ✅ Test suite validates conversion for both `true` and `false` values
 - ✅ `.command.help` variants will work in willbe/will_crates/wflow after upgrade
 - ✅ No breaking changes to public API (backward compatible, field defaults to `true`)
 - ⏸️ CHANGELOG update (deferred - will be done with release)
@@ -492,12 +489,12 @@ Issue-088 was comprehensively fixed using a Test-Driven Development approach fol
 **After Fix**:
 - ✅ YAML `auto_help_enabled` value preserved through entire data flow
 - ✅ `.command.help` generation works as documented
-- ✅ Consistent UX across all help access methods  
+- ✅ Consistent UX across all help access methods
 - ✅ Data integrity maintained: YAML → Build → Static → Dynamic → Runtime
 
 **Affected Projects** (will benefit immediately upon upgrade):
 - willbe3
-- will_crates  
+- will_crates
 - wflow
 - wplan
 - All external projects using unilang v0.35+
@@ -509,7 +506,7 @@ Issue-088 was comprehensively fixed using a Test-Driven Development approach fol
 **Files Modified Total**: 10 files
 - 3 core implementation files
 - 4 test files
-- 2 example files  
+- 2 example files
 - 1 additional test assertion update
 
 ### Lessons Learned
@@ -593,3 +590,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Unilang Critical Bug: `auto_help_enabled` Lost During Static-to-Dynamic Conversion.

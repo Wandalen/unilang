@@ -24,6 +24,8 @@ fn test_routine( _cmd : unilang::semantic::VerifiedCommand, _ctx : ExecutionCont
   })
 }
 
+/// FT-6: `.cmd.help` command is automatically available and returns help.
+// test_kind: ft_spec(FT-6)
 #[ test ]
 fn test_mandatory_help_counterpart_generation()
 {
@@ -392,6 +394,8 @@ fn test_help_content_comprehensive()
   println!( "✅ Help content is comprehensive and includes all mandatory sections" );
 }
 
+/// FT-8: `.help` command does not appear in its own listing.
+///
 /// Bug reproducer for BUG-102: `.help` visible in its own help listing.
 ///
 /// ## Root Cause
@@ -427,7 +431,7 @@ fn test_help_content_comprehensive()
 /// registration in `register_mandatory_global_help_command()`; `command_add_runtime`
 /// for `.help` always fails silently (suppressed at `lib.rs:150`).
 ///
-// test_kind: bug_reproducer(BUG-102)
+// test_kind: ft_spec(FT-8), bug_reproducer(BUG-102)
 #[ test ]
 fn test_help_not_self_referential_bug_102()
 {

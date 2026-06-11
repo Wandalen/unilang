@@ -115,14 +115,28 @@ Test the four combinations: default (enhanced REPL), basic REPL only (`--no-defa
 
 Arrow keys can only be tested interactively in a terminal. Start the REPL, enter several commands, then use the up arrow to navigate backward through history and the down arrow to navigate forward. Edit a recalled command and press Enter to execute the modified version.
 
-### Feature Instances
+### Features
 
 | File | Relationship |
 |------|--------------|
 | [005_repl_interactive.md](../feature/005_repl_interactive.md) | FR-REPL-* requirements this implements |
 
-### Architecture Instances
+### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [003_vision_scope.md](003_vision_scope.md) | REPL as a supported modality |
+
+### Sources
+
+| File | Relationship |
+|------|--------------|
+| `src/bin/unilang_cli.rs` | REPL binary entry point |
+| `src/interpreter.rs` | Interpreter used by REPL |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `examples/wasm-repl/` | WASM REPL example |
+| `tests/manual/readme.md` | Manual REPL testing plan |

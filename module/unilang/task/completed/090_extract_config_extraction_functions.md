@@ -1,21 +1,18 @@
 # Extract Config Extraction Functions to unilang_parser
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
-- **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
 
-- **Date**: 2025-11-19
-- **Completed**: 2025-11-22
-- **Priority**: MEDIUM - Reduces Code Duplication
-- **Category**: API Enhancement
-- **Status**: Completed
-- **Source**: wplan_agent/src/config.rs, wplan_client/src/config.rs
-- **Actual Location**: unilang/src/config_extraction.rs (moved from unilang_parser due to serde_json dependency)
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
+- **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 **⚠️ CRITICAL**: This task is INCOMPLETE without follow-up adoption. Task will be CANCELED if adoption not implemented.
 
@@ -372,7 +369,7 @@ cargo test -p wplan_client
 
 ## RESOLUTION - 2025-11-22
 
-**Status**: ✅ COMPLETED
+**Result**: ✅ COMPLETED
 
 ### Implementation Summary
 
@@ -495,3 +492,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Extract Config Extraction Functions to unilang_parser.

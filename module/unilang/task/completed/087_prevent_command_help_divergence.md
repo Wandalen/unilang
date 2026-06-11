@@ -1,18 +1,18 @@
 # Unilang Critical Issue: Make Command/Help Divergence Unrepresentable
 
 ## Execution State
-- **Status:** ✅ (Completed)
-- **Executor Type:** AI
-- **Actor:** N/A (pre-template)
-- **Claimed At:** N/A (pre-template)
-- **Priority:** 0
-- **Validated By:** N/A (pre-template)
-- **Validation Date:** N/A (pre-template)
 
-- **Date**: 2025-10-21
-- **Priority**: CRITICAL
-- **Category**: API Design - Prevent Misuse
-- **Status**: Completed (Phase 1 + Phase 2 implemented; Phase 3 superseded — see RESOLUTION)
+- **Executor Type:** ai
+- **Actor:** null
+- **Claimed At:** null
+- **Reopen Count:** 0
+- **State:** ✅ (Completed)
+- **Priority:** 0
+- **Closes:** null
+- **Blocked Reason:** null
+- **Dir:** .
+- **Validated By:** N/A
+- **Validation Date:** N/A
 
 ## Goal
 
@@ -623,7 +623,7 @@ def hello(name):
 
 ---
 
-- **Status**: Awaiting review and approval for implementation
+- **Result**: Awaiting review and approval for implementation
 - **Priority**: CRITICAL - This prevents users from shipping broken CLI applications
 - **Effort**: Medium (2-3 weeks for all phases)
 
@@ -631,7 +631,7 @@ def hello(name):
 
 ## RESOLUTION
 
-**Status**: Completed (Phase 1 complete; Phase 2 effectively complete via superior approach; Phase 3 superseded)
+**Result**: Completed (Phase 1 complete; Phase 2 effectively complete via superior approach; Phase 3 superseded)
 
 ### Implementation Summary
 
@@ -719,3 +719,7 @@ _N/A — pre-template task._
 ## Outcomes
 
 _Pre-template task — outcomes not formally recorded. See task body for implementation details._
+
+## History
+
+- **N/A** `COMPLETED` — Validated by N/A (pre-template). Unilang Critical Issue: Make Command/Help Divergence Unrepresentable.

@@ -69,7 +69,7 @@ fn test_no_build_rs_passes()
 fn test_build_rs_with_yaml_fails()
 {
   let temp = assert_fs::TempDir::new().unwrap();
-  temp.child( "build.rs" ).write_str( "fn main() { let yaml = serde_yaml::from_str(); }" ).unwrap();
+  temp.child( "build.rs" ).write_str( "fn main() { let yaml = serde_yaml_ng::from_str(); }" ).unwrap();
 
   let result = check_build_rs( temp.path() );
   assert!( !result.passed );
@@ -117,7 +117,7 @@ unilang = "0.33"
 }
 
 #[test]
-fn test_serde_yaml_duplicate_fails()
+fn test_serde_yaml_ng_duplicate_fails()
 {
   let temp = assert_fs::TempDir::new().unwrap();
   temp.child( "Cargo.toml" ).write_str(
@@ -127,13 +127,13 @@ version = "0.1.0"
 
 [dependencies]
 unilang = "0.33"
-serde_yaml = "0.9"
+serde_yaml_ng = "0.10"
 "#
   ).unwrap();
 
   let result = check_duplicate_deps( temp.path() );
   assert!( !result.passed );
-  assert!( result.issue.contains( "serde_yaml" ) );
+  assert!( result.issue.contains( "serde_yaml_ng" ) );
 }
 
 #[test]
@@ -147,13 +147,13 @@ version = "0.1.0"
 
 [dependencies]
 unilang = "0.33"
-serde_yaml = "0.9"
+serde_yaml_ng = "0.10"
 phf = "0.11"
 "#
   ).unwrap();
 
   let result = check_duplicate_deps( temp.path() );
   assert!( !result.passed );
-  assert!( result.issue.contains( "serde_yaml" ) );
+  assert!( result.issue.contains( "serde_yaml_ng" ) );
   assert!( result.issue.contains( "phf" ) );
 }
