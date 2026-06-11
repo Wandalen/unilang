@@ -1,6 +1,6 @@
 [package]
 name = "unilang"
-version = "0.53.0"
+version = "0.54.0"
 edition = "2021"
 rust-version = "1.70"
 authors = [
@@ -409,8 +409,13 @@ required-features = ["json_parser"]
 name = "16_comprehensive_loader_demo"
 required-features = ["json_parser"]
 
+[[example]]
+name = "validate_organization"
+path = "examples/validate_organization/main.rs"
 
-
+[[example]]
+name = "assess_quality_cli"
+path = "examples/assess_quality_cli.rs"
 
 [build-dependencies]
 # Core (always available):

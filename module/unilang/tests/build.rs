@@ -8,4 +8,5 @@ mod build {
   mod helpers_type_analyzer;
   mod validation;
   mod phf_codegen_no_leaked_dep;
+  mod dependency_standards;
 }

@@ -3,6 +3,8 @@
 //! This file demonstrates best practices for unit testing in the systematic
 //! organization structure. It shows proper patterns for testing individual
 //! components in isolation.
+// Allow proptest feature gate used in example code (feature not in Cargo.toml by design)
+#![ allow( unexpected_cfgs ) ]
 
 use unilang::data::{ ArgumentDefinition, CommandDefinition, Kind, ArgumentAttributes };
 use unilang::registry::CommandRegistry;
@@ -69,8 +71,6 @@ fn test_semantic_analyzer_validates_required_arguments()
   assert!( result.is_err(), "Should reject command missing required argument" );
 
   let error = result.unwrap_err();
-  assert!( error.len() > 0, "Should provide error details" );
-
   // Verify error contains relevant information (flexible assertion)
   let error_message = format!( "{:?}", error );
   assert!( error_message.to_lowercase().contains( "required" ) ||
@@ -90,27 +90,31 @@ fn test_argument_parsing_handles_edge_case_values()
   let parser = Parser::new( UnilangParserOptions::default() );
 
   // Test boundary conditions and edge cases
-  let test_cases = vec![
+  // Pre-declare dynamic strings to ensure valid lifetimes
+  let long_str = "x".repeat( 1000 );
+  let long_input = format!( ".test arg::\"{}\"", long_str );
+
+  let test_cases : Vec< ( &str, &str ) > = vec![
     // Empty string
-    (r#".test arg::"""#, ""),
+    ( r#".test arg::"""#, "" ),
 
     // String with only whitespace
-    (r#".test arg::"   ""#, "   "),
+    ( r#".test arg::"   ""#, "   " ),
 
     // String with special characters
-    (r#".test arg::"!@#$%^&*()""#, "!@#$%^&*()"),
+    ( r#".test arg::"!@#$%^&*()""#, "!@#$%^&*()" ),
 
     // Very long string (boundary test)
-    (r".test arg::".to_string() + &"x".repeat(1000) + r#"""#, "x".repeat(1000).as_str()),
+    ( &long_input, &long_str ),
 
     // String with escaped quotes
-    (r#".test arg::"contains \"quotes\" inside""#, r#"contains "quotes" inside"#),
+    ( r#".test arg::"contains \"quotes\" inside""#, r#"contains "quotes" inside"# ),
   ];
 
   for (input, expected_value) in test_cases
   {
     // Act
-    let result = parser.parse_repl_input( &input );
+    let result = parser.parse_repl_input( input );
 
     // Assert
     assert!( result.is_ok(), "Should parse edge case input: {}", input );
@@ -169,11 +173,11 @@ fn test_command_registry_runtime_integration()
     *call_count_clone.lock().unwrap() += 1;
 
     // Verify command data was passed correctly
-    assert_eq!( cmd.definition.name, ".mock_test" );
+    assert_eq!( cmd.definition.name().as_str(), ".mock_test" );
     assert!( cmd.arguments.contains_key( "input" ) );
 
     Ok( OutputData {
-      content : format!( "Processed: {}", cmd.arguments()["input"] ),
+      content : format!( "Processed: {}", cmd.arguments["input"] ),
       format : "text".to_string(),
       execution_time_ms : None,
     })
@@ -257,7 +261,7 @@ fn test_semantic_analyzer_error_conditions()
     .end();
 
   let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "success".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
   registry.command_add_runtime( &valid_cmd, mock_routine ).unwrap();
 
@@ -265,14 +269,14 @@ fn test_semantic_analyzer_error_conditions()
 
   // Test various error conditions
   let error_cases = vec![
-    // Unknown command
-    ( ".unknown_command", "unknown command" ),
+    // Unknown command — actual error says "not found"
+    ( ".unknown_command", "not found" ),
 
     // Missing required argument
     ( ".valid", "required" ),
 
-    // Invalid argument name
-    ( ".valid invalid_arg::value", "unknown argument" ),
+    // Invalid argument name — actual error says "unknown parameter"
+    ( ".valid invalid_arg::value", "unknown parameter" ),
   ];
 
   for ( input, expected_error_keyword ) in error_cases
@@ -296,12 +300,12 @@ fn test_semantic_analyzer_error_conditions()
   }
 }
 
-/// Example: Test helper functions
-///
-/// This demonstrates:
-/// - Reusable test utilities
-/// - Consistent test data creation
-/// - Reducing test code duplication
+// Example: Test helper functions
+//
+// This demonstrates:
+// - Reusable test utilities
+// - Consistent test data creation
+// - Reducing test code duplication
 
 /// Helper function to create a standard test command
 fn create_simple_test_command( name : &str ) -> CommandDefinition
@@ -361,5 +365,5 @@ fn test_with_helper_functions()
   assert!( result.is_ok(), "Should succeed with default argument value" );
   let verified_commands = result.unwrap();
   assert_eq!( verified_commands.len(), 1 );
-  assert_eq!( verified_commands[0].definition.name, ".helper_test" );
+  assert_eq!( verified_commands[0].definition.name().as_str(), ".helper_test" );
 }

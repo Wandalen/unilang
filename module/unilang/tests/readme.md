@@ -20,16 +20,20 @@ This directory follows a **domain-based organization principle** where tests are
 tests/
 ├── readme.md           # This file
 ├── acceptance.rs       # Acceptance domain entry point
+├── api.rs              # API domain entry point
 ├── build.rs            # Build domain entry point
 ├── cli.rs              # CLI domain entry point
 ├── data.rs             # Data domain entry point
+├── examples.rs         # Examples domain entry point
 ├── help.rs             # Help domain entry point
 ├── interpreter.rs      # Interpreter domain entry point
 ├── parser.rs           # Parser domain entry point
+├── pipeline.rs         # Pipeline domain entry point
 ├── registry.rs         # Registry domain entry point
 ├── regression.rs       # Regression domain entry point
 ├── semantic.rs         # Semantic domain entry point
 ├── system.rs           # System domain entry point
+├── tools.rs            # Tools domain entry point
 ├── validation.rs       # Validation domain entry point
 ├── acceptance/         # User-facing acceptance criteria tests
 ├── api/                # Public API contract tests (AP- spec cases)
@@ -153,16 +157,20 @@ Each top-level `.rs` file is a domain entry point that compiles as its own test 
 | File | Responsibility |
 |------|----------------|
 | `acceptance.rs` | Acceptance domain entry point: user-facing CLI acceptance criteria |
+| `api.rs` | API domain entry point: public API contract tests (AP-1..8 spec cases) |
 | `build.rs` | Build domain entry point: build-time code generation and static registry tests |
 | `cli.rs` | CLI domain entry point: builder APIs and ergonomic interface tests |
 | `data.rs` | Data domain entry point: data model, serialization, and validation tests |
+| `examples.rs` | Examples domain entry point: example code compilation and output verification |
 | `help.rs` | Help domain entry point: help generation and formatting tests |
 | `interpreter.rs` | Interpreter domain entry point: command execution and context tests |
 | `parser.rs` | Parser domain entry point: tokenization, SIMD, and string interning tests |
+| `pipeline.rs` | Pipeline domain entry point: batch processing, validation, and convenience API tests |
 | `registry.rs` | Registry domain entry point: static/dynamic registry and lookup tests |
 | `regression.rs` | Regression domain entry point: critical bug prevention tests |
 | `semantic.rs` | Semantic domain entry point: validation, argument binding, type checking |
 | `system.rs` | System domain entry point: cross-cutting end-to-end workflow tests |
+| `tools.rs` | Tools domain entry point: test infrastructure tool tests (QualityAssessor) |
 | `validation.rs` | Validation domain entry point: CI-level crate-wide property tests |
 
 ### Support Files

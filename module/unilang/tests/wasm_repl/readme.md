@@ -2,9 +2,7 @@
 
 Tests for the WebAssembly REPL interface and browser integration.
 
-## Files
+## Status
 
-| File | Responsibility |
-|------|----------------|
-| `integration.rs` | WASM REPL integration with unilang command processing |
-| `wasm.rs` | WASM-specific bindings and JavaScript interop |
+WASM REPL test files have been moved to `examples/wasm-repl/tests/`. This directory is
+retained as a placeholder for future WASM-specific test cases that belong in the main test suite.

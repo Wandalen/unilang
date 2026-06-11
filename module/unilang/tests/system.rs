@@ -10,4 +10,6 @@ mod system {
   mod end_to_end;
   mod external_usage;
   mod multi_yaml_system;
+  mod vocabulary_enforcement;
+  mod nfr_sensitive_data;
 }

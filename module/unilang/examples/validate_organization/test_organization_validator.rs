@@ -5,6 +5,8 @@
 //! conventions, proper categorization, and prevents regression to problematic
 //! task-based naming patterns.
 
+#![ allow( dead_code ) ]
+
 use std::fs;
 use std::path::{ Path, PathBuf };
 use std::collections::{ HashMap, HashSet };
@@ -18,6 +20,7 @@ pub struct OrganizationRules
   /// Prohibited naming patterns
   pub prohibited_patterns : Vec< String >,
   /// Required naming conventions
+  #[ allow( dead_code ) ]
   pub naming_conventions : HashMap< String, Vec< String > >,
   /// Maximum depth for test directories
   pub max_depth : usize,
@@ -104,6 +107,7 @@ impl OrganizationValidator
   }
 
   /// Create validator with custom rules
+  #[ allow( dead_code ) ]
   pub fn with_rules< P : AsRef< Path > >( tests_root : P, rules : OrganizationRules ) -> Self
   {
     Self {
@@ -144,7 +148,7 @@ impl OrganizationValidator
     };
 
     // Check if it's a Rust test file
-    if !path.extension().map_or( false, |ext| ext == "rs" )
+    if !path.extension().is_some_and( |ext| ext == "rs" )
     {
       // Skip non-Rust files
       return ValidationResult {
@@ -292,7 +296,7 @@ impl OrganizationValidator
     let valid_files = results.iter().filter( |r| r.is_valid ).count();
     let invalid_files = total_files - valid_files;
 
-    report.push_str( &format!( "# Test Organization Validation Report\n\n" ) );
+    report.push_str( "# Test Organization Validation Report\n\n" );
     report.push_str( &format!( "**Total files analyzed:** {}\n", total_files ) );
     report.push_str( &format!( "**Valid files:** {} ({:.1}%)\n", valid_files, (valid_files as f64 / total_files as f64) * 100.0 ) );
     report.push_str( &format!( "**Invalid files:** {} ({:.1}%)\n\n", invalid_files, (invalid_files as f64 / total_files as f64) * 100.0 ) );
@@ -313,7 +317,7 @@ impl OrganizationValidator
         {
           report.push_str( &format!( "- {}\n", violation ) );
         }
-        report.push_str( "\n" );
+        report.push( '\n' );
       }
     }
     else

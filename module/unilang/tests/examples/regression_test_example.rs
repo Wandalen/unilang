@@ -77,11 +77,14 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
 
   let run_routine = Box::new( |cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     // Verify the fix is working by checking all commands are collected
-    let commands = cmd.arguments.get( "command" ).expect( "command argument should exist" );
+    let count = cmd.get_list( "command" )
+      .map( |list| list.len() )
+      .unwrap_or( 1 ); // single value = 1 command
 
     Ok( OutputData {
-      content : format!( "Executed {} commands", commands.len() ),
+      content : format!( "Executed {} commands", count ),
       format : "text".to_string(),
+      execution_time_ms : None,
     })
   });
 
@@ -102,8 +105,8 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
   let verified_cmd = &verified_commands[0];
 
   // The critical assertion: ALL commands should be collected
-  let command_values = verified_cmd.arguments.get( "command" )
-    .expect( "command argument should be present" );
+  let command_values = verified_cmd.get_list( "command" )
+    .expect( "command argument should be a list of values" );
 
   assert_eq!( command_values.len(), 3,
              "Should collect all three commands (original bug collected only 1)" );
@@ -121,9 +124,9 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
              "All command values should be preserved exactly as provided" );
 
   // Verify parallel parameter is also handled correctly
-  let parallel_value = verified_cmd.arguments.get( "parallel" )
-    .expect( "parallel argument should be present" );
-  assert_eq!( parallel_value.to_string(), "2",
+  let parallel_value = verified_cmd.get_integer( "parallel" )
+    .expect( "parallel argument should be an integer" );
+  assert_eq!( parallel_value, 2,
              "Parallel parameter should be parsed correctly" );
 }
 
@@ -170,7 +173,7 @@ fn regression_backward_compatibility_single_parameter_usage()
     .end();
 
   let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "success".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
   registry.command_add_runtime( &test_cmd, test_routine ).unwrap();
@@ -181,7 +184,7 @@ fn regression_backward_compatibility_single_parameter_usage()
     r".test param::unquoted",
     r#".test param::"value with spaces""#,
     r#".test param::"123""#,
-    r#".test param::""#,  // empty string
+    r#".test param::"""#,  // empty string — needs 3 quotes: 2 for value, 1 for raw-string close
   ];
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -190,20 +193,18 @@ fn regression_backward_compatibility_single_parameter_usage()
   {
     // Act
     let instruction = parser.parse_repl_input( pattern )
-      .expect( &format!( "Should parse single parameter pattern: {}", pattern ) );
+      .unwrap_or_else( |e| panic!( "Should parse single parameter pattern: {pattern}: {e:?}" ) );
 
     let instructions = [instruction];
     let analyzer = SemanticAnalyzer::new( &instructions, &registry );
     let verified_commands = analyzer.analyze()
-      .expect( &format!( "Should analyze single parameter pattern: {}", pattern ) );
+      .unwrap_or_else( |e| panic!( "Should analyze single parameter pattern: {pattern}: {e:?}" ) );
 
     // Assert - Single parameter behavior should be unchanged
     let verified_cmd = &verified_commands[0];
-    let param_values = verified_cmd.arguments.get( "param" )
-      .expect( "param argument should be present" );
 
-    assert_eq!( param_values.len(), 1,
-               "Single parameter should remain single for pattern: {}", pattern );
+    // Single value (multiple=false, one occurrence) should be a scalar, not a list
+    assert!( verified_cmd.get_list( "param" ).is_none(), "Single parameter should remain single for pattern: {}", pattern );
 
     // Verify the value is correct (extract expected value from pattern)
     let expected_value = pattern
@@ -212,7 +213,9 @@ fn regression_backward_compatibility_single_parameter_usage()
       .unwrap()
       .trim_matches( '"' );
 
-    assert_eq!( param_values[0].to_string(), expected_value,
+    let param_value = verified_cmd.get_string( "param" )
+      .expect( "param argument should be a string" );
+    assert_eq!( param_value, expected_value,
                "Single parameter value should be preserved for pattern: {}", pattern );
   }
 }
@@ -261,7 +264,7 @@ fn regression_multiple_parameter_performance_no_degradation()
     .end();
 
   let perf_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "performance_test".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "performance_test".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
   registry.command_add_runtime( &perf_cmd, perf_routine ).unwrap();
@@ -280,6 +283,7 @@ fn regression_multiple_parameter_performance_no_degradation()
   let _ = parser.parse_repl_input( &large_command );
 
   // Act - Measure performance
+  let start = std::time::Instant::now();
 
   for _ in 0..10  // Multiple iterations for stability
   {
@@ -292,6 +296,7 @@ fn regression_multiple_parameter_performance_no_degradation()
       .expect( "Should analyze large command" );
   }
 
+  let duration = start.elapsed();
   let avg_duration = duration.as_millis() / 10;
 
   // Assert - Performance should be reasonable
@@ -305,7 +310,8 @@ fn regression_multiple_parameter_performance_no_degradation()
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let verified_commands = analyzer.analyze().unwrap();
 
-  let data_values = verified_commands[0].arguments.get( "data" ).unwrap();
+  let data_values = verified_commands[0].get_list( "data" )
+    .expect( "data argument should be a list" );
   assert_eq!( data_values.len(), 100,
              "Should still collect all parameters correctly despite performance optimization" );
 }
@@ -352,7 +358,7 @@ fn regression_edge_case_parameter_collection_robustness()
     .end();
 
   let edge_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "edge_test_success".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "edge_test_success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
   registry.command_add_runtime( &edge_cmd, edge_routine ).unwrap();
@@ -369,7 +375,8 @@ fn regression_edge_case_parameter_collection_robustness()
   let verified_commands = analyzer.analyze()
     .expect( "Should analyze command with empty values" );
 
-  let values = verified_commands[0].arguments.get( "value" ).unwrap();
+  let values = verified_commands[0].get_list( "value" )
+    .expect( "value argument should be a list" );
   assert_eq!( values.len(), 3, "Should collect empty values" );
   assert_eq!( values[0].to_string(), "", "Empty value should be preserved" );
   assert_eq!( values[1].to_string(), "non_empty", "Non-empty value should be preserved" );
@@ -385,7 +392,8 @@ fn regression_edge_case_parameter_collection_robustness()
   let ws_commands = ws_analyzer.analyze()
     .expect( "Should analyze command with whitespace values" );
 
-  let ws_values = ws_commands[0].arguments.get( "value" ).unwrap();
+  let ws_values = ws_commands[0].get_list( "value" )
+    .expect( "value argument should be a list" );
   assert_eq!( ws_values.len(), 3, "Should collect whitespace values" );
   assert_eq!( ws_values[0].to_string().trim(), "", "Whitespace value should be preserved" );
 
@@ -437,7 +445,7 @@ fn regression_configuration_compatibility()
 
   // Test explicit configuration settings
   let explicit_options = UnilangParserOptions {
-    strict_mode : false,
+    error_on_duplicate_named_arguments : false,
     ..Default::default()
   };
 
@@ -451,7 +459,7 @@ fn regression_configuration_compatibility()
   let default_instruction = default_result.unwrap();
   let explicit_instruction = explicit_result.unwrap();
 
-  assert_eq!( default_instruction.command_name, explicit_instruction.command_name,
+  assert_eq!( default_instruction.command_path_slices, explicit_instruction.command_path_slices,
              "Configuration variants should produce compatible results" );
 
   assert_eq!( default_instruction.named_arguments.len(),
@@ -495,7 +503,7 @@ fn regression_api_stability()
     .end();
 
   let api_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "api_stable".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "api_stable".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
   // This method should continue to exist and work
@@ -551,7 +559,7 @@ fn regression_output_format_stability()
     .end();
 
   let stable_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "stable_output".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "stable_output".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
   registry.command_add_runtime( &stable_cmd, stable_routine ).unwrap();

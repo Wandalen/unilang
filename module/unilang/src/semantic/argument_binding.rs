@@ -101,7 +101,7 @@ impl SemanticAnalyzer< '_ >
       while *positional_idx < instruction.positional_arguments.len()
       {
         let parser_arg = &instruction.positional_arguments[ *positional_idx ];
-        values.push( parse_value( &parser_arg.value, &arg_def.kind )? );
+        values.push( coerce_arg_value( &parser_arg.value, arg_def )? );
         *positional_idx += 1;
       }
       bound_arguments.insert( arg_def.name.clone(), Value::List( values ) );
@@ -109,7 +109,7 @@ impl SemanticAnalyzer< '_ >
     else
     {
       let parser_arg = &instruction.positional_arguments[ *positional_idx ];
-      bound_arguments.insert( arg_def.name.clone(), parse_value( &parser_arg.value, &arg_def.kind )? );
+      bound_arguments.insert( arg_def.name.clone(), coerce_arg_value( &parser_arg.value, arg_def )? );
       *positional_idx += 1;
     }
 
@@ -128,7 +128,7 @@ impl SemanticAnalyzer< '_ >
       let mut values = Vec::new();
       for parser_arg in parser_args
       {
-        values.push( parse_value( &parser_arg.value, &arg_def.kind )? );
+        values.push( coerce_arg_value( &parser_arg.value, arg_def )? );
       }
       bound_arguments.insert( arg_def.name.clone(), Value::List( values ) );
     }
@@ -138,14 +138,14 @@ impl SemanticAnalyzer< '_ >
       let mut values = Vec::new();
       if let Some( parser_arg ) = parser_args.first()
       {
-        values.push( parse_value( &parser_arg.value, &arg_def.kind )? );
+        values.push( coerce_arg_value( &parser_arg.value, arg_def )? );
       }
       bound_arguments.insert( arg_def.name.clone(), Value::List( values ) );
     }
     else if let Some( parser_arg ) = parser_args.first()
     {
       // Single value and multiple=false - keep as single value
-      bound_arguments.insert( arg_def.name.clone(), parse_value( &parser_arg.value, &arg_def.kind )? );
+      bound_arguments.insert( arg_def.name.clone(), coerce_arg_value( &parser_arg.value, arg_def )? );
     }
 
     Ok( () )
@@ -183,7 +183,7 @@ impl SemanticAnalyzer< '_ >
     }
     else if let Some( default_value ) = &arg_def.attributes.default
     {
-      bound_arguments.insert( arg_def.name.clone(), parse_value( default_value, &arg_def.kind )? );
+      bound_arguments.insert( arg_def.name.clone(), coerce_arg_value( default_value, arg_def )? );
     }
 
     Ok( () )
@@ -193,3 +193,33 @@ impl SemanticAnalyzer< '_ >
 // Suppress unused import warnings — these imports are used by method bodies above
 #[ allow( unused_imports ) ]
 use VerifiedCommand as _;
+
+/// Coerces a raw string value to a typed `Value` for a specific argument definition.
+///
+/// Produces `ErrorCode::ArgumentTypeMismatch` on failure, distinguishing argument-level
+/// coercion errors from internal `TypeMismatch` errors (which come from `From<TypeError>`
+/// for non-argument contexts). Sensitive argument values are excluded from the error
+/// message to prevent credential leakage in logs.
+fn coerce_arg_value( input : &str, arg_def : &ArgumentDefinition ) -> Result< Value, Error >
+{
+  parse_value( input, &arg_def.kind ).map_err( | type_err |
+  {
+    // Do not include the raw value in the message for sensitive arguments
+    // (prevents passwords, API keys, and tokens from appearing in error logs)
+    let detail = if arg_def.attributes.sensitive
+    {
+      "type coercion failed (value redacted — sensitive argument)".to_string()
+    }
+    else
+    {
+      type_err.reason.clone()
+    };
+    Error::Execution( ErrorData::new(
+      ErrorCode::ArgumentTypeMismatch,
+      format!(
+        "Argument Error: Cannot coerce value for argument '{}' to {:?}. {}",
+        arg_def.name, arg_def.kind, detail
+      ),
+    ))
+  })
+}

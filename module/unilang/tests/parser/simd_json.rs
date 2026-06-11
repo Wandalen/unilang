@@ -7,7 +7,6 @@
 
 #![ cfg( feature = "json_parser" ) ]
 
-use test_tools::*;
 use unilang::simd_json_parser::{ SIMDJsonParser, FastJsonValue };
 use serde_json::Value as SerdeValue;
 use unilang::{ Value, Kind, types::parse_value };

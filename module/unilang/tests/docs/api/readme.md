@@ -14,4 +14,5 @@ Case prefix: `AP-`. Minimum 4 cases per spec.
 
 | Name | Purpose | Status |
 |------|---------|--------|
-| `01_public_types.md` | `api` spec for all public types and compatibility guarantees | ⏳ |
+| `01_public_types.md` | `api` spec for all public types and compatibility guarantees | ✅ |
+| `02_error_codes.md` | `api` spec for error code taxonomy, string representations, and derives | ✅ |

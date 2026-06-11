@@ -7,3 +7,4 @@ Public API contract tests covering all 10 public types and compatibility guarant
 | File | Responsibility |
 |------|----------------|
 | `public_types.rs` | AP-1..8 spec cases — builder API, round-trip, type coverage, private fields |
+| `error_codes.rs` | AP-1..6 spec cases — error code variants, conditions, and derive contracts |

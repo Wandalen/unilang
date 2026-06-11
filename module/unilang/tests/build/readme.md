@@ -10,3 +10,4 @@ Build-time code generation tests: YAML/JSON extraction, PHF generation, hint gen
 | `helpers_type_analyzer.rs` | `build_helpers::TypeAnalyzer` — type mismatch detection during build |
 | `validation.rs` | Build-time validation of command definitions from YAML/JSON sources |
 | `phf_codegen_no_leaked_dep.rs` | Codegen: `generate_static_registry_source()` emits no bare `phf_map!` |
+| `dependency_standards.rs` | IN-1..3 spec cases — workspace dep version format rules R1–R3 |

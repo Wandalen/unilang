@@ -6,48 +6,31 @@ This directory contains automated tools for validating and maintaining the syste
 
 | File | Responsibility |
 |------|----------------|
-| `test_organization_validator.rs` | Core validation library for test organization rules |
-| `validate_organization.rs` | CLI tool for running organization validation |
-| `assess_quality_cli.rs` | CLI tool for test quality assessment |
-| `quality_assessor.rs` | Quality assessment logic library |
 | `quality_monitor.sh` | Shell script: continuous quality monitoring |
 | `pre_commit_test_organization.sh` | Shell script: git pre-commit hook for test org |
 | `rollback_prevention_suite.sh` | Shell script: rollback prevention test suite |
 | `state_metrics_verification.sh` | Shell script: verify state metrics consistency |
 | `test_organization_ci.yml` | GitHub Actions workflow for CI validation |
 | `makefile.test_organization` | Makefile targets for test organization tasks |
+| `quality_assessor.rs` | Unit tests for the `QualityAssessor` tool (from `examples/assess_quality_cli/`) |
 
 ## Tools Overview
 
-### 1. `test_organization_validator.rs`
-**Core validation library**
-- Rust library providing validation logic for test organization
-- Validates naming conventions, directory structure, and categorization
-- Generates detailed violation reports
-- Used by other tools as the foundation validation engine
-
-### 2. `validate_organization.rs`
-**CLI validation tool**
-- Standalone executable for validating test organization
-- Can be run manually or in CI/CD pipelines
-- Provides detailed reports and exit codes for automation
-- Usage: `rustc validate_organization.rs && ./validate_organization`
-
-### 3. `pre_commit_test_organization.sh`
+### 1. `pre_commit_test_organization.sh`
 **Git pre-commit hook**
 - Prevents commits that violate test organization standards
 - Validates only staged test files for efficiency
 - Provides colored output with clear violation explanations
 - Installation: Copy to `.git/hooks/pre-commit` and make executable
 
-### 4. `test_organization_ci.yml`
+### 2. `test_organization_ci.yml`
 **GitHub Actions workflow**
 - Automated validation in CI/CD pipelines
 - Runs on pull requests and pushes affecting test files
 - Generates organization reports in CI output
 - Place in `.github/workflows/test_organization.yml`
 
-### 5. `Makefile.test_organization`
+### 3. `Makefile.test_organization`
 **Make targets for validation**
 - Convenient make targets for common validation tasks
 - Supports installation of pre-commit hooks
@@ -173,9 +156,8 @@ Directory nesting is too deep (max: 4 levels)
 ## Maintenance
 
 ### Adding New Rules
-1. Update `OrganizationRules` in `test_organization_validator.rs`
-2. Add corresponding checks in shell scripts and CI workflows
-3. Update documentation and examples
+1. Add corresponding checks in shell scripts and CI workflows
+2. Update documentation and examples
 
 ### Customizing Rules
 - Modify `OrganizationRules::default()` for project-specific rules

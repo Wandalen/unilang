@@ -12,3 +12,5 @@ End-to-end workflows, API compatibility, and external usage pattern tests.
 | `external_usage.rs` | Usage patterns as seen by downstream crates |
 | `multi_yaml_system.rs` | Multi-YAML aggregation end-to-end |
 | `argv_api.rs` | argv-based API request parsing and dispatch |
+| `vocabulary_enforcement.rs` | IN-1..3 spec cases — actor taxonomy and canonical term enforcement |
+| `nfr_sensitive_data.rs` | IN-3 spec case — sensitive argument value excluded from error output |

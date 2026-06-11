@@ -23,3 +23,5 @@ Tests for command registration, lookup, static/dynamic modes, and validation.
 | `static_registry_conversion.rs` | Conversion from dynamic definitions to static registry |
 | `phf_reexport.rs` | PHF map accessible via unilang re-export without direct dep |
 | `multi_yaml_conflict_detection.rs` | Conflict detection when merging multiple YAML sources |
+| `static_registry_routines.rs` | `into_routines()` and `From<StaticCommandRegistry>` routine transfer |
+| `command_naming_invariant.rs` | IN-1..3 spec cases — dot-prefix enforcement and full-name construction |

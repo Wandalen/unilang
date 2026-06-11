@@ -84,6 +84,14 @@ The verbosity level **must** be parseable from integers 0-4 via `HelpVerbosity::
 
 **Implementation status:** ✅ Implemented with `HelpVerbosity` enum (Minimal, Basic, Standard, Detailed, Comprehensive), `HelpGenerator::with_verbosity()`, `set_verbosity()`, and `verbosity()` methods. Default is Standard (Level 2). Comprehensive test coverage with 9 tests verifying all verbosity levels and progressive information display.
 
+### FR-HELP-8 (Help Command Self-Exclusion)
+
+The `.help` system command **must not** appear in its own listing when the user invokes `.help` (or the `?` operator). Including `.help` in its own output is a self-referential display artefact that adds noise without value, since the user already successfully invoked `.help` to see the list.
+
+**Implementation Note:** Achieved by registering `.help` with `hidden_from_list: true` so `format_command_listing()` suppresses it from the output it generates.
+
+**Implementation status:** ✅ Implemented — `.help` is registered with `hidden_from_list: true` in the dynamic registry build (fixed in BUG-102).
+
 ### Analysis Instances
 
 | File | Relationship |

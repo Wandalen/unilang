@@ -32,8 +32,8 @@ fn main()
     process::exit( 1 );
   }
 
-  println!( "🔍 Validating test organization in: {}", tests_path.display() );
-  println!( "📋 Checking compliance with systematic organization standards...\n" );
+  println!( "Validating test organization in: {}", tests_path.display() );
+  println!( "Checking compliance with systematic organization standards...\n" );
 
   let validator = OrganizationValidator::new( tests_path );
 
@@ -47,12 +47,12 @@ fn main()
 
       if invalid_count > 0
       {
-        eprintln!( "\n❌ Validation failed: {} files violate organization standards", invalid_count );
+        eprintln!( "\nValidation failed: {} files violate organization standards", invalid_count );
         process::exit( 1 );
       }
       else
       {
-        println!( "\n✅ All test files comply with organization standards!" );
+        println!( "\nAll test files comply with organization standards!" );
         process::exit( 0 );
       }
     }

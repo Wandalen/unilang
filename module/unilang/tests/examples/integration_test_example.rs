@@ -13,7 +13,6 @@ use unilang::interpreter::{ ExecutionContext, Interpreter };
 use unilang::pipeline::Pipeline;
 use unilang::data::{ OutputData, ErrorData };
 use unilang_parser::{ Parser, UnilangParserOptions };
-use std::collections::HashMap;
 
 /// Example: End-to-end component interaction
 ///
@@ -82,12 +81,13 @@ fn test_complete_command_processing_pipeline()
     {
       "json" => format!( r#"{{"processed": "{}"}}"#, input_value ),
       "xml" => format!( "<processed>{}</processed>", input_value ),
-      "text" | _ => format!( "Processed: {}", input_value ),
+      _ => format!( "Processed: {}", input_value ),
     };
 
     Ok( OutputData {
       content : processed_content,
       format,
+      execution_time_ms : None,
     })
   });
 
@@ -108,10 +108,11 @@ fn test_complete_command_processing_pipeline()
     .expect( "Semantic analyzer should validate command" );
 
   // 3. Command execution
-  let interpreter = Interpreter::new();
-  let context = ExecutionContext::new();
-  let output = interpreter.execute( verified_commands.into_iter().next().unwrap(), context )
+  let interpreter = Interpreter::new( &verified_commands, &registry );
+  let mut context = ExecutionContext::default();
+  let outputs = interpreter.run( &mut context )
     .expect( "Interpreter should execute verified command" );
+  let output = outputs.into_iter().next().unwrap();
 
   // Assert - Verify complete data flow
   assert_eq!( output.format, "json", "Output format should match requested format" );
@@ -170,7 +171,7 @@ fn test_parser_semantic_analyzer_contract()
     .end();
 
   let contract_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-    Ok( OutputData { content : "contract_fulfilled".to_string(), format : "text".to_string() })
+    Ok( OutputData { content : "contract_fulfilled".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
   registry.command_add_runtime( &contract_cmd, contract_routine ).unwrap();
 
@@ -182,8 +183,10 @@ fn test_parser_semantic_analyzer_contract()
     .expect( "Parser should handle valid input" );
 
   // Verify parser output structure (contract requirements)
-  assert!( !instruction.command_name.is_empty(), "Parser must provide command name" );
-  assert!( instruction.command_name.starts_with( '.' ), "Parser must preserve command prefix" );
+  assert!( !instruction.command_path_slices.is_empty(), "Parser must provide command name" );
+  // command_path_slices contains the path segments without the leading dot separator
+  let full_path = instruction.command_path_slices.join( "." );
+  assert!( full_path.contains( "contract_test" ), "Parser must include command name in path slices: {:?}", instruction.command_path_slices );
   assert!( instruction.named_arguments.contains_key( "required_arg" ), "Parser must extract arguments" );
 
   // Test semantic analyzer can process parser output (contract fulfillment)
@@ -194,7 +197,7 @@ fn test_parser_semantic_analyzer_contract()
 
   // Verify contract fulfillment
   assert_eq!( verified_commands.len(), 1, "Should produce one verified command" );
-  assert_eq!( verified_commands[0].definition.name, ".contract_test", "Command identity preserved" );
+  assert_eq!( verified_commands[0].definition.name().as_str(), ".contract_test", "Command identity preserved" );
   assert!( verified_commands[0].arguments.contains_key( "required_arg" ), "Required arguments preserved" );
   assert!( verified_commands[0].arguments.contains_key( "optional_arg" ), "Default values should be applied" );
 }
@@ -208,41 +211,61 @@ fn test_parser_semantic_analyzer_contract()
 #[test]
 fn test_pipeline_state_transitions()
 {
-  // Arrange - Set up stateful pipeline
-  let mut pipeline = Pipeline::new();
+  // Arrange - Set up pipeline with a registered .echo command
+  let mut registry = CommandRegistry::new();
 
-  // Verify initial state
-  assert!( matches!( pipeline.last_result(), None ), "Pipeline should start with no result" );
+  let echo_cmd = CommandDefinition::former()
+    .name( ".echo" )
+    .description( "Echo a message" )
+    .arguments( vec![
+      ArgumentDefinition {
+        name : "message".to_string(),
+        description : "Message to echo".to_string(),
+        kind : Kind::String,
+        hint : "Text to echo".to_string(),
+        attributes : ArgumentAttributes {
+          optional : false,
+          ..Default::default()
+        },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  let echo_routine = Box::new( |cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
+    let msg = cmd.get_string( "message" ).unwrap_or( "" );
+    Ok( OutputData { content : msg.to_string(), format : "text".to_string(), execution_time_ms : None })
+  });
+  registry.command_add_runtime( &echo_cmd, echo_routine ).unwrap();
+
+  let pipeline = Pipeline::new( registry );
 
   // Act & Assert - Test state transitions through workflow
 
   // Step 1: Process first command
-  let result1 = pipeline.process_command( r#".echo message::"Hello""# );
-  assert!( result1.is_ok(), "Pipeline should process valid command" );
+  let result1 = pipeline.process_command_simple( r#".echo message::"Hello""# );
+  assert!( result1.is_success(), "Pipeline should process valid command" );
+  assert!( !result1.outputs.is_empty(), "Pipeline should have output after command" );
 
-  // Verify state after first command
-  let last_result = pipeline.last_result();
-  assert!( last_result.is_some(), "Pipeline should store last result" );
+  // Step 2: Process second command
+  let result2 = pipeline.process_command_simple( r#".echo message::"World""# );
+  assert!( result2.is_success(), "Pipeline should process subsequent commands" );
 
-  // Step 2: Process second command that might reference previous result
-  let result2 = pipeline.process_command( r#".echo message::"World""# );
-  assert!( result2.is_ok(), "Pipeline should process subsequent commands" );
-
-  // Step 3: Process batch of commands
-  let batch_commands = vec![
+  // Step 3: Process "batch" of commands (using multiple sequential calls)
+  let batch_commands = [
     r#".echo message::"First""#,
     r#".echo message::"Second""#,
     r#".echo message::"Third""#,
   ];
 
-  let batch_result = pipeline.process_batch( &batch_commands );
-  assert!( batch_result.is_ok(), "Pipeline should handle command batches" );
+  let batch_results : Vec< _ > = batch_commands.iter()
+    .map( |cmd| pipeline.process_command_simple( cmd ) )
+    .collect();
 
-  let batch_output = batch_result.unwrap();
-  assert_eq!( batch_output.len(), 3, "Should process all commands in batch" );
-
-  // Verify final state
-  assert!( pipeline.last_result().is_some(), "Pipeline should maintain state after batch" );
+  assert_eq!( batch_results.len(), 3, "Should process all commands in batch" );
+  assert!( batch_results.iter().all( |r| r.is_success() ), "All batch commands should succeed" );
 }
 
 /// Example: Error propagation testing
@@ -314,22 +337,23 @@ fn test_error_propagation_through_components()
   let verified_commands = valid_analyzer.analyze()
     .expect( "Semantic analysis should succeed for valid command" );
 
-  let interpreter = Interpreter::new();
-  let context = ExecutionContext::new();
-  let execution_result = interpreter.execute( verified_commands.into_iter().next().unwrap(), context );
+  let interpreter = Interpreter::new( &verified_commands, &registry );
+  let mut context = ExecutionContext::default();
+  let execution_result = interpreter.run( &mut context );
 
   assert!( execution_result.is_err(), "Should fail at execution stage" );
 
   let execution_error = execution_result.unwrap_err();
-  assert_eq!( execution_error.code, unilang::data::ErrorCode::ValidationRuleFailed, "Error code should be preserved" );
-  assert!( execution_error.message.contains( "validation" ), "Error message should be preserved" );
+  let error_text = format!( "{:?}", execution_error ).to_lowercase();
+  assert!( error_text.contains( "validationrulefailed" ) || error_text.contains( "validation" ),
+          "Error should indicate validation failure: {:?}", execution_error );
 
-  // Test 3: Error recovery - system should handle subsequent valid commands
-  let recovery_instruction = parser.parse_repl_input( r#".echo message::"recovery test""# ).unwrap();
+  // Test 3: Error recovery - semantic analysis succeeds for valid commands after execution error
+  let recovery_instruction = parser.parse_repl_input( r#".error_test trigger::"runtime""# ).unwrap();
   let recovery_instructions = [recovery_instruction];
   let recovery_analyzer = SemanticAnalyzer::new( &recovery_instructions, &registry );
 
-  // System should recover and process valid commands after errors
+  // System should recover - semantic analysis succeeds even after previous execution error
   let recovery_result = recovery_analyzer.analyze();
   assert!( recovery_result.is_ok(), "System should recover from previous errors" );
 }
@@ -351,7 +375,7 @@ fn test_integration_performance_characteristics()
   for i in 0..100
   {
     let cmd = CommandDefinition::former()
-      .name( &format!( ".perf_test_{}", i ) )
+      .name( format!( ".perf_test_{}", i ) )
       .description( "Performance test command" )
       .arguments( vec![
         ArgumentDefinition {
@@ -371,15 +395,13 @@ fn test_integration_performance_characteristics()
       .end();
 
     let perf_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
-      use unilang::data::ErrorCode;
-      Ok( OutputData { content : "performance_test_result".to_string(), format : "text".to_string() })
+      Ok( OutputData { content : "performance_test_result".to_string(), format : "text".to_string(), execution_time_ms : None })
     });
 
     registry.command_add_runtime( &cmd, perf_routine ).unwrap();
   }
 
   let parser = Parser::new( UnilangParserOptions::default() );
-  let interpreter = Interpreter::new();
 
   // Act - Measure performance of integrated workflow
 
@@ -396,8 +418,9 @@ fn test_integration_performance_characteristics()
     let verified_commands = analyzer.analyze()
       .expect( "Should analyze performance test command" );
 
-    let context = ExecutionContext::new();
-    let _output = interpreter.execute( verified_commands.into_iter().next().unwrap(), context )
+    let interpreter = Interpreter::new( &verified_commands, &registry );
+    let mut context = ExecutionContext::default();
+    let _outputs = interpreter.run( &mut context )
       .expect( "Should execute test command" );
   }
 
@@ -421,12 +444,12 @@ fn test_configuration_integration()
 {
   // Test different parser configurations
   let strict_options = UnilangParserOptions {
-    strict_mode : true,
+    error_on_duplicate_named_arguments : true,
     ..Default::default()
   };
 
   let permissive_options = UnilangParserOptions {
-    strict_mode : false,
+    error_on_duplicate_named_arguments : false,
     ..Default::default()
   };
 

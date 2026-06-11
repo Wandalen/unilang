@@ -15,5 +15,5 @@ Governed by `test_surface.rulebook.md`.
 | Directory | Responsibility | Specs |
 |-----------|----------------|------:|
 | `feature/` | Behavioral requirement specs for `docs/feature/` instances | 5 |
-| `invariant/` | System invariant enforcement specs for `docs/invariant/` instances | 4 |
-| `api/` | Public API contract specs for `docs/api/` instances | 1 |
+| `invariant/` | System invariant enforcement specs for `docs/invariant/` instances | 5 |
+| `api/` | Public API contract specs for `docs/api/` instances | 2 |

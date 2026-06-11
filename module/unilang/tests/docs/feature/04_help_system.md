@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify all FR-HELP behavioral requirements for help generation and access
 - **Responsibility:** Test cases covering command list generation, detailed help, `?` operator, `.cmd.help` commands, `??` parameter, automatic help API, and verbosity levels
-- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`)
+- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`), FR-HELP-8 (`.help` self-exclusion from listing)
 - **Out of Scope:** Registry initialization (FR-REG); argument parsing (FR-ARG); REPL state (FR-REPL)
 
 ### FT-1: Command list returns all registered command names
@@ -48,3 +48,9 @@
 - **Given:** A `Pipeline` with a registry that does not contain `.unknown`
 - **When:** `pipeline.run("? .unknown")` is called
 - **Then:** Output includes a not-found indication for `.unknown` (with optional Levenshtein suggestions); no panic
+
+### FT-8: `.help` command does not appear in its own listing
+
+- **Given:** A `Pipeline` whose registry includes the `.help` system command
+- **When:** `pipeline.run(".help")` is called (or `pipeline.run("?")`)
+- **Then:** The returned output does NOT contain `.help` as a listed command entry; all other registered commands are still visible in the listing

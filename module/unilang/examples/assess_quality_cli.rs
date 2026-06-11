@@ -8,6 +8,7 @@ use std::path::Path;
 use std::process;
 use std::fs;
 
+#[ path = "assess_quality_cli/quality_assessor.rs" ]
 mod quality_assessor;
 use quality_assessor::{ QualityAssessor, AssessmentConfig, QualityReport };
 
@@ -602,7 +603,7 @@ fn format_text_report( report : &QualityReport, config : &CliConfig ) -> String
         output.push_str( &format!( "  Files:    {}\n", rec.files_affected.join( ", " ) ) );
       }
     }
-    output.push_str( "\n" );
+    output.push( '\n' );
   }
 
   output.push_str( "📈 Summary\n" );

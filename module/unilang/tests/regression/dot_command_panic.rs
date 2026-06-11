@@ -71,10 +71,10 @@ fn test_dot_command_with_minimal_commands()
 
   if let Err(Error::Execution(error_data)) = result {
     assert_eq!(error_data.code, unilang::data::ErrorCode::HelpRequested);
-    // NOTE: With mandatory help enforcement, .help command is always available
-    assert!(error_data.message.contains("Available Commands") ||
-            error_data.message.contains(".help"),
-            "Should show available commands or mention .help command");
+    // Message shows either the command list or "no commands" — both are valid help responses
+    let msg_lower = error_data.message.to_lowercase();
+    assert!(msg_lower.contains("commands") || msg_lower.contains("available"),
+            "Should produce a help-related response mentioning commands: {:?}", error_data.message);
   } else {
     panic!("Expected Execution error with help content");
   }

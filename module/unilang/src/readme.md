@@ -11,10 +11,9 @@ Library source code for the `unilang` crate.
 | `multi_yaml/` | Multi-file YAML aggregation and static code generation |
 | `build_helpers/` | Build-time utilities (type hints, code generators) |
 | `bin/` | Binary entry points |
-| `registry/` | Registry module split (planned) |
-| `registry.rs` | Command registry: static, dynamic, and hybrid modes |
-| `semantic.rs` | Semantic analysis: argument binding and validation |
-| `pipeline.rs` | Command pipeline: batch and single-command processing |
+| `registry/` | Command registry: static PHF, dynamic LRU, bridge, and traits |
+| `pipeline/` | Command pipeline: batch and single-command processing |
+| `semantic/` | Semantic analysis: argument binding and validation |
 | `interpreter.rs` | Command execution engine |
 | `help.rs` | Help text generation and formatting |
 | `loader.rs` | Load command definitions from YAML/JSON strings |

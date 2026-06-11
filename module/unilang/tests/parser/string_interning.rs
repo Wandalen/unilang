@@ -334,3 +334,28 @@ fn test_memory_allocation_reduction()
   let stats = interner.stats();
   assert_eq!( stats.cached_strings, test_patterns.len() );
 }
+
+#[ test ]
+fn test_empty_path_slices()
+{
+  let interner = unilang::interner::StringInterner::new();
+  let cmd = interner.intern_command_name( &[] );
+  assert_eq!( cmd, "." );
+}
+
+#[ test ]
+fn test_clear()
+{
+  let interner = unilang::interner::StringInterner::new();
+
+  interner.intern( "test1" );
+  interner.intern( "test2" );
+
+  let stats_before = interner.stats();
+  assert_eq!( stats_before.cached_strings, 2 );
+
+  interner.clear();
+
+  let stats_after = interner.stats();
+  assert_eq!( stats_after.cached_strings, 0 );
+}

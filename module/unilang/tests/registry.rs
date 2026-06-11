@@ -22,5 +22,7 @@ mod registry {
   mod static_const_constructor;
   mod static_registry;
   mod static_registry_conversion;
+  mod static_registry_routines;
   mod validation_enforcement;
+  mod command_naming_invariant;
 }

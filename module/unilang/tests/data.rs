@@ -17,6 +17,10 @@ mod data {
   mod get_string_normalized;
   mod loader;
   mod static_data;
+  mod static_data_auto_help;
+  mod static_data_category;
   mod types;
-  mod validated_newtypes;
+  mod validated_command_name;
+  mod validated_namespace;
+  mod validated_version_status;
 }
