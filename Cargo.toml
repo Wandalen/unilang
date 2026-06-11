@@ -17,7 +17,7 @@ discord_url = "https://discord.gg/m3yKnHRAGr"
 # Workspace Member Crates
 # ========================================
 unilang = { version = "=0.53.0", path = "module/unilang", default-features = false }
-unilang_parser = { version = "=0.36.0", path = "module/unilang_parser", default-features = false }
+unilang_parser = { version = "=0.37.0", path = "module/unilang_parser", default-features = false }
 unilang_meta = { version = "=0.1.0", path = "module/unilang_meta", default-features = false }
 cargo_unilang = { version = "=0.1.0", path = "module/cargo_unilang", default-features = false }
 
@@ -44,21 +44,21 @@ ron = { version = "^0.12" }
 phf = { version = "^0.13" }
 walkdir = { version = "^2.0" }
 indexmap = { version = "^2.0" }
-lru = { version = "^0.17" }
+lru = { version = "^0.18" }
 toml_edit = { version = "^0.25" }
 
 # ========================================
 # wTools Ecosystem
 # ========================================
-error_tools = { version = "^0.39" }
-mod_interface = { version = "^0.61" }
+error_tools = { version = "^0.40" }
+mod_interface = { version = "^0.64" }
 former = { version = "^2.45" }
-strs_tools = { version = "^0.45" }
+strs_tools = { version = "^0.46" }
 iter_tools = { version = "^0.50" }
-macro_tools = { version = "^0.85" }
-component_model_types = { version = "^0.27" }
+macro_tools = { version = "^0.87" }
+component_model_types = { version = "^0.56" }
 cli_fmt = { version = "^0.3" }
-test_tools = { version = "^0.16" }
+test_tools = { version = "^0.17" }
 
 # ========================================
 # Performance Optimizations
