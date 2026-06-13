@@ -12,7 +12,6 @@ This directory contains automated tools for validating and maintaining the syste
 | `state_metrics_verification.sh` | Shell script: verify state metrics consistency |
 | `test_organization_ci.yml` | GitHub Actions workflow for CI validation |
 | `makefile.test_organization` | Makefile targets for test organization tasks |
-| `quality_assessor.rs` | Unit tests for the `QualityAssessor` tool (from `examples/assess_quality_cli/`) |
 
 ## Tools Overview
 

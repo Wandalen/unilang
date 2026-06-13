@@ -121,7 +121,7 @@ fn main() -> Result< (), unilang::error::Error >
   // Step 4: Register the Command
   // This connects the command definition with its execution routine.
   // After this, the command can be looked up and executed by name.
-  registry.command_add_runtime( &greet_command, greet_routine )?;
+  registry.register_with_routine( &greet_command, greet_routine )?;
   println!( "✓ Registered 'greet' command with routine" );
 
   // Step 5: Verify Registration

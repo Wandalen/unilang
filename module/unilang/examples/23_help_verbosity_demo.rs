@@ -83,7 +83,7 @@ fn main()
     Ok( OutputData { content: "Config displayed".to_string(), format: "text".to_string(), execution_time_ms: None } )
   });
 
-  registry.command_add_runtime( &command, mock_routine ).unwrap();
+  registry.register_with_routine( &command, mock_routine ).unwrap();
 
   // Create HelpGenerator that respects UNILANG_HELP_VERBOSITY environment variable
   let help_generator = HelpGenerator::from_env( &registry );

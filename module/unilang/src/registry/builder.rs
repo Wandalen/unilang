@@ -62,7 +62,7 @@ impl CommandRegistryBuilder
       {
         let routine = crate::loader::resolve_routine_link( link )?;
         #[ allow( deprecated ) ]
-        self.registry.command_add_runtime( &command_def, routine )?;
+        self.registry.register_with_routine( &command_def, routine )?;
       }
       else
       {
@@ -90,7 +90,7 @@ impl CommandRegistryBuilder
       {
         let routine = crate::loader::resolve_routine_link( link )?;
         #[ allow( deprecated ) ]
-        self.registry.command_add_runtime( &command_def, routine )?;
+        self.registry.register_with_routine( &command_def, routine )?;
       }
       else
       {
@@ -153,7 +153,7 @@ impl CommandRegistryBuilder
 
     // Register with routine - collect errors for later checking
     #[ allow( deprecated ) ]
-    if let Err( e ) = self.registry.command_add_runtime( &cmd, Box::new( routine ) )
+    if let Err( e ) = self.registry.register_with_routine( &cmd, Box::new( routine ) )
     {
       self.errors.push( ( name.to_string(), e ) );
     }

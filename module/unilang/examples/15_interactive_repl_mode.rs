@@ -145,7 +145,7 @@ fn register_interactive_commands( registry : &mut CommandRegistry ) -> Result< (
     })
   });
 
-  registry.command_add_runtime( &login_cmd, login_routine )?;
+  registry.register_with_routine( &login_cmd, login_routine )?;
 
   // Command with optional interactive input
   let config_cmd = CommandDefinition::former()
@@ -227,7 +227,7 @@ fn register_interactive_commands( registry : &mut CommandRegistry ) -> Result< (
     })
   });
 
-  registry.command_add_runtime( &config_cmd, config_routine )?;
+  registry.register_with_routine( &config_cmd, config_routine )?;
 
   // Regular command for comparison
   let info_cmd = CommandDefinition::former()
@@ -263,7 +263,7 @@ fn register_interactive_commands( registry : &mut CommandRegistry ) -> Result< (
     })
   });
 
-  registry.command_add_runtime( &info_cmd, info_routine )?;
+  registry.register_with_routine( &info_cmd, info_routine )?;
 
   // Note: .version is a static command that appears in help but has no executable routine
   // This is a limitation of the static command system - we can only add routines to dynamic commands

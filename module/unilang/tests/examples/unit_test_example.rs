@@ -55,7 +55,7 @@ fn test_semantic_analyzer_validates_required_arguments()
       execution_time_ms : None,
     })
   });
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   // Create instruction missing the required argument
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -184,7 +184,7 @@ fn test_command_registry_runtime_integration()
   });
 
   // Act - Register and use command
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   // Verify command was registered
   let retrieved_cmd = registry.command( ".mock_test" );
@@ -263,7 +263,7 @@ fn test_semantic_analyzer_error_conditions()
   let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     Ok( OutputData { content : "success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
-  registry.command_add_runtime( &valid_cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &valid_cmd, mock_routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
@@ -351,7 +351,7 @@ fn test_with_helper_functions()
   // Arrange - Using helpers for cleaner setup
   let mut registry = CommandRegistry::new();
   let cmd = create_simple_test_command( ".helper_test" );
-  registry.command_add_runtime( &cmd, create_mock_routine() ).unwrap();
+  registry.register_with_routine( &cmd, create_mock_routine() ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( ".helper_test" ).unwrap();

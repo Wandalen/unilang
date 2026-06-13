@@ -183,7 +183,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &types_demo, types_routine )?;
+  registry.register_with_routine( &types_demo, types_routine )?;
   println!( "✓ Registered command with various argument types" );
 
   println!( "\n=== Supported Argument Types ===" );

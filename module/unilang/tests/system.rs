@@ -12,5 +12,9 @@ mod system {
   mod multi_yaml_system;
   mod vocabulary_enforcement;
   mod nfr_sensitive_data;
+  mod nfr_platform;
+  mod nfr_robustness;
+  mod nfr_performance;
+  mod nfr_modularity;
   mod invariant_03_governing_principles;
 }

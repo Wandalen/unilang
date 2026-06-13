@@ -132,7 +132,7 @@ impl UniLangWasmRepl {
       http_method_hint: "GET".to_string(),
     };
     
-    if let Err(e) = registry.command_add_runtime(&echo_cmd, Box::new(demo_handler)) {
+    if let Err(e) = registry.register_with_routine(&echo_cmd, Box::new(demo_handler)) {
       console::error_1(&format!("Failed to register echo command: {}", e).into());
     }
     
@@ -178,7 +178,7 @@ impl UniLangWasmRepl {
       http_method_hint: "GET".to_string(),
     };
     
-    if let Err(e) = registry.command_add_runtime(&calc_cmd, Box::new(demo_handler)) {
+    if let Err(e) = registry.register_with_routine(&calc_cmd, Box::new(demo_handler)) {
       console::error_1(&format!("Failed to register add command: {}", e).into());
     }
   }

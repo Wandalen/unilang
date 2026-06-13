@@ -41,7 +41,7 @@ let greet_cmd = CommandDefinition {
   ..Default::default()
 };
 
-registry.command_add_runtime(&greet_cmd, greet_routine)?;
+registry.register_with_routine(&greet_cmd, greet_routine)?;
 ```
 
 **After (Build-Time), `unilang.commands.yaml`:**
@@ -82,7 +82,7 @@ fn main()
 
 ```rust,ignore
 let mut registry = CommandRegistry::new();
-registry.command_add_runtime(&greet_cmd, greet_routine)?;
+registry.register_with_routine(&greet_cmd, greet_routine)?;
 let pipeline = Pipeline::new(registry);
 ```
 

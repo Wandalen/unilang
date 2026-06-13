@@ -133,6 +133,7 @@ Each domain directory contains **all test types** relevant to that domain:
 | `api/` | Public API contract tests (AP- spec cases from `docs/api/`) |
 | `build/` | Build-time code generation, PHF codegen, and static registry tests |
 | `cli/` | CLI builder API and ergonomic interface tests |
+| `compile_fail/` | Compile-fail fixture files used by trybuild (type-state and private field enforcement) |
 | `data/` | Data model, serialization, and validation tests |
 | `docs/` | Test surface spec files (`tests/docs/feature/`, `invariant/`, `api/`) |
 | `dynamic_libs/` | Dynamic library loading and plugin integration tests |

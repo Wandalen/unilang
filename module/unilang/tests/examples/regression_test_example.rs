@@ -88,7 +88,7 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
     })
   });
 
-  registry.command_add_runtime( &run_cmd, run_routine ).unwrap();
+  registry.register_with_routine( &run_cmd, run_routine ).unwrap();
 
   // Act - Execute the EXACT failing scenario from Task 024
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -176,7 +176,7 @@ fn regression_backward_compatibility_single_parameter_usage()
     Ok( OutputData { content : "success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
-  registry.command_add_runtime( &test_cmd, test_routine ).unwrap();
+  registry.register_with_routine( &test_cmd, test_routine ).unwrap();
 
   // Test various single-parameter patterns that users might use
   let single_param_patterns = vec![
@@ -267,7 +267,7 @@ fn regression_multiple_parameter_performance_no_degradation()
     Ok( OutputData { content : "performance_test".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
-  registry.command_add_runtime( &perf_cmd, perf_routine ).unwrap();
+  registry.register_with_routine( &perf_cmd, perf_routine ).unwrap();
 
   // Create command with many parameters (stress test)
   let mut command_parts = vec![ ".perf_test".to_string() ];
@@ -363,7 +363,7 @@ fn regression_edge_case_parameter_collection_robustness()
     Ok( OutputData { content : "edge_test_success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
-  registry.command_add_runtime( &edge_cmd, edge_routine ).unwrap();
+  registry.register_with_routine( &edge_cmd, edge_routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
@@ -509,9 +509,9 @@ fn regression_api_stability()
   });
 
   // This method should continue to exist and work
-  let registration_result = registry.command_add_runtime( &cmd, api_routine );
+  let registration_result = registry.register_with_routine( &cmd, api_routine );
   assert!( registration_result.is_ok(),
-          "command_add_runtime method should remain available and functional" );
+          "register_with_routine method should remain available and functional" );
 
   // Test that lookup functionality remains stable
   let lookup_result = registry.command( ".api_test" );
@@ -564,7 +564,7 @@ fn regression_output_format_stability()
     Ok( OutputData { content : "stable_output".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
 
-  registry.command_add_runtime( &stable_cmd, stable_routine ).unwrap();
+  registry.register_with_routine( &stable_cmd, stable_routine ).unwrap();
 
   // Generate help output
   use unilang::help::HelpGenerator;

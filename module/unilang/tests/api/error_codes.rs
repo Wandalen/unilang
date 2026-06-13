@@ -11,7 +11,7 @@
 //! semantic analysis (type coercion, unknown parameter detection, missing arg validation,
 //! excess positional args, interactive arg signaling) before the interpreter is ever called.
 //!
-//! AP-5 uses `CommandRegistry::command_add_runtime` directly because `CommandAlreadyExists`
+//! AP-5 uses `CommandRegistry::register_with_routine` directly because `CommandAlreadyExists`
 //! is returned at registration time, not during pipeline execution.
 //!
 //! AP-6 verifies `Clone + PartialEq + Eq` at runtime using equality assertions that
@@ -29,6 +29,49 @@ use unilang::interpreter::{ ExecutionContext, Interpreter };
 use unilang::registry::CommandRegistry;
 use unilang::semantic::{ SemanticAnalyzer, VerifiedCommand };
 use unilang_parser::{ Parser, UnilangParserOptions };
+
+// ---------------------------------------------------------------------------
+// Test fixture helpers — eliminate repeated boilerplate across AP-1..14 tests.
+// ---------------------------------------------------------------------------
+
+/// Build a minimal `CommandDefinition` for testing with given args.
+fn test_command( name : &str, desc : &str, args : Vec< ArgumentDefinition > ) -> CommandDefinition
+{
+  CommandDefinition::former()
+    .name( name )
+    .namespace( String::new() )
+    .description( desc.to_string() )
+    .hint( String::new() )
+    .status( "stable" )
+    .version( "1.0.0" )
+    .aliases( vec![] )
+    .tags( vec![] )
+    .permissions( vec![] )
+    .idempotent( false )
+    .deprecation_message( String::new() )
+    .http_method_hint( String::new() )
+    .examples( vec![] )
+    .arguments( args )
+    .end()
+}
+
+/// Build a minimal `ArgumentDefinition` for testing.
+fn test_arg( name : &str, kind : Kind, attrs : ArgumentAttributes ) -> ArgumentDefinition
+{
+  ArgumentDefinition
+  {
+    name : name.to_string(),
+    kind,
+    description : String::new(),
+    hint : String::new(),
+    attributes : attrs,
+    validation_rules : vec![],
+    aliases : vec![],
+    tags : vec![],
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 /// AP-1: `CommandNotFound` is returned for an unregistered command path.
 ///
@@ -76,41 +119,14 @@ fn test_ap1_command_not_found_for_unregistered_command()
 fn test_ap2_argument_missing_for_absent_required_arg()
 {
   let mut registry = CommandRegistry::new();
-  let greet_command = CommandDefinition::former()
-    .name( ".greet" )
-    .namespace( String::new() )
-    .description( "Greet someone".to_string() )
-    .hint( "Greet" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "name".to_string(),
-        kind : Kind::String,
-        description : "Name to greet".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : false, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
-
+  let greet_command = test_command( ".greet", "Greet someone", vec![
+    test_arg( "name", Kind::String, ArgumentAttributes { optional : false, ..Default::default() } ),
+  ]);
   registry.register( greet_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( ".greet" ).unwrap();
   let instructions = vec![ instruction ];
-
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let result = analyzer.analyze();
 
@@ -149,35 +165,9 @@ fn test_ap2_argument_missing_for_absent_required_arg()
 fn test_ap3_unknown_parameter_for_undefined_named_arg()
 {
   let mut registry = CommandRegistry::new();
-  let greet_command = CommandDefinition::former()
-    .name( ".greet" )
-    .namespace( String::new() )
-    .description( "Greet someone".to_string() )
-    .hint( "Greet" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "name".to_string(),
-        kind : Kind::String,
-        description : "Name to greet".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : true, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
-
+  let greet_command = test_command( ".greet", "Greet someone", vec![
+    test_arg( "name", Kind::String, ArgumentAttributes { optional : true, ..Default::default() } ),
+  ]);
   registry.register( greet_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -216,35 +206,9 @@ fn test_ap3_unknown_parameter_for_undefined_named_arg()
 fn test_ap4_argument_type_mismatch_for_non_coercible_value()
 {
   let mut registry = CommandRegistry::new();
-  let add_command = CommandDefinition::former()
-    .name( ".add" )
-    .namespace( String::new() )
-    .description( "Add a number".to_string() )
-    .hint( "Add" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "x".to_string(),
-        kind : Kind::Integer,
-        description : "An integer value".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : false, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
-
+  let add_command = test_command( ".add", "Add a number", vec![
+    test_arg( "x", Kind::Integer, ArgumentAttributes { optional : false, ..Default::default() } ),
+  ]);
   registry.register( add_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -271,36 +235,22 @@ fn test_ap4_argument_type_mismatch_for_non_coercible_value()
 
 /// AP-5: `CommandAlreadyExists` is returned when registering a duplicate command name.
 ///
-/// After `.dup` is registered once via `command_add_runtime`, a second registration
+/// After `.dup` is registered once via `register_with_routine`, a second registration
 /// attempt with the same name must fail with `ErrorCode::CommandAlreadyExists`.
-/// The error comes from `command_add_runtime` at registration time, not from the pipeline.
+/// The error comes from `register_with_routine` at registration time, not from the pipeline.
 // test_kind: ap_spec(AP-5)
 #[ test ]
 fn test_ap5_command_already_exists_for_duplicate_registration()
 {
   let mut registry = CommandRegistry::new();
-  let dup_command = CommandDefinition::former()
-    .name( ".dup" )
-    .namespace( String::new() )
-    .description( "A duplicated command".to_string() )
-    .hint( "Dup" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .end();
+  let dup_command = test_command( ".dup", "A duplicated command", vec![] );
 
   let noop = | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, ErrorData >
   {
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   };
 
-  registry.command_add_runtime( &dup_command, Box::new( noop ) )
+  registry.register_with_routine( &dup_command, Box::new( noop ) )
     .expect( "First registration must succeed" );
 
   let noop2 = | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, ErrorData >
@@ -308,7 +258,7 @@ fn test_ap5_command_already_exists_for_duplicate_registration()
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   };
 
-  let result = registry.command_add_runtime( &dup_command, Box::new( noop2 ) );
+  let result = registry.register_with_routine( &dup_command, Box::new( noop2 ) );
   assert!( result.is_err(), "Duplicate registration must produce an error" );
   match result.unwrap_err()
   {
@@ -355,35 +305,9 @@ fn test_ap6_error_code_derives_clone_partial_eq_eq()
 fn test_ap7_too_many_arguments_for_excess_positional_args()
 {
   let mut registry = CommandRegistry::new();
-  let single_command = CommandDefinition::former()
-    .name( ".single" )
-    .namespace( String::new() )
-    .description( "Accepts one argument".to_string() )
-    .hint( "Single" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "item".to_string(),
-        kind : Kind::String,
-        description : "Single item".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : false, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
-
+  let single_command = test_command( ".single", "Accepts one argument", vec![
+    test_arg( "item", Kind::String, ArgumentAttributes { optional : false, ..Default::default() } ),
+  ]);
   registry.register( single_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -408,22 +332,23 @@ fn test_ap7_too_many_arguments_for_excess_positional_args()
   }
 }
 
-/// AP-9: `ArgumentInteractiveRequired` is returned when an interactive argument is missing.
+/// AP-8: `ValidationRuleFailed` is returned when a value violates a declared validation rule.
 ///
-/// `.auth` is registered with a `token` argument marked `interactive = true` and
-/// `optional = false`. Invoking `.auth` without providing `token` must produce
-/// `ErrorCode::ArgumentInteractiveRequired` — distinct from `ArgumentMissing` — to
-/// signal that the REPL should prompt the user for secure input.
-// test_kind: ap_spec(AP-9)
+/// `.count` is registered with argument `n` of `Kind::Integer` and `ValidationRule::Min(1)`.
+/// Invoking `.count n::0` supplies a valid integer but violates the minimum. The semantic
+/// analyzer must produce `ErrorCode::ValidationRuleFailed`.
+// test_kind: ap_spec(AP-8)
 #[ test ]
-fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
+fn test_ap8_validation_rule_failed_for_constraint_violation()
 {
+  use unilang::data::ValidationRule;
+
   let mut registry = CommandRegistry::new();
-  let auth_command = CommandDefinition::former()
-    .name( ".auth" )
+  let count_command = CommandDefinition::former()
+    .name( ".count" )
     .namespace( String::new() )
-    .description( "Authenticate".to_string() )
-    .hint( "Auth" )
+    .description( "Count items".to_string() )
+    .hint( String::new() )
     .status( "stable" )
     .version( "1.0.0" )
     .aliases( vec![] )
@@ -436,23 +361,60 @@ fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
     .arguments( vec![
       ArgumentDefinition
       {
-        name : "token".to_string(),
-        kind : Kind::String,
-        description : "Authentication token".to_string(),
+        name : "n".to_string(),
+        kind : Kind::Integer,
+        description : "Count must be at least 1".to_string(),
         hint : String::new(),
-        attributes : ArgumentAttributes
-        {
-          optional : false,
-          interactive : true,
-          ..Default::default()
-        },
-        validation_rules : vec![],
+        attributes : ArgumentAttributes { optional : false, ..Default::default() },
+        validation_rules : vec![ ValidationRule::Min( 1.0 ) ],
         aliases : vec![],
         tags : vec![],
       }
     ])
     .end();
 
+  registry.register( count_command ).expect( "Registration must succeed" );
+
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let instruction = parser.parse_repl_input( ".count n::0" ).unwrap();
+  let instructions = vec![ instruction ];
+
+  let analyzer = SemanticAnalyzer::new( &instructions, &registry );
+  let result = analyzer.analyze();
+
+  assert!( result.is_err(), "Validation rule violation must produce an error" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ValidationRuleFailed,
+        "Must produce ValidationRuleFailed; got: {:?}", error_data.code
+      );
+      assert!(
+        !error_data.message.is_empty(),
+        "Error message must be non-empty"
+      );
+    },
+    other => panic!( "Expected Error::Execution with ValidationRuleFailed, got: {other:?}" ),
+  }
+}
+
+/// AP-9: `ArgumentInteractiveRequired` is returned when an interactive argument is missing.
+///
+/// `.auth` is registered with a `token` argument marked `interactive = true` and
+/// `optional = false`. Invoking `.auth` without providing `token` must produce
+/// `ErrorCode::ArgumentInteractiveRequired` — distinct from `ArgumentMissing` — to
+/// signal that the REPL should prompt the user for secure input.
+// test_kind: ap_spec(AP-9)
+#[ test ]
+fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
+{
+  let mut registry = CommandRegistry::new();
+  let auth_command = test_command( ".auth", "Authenticate", vec![
+    test_arg( "token", Kind::String, ArgumentAttributes { optional : false, interactive : true, ..Default::default() } ),
+  ]);
   registry.register( auth_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -491,22 +453,7 @@ fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
 fn test_ap10_command_not_implemented_for_stub_routine()
 {
   let mut registry = CommandRegistry::new();
-  let stub_command = CommandDefinition::former()
-    .name( ".stub" )
-    .namespace( String::new() )
-    .description( "Stub command".to_string() )
-    .hint( "Stub" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![] )
-    .end();
+  let stub_command = test_command( ".stub", "Stub command", vec![] );
 
   let stub_routine : Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync + 'static > = Box::new( | _cmd, _ctx |
   {
@@ -516,7 +463,7 @@ fn test_ap10_command_not_implemented_for_stub_routine()
     ))
   });
 
-  registry.command_add_runtime( &stub_command, stub_routine )
+  registry.register_with_routine( &stub_command, stub_routine )
     .expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -557,41 +504,14 @@ fn test_ap11_help_requested_converted_to_successful_output()
   use unilang::pipeline::Pipeline;
 
   let mut registry = CommandRegistry::new();
-  let greet_command = CommandDefinition::former()
-    .name( ".greet" )
-    .namespace( String::new() )
-    .description( "Greet someone".to_string() )
-    .hint( "Greet" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "name".to_string(),
-        kind : Kind::String,
-        description : "Name to greet".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : true, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
+  let greet_command = test_command( ".greet", "Greet someone", vec![
+    test_arg( "name", Kind::String, ArgumentAttributes { optional : true, ..Default::default() } ),
+  ]);
 
   let noop : Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync > =
-    Box::new( | _cmd, _ctx |
-    Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
-  );
+    Box::new( | _cmd, _ctx | Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } ) );
 
-  registry.command_add_runtime( &greet_command, noop ).expect( "Registration must succeed" );
+  registry.register_with_routine( &greet_command, noop ).expect( "Registration must succeed" );
 
   let pipeline = Pipeline::new( registry );
   let result = pipeline.process_command( ".greet ?", ExecutionContext::default() );
@@ -619,22 +539,7 @@ fn test_ap11_help_requested_converted_to_successful_output()
 fn test_ap12_internal_error_for_unexpected_failure()
 {
   let mut registry = CommandRegistry::new();
-  let broken_command = CommandDefinition::former()
-    .name( ".broken" )
-    .namespace( String::new() )
-    .description( "Triggers internal error".to_string() )
-    .hint( "Broken" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![] )
-    .end();
+  let broken_command = test_command( ".broken", "Triggers internal error", vec![] );
 
   let broken_routine : Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync + 'static > =
     Box::new( | _cmd, _ctx |
@@ -645,7 +550,7 @@ fn test_ap12_internal_error_for_unexpected_failure()
     ))
   });
 
-  registry.command_add_runtime( &broken_command, broken_routine )
+  registry.register_with_routine( &broken_command, broken_routine )
     .expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -687,35 +592,9 @@ fn test_ap12_internal_error_for_unexpected_failure()
 fn test_ap13_type_mismatch_for_type_conversion_error()
 {
   let mut registry = CommandRegistry::new();
-  let add_command = CommandDefinition::former()
-    .name( ".add" )
-    .namespace( String::new() )
-    .description( "Add integers".to_string() )
-    .hint( "Add" )
-    .status( "stable" )
-    .version( "1.0.0" )
-    .aliases( vec![] )
-    .tags( vec![] )
-    .permissions( vec![] )
-    .idempotent( false )
-    .deprecation_message( String::new() )
-    .http_method_hint( String::new() )
-    .examples( vec![] )
-    .arguments( vec![
-      ArgumentDefinition
-      {
-        name : "x".to_string(),
-        kind : Kind::Integer,
-        description : "An integer".to_string(),
-        hint : String::new(),
-        attributes : ArgumentAttributes { optional : false, ..Default::default() },
-        validation_rules : vec![],
-        aliases : vec![],
-        tags : vec![],
-      }
-    ])
-    .end();
-
+  let add_command = test_command( ".add", "Add integers", vec![
+    test_arg( "x", Kind::Integer, ArgumentAttributes { optional : false, ..Default::default() } ),
+  ]);
   registry.register( add_command ).expect( "Registration must succeed" );
 
   let parser = Parser::new( UnilangParserOptions::default() );

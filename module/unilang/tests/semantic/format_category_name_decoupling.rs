@@ -65,7 +65,7 @@ fn test_format_category_name_generic_transformation()
 
   for (input, expected) in test_cases
   {
-    let result = help_gen.format_category_name_for_test( input );
+    let result = help_gen.format_category_name( input );
 
     assert_eq!(
       result,
@@ -86,7 +86,7 @@ fn test_format_category_name_empty_string()
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
-  let result = help_gen.format_category_name_for_test( "" );
+  let result = help_gen.format_category_name( "" );
   assert_eq!( result, "", "Empty string should return empty string" );
 }
 
@@ -99,12 +99,12 @@ fn test_format_category_name_single_word()
   let help_gen = HelpGenerator::new( &registry );
 
   assert_eq!(
-    help_gen.format_category_name_for_test( "system" ),
+    help_gen.format_category_name( "system" ),
     "System"
   );
 
   assert_eq!(
-    help_gen.format_category_name_for_test( "help" ),
+    help_gen.format_category_name( "help" ),
     "Help"
   );
 }
@@ -118,7 +118,7 @@ fn test_format_category_name_multiple_underscores()
   let help_gen = HelpGenerator::new( &registry );
 
   assert_eq!(
-    help_gen.format_category_name_for_test( "very_long_category_name" ),
+    help_gen.format_category_name( "very_long_category_name" ),
     "Very Long Category Name"
   );
 }
@@ -136,9 +136,9 @@ fn test_format_category_name_is_pure()
 
   let input = "git_operations";
 
-  let result1 = help_gen.format_category_name_for_test( input );
-  let result2 = help_gen.format_category_name_for_test( input );
-  let result3 = help_gen.format_category_name_for_test( input );
+  let result1 = help_gen.format_category_name( input );
+  let result2 = help_gen.format_category_name( input );
+  let result3 = help_gen.format_category_name( input );
 
   assert_eq!( result1, result2 );
   assert_eq!( result2, result3 );
@@ -167,7 +167,7 @@ fn test_no_hardcoded_mappings()
 
   for (input, expected) in arbitrary_categories
   {
-    let result = help_gen.format_category_name_for_test( input );
+    let result = help_gen.format_category_name( input );
     assert_eq!(
       result,
       expected,
@@ -201,7 +201,7 @@ fn test_domain_agnostic_transformation()
 
   for (input, expected) in domain_agnostic
   {
-    let result = help_gen.format_category_name_for_test( input );
+    let result = help_gen.format_category_name( input );
     assert_eq!(
       result,
       expected,

@@ -115,7 +115,7 @@ fn register_commands( registry : &mut CommandRegistry ) -> Result< (), String >
         .map( | _code | OutputData::new( "", "text" ) )
         .map_err( | e | ErrorData::new( ErrorCode::InternalError, e ) )
     } );
-    registry.command_add_runtime( &def, routine )
+    registry.register_with_routine( &def, routine )
       .map_err( | e | format!( "Failed to register .new: {e}" ) )?;
   }
 
@@ -131,7 +131,7 @@ fn register_commands( registry : &mut CommandRegistry ) -> Result< (), String >
       println!( "{}", commands::new_help() );
       Ok( OutputData::new( "", "text" ) )
     } );
-    registry.command_add_runtime( &def, routine )
+    registry.register_with_routine( &def, routine )
       .map_err( | e | format!( "Failed to register .new.help: {e}" ) )?;
   }
 
@@ -160,7 +160,7 @@ fn register_commands( registry : &mut CommandRegistry ) -> Result< (), String >
         Err( e ) => Err( ErrorData::new( ErrorCode::InternalError, e ) ),
       }
     } );
-    registry.command_add_runtime( &def, routine )
+    registry.register_with_routine( &def, routine )
       .map_err( | e | format!( "Failed to register .check: {e}" ) )?;
   }
 
@@ -176,7 +176,7 @@ fn register_commands( registry : &mut CommandRegistry ) -> Result< (), String >
       println!( "{}", commands::check_help() );
       Ok( OutputData::new( "", "text" ) )
     } );
-    registry.command_add_runtime( &def, routine )
+    registry.register_with_routine( &def, routine )
       .map_err( | e | format!( "Failed to register .check.help: {e}" ) )?;
   }
 

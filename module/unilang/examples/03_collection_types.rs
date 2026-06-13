@@ -108,7 +108,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &list_demo, list_routine )?;
+  registry.register_with_routine( &list_demo, list_routine )?;
 
   // Step 2: Command demonstrating Map types
   let map_demo = CommandDefinition::former()
@@ -215,7 +215,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &map_demo, map_routine )?;
+  registry.register_with_routine( &map_demo, map_routine )?;
 
   println!( "✓ Registered collection type demonstration commands" );
 

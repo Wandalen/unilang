@@ -130,7 +130,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
   .end();
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &ls_cmd, Box::new( ls_routine ) )?;
+  registry.register_with_routine( &ls_cmd, Box::new( ls_routine ) )?;
 
   // =========================================================================
   // .fs.grep  —  search for a pattern in files (mirrors `grep`)
@@ -228,7 +228,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
   .end();
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &grep_cmd, Box::new( grep_routine ) )?;
+  registry.register_with_routine( &grep_cmd, Box::new( grep_routine ) )?;
 
   // =========================================================================
   // .fs.wc  —  count lines, words, and bytes (mirrors `wc`)
@@ -303,7 +303,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
   .end();
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &wc_cmd, Box::new( wc_routine ) )?;
+  registry.register_with_routine( &wc_cmd, Box::new( wc_routine ) )?;
 
   // =========================================================================
   // Demo: side-by-side POSIX ↔ unilang

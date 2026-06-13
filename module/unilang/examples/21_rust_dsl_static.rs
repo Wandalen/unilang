@@ -222,7 +222,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
   println!( "  Registered {} commands", registry.commands().len() );
   for name in registry.commands().keys()
   {
-    let has_routine = registry.get_routine( name ).is_some();
+    let has_routine = registry.routine( name ).is_some();
     println!( "    - {name} (routine: {})", if has_routine { "✅" } else { "❌" } );
   }
   println!();

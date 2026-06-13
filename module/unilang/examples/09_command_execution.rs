@@ -76,7 +76,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &hello_command, hello_routine )?;
+  registry.register_with_routine( &hello_command, hello_routine )?;
 
   // 2. Command that uses execution context
   let status_command = CommandDefinition::former()
@@ -153,7 +153,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &status_command, status_routine )?;
+  registry.register_with_routine( &status_command, status_routine )?;
 
   // 3. Command that can fail with error
   let divide_command = CommandDefinition::former()
@@ -251,7 +251,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &divide_command, divide_routine )?;
+  registry.register_with_routine( &divide_command, divide_routine )?;
 
   // 4. Command with complex data processing
   let analyze_command = CommandDefinition::former()
@@ -357,7 +357,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &analyze_command, analyze_routine )?;
+  registry.register_with_routine( &analyze_command, analyze_routine )?;
 
   println!( "✓ Registered commands for execution demonstration" );
 

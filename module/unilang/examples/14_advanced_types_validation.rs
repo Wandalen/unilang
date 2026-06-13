@@ -255,7 +255,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &advanced_cmd, advanced_routine )?;
+  registry.register_with_routine( &advanced_cmd, advanced_routine )?;
   println!( "✓ Registered advanced types command\n" );
 
   // Step 2: Demonstrate type parsing capabilities

@@ -149,7 +149,7 @@ fn test_detect_multiple_true_with_wrong_kind()
   );
 
   // This command should be REJECTED during registration
-  let result = registry.command_add_runtime( &incorrect_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &incorrect_cmd, create_mock_routine() );
 
   // Verify registration failed
   assert!(
@@ -187,7 +187,7 @@ fn test_validation_at_registration()
   );
 
   // Registry validation should catch this
-  let result = registry.command_add_runtime( &invalid_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &invalid_cmd, create_mock_routine() );
 
   assert!(
     result.is_err(),

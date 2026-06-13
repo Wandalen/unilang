@@ -14,7 +14,7 @@
 //!
 //! Validation was moved from registration time to construction time ("fail-fast").
 //! `CommandDefinition::former().name("nodot")` panics at `.name()` with a
-//! `MissingDotPrefix` error, before `command_add_runtime()` is ever invoked.
+//! `MissingDotPrefix` error, before `register_with_routine()` is ever invoked.
 //! `std::panic::catch_unwind` captures this rejection so the test can also assert
 //! the registry remains unmodified.
 //!
@@ -110,7 +110,7 @@ fn test_in2_runtime_registration_accepts_name_with_dot()
   ])
   .end();
 
-  let result = registry.command_add_runtime( &valid_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &valid_cmd, create_mock_routine() );
 
   assert!( result.is_ok(), "Registration of '.valid' must succeed, got: {result:?}" );
   assert!(

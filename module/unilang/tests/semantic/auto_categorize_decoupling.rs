@@ -60,7 +60,7 @@ fn test_auto_categorize_returns_empty_string()
 
   for command_name in test_cases
   {
-    let category = help_gen.auto_categorize_for_test( command_name );
+    let category = help_gen.auto_categorize( command_name );
 
     assert_eq!(
       category,
@@ -86,9 +86,9 @@ fn test_auto_categorize_is_pure_function()
   let command_name = ".git.status";
 
   // Call multiple times - should always return same result
-  let result1 = help_gen.auto_categorize_for_test( command_name );
-  let result2 = help_gen.auto_categorize_for_test( command_name );
-  let result3 = help_gen.auto_categorize_for_test( command_name );
+  let result1 = help_gen.auto_categorize( command_name );
+  let result2 = help_gen.auto_categorize( command_name );
+  let result3 = help_gen.auto_categorize( command_name );
 
   assert_eq!( result1, result2 );
   assert_eq!( result2, result3 );
@@ -118,7 +118,7 @@ fn test_auto_categorize_edge_cases()
 
   for command_name in edge_cases
   {
-    let category = help_gen.auto_categorize_for_test( command_name );
+    let category = help_gen.auto_categorize( command_name );
 
     assert_eq!(
       category,
@@ -183,7 +183,7 @@ fn test_auto_categorize_implementation_simplicity()
 
   // Implementation should be equivalent to this:
   let expected = String::new();
-  let actual = help_gen.auto_categorize_for_test( ".any.command" );
+  let actual = help_gen.auto_categorize( ".any.command" );
 
   assert_eq!(
     actual,

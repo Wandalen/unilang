@@ -645,7 +645,7 @@ Phases 1 and 2 were implemented in `unilang/src/registry/dynamic.rs`. Phase 3 (t
 - `unilang/src/registry/dynamic.rs:505` — `register_with_auto_help()` added
 
 **Phase 2 — Auto-help on every registration:**
-- `unilang/src/registry/dynamic.rs:207-248` — `command_add_runtime()` auto-generates `.help` command unconditionally when `auto_help_enabled == true` (the default). This is effectively stronger than Phase 2's proposed breaking change: help generation is automatic unless explicitly opted out via `CommandDefinition::with_auto_help(false)`.
+- `unilang/src/registry/dynamic.rs:207-248` — `register_with_routine()` auto-generates `.help` command unconditionally when `auto_help_enabled == true` (the default). This is effectively stronger than Phase 2's proposed breaking change: help generation is automatic unless explicitly opted out via `CommandDefinition::with_auto_help(false)`.
 
 ### Why Phase 3 Was Superseded
 
@@ -656,7 +656,7 @@ UnregisteredCommand::new(def).with_help()  // explicit .with_help() call
 
 The implemented approach is superior:
 ```rust
-registry.command_add_runtime(cmd, routine)?;  // help auto-generated, no extra call
+registry.register_with_routine(cmd, routine)?;  // help auto-generated, no extra call
 ```
 
 The `auto_help_enabled = true` default makes divergence impossible in normal use — matching the type-state guarantee without the boilerplate. The type-state pattern adds compile-time enforcement only for the edge case where `auto_help_enabled = false`, which is an explicit opt-out indicating intentional behavior.
@@ -665,7 +665,7 @@ The `auto_help_enabled = true` default makes divergence impossible in normal use
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
-| `command_add_runtime()` auto-generates `.command.help` entries | ✅ | `dynamic.rs:231-245` |
+| `register_with_routine()` auto-generates `.command.help` entries | ✅ | `dynamic.rs:231-245` |
 | `format_command_listing()` returns complete command list | ✅ | `dynamic.rs:370` |
 | `validate_help_completeness()` catches divergence | ✅ | `dynamic.rs:423` |
 | Help auto-generation is default behavior | ✅ | `auto_help_enabled` defaults to `true` |

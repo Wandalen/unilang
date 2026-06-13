@@ -82,13 +82,13 @@ fn test_pipeline_round_trip_correct_arguments()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &echo_command, routine ).unwrap();
+  registry.register_with_routine( &echo_command, routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
   let result = pipeline.process_command( r#".echo msg::"hello""#, ExecutionContext::default() );
 
   assert!( result.success, "Pipeline round-trip must succeed; error: {:?}", result.error );
-  assert!( result.error.is_none() );
+  assert!( result.error.is_none(), "Pipeline result should have no error; got: {:?}", result.error );
   assert_eq!( result.outputs.len(), 1 );
   assert_eq!(
     result.outputs[ 0 ].content,
@@ -159,7 +159,7 @@ fn test_registry_lookup_returns_expected_definition()
   );
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &query_command, noop ).unwrap();
+  registry.register_with_routine( &query_command, noop ).unwrap();
 
   let definition = registry.command( ".query" );
   assert!( definition.is_some(), "Registered command must be retrievable by name" );
@@ -268,7 +268,7 @@ fn test_output_data_field_access()
     format : "json".to_string(),
     execution_time_ms : None,
   };
-  assert!( output_no_timing.execution_time_ms.is_none() );
+  assert!( output_no_timing.execution_time_ms.is_none(), "execution_time_ms should be None when not provided" );
 }
 
 /// AP-8: UNILANG_HELP_VERBOSITY env var is recognized and applied.
@@ -352,7 +352,7 @@ fn test_ap9_process_command_from_argv_preserves_boundaries()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &echo_command, routine ).unwrap();
+  registry.register_with_routine( &echo_command, routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
   let argv : Vec< String > = vec![
@@ -395,7 +395,7 @@ fn test_ap10_process_batch_collects_all_results()
   );
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &ok_command, ok_routine ).unwrap();
+  registry.register_with_routine( &ok_command, ok_routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
   let commands = vec![ ".nonexistent", ".ok", ".also_nonexistent" ];

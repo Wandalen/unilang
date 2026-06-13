@@ -12,3 +12,4 @@ Build-time code generation tests: YAML/JSON extraction, PHF generation, hint gen
 | `phf_codegen_no_leaked_dep.rs` | Codegen: `generate_static_registry_source()` emits no bare `phf_map!` |
 | `dependency_standards.rs` | IN-1..5 spec cases — workspace dep version format rules R1–R5 |
 | `build_runtime_separation.rs` | IN-1..4 spec cases — build-runtime separation invariant (serde_yaml/json absent at runtime) |
+| `compile_fail_tests.rs` | T40/T50 trybuild runner verifying compile-fail fixtures in `tests/compile_fail/` |

@@ -83,7 +83,7 @@ fn test_load_from_json_str_simple_command()
   assert_eq!( command.aliases(), &vec![ "hi_json".to_string() ] );
   assert_eq!( command.permissions(), &vec![ "public".to_string() ] );
   assert!( command.idempotent() );
-  assert!( registry.get_routine( ".system.hello_json" ).is_some() );
+  assert!( registry.routine( ".system.hello_json" ).is_some() );
 }
 
 #[ test ]

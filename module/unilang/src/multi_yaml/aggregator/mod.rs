@@ -17,11 +17,14 @@
 //! - Integration with hybrid registry system
 
 mod core;
+mod core_types;
 mod conflict;
 mod codegen;
+mod aggregation_fns;
 
-pub use core::{
-  MultiYamlAggregator,
+pub use core::MultiYamlAggregator;
+
+pub use core_types::{
   AggregationConfig,
   ConflictResolutionStrategy,
   NamespaceIsolation,
@@ -29,6 +32,9 @@ pub use core::{
   ConflictReport,
   ConflictType,
   EnvConfigParser,
+};
+
+pub use aggregation_fns::{
   parse_cargo_metadata,
   aggregate_cli_simple,
   aggregate_cli_complex,

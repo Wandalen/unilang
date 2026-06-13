@@ -172,7 +172,7 @@ fn help_output_includes_version_when_true()
   let mut registry = CommandRegistry::new();
   let _ = registry.register( cmd );
 
-  let help = registry.get_help_for_command( ".test_version_shown" );
+  let help = registry.help_for_command( ".test_version_shown" );
   assert!( help.is_some(), "Help should be generated" );
 
   let help_text = help.unwrap();
@@ -199,7 +199,7 @@ fn help_output_excludes_version_when_false()
   let mut registry = CommandRegistry::new();
   let _ = registry.register( cmd );
 
-  let help = registry.get_help_for_command( ".test_version_hidden" );
+  let help = registry.help_for_command( ".test_version_hidden" );
   assert!( help.is_some(), "Help should be generated" );
 
   let help_text = help.unwrap();

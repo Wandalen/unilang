@@ -56,7 +56,7 @@ let pipeline = Pipeline::from_static(static_registry);
 **TL;DR:** Runtime registration is NOT deprecated. It's a performance trade-off with legitimate use cases.
 
 **What changed:**
-- Removed misleading `#[deprecated]` attribute from `CommandRegistry::new()` and `command_add_runtime()`
+- Removed misleading `#[deprecated]` attribute from `CommandRegistry::new()` and `register_with_routine()`
 - Updated all documentation to emphasize performance trade-offs rather than deprecation
 - Clarified appropriate use cases: REPL applications, plugin systems, prototyping
 

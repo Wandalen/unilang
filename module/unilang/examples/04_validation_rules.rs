@@ -354,7 +354,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &validation_demo, validation_routine )?;
+  registry.register_with_routine( &validation_demo, validation_routine )?;
   println!( "✓ Registered validation demonstration command" );
 
   println!( "\n=== Complete ValidationRule Reference ===" );

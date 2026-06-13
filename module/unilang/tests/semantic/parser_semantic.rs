@@ -122,7 +122,7 @@ fn setup_registry_with_routine( command_def: &CommandDefinition ) -> CommandRegi
     }
   );
 
-  registry.command_add_runtime( command_def, routine ).unwrap();
+  registry.register_with_routine( command_def, routine ).unwrap();
   registry
 }
 
@@ -283,7 +283,7 @@ fn test_backward_compatibility_single_parameter_integration()
     }
   );
 
-  registry.command_add_runtime( &single_param_cmd, routine ).unwrap();
+  registry.register_with_routine( &single_param_cmd, routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".single_file file::"data.json""#;
@@ -391,7 +391,7 @@ fn test_quote_handling_integration()
     }
   );
 
-  registry.command_add_runtime( &quote_test_cmd, routine ).unwrap();
+  registry.register_with_routine( &quote_test_cmd, routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
@@ -513,7 +513,7 @@ fn test_multiple_parameter_performance()
     }
   );
 
-  registry.command_add_runtime( &perf_test_cmd, routine ).unwrap();
+  registry.register_with_routine( &perf_test_cmd, routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 

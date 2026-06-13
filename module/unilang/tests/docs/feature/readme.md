@@ -18,4 +18,4 @@ Case prefix: `FT-`. Minimum 4 cases per spec.
 | `02_argument_system.md` | `feature` spec for argument system (FR-ARG-1..8) | ✅ |
 | `03_pipeline.md` | `feature` spec for pipeline orchestration (FR-PIPE-1..4) | ✅ |
 | `04_help_system.md` | `feature` spec for help system (FR-HELP-1..8) | ✅ |
-| `05_repl_interactive.md` | `feature` spec for REPL and interactive mode | ⏳ |
+| `05_repl_interactive.md` | `feature` spec for REPL and interactive mode | ✅ |

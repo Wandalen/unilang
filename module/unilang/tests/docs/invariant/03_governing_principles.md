@@ -35,5 +35,5 @@
 ### IN-5: Single Source of Truth — duplicate command registration is rejected
 
 - **Given:** A `CommandRegistry` that already contains `.dup`
-- **When:** `command_add_runtime` is called a second time with a definition named `".dup"`
+- **When:** `register_with_routine` is called a second time with a definition named `".dup"`
 - **Then:** Returns an error with code `CommandAlreadyExists`; the registry retains the original definition unmodified

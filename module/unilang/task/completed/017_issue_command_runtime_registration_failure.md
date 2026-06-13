@@ -26,7 +26,7 @@ _N/A — pre-template task. See task body for objective details._
 
 ### Symptoms
 1. **Command Definition**: Commands are defined correctly with proper `CommandDefinition` structures
-2. **Command Registration**: `registry.command_add_runtime()` calls succeed without errors
+2. **Command Registration**: `registry.register_with_routine()` calls succeed without errors
 3. **Command Discovery**: Commands appear correctly in help listings and command discovery (`.` command)
 4. **Command Help**: Individual command help works perfectly (`<command> ?`)
 5. **Runtime Execution Failure**: All command execution fails with identical error pattern
@@ -58,7 +58,7 @@ let chat_cmd = CommandDefinition {
 };
 
 // Runtime registration - APPEARS CORRECT
-registry.command_add_runtime(&chat_cmd, Box::new(handle_chat_command))?;
+registry.register_with_routine(&chat_cmd, Box::new(handle_chat_command))?;
 ```
 
 ### Handler Function (WORKING)
@@ -181,7 +181,7 @@ cargo run -- .chat
 ```rust
 // Suggested debug code to add to setup_command_registry()
 println!("DEBUG: Registering command: '{}'", chat_cmd.name);
-registry.command_add_runtime(&chat_cmd, Box::new(handle_chat_command))?;
+registry.register_with_routine(&chat_cmd, Box::new(handle_chat_command))?;
 println!("DEBUG: Registration completed for: '{}'", chat_cmd.name);
 ```
 

@@ -48,7 +48,7 @@ fn test_command_registry_key_mismatch()
 
   // Register the command and a dummy routine
   registry
-  .command_add_runtime
+  .register_with_routine
   (
     &command_def,
     Box::new( | _, _ |
@@ -91,7 +91,7 @@ fn test_command_registry_key_mismatch()
   assert_eq!( retrieved_command.unwrap().name(), command_def.name() );
 
   // Also check the routine map
-  let retrieved_routine = registry.get_routine( &lookup_key );
+  let retrieved_routine = registry.routine( &lookup_key );
   assert!
   (
     retrieved_routine.is_some(),

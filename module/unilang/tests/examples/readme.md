@@ -2,6 +2,15 @@
 
 This directory contains comprehensive examples demonstrating best practices for each test category in the systematic organization structure. These examples serve as both documentation and templates for writing high-quality tests.
 
+## Files
+
+| File | Responsibility |
+|------|----------------|
+| `unit_test_example.rs` | Unit test patterns: isolation, boundaries, mocks |
+| `integration_test_example.rs` | Integration test patterns: data flow, contracts |
+| `acceptance_test_example.rs` | Acceptance test patterns: user scenarios, CLI |
+| `regression_test_example.rs` | Regression test patterns: bug reproduction, compat |
+
 ## Example Files Overview
 
 ### [`unit_test_example.rs`](unit_test_example.rs)
@@ -201,7 +210,7 @@ let mock_routine = Box::new(|cmd: VerifiedCommand, _ctx: ExecutionContext| {
   Ok(OutputData { content: "mock_response".to_string(), format: "text".to_string() })
 });
 
-registry.command_add_runtime(&cmd, mock_routine).unwrap();
+registry.register_with_routine(&cmd, mock_routine).unwrap();
 ```
 
 **Interaction Verification**

@@ -29,7 +29,7 @@
 
 - **Given:** A command `.panic_cmd` whose handler closure calls `panic!("intentional")`
 - **When:** `pipeline.run(".panic_cmd")` is called
-- **Then:** Returns `Err(UnilangError::HandlerPanic { message: ... })` rather than unwinding the caller stack; the process does not abort
+- **Then:** Returns `Err` with `error_data.code == ErrorCode::InternalError` rather than unwinding the caller stack; the process does not abort (panics are caught via `std::panic::catch_unwind` in `SemanticAnalyzer::analyze` and mapped to `InternalError`)
 
 ### IN-5: Zero-feature build compiles without errors
 

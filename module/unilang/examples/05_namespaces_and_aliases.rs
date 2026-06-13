@@ -97,7 +97,7 @@ fn main() -> Result< (), unilang::error::Error >
     }
   });
 
-  registry.command_add_runtime( &add_command, add_routine )?;
+  registry.register_with_routine( &add_command, add_routine )?;
 
   // .cmd1.multiply command
   let multiply_command = CommandDefinition::former()
@@ -175,7 +175,7 @@ fn main() -> Result< (), unilang::error::Error >
     }
   });
 
-  registry.command_add_runtime( &multiply_command, multiply_routine )?;
+  registry.register_with_routine( &multiply_command, multiply_routine )?;
 
   // Step 2: Commands in the 'cmd3' namespace
 
@@ -239,7 +239,7 @@ fn main() -> Result< (), unilang::error::Error >
     }
   });
 
-  registry.command_add_runtime( &uppercase_command, uppercase_routine )?;
+  registry.register_with_routine( &uppercase_command, uppercase_routine )?;
 
   // Step 3: Commands in the 'file' namespace
 
@@ -324,7 +324,7 @@ fn main() -> Result< (), unilang::error::Error >
     }
   });
 
-  registry.command_add_runtime( &list_command, list_routine )?;
+  registry.register_with_routine( &list_command, list_routine )?;
 
   println!( "✓ Registered commands in multiple namespaces with aliases" );
 

@@ -170,8 +170,8 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
 
   println!( "  YAML command: .config (no routine)" );
   println!( "  Inline command: .runtime (with routine)" );
-  println!( "  Has routine for .config: {}", registry_mixed.get_routine( ".config" ).is_some() );
-  println!( "  Has routine for .runtime: {}", registry_mixed.get_routine( ".runtime" ).is_some() );
+  println!( "  Has routine for .config: {}", registry_mixed.routine( ".config" ).is_some() );
+  println!( "  Has routine for .runtime: {}", registry_mixed.routine( ".runtime" ).is_some() );
   println!();
 
   // Example 5: Auto-help generation

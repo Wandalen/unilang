@@ -73,7 +73,7 @@ fn test_duplicate_command_name_detection()
 
   // First registration - should succeed
   let cmd1 = create_test_command( ".deploy", "First deploy implementation" );
-  let result1 = registry.command_add_runtime( &cmd1, create_mock_routine_with_output( "first" ) );
+  let result1 = registry.register_with_routine( &cmd1, create_mock_routine_with_output( "first" ) );
 
   assert!(
     result1.is_ok(),
@@ -82,7 +82,7 @@ fn test_duplicate_command_name_detection()
 
   // Second registration with SAME name - should fail
   let cmd2 = create_test_command( ".deploy", "Second deploy implementation" );
-  let result2 = registry.command_add_runtime( &cmd2, create_mock_routine_with_output( "second" ) );
+  let result2 = registry.register_with_routine( &cmd2, create_mock_routine_with_output( "second" ) );
 
   // CRITICAL CHECK: Second registration should fail
   assert!(
@@ -114,10 +114,10 @@ fn test_duplicate_registration_returns_error()
   let cmd = create_test_command( ".test", "Test command" );
 
   // First registration
-  let _first = registry.command_add_runtime( &cmd, create_mock_routine_with_output( "first" ) );
+  let _first = registry.register_with_routine( &cmd, create_mock_routine_with_output( "first" ) );
 
   // Second registration of same command
-  let second = registry.command_add_runtime( &cmd, create_mock_routine_with_output( "second" ) );
+  let second = registry.register_with_routine( &cmd, create_mock_routine_with_output( "second" ) );
 
   // CRITICAL CHECK: Must return Err for duplicate
   assert!(
@@ -139,7 +139,7 @@ fn test_first_registration_preserved_on_duplicate()
 
   // Register first version
   let cmd1 = create_test_command( ".build", "Original build command" );
-  registry.command_add_runtime( &cmd1, create_mock_routine_with_output( "original" ) )
+  registry.register_with_routine( &cmd1, create_mock_routine_with_output( "original" ) )
     .expect( "First registration should succeed" );
 
   // Verify first version is in registry
@@ -150,7 +150,7 @@ fn test_first_registration_preserved_on_duplicate()
 
   // Attempt to register duplicate
   let cmd2 = create_test_command( ".build", "Modified build command" );
-  let _duplicate_result = registry.command_add_runtime( &cmd2, create_mock_routine_with_output( "modified" ) );
+  let _duplicate_result = registry.register_with_routine( &cmd2, create_mock_routine_with_output( "modified" ) );
 
   // CRITICAL CHECK: Original command should still be present
   assert!(
@@ -182,11 +182,11 @@ fn test_duplicate_error_message_clarity()
   let cmd = create_test_command( ".config", "Configuration command" );
 
   // First registration
-  registry.command_add_runtime( &cmd, create_mock_routine_with_output( "first" ) )
+  registry.register_with_routine( &cmd, create_mock_routine_with_output( "first" ) )
     .expect( "First registration should succeed" );
 
   // Duplicate registration
-  let duplicate_result = registry.command_add_runtime( &cmd, create_mock_routine_with_output( "second" ) );
+  let duplicate_result = registry.register_with_routine( &cmd, create_mock_routine_with_output( "second" ) );
 
   // Check error message quality
   if let Err( error ) = duplicate_result

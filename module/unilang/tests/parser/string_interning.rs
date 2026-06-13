@@ -30,7 +30,7 @@ fn test_global_interner_integration()
   let cmd1 = unilang::interner::intern_command_name( &[ "global", "test" ] );
   let cmd2 = unilang::interner::intern_command_name( &[ "global", "test" ] );
   
-  assert!( core::ptr::eq( cmd1, cmd2 ) );
+  assert!( core::ptr::eq( cmd1, cmd2 ), "global interner must return the same reference for identical strings" );
   assert_eq!( cmd1, ".global.test" );
 }
 
@@ -93,7 +93,7 @@ fn test_interning_with_empty_first_slice()
   assert_eq!( cmd2, ".test.command" );
   
   // And should be the same interned reference
-  assert!( core::ptr::eq( cmd1, cmd2 ) );
+  assert!( core::ptr::eq( cmd1, cmd2 ), "empty leading slice must produce the same interned reference as non-empty form" );
 }
 
 #[ test ]
@@ -167,8 +167,8 @@ fn test_thread_safety()
   
   // Verify cache contains expected entries
   let stats = interner.stats();
-  assert!( stats.cached_strings >= 3 ); // At least the 3 unique patterns
-  assert!( stats.cached_strings <= 8 ); // At most one per thread
+  assert!( stats.cached_strings >= 3, "at least the 3 unique patterns must be cached" );
+  assert!( stats.cached_strings <= 8, "at most one entry per thread (8 threads)" );
 }
 
 #[ test ]
@@ -181,38 +181,44 @@ fn test_performance_characteristics()
     vec![ "user", "login" ],
     vec![ "system", "status" ],
   ];
-  
-  // Measure cache miss performance (first time)
+
+  // Cold pass: populate the cache with all 4 distinct commands
   for cmd_slices in &test_commands
   {
-    for _ in 0..1000
-    {
-      let _interned = interner.intern_command_name( cmd_slices );
-    }
+    interner.intern_command_name( cmd_slices );
   }
-  
-  // Clear and measure cache miss again for comparison
-  interner.clear();
-  
-  // Measure cache miss again
-  for cmd_slices in &test_commands
-  {
-    let _interned = interner.intern_command_name( cmd_slices );
-  }
-  
-  // Now measure cache hit performance (subsequent times)
+
+  // All 4 distinct commands must be in the cache after first pass
+  let stats_cold = interner.stats();
+  assert!(
+    stats_cold.cached_strings >= 4,
+    "All 4 distinct commands must be cached after cold population; found {}",
+    stats_cold.cached_strings
+  );
+
+  // Cache hit: same slices must resolve to the same interned reference
+  let first  = interner.intern_command_name( &test_commands[ 0 ] );
+  let second = interner.intern_command_name( &test_commands[ 0 ] );
+  assert!(
+    core::ptr::eq( first, second ),
+    "Cache hit must return the same pointer for identical command slices"
+  );
+
+  // 1000 iterations: enough to detect unbounded growth (even a 1-entry leak per call would
+  // add 4000 entries) while remaining fast (< 1ms on any hardware with a warm cache).
   for _ in 0..1000
   {
     for cmd_slices in &test_commands
     {
-      let _interned = interner.intern_command_name( cmd_slices );
+      let _ = interner.intern_command_name( cmd_slices );
     }
   }
-  
-  
-  // Cache hits should be reasonably fast compared to misses for bulk operations
-  // Allow for some variance in performance due to system load and other factors
-  // We expect cache hits to not be significantly slower than cache misses
+
+  let stats_warm = interner.stats();
+  assert_eq!(
+    stats_warm.cached_strings, stats_cold.cached_strings,
+    "Cache size must remain stable when only re-interning already-known commands"
+  );
 }
 
 #[ test ]

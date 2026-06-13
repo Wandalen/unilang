@@ -2,7 +2,7 @@
 //!
 //! ## Architecture Evolution
 //!
-//! **Phase 1:** Validation at registration time (both `register()` and `command_add_runtime()`)
+//! **Phase 1:** Validation at registration time (both `register()` and `register_with_routine()`)
 //! - Fixed code path divergence where validation rules differed between registration methods
 //! - Prevented invalid commands from being registered
 //!
@@ -89,9 +89,9 @@ fn test_register_rejects_command_without_dot_prefix()
 /// **Phase 2 Update:** Validation moved to construction time for both paths.
 #[test]
 #[should_panic(expected = "MissingDotPrefix")]
-fn test_command_add_runtime_rejects_command_without_dot_prefix()
+fn test_register_with_routine_rejects_command_without_dot_prefix()
 {
-  // Phase 2: This panics at construction time, before `command_add_runtime()` call
+  // Phase 2: This panics at construction time, before `register_with_routine()` call
   let _invalid_cmd = CommandDefinition::former()
     .name( "build" )  // ❌ No dot prefix - panics here
     .description( "Build project" )
@@ -272,7 +272,7 @@ fn test_both_paths_accept_valid_commands_identically()
 
   // Both paths should accept
   let result1 = registry1.register( valid_cmd.clone() );
-  let result2 = registry2.command_add_runtime( &valid_cmd, create_mock_routine() );
+  let result2 = registry2.register_with_routine( &valid_cmd, create_mock_routine() );
 
   assert!(
     result1.is_ok() && result2.is_ok(),

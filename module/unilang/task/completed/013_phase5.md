@@ -281,7 +281,7 @@ _N/A — pre-template task. See task body for objective details._
 - ✅ Enhanced type system tests exist at `/tests/inc/phase2/argument_types_test.rs` and `collection_types_test.rs`
 - ✅ Comprehensive coverage of Path, File, Directory, Enum, URL, DateTime, Pattern types
 - ✅ Collection types (List, Map) with custom delimiters fully implemented
-- ✅ Runtime command management through `CommandRegistry::command_add_runtime()` working
+- ✅ Runtime command management through `CommandRegistry::register_with_routine()` working
 - ✅ Complex validation rules and default values functioning properly
 
 **Phase 3 Verification:**

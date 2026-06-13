@@ -34,7 +34,7 @@
 ### AP-5: CommandAlreadyExists is returned when registering a duplicate command name
 
 - **Given:** A `CommandRegistry` that already contains `.dup`
-- **When:** `command_add_runtime` is called a second time with a definition named `".dup"`
+- **When:** `register_with_routine` is called a second time with a definition named `".dup"`
 - **Then:** Returns `Err(error_data)` where `error_data.code == ErrorCode::CommandAlreadyExists`; the registry still contains the original definition
 
 ### AP-6: ErrorCode enum derives Clone, PartialEq, and Eq

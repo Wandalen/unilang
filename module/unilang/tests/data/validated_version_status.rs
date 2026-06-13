@@ -14,7 +14,7 @@ use unilang::data::{ VersionType, CommandStatus };
 /// and arbitrary non-empty formats).
 // test_kind: tc_spec(TC-1, TC-3, TC-4)
 #[ test ]
-fn version_valid_construction()
+fn test_tc1_tc3_tc4_version_non_empty_valid()
 {
   let versions = vec!
   [
@@ -48,7 +48,7 @@ fn version_valid_construction()
 /// TC-2: Empty string is rejected.
 // test_kind: tc_spec(TC-2)
 #[ test ]
-fn version_rejects_empty_string()
+fn test_tc2_version_empty_rejected()
 {
   let result = VersionType::new( "" );
 
@@ -122,7 +122,7 @@ fn version_serde_json_deserialize_valid()
 // test_kind: tc_spec(TC-5)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn version_serde_json_deserialize_rejects_empty()
+fn test_tc5_version_serde_rejects_empty()
 {
   let json_empty = "\"\"";
   let result : Result< VersionType, _ > = serde_json::from_str( json_empty );
@@ -161,7 +161,7 @@ fn version_serde_yaml_ng_deserialize_rejects_empty()
 /// TC-1: Active variant is default and queryable.
 // test_kind: tc_spec(TC-1)
 #[ test ]
-fn command_status_active()
+fn test_tc1_command_status_active()
 {
   let active = CommandStatus::Active;
 
@@ -176,7 +176,7 @@ fn command_status_active()
 /// TC-6: Experimental variant is queryable.
 // test_kind: tc_spec(TC-6)
 #[ test ]
-fn command_status_experimental()
+fn test_tc6_command_status_experimental()
 {
   let experimental = CommandStatus::Experimental;
 
@@ -191,7 +191,7 @@ fn command_status_experimental()
 /// TC-7: Internal variant is queryable.
 // test_kind: tc_spec(TC-7)
 #[ test ]
-fn command_status_internal()
+fn test_tc7_command_status_internal()
 {
   let internal = CommandStatus::Internal;
 
@@ -206,7 +206,7 @@ fn command_status_internal()
 /// TC-2: Deprecated variant carries metadata.
 // test_kind: tc_spec(TC-2)
 #[ test ]
-fn command_status_deprecated_full()
+fn test_tc2_command_status_deprecated_carries_metadata()
 {
   let deprecated = CommandStatus::Deprecated
   {
@@ -281,7 +281,7 @@ fn command_status_clone_and_equality()
 // test_kind: tc_spec(TC-3)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn command_status_serde_json_active()
+fn test_tc3_command_status_serde_json_active()
 {
   let active = CommandStatus::Active;
   let json = serde_json::to_string( &active ).expect( "serialization should succeed" );
@@ -322,7 +322,7 @@ fn command_status_serde_json_internal()
 // test_kind: tc_spec(TC-4)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn command_status_serde_json_deprecated()
+fn test_tc4_command_status_serde_json_deprecated()
 {
   let deprecated = CommandStatus::Deprecated
   {
@@ -373,7 +373,7 @@ fn command_status_serde_json_backward_compatible()
 // test_kind: tc_spec(TC-5)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn command_status_serde_json_case_insensitive()
+fn test_tc5_command_status_serde_case_insensitive()
 {
   let test_cases = vec!
   [

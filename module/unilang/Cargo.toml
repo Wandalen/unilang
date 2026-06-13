@@ -231,7 +231,7 @@ bytecount = { workspace = true, optional = true } # SIMD byte counting and opera
 
 [[bin]]
 name = "unilang_cli"
-path = "src/bin/unilang_cli.rs"
+path = "src/bin/unilang_cli/main.rs"
 required-features = ["enabled"]
 
 
@@ -443,6 +443,7 @@ pico-args = { workspace = true }
 chrono = { workspace = true }
 tempfile = { workspace = true }
 walkdir = { workspace = true }  # For build-time test verification
+trybuild = { workspace = true }  # For compile_fail tests (M2)
 
 criterion = { workspace = true }
 

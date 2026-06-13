@@ -299,7 +299,7 @@ The WebAssembly REPL demonstrates:
                     let message = cmd.arguments.get("message").unwrap_or(&Value::String("".to_string()));
                     Ok(OutputData { content: message.to_string(), format: "text".to_string() })
                 });
-                registry.command_add_runtime(&echo_cmd, echo_routine).unwrap();
+                registry.register_with_routine(&echo_cmd, echo_routine).unwrap();
 
                 Self {
                     pipeline: Pipeline::new(registry),

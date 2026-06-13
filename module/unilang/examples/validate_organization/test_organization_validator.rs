@@ -253,36 +253,32 @@ impl OrganizationValidator
   {
     match category
     {
-      "unit" => {
+      "unit" if filename.contains( "integration" ) || filename.contains( "end_to_end" ) =>
+      {
         // Unit tests should focus on single components
-        if filename.contains( "integration" ) || filename.contains( "end_to_end" )
-        {
-          violations.push( "Unit test filename suggests integration testing".to_string() );
-        }
+        violations.push( "Unit test filename suggests integration testing".to_string() );
       }
-      "integration" => {
+      "integration" if !filename.contains( "_" ) && !filename.contains( "integration" ) =>
+      {
         // Integration tests should indicate component interaction
-        if !filename.contains( "_" ) && !filename.contains( "integration" )
-        {
-          violations.push( "Integration test should indicate component interaction".to_string() );
-        }
+        violations.push( "Integration test should indicate component interaction".to_string() );
       }
-      "acceptance" => {
+      "acceptance"
+        if !filename.contains( "cli" )
+          && !filename.contains( "user" )
+          && !filename.contains( "scenario" ) =>
+      {
         // Acceptance tests should indicate user scenarios
-        if !filename.contains( "cli" ) && !filename.contains( "user" ) && !filename.contains( "scenario" )
-        {
-          violations.push( "Acceptance test should indicate user scenario or CLI interaction".to_string() );
-        }
+        violations.push( "Acceptance test should indicate user scenario or CLI interaction".to_string() );
       }
-      "regression" => {
+      "regression" if !filename.contains( "regression" ) && !filename.contains( "fix" ) =>
+      {
         // Regression tests should indicate bug prevention
-        if !filename.contains( "regression" ) && !filename.contains( "fix" )
-        {
-          violations.push( "Regression test should clearly indicate bug prevention purpose".to_string() );
-        }
+        violations.push( "Regression test should clearly indicate bug prevention purpose".to_string() );
       }
-      _ => {
-        // Other categories have no specific requirements
+      _ =>
+      {
+        // Other categories have no specific requirements or condition not met
       }
     }
   }

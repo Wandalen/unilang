@@ -197,7 +197,7 @@ fn test_complete_workflow()
   });
   
   // Register the command
-  registry.command_add_runtime( &greet_cmd, routine )
+  registry.register_with_routine( &greet_cmd, routine )
     .expect( "Failed to register command" );
   
   // Verify command was registered - registry doesn't expose commands() method

@@ -119,7 +119,7 @@ fn test_in4_consistent_help_access_three_routes_equivalent()
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   );
 
-  registry.command_add_runtime( &greet_command, noop ).expect( "Registration must succeed" );
+  registry.register_with_routine( &greet_command, noop ).expect( "Registration must succeed" );
 
   let pipeline = Pipeline::new( registry );
 
@@ -173,7 +173,7 @@ fn test_in5_single_source_of_truth_duplicate_registration_rejected()
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   };
 
-  registry.command_add_runtime( &dup_command, Box::new( noop ) )
+  registry.register_with_routine( &dup_command, Box::new( noop ) )
     .expect( "First registration must succeed" );
 
   let noop2 = | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, ErrorData >
@@ -181,7 +181,7 @@ fn test_in5_single_source_of_truth_duplicate_registration_rejected()
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   };
 
-  let result = registry.command_add_runtime( &dup_command, Box::new( noop2 ) );
+  let result = registry.register_with_routine( &dup_command, Box::new( noop2 ) );
   assert!( result.is_err(), "Duplicate registration must produce an error" );
   match result.unwrap_err()
   {

@@ -136,7 +136,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &dynamic_cmd, dynamic_routine )?;
+  registry.register_with_routine( &dynamic_cmd, dynamic_routine )?;
   println!( "✓ Dynamic command registered successfully" );
 
   // Step 4: Compare static vs dynamic performance

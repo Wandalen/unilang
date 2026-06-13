@@ -114,7 +114,7 @@ fn test_basic_command_execution()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".test" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".test" ).expect( "Should create verified command" );
 
@@ -139,7 +139,7 @@ fn test_command_execution_with_arguments()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".greet" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( argument_access_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( argument_access_routine ) ).unwrap();
 
   let verified_command = create_verified_command( &registry, r#".greet name::"Alice""# ).expect( "Should create verified command" );
 
@@ -164,7 +164,7 @@ fn test_command_execution_with_default_arguments()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".greet" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( argument_access_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( argument_access_routine ) ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".greet" ).expect( "Should create verified command" );
 
@@ -188,7 +188,7 @@ fn test_command_execution_error_handling()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".error" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( error_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( error_routine ) ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".error" ).expect( "Should create verified command" );
 
@@ -228,7 +228,7 @@ fn test_execution_context_management()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, context_validation_routine ).unwrap();
+  registry.register_with_routine( &cmd, context_validation_routine ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".test" ).expect( "Should create verified command" );
 
@@ -252,7 +252,7 @@ fn test_multiple_command_executions()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".test" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Execute multiple commands to ensure no state leakage
   for i in 1..=5 {
@@ -348,7 +348,7 @@ fn test_execution_with_complex_arguments()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, complex_routine ).unwrap();
+  registry.register_with_routine( &cmd, complex_routine ).unwrap();
 
   let verified_command = create_verified_command( &registry, r#".complex text::"hello" number::42 flag::true"# ).expect( "Should create verified command" );
 
@@ -372,7 +372,7 @@ fn test_execution_performance()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".perf" );
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".perf" ).expect( "Should create verified command" );
 
@@ -401,7 +401,7 @@ fn test_execution_output_formats()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &cmd, format_routine ).unwrap();
+  registry.register_with_routine( &cmd, format_routine ).unwrap();
 
   let verified_command = create_verified_command( &registry, r".format" ).expect( "Should create verified command" );
 

@@ -53,15 +53,7 @@ mod private
 /// ```
 pub fn validate_command_name( name : &str ) -> Result< (), Error >
 {
-  if !name.starts_with( '.' )
-  {
-    return Err( Error::Registration( format!(
-      "Invalid command name '{}'. All commands must start with dot prefix (e.g., '.chat'). \
-      This enforces explicit naming with minimal implicit transformations.",
-      name
-    )));
-  }
-  Ok(())
+  crate::validation_core::validate_command_name_core( name ).map_err( Error::Registration )
 }
 
 /// Validates namespace follows dot-prefix naming convention.
@@ -84,15 +76,7 @@ pub fn validate_command_name( name : &str ) -> Result< (), Error >
 /// ```
 pub fn validate_namespace( namespace : &str ) -> Result< (), Error >
 {
-  if !namespace.is_empty() && !namespace.starts_with( '.' )
-  {
-    return Err( Error::Registration( format!(
-      "Invalid namespace '{}'. Non-empty namespaces must start with dot prefix (e.g., '.session'). \
-      Use empty namespace for root-level commands.",
-      namespace
-    )));
-  }
-  Ok(())
+  crate::validation_core::validate_namespace_core( namespace ).map_err( Error::Registration )
 }
 
 /// Validates parameter storage types match their multiple attribute.

@@ -197,7 +197,7 @@ impl StaticCommandRegistry {
         self.static_commands.as_ref().and_then( | m | m.get( name ).map( | c | c.into() ) )
       }
       RegistryMode::DynamicOnly => {
-        self.dynamic_commands.get_readonly(name)
+        self.dynamic_commands.lookup(name)
       }
       RegistryMode::Hybrid | RegistryMode::Auto => {
         // Static commands take priority
@@ -205,11 +205,11 @@ impl StaticCommandRegistry {
           if let Some(static_cmd) = static_commands.get(name) {
             Some(static_cmd.into())
           } else {
-            self.dynamic_commands.get_readonly(name)
+            self.dynamic_commands.lookup(name)
           }
         } else {
           // No static commands available, use dynamic only
-          self.dynamic_commands.get_readonly(name)
+          self.dynamic_commands.lookup(name)
         }
       }
     }
@@ -320,12 +320,6 @@ impl StaticCommandRegistry {
     self.routines.get(name)
   }
 
-  /// Get command routine for execution (alias for compatibility with CommandRegistry).
-  #[must_use]
-  pub fn get_routine(&self, name: &str) -> Option<&CommandRoutine> {
-    self.routine(name)
-  }
-
   /// Get all commands as a HashMap (for compatibility with CommandRegistry interface).
   ///
   /// This method provides the same interface as CommandRegistry::commands() for seamless
@@ -353,12 +347,12 @@ impl StaticCommandRegistry {
     all_commands
   }
 
-  /// Get formatted help text for a command (for compatibility with CommandRegistry interface).
+  /// Get formatted help text for a command.
   ///
-  /// This method provides the same interface as CommandRegistry::get_help_for_command()
-  /// for seamless integration with Pipeline and other components.
+  /// Mirrors `CommandRegistry::help_for_command()` for seamless integration with Pipeline
+  /// and other components using the `CommandRegistryTrait` interface.
   #[must_use]
-  pub fn get_help_for_command(&self, command_name: &str) -> Option<String> {
+  pub fn help_for_command(&self, command_name: &str) -> Option<String> {
     self.command_readonly(command_name).map( |cmd_def| self.format_help_text(&cmd_def) )
   }
 
@@ -392,7 +386,7 @@ impl StaticCommandRegistry {
   /// Consume this registry and return its routines map.
   ///
   /// Used by `From<StaticCommandRegistry> for CommandRegistry` to transfer
-  /// routines without cloning. For non-consuming access use `get_routine()`.
+  /// routines without cloning. For non-consuming access use `routine()`.
   #[ must_use ]
   pub fn into_routines( self ) -> HashMap< String, CommandRoutine >
   {
@@ -415,11 +409,11 @@ impl super::traits::CommandRegistryTrait for StaticCommandRegistry {
     self.commands()
   }
 
-  fn get_routine(&self, name: &str) -> Option<&CommandRoutine> {
-    self.get_routine(name)
+  fn routine(&self, name: &str) -> Option<&CommandRoutine> {
+    self.routine(name)
   }
 
-  fn get_help_for_command(&self, command_name: &str) -> Option<String> {
-    self.get_help_for_command(command_name)
+  fn help_for_command(&self, command_name: &str) -> Option<String> {
+    self.help_for_command(command_name)
   }
 }

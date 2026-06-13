@@ -29,7 +29,7 @@ fn test_external_usage_with_prelude()
   });
   
   // Register the command
-    registry.command_add_runtime( &cmd, routine ).unwrap();
+    registry.register_with_routine( &cmd, routine ).unwrap();
   
   // Use Pipeline API
   let pipeline = Pipeline::new( registry );
@@ -87,7 +87,7 @@ fn test_external_usage_with_specific_imports()
     })
   });
   
-    registry.command_add_runtime( &cmd, routine ).unwrap();
+    registry.register_with_routine( &cmd, routine ).unwrap();
   
   let pipeline = Pipeline::new( registry );
   let result = pipeline.process_command_simple( ".greet name::\"Alice\"" );
@@ -125,7 +125,7 @@ fn test_external_usage_with_module_imports()
     })
   });
   
-    registry.command_add_runtime( &cmd, routine ).unwrap();
+    registry.register_with_routine( &cmd, routine ).unwrap();
   
   let pipeline = Pipeline::new( registry );
   let result = pipeline.process_command_simple( ".test" );
@@ -175,7 +175,7 @@ fn test_external_usage_batch_processing()
     })
   });
   
-    registry.command_add_runtime( &cmd, routine ).unwrap();
+    registry.register_with_routine( &cmd, routine ).unwrap();
   
   let pipeline = Pipeline::new( registry );
   let commands = vec![ ".echo", ".echo", ".echo" ];

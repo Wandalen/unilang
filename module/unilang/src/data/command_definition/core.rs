@@ -98,7 +98,8 @@
 //! assert_eq!(cmd.name().as_str(), ".test");
 //! ```
 
-use super::super::validated_types::{ CommandName, VersionType };
+use super::super::command_name::CommandName;
+use super::super::version_type::VersionType;
 use super::super::command_status::{ CommandStatus, construct_full_command_name };
 use super::super::argument_types::ArgumentDefinition;
 use super::builder::{ CommandDefinitionBuilder, NotSet };

@@ -142,7 +142,7 @@ fn setup_demo_commands(registry: &mut CommandRegistry) -> Result<(), Error> {
         })
     });
 
-    registry.command_add_runtime(&demo_cmd, demo_routine)?;
+    registry.register_with_routine(&demo_cmd, demo_routine)?;
 
     // Interactive command for secure input demo
     let secure_cmd = CommandDefinition::former()
@@ -186,7 +186,7 @@ fn setup_demo_commands(registry: &mut CommandRegistry) -> Result<(), Error> {
         })
     });
 
-    registry.command_add_runtime(&secure_cmd, secure_routine)?;
+    registry.register_with_routine(&secure_cmd, secure_routine)?;
 
     Ok(())
 }

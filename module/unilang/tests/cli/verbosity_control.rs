@@ -61,15 +61,15 @@ fn test_pipeline_with_custom_verbosity()
   use unilang::registry::CommandRegistry;
   use unilang_parser::UnilangParserOptions;
 
-  // Create a pipeline with quiet verbosity
-    let registry = CommandRegistry::new();
+  let registry = CommandRegistry::new();
   let quiet_options = UnilangParserOptions { verbosity: 0, ..Default::default() };
-  
-  let _pipeline = Pipeline::with_parser_options( registry, quiet_options );
-  
-  // The pipeline should be created successfully with custom options
-  // In a real implementation, this would suppress debug output
-  // Pipeline creation test successful
+  let pipeline = Pipeline::with_parser_options( registry, quiet_options );
+
+  // Pipeline with quiet verbosity must behave identically to default verbosity:
+  // empty string triggers HelpRequested which the pipeline converts to a success result
+  let result = pipeline.process_command_simple( "" );
+  assert!( result.success, "Empty string must succeed (help response) regardless of verbosity setting" );
+  assert!( result.error.is_none(), "Help response must carry no error field regardless of verbosity" );
 }
 
 #[test]

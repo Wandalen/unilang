@@ -33,6 +33,8 @@ mod traits;
 mod map;
 mod builder;
 mod dynamic;
+mod help;
+mod trait_impl;
 #[ cfg( feature = "static_registry" ) ]
 mod static_reg;
 #[ cfg( feature = "static_registry" ) ]

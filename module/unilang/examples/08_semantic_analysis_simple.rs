@@ -102,7 +102,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &cmd1_command, cmd1_routine )?;
+  registry.register_with_routine( &cmd1_command, cmd1_routine )?;
 
   // Generic processing command for testing
   let text_command = CommandDefinition::former()
@@ -189,7 +189,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &text_command, text_routine )?;
+  registry.register_with_routine( &text_command, text_routine )?;
 
   println!( "✓ Registered test commands for semantic analysis" );
 
@@ -286,7 +286,7 @@ fn main() -> Result< (), unilang::error::Error >
             // Execute the verified command
             for verified_cmd in verified_commands
             {
-              if let Some( routine ) = registry.get_routine( &format!( ".{}.{}", verified_cmd.definition.namespace().trim_start_matches( '.' ), verified_cmd.definition.name() ) )
+              if let Some( routine ) = registry.routine( &format!( ".{}.{}", verified_cmd.definition.namespace().trim_start_matches( '.' ), verified_cmd.definition.name() ) )
               {
                 let context = unilang::interpreter::ExecutionContext::default();
                 match routine( verified_cmd, context )

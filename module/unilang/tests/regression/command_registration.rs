@@ -57,7 +57,7 @@ fn test_correct_dot_command_registration()
     .end();
 
     let mut registry = CommandRegistry::new();
-    let registration_result = registry.command_add_runtime( &test_cmd, Box::new( create_test_command_handler ) );
+    let registration_result = registry.register_with_routine( &test_cmd, Box::new( create_test_command_handler ) );
   
   assert!( registration_result.is_ok(), "Command registration should succeed" );
   println!( "✅ Command registered correctly: '{}'", test_cmd.name() );
@@ -106,7 +106,7 @@ fn test_multiple_corrected_commands()
       .description( *description )
       .end();
 
-        let result = registry.command_add_runtime( &cmd, Box::new( create_test_command_handler ) );
+        let result = registry.register_with_routine( &cmd, Box::new( create_test_command_handler ) );
     assert!( result.is_ok(), "Failed to register command '{}'", name );
     println!( "✅ Registered: '{}'", name );
   }
@@ -148,7 +148,7 @@ fn test_namespaced_commands_work_correctly()
     .end();
 
     let mut registry = CommandRegistry::new();
-    let result = registry.command_add_runtime( &session_cmd, Box::new( create_test_command_handler ) );
+    let result = registry.register_with_routine( &session_cmd, Box::new( create_test_command_handler ) );
   assert!( result.is_ok(), "Namespaced command registration should succeed" );
   
   let pipeline = Pipeline::new( registry );

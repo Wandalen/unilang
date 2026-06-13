@@ -4,38 +4,29 @@
 //!
 //! | Test ID | What's Tested | Input | Expected | Status |
 //! |---------|---------------|-------|----------|--------|
-//! | HC-1 | Validate all commands have help | Registry with commands | Validation passes | NEW API |
-//! | HC-2 | Detect missing help commands | Command without .help | Validation fails | NEW API |
-//! | HC-3 | Formatted listing completeness | Multiple commands | All in formatted output | NEW API |
+//! | HC-1 | Validate all commands have help | Registry with commands | Validation passes | Implemented |
+//! | HC-2 | Detect missing help commands | Command without .help | Validation passes (auto-help) | Implemented |
+//! | HC-3 | Formatted listing completeness | Multiple commands | All in formatted output | Implemented |
 //!
 //! ## Scope
 //!
-//! Tests the proposed API for validating that every command in the registry has
+//! Tests the API for validating that every command in the registry has
 //! corresponding help. This validates the solution to the help divergence problem.
 //!
 //! ## Coverage
 //!
-//! - Registry validation API (proposed: `validate_help_completeness()`)
-//! - Formatted command listing API (proposed: `format_command_listing()`)
-//! - Detection of missing help commands
-//! - Verification that help is complete and accurate
+//! - `CommandRegistry::validate_help_completeness()` — validates all commands have help
+//! - `CommandRegistry::format_command_listing()` — lists all commands with descriptions
+//! - Detection of commands missing help
+//! - Verification that auto-generated help is present
 //!
 //! ## Related
 //!
 //! - `task/prevent_command_help_divergence.md` - Solution specification
 //! - `tests/help/help_divergence_prevention.rs` - Bug demonstration
 //! - `tests/registry/auto_help_integration.rs` - Automatic help generation
-//!
-//! ## Implementation Status
-//!
-//! These tests use PROPOSED APIs that dont exist yet:
-//! - `CommandRegistry::validate_help_completeness()` - NEW
-//! - `CommandRegistry::format_command_listing()` - NEW
-//!
-//! Tests will FAIL until APIs are implemented (this is expected).
 
 #![ allow( deprecated ) ]
-#![ allow( unused_imports ) ] // Some APIs dont exist yet
 
 use unilang::data::{ CommandDefinition, OutputData };
 use unilang::registry::CommandRegistry;
@@ -78,11 +69,11 @@ fn test_validate_all_commands_have_help()
   let cmd2 = create_test_command( ".test", "Run tests" );
   let cmd3 = create_test_command( ".deploy", "Deploy application" );
 
-  registry.command_add_runtime( &cmd1, create_mock_routine() )
+  registry.register_with_routine( &cmd1, create_mock_routine() )
     .expect( "Command registration should succeed" );
-  registry.command_add_runtime( &cmd2, create_mock_routine() )
+  registry.register_with_routine( &cmd2, create_mock_routine() )
     .expect( "Command registration should succeed" );
-  registry.command_add_runtime( &cmd3, create_mock_routine() )
+  registry.register_with_routine( &cmd3, create_mock_routine() )
     .expect( "Command registration should succeed" );
 
   // Validate help completeness
@@ -108,7 +99,7 @@ fn test_detect_missing_help_commands()
 
   // Register command with auto_help enabled
   let cmd = create_test_command( ".deploy", "Deploy application" );
-  registry.command_add_runtime( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_mock_routine() )
     .expect( "Command registration should succeed" );
 
   // With auto_help_enabled, the help command should be auto-generated
@@ -143,7 +134,7 @@ fn test_formatted_listing_completeness()
   for ( name, desc ) in &commands
   {
     let cmd = create_test_command( name, desc );
-    registry.command_add_runtime( &cmd, create_mock_routine() )
+    registry.register_with_routine( &cmd, create_mock_routine() )
       .expect( "Command registration should succeed" );
   }
 

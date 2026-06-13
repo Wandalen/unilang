@@ -1,6 +1,7 @@
 use crate::interpreter::{ ExecutionContext, Interpreter };
 use crate::semantic::SemanticAnalyzer;
-use super::core::{ Pipeline, CommandResult };
+use super::core::Pipeline;
+use super::result::CommandResult;
 
 impl Pipeline
 {

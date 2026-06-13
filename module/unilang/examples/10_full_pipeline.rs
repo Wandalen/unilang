@@ -373,7 +373,7 @@ fn setup_file_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     }
   });
 
-  registry.command_add_runtime( &list_command, list_routine )?;
+  registry.register_with_routine( &list_command, list_routine )?;
 
   // File sync command
   let sync_command = CommandDefinition::former()
@@ -490,7 +490,7 @@ fn setup_file_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &sync_command, sync_routine )?;
+  registry.register_with_routine( &sync_command, sync_routine )?;
 
   Ok(())
 }
@@ -629,7 +629,7 @@ fn setup_text_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &analyze_command, analyze_routine )?;
+  registry.register_with_routine( &analyze_command, analyze_routine )?;
 
   Ok(())
 }
@@ -728,7 +728,7 @@ fn setup_network_commands( registry : &mut CommandRegistry ) -> Result< (), unil
     })
   });
 
-  registry.command_add_runtime( &ping_command, ping_routine )?;
+  registry.register_with_routine( &ping_command, ping_routine )?;
 
   Ok(())
 }
@@ -781,7 +781,7 @@ fn setup_utility_commands( registry : &mut CommandRegistry ) -> Result< (), unil
     })
   });
 
-  registry.command_add_runtime( &echo_command, echo_routine )?;
+  registry.register_with_routine( &echo_command, echo_routine )?;
 
   // Timestamp command
   let timestamp_command = CommandDefinition::former()
@@ -856,7 +856,7 @@ fn setup_utility_commands( registry : &mut CommandRegistry ) -> Result< (), unil
     })
   });
 
-  registry.command_add_runtime( &timestamp_command, timestamp_routine )?;
+  registry.register_with_routine( &timestamp_command, timestamp_routine )?;
 
   Ok(())
 }

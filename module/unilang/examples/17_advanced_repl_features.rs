@@ -94,7 +94,7 @@ fn register_comprehensive_commands( registry : &mut CommandRegistry ) -> Result<
     })
   });
 
-  registry.command_add_runtime( &ls_cmd, ls_routine )?;
+  registry.register_with_routine( &ls_cmd, ls_routine )?;
 
   // Network commands
   let ping_cmd = CommandDefinition::former()
@@ -166,7 +166,7 @@ fn register_comprehensive_commands( registry : &mut CommandRegistry ) -> Result<
     })
   });
 
-  registry.command_add_runtime( &ping_cmd, ping_routine )?;
+  registry.register_with_routine( &ping_cmd, ping_routine )?;
 
   // Data processing command
   let process_cmd = CommandDefinition::former()
@@ -264,7 +264,7 @@ fn register_comprehensive_commands( registry : &mut CommandRegistry ) -> Result<
     })
   });
 
-  registry.command_add_runtime( &process_cmd, process_routine )?;
+  registry.register_with_routine( &process_cmd, process_routine )?;
 
   println!( "✓ Registered {} commands for advanced REPL demo", registry.commands().len() );
 

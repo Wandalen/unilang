@@ -49,7 +49,7 @@ The `src/lib.rs` prelude exposes: `CommandDefinition`, `ArgumentDefinition`, `Ar
 5. `VerifiedCommand` — commands after semantic analysis
 6. `Pipeline` — high-level orchestration API
 
-The most common usage patterns are: creating a registry then calling `command_add_runtime()` per command, or using the fluent builder API with `CommandRegistry::builder()`.
+The most common usage patterns are: creating a registry then calling `register_with_routine()` per command, or using the fluent builder API with `CommandRegistry::builder()`.
 
 ### Part 3: Error-Prone API Patterns
 

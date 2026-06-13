@@ -194,7 +194,7 @@ fn test_static_registry_auto_help_content()
   let command_reg: unilang::registry::CommandRegistry = static_reg.into();
 
   // Get help content
-  if let Some( help_text ) = command_reg.get_help_for_command( ".mycommand" )
+  if let Some( help_text ) = command_reg.help_for_command( ".mycommand" )
   {
     assert!(
       help_text.contains( "unique description" ),
@@ -203,7 +203,7 @@ fn test_static_registry_auto_help_content()
   }
   else
   {
-    panic!( "get_help_for_command should return help for registered command" );
+    panic!( "help_for_command should return help for registered command" );
   }
 }
 

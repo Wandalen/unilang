@@ -78,7 +78,7 @@ Result< (), Error >
     }
     unreachable!();
   });
-  registry.command_add_runtime( &cmd1_add_def, cmd1_add_routine )?;
+  registry.register_with_routine( &cmd1_add_def, cmd1_add_routine )?;
 
   // .cmd1.sub command
   let cmd1_sub_def = CommandDefinition::former()
@@ -134,7 +134,7 @@ Result< (), Error >
     }
     unreachable!();
   });
-  registry.command_add_runtime( &cmd1_sub_def, cmd1_sub_routine )?;
+  registry.register_with_routine( &cmd1_sub_def, cmd1_sub_routine )?;
 
   // .greet command
   let greet_def = CommandDefinition::former()
@@ -179,7 +179,7 @@ Result< (), Error >
       execution_time_ms : None,
     })
   });
-  registry.command_add_runtime( &greet_def, greet_routine )?;
+  registry.register_with_routine( &greet_def, greet_routine )?;
 
   // .config.set command
   let config_set_def = CommandDefinition::former()
@@ -234,7 +234,7 @@ Result< (), Error >
       execution_time_ms : None,
     })
   });
-  registry.command_add_runtime( &config_set_def, config_set_routine )?;
+  registry.register_with_routine( &config_set_def, config_set_routine )?;
   let args : Vec< String > = std::env::args().skip( 1 ).collect();
 
   // Fix(BUG-093): Show help when no arguments provided instead of failing with HelpRequested error

@@ -221,7 +221,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
       _ => unreachable!(),
     };
     #[ allow( deprecated ) ]
-    registry.command_add_runtime( &cmd, routine )?;
+    registry.register_with_routine( &cmd, routine )?;
   }
 
   // Register generic commands
@@ -234,7 +234,7 @@ fn main() -> Result< (), Box< dyn std::error::Error > >
       _ => unreachable!(),
     };
     #[ allow( deprecated ) ]
-    registry.command_add_runtime( &cmd, routine )?;
+    registry.register_with_routine( &cmd, routine )?;
   }
 
   // Create pipeline

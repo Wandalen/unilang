@@ -107,7 +107,7 @@ use unilang::{ CommandRegistry, Pipeline };
 /// FT-5: Empty REPL input handled without panic.
 // test_kind: ft_spec(FT-5), bug_reproducer(BUG-093)
 #[ test ]
-fn test_empty_string_handling()
+fn test_ft5_empty_repl_input_handled_without_panic()
 {
   // Test how empty string is handled
 
@@ -116,58 +116,43 @@ fn test_empty_string_handling()
 
   let result = pipeline.process_command_simple( "" );
 
-  // Empty string handling - either succeeds (shows help) or fails gracefully
-  // Implementation may vary - document actual behavior
-  println!( "Empty string result - success: {}", result.success );
-  if let Some( error ) = &result.error
-  {
-    println!( "Empty string error: {}", error );
-  }
-
-  // Test passes regardless - documents behavior
+  // Pipeline converts HelpRequested into a success result (help display is not an error)
+  assert!( result.success, "Pipeline with empty string must succeed — HelpRequested is not an error" );
+  assert!( result.error.is_none(), "Help request must carry no error field" );
 }
 
-/// Demonstrates correct pattern for handling empty CLI arguments.
+/// Verifies that the pipeline handles empty-string input as a successful help response.
 ///
-/// This test shows the FIX applied - check for empty args before parsing.
+/// The fix in examples/ intercepts empty args before calling the pipeline, but the
+/// pipeline itself also handles the case gracefully (HelpRequested → success).
 #[ test ]
 fn test_empty_args_should_show_help()
 {
-  // Simulate CLI running with no arguments
-  let args: Vec< String > = vec![];
+  let registry = CommandRegistry::new();
+  let pipeline = Pipeline::new( registry );
 
-  // CORRECT PATTERN: Check for empty args before parsing
-  if args.is_empty() || args.first().is_some_and( | arg | arg == "help" )
-  {
-    // Show help without treating as error
-    // In real code, this would print help and return Ok(())
+  // Empty string → HelpRequested → pipeline converts to success with help output
+  let result = pipeline.process_command_simple( "" );
 
-    println!( "Help would be displayed here" );
-    // Test passes - demonstrates proper handling
-    return;
-  }
-
-  // If we reach here, args exist - proceed with normal parsing
-  unreachable!( "Empty args should have triggered help display" );
+  assert!( result.success, "Pipeline with empty string must succeed; HelpRequested is treated as a valid help response" );
+  assert!( result.error.is_none(), "Help response must carry no error field" );
 }
 
-/// Tests that explicit "help" argument also triggers help display.
+/// Verifies that the bare "help" keyword is also handled as a successful help response.
 ///
-/// This verifies that both empty args and explicit "help" are handled consistently.
+/// Both empty string and "help" keyword are recognized as help requests by the pipeline.
 #[ test ]
 fn test_explicit_help_request()
 {
-  // Simulate CLI running with "help" argument
-  let args: Vec< String > = vec![ "help".to_string() ];
+  // "help" is recognized as a help request by the pipeline (treated same as empty string).
+  // CLI callers may intercept it early, but the pipeline also handles it gracefully.
+  let registry = CommandRegistry::new();
+  let pipeline = Pipeline::new( registry );
 
-  // Both empty args and "help" should trigger help display
-  if args.is_empty() || args.first().is_some_and( | arg | arg == "help" )
-  {
-    println!( "Help would be displayed here" );
-    return;
-  }
+  let result = pipeline.process_command_simple( "help" );
 
-  unreachable!( "Explicit help request should have triggered help display" );
+  assert!( result.success, "'help' keyword must succeed — pipeline recognizes it as a help request" );
+  assert!( result.error.is_none(), "Help request must carry no error field" );
 }
 
 /// Tests normal command execution path when args are provided.
@@ -188,27 +173,6 @@ fn test_valid_args_proceed_to_parsing()
   println!( "Would parse and execute: {}", args[ 0 ] );
 }
 
-/// Documents the architectural issue: HelpRequested as error vs success.
-///
-/// This test explores the design question of whether HelpRequested should be
-/// `Result::Err` or `Result::Ok` variant.
-#[ test ]
-fn test_help_requested_semantics()
-{
-  // Consider two possible designs:
-
-  // CURRENT: HelpRequested is an error
-  // Result<(), Error> where Error::HelpRequested
-  // Problem: Callers must special-case HelpRequested to avoid treating as failure
-
-  // ALTERNATIVE: HelpRequested is a success variant
-  // Result<ExecutionResult, Error>
-  // where ExecutionResult = { Success, HelpRequested }
-  // Benefit: Help requests are clearly non-errors, exit code 0 by default
-
-  // This test documents the tension between these designs
-  // Current implementation treats help as error, forcing awkward handling at call sites
-}
 
 /// Tests edge case: single-element args with empty string.
 ///
@@ -225,10 +189,9 @@ fn test_single_empty_string_arg()
   let is_help_request = args.first().is_some_and( | arg | arg == "help" );
   let is_empty_first = args.first().is_some_and( | arg | arg.is_empty() );
 
-  println!( "args.is_empty(): {}", is_empty_args );
-  println!( "first == 'help': {}", is_help_request );
-  println!( "first.is_empty(): {}", is_empty_first );
-
-  // Consider: should args = [""] also trigger help display?
-  // This edge case might need additional handling
+  // Single empty-string element is distinct from an empty args list
+  assert!( !is_empty_args, "Single-element args vector is not empty" );
+  assert!( !is_help_request, "Empty-string first arg is not a help request" );
+  assert!( is_empty_first, "First arg must be the empty string" );
+  // Note: args = [ "" ] is NOT caught by is_empty() — callers must also guard this edge case
 }

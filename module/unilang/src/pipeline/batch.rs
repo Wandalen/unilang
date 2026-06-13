@@ -1,5 +1,6 @@
 use crate::interpreter::ExecutionContext;
-use super::core::{ Pipeline, CommandResult };
+use super::core::Pipeline;
+use super::result::CommandResult;
 
 ///
 /// Result of processing multiple commands through the pipeline.

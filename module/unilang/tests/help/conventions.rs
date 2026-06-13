@@ -213,9 +213,9 @@ fn test_help_conventions_api()
   assert!( registry.command( ".test_force_help" ).is_some(), "Main command should exist" );
   assert!( registry.command( ".test_force_help.help" ).is_some(), "Help command should be generated when explicitly enabled" );
 
-  // Test 3: get_help_for_command API
-  let help_text = registry.get_help_for_command( ".test_force_help" );
-  assert!( help_text.is_some(), "get_help_for_command should return help text" );
+  // Test 3: help_for_command API
+  let help_text = registry.help_for_command( ".test_force_help" );
+  assert!( help_text.is_some(), "help_for_command should return help text" );
   assert!( help_text.unwrap().contains( "Command: .test_force_help" ), "Help text should be properly formatted" );
 
   // Test 4: Pipeline help request processing
@@ -249,7 +249,7 @@ fn test_command_definition_builder_methods()
 
   // Test generated help command via registry
   let mut registry = CommandRegistry::new();
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let help_cmd = registry.command( ".test_builder.help" ).unwrap();
   assert_eq!( help_cmd.name().as_str(), ".test_builder.help", "Generated help command should have correct name" );
@@ -319,7 +319,7 @@ fn test_help_content_formatting()
 
   registry.register_with_auto_help( cmd, Box::new( test_routine ) ).unwrap();
 
-  let help_text = registry.get_help_for_command( ".testing.test_format" ).unwrap();
+  let help_text = registry.help_for_command( ".testing.test_format" ).unwrap();
 
   // Verify all sections are present and properly formatted
   assert!( help_text.contains( "Command: .test_format" ), "Command name section" );
@@ -366,10 +366,10 @@ fn test_help_error_handling()
   assert!( error_msg.contains( "not found" ), "Error should indicate command not found" );
   assert!( error_msg.contains( ".nonexistent" ), "Error should mention the command name" );
 
-  // Test get_help_for_command with non-existent command - create new registry
+  // Test help_for_command with non-existent command - create new registry
     let new_registry = CommandRegistry::new();
-  let help_text = new_registry.get_help_for_command( ".nonexistent" );
-  assert!( help_text.is_none(), "get_help_for_command should return None for non-existent commands" );
+  let help_text = new_registry.help_for_command( ".nonexistent" );
+  assert!( help_text.is_none(), "help_for_command should return None for non-existent commands" );
 
   println!( "✅ Help error handling works correctly for non-existent commands" );
 }

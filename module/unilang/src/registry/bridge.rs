@@ -40,9 +40,9 @@ impl From< StaticCommandRegistry > for CommandRegistry
     {
       if let Some( routine ) = routines.remove( &name )
       {
-        // Use command_add_runtime so the routine is attached directly
+        // Use register_with_routine so the routine is attached directly
         // without requiring re-registration by the caller.
-        if let Err( e ) = registry.command_add_runtime( &cmd, routine )
+        if let Err( e ) = registry.register_with_routine( &cmd, routine )
         {
           log::warn!(
             "Unexpected: Command '{}' failed during StaticCommandRegistry conversion: {}",

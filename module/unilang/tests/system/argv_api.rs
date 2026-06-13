@@ -210,7 +210,7 @@ fn test_pipeline_argv_integration()
   });
 
   #[ allow( deprecated ) ]
-  registry.command_add_runtime(&test_cmd, test_routine).unwrap();
+  registry.register_with_routine(&test_cmd, test_routine).unwrap();
 
   // Create pipeline and test argv API
   let pipeline = Pipeline::new(registry);

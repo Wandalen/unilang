@@ -12,5 +12,6 @@ Split from `registry.rs`. Manages command registration, lookup, and routing.
 | `map.rs` | `DynamicCommandMap` — LRU-cached command storage |
 | `builder.rs` | `CommandRegistryBuilder` — fluent registry construction |
 | `dynamic.rs` | `CommandRegistry` — runtime dynamic command registry |
+| `trait_impl.rs` | `CommandRegistryTrait` impl for `CommandRegistry` |
 | `static_reg.rs` | `StaticCommandRegistry` — PHF static + dynamic hybrid registry |
 | `bridge.rs` | `From<StaticCommandRegistry> for CommandRegistry` conversion |

@@ -114,6 +114,33 @@
     }
 
     ///
+    /// Parses a status string, defaulting to `Active` for unrecognized values.
+    ///
+    /// Maps `"experimental"` → `Experimental`, `"internal"` → `Internal`,
+    /// everything else (including `"active"`, `"stable"`) → `Active`.
+    ///
+    /// For `Deprecated` (which requires extra metadata), set that variant directly.
+    ///
+    /// # Examples
+    /// ```
+    /// use unilang::data::CommandStatus;
+    ///
+    /// assert_eq!( CommandStatus::from_str_lossy( "experimental" ), CommandStatus::Experimental );
+    /// assert_eq!( CommandStatus::from_str_lossy( "internal" ), CommandStatus::Internal );
+    /// assert_eq!( CommandStatus::from_str_lossy( "stable" ), CommandStatus::Active );
+    /// assert_eq!( CommandStatus::from_str_lossy( "unknown" ), CommandStatus::Active );
+    /// ```
+    pub fn from_str_lossy( s : &str ) -> Self
+    {
+      match s.to_lowercase().as_str()
+      {
+        "experimental" => CommandStatus::Experimental,
+        "internal" => CommandStatus::Internal,
+        _ => CommandStatus::Active,
+      }
+    }
+
+    ///
     /// Gets deprecation metadata if this command is deprecated.
     ///
     /// # Examples

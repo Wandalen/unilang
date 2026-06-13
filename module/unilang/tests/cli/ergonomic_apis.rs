@@ -23,10 +23,10 @@ use std::path::PathBuf;
 fn test_cli_builder_creation()
 {
   let builder = CliBuilder::new();
-  assert_eq!( *builder.get_mode(), AggregationMode::Auto );
-  assert_eq!( builder.get_config().app_name, "app" );
-  assert!( builder.get_config().auto_help );
-  assert!( builder.get_config().detect_conflicts );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Auto );
+  assert_eq!( builder.config().app_name, "app" );
+  assert!( builder.config().auto_help, "auto_help must default to true" );
+  assert!( builder.config().detect_conflicts, "detect_conflicts must default to true" );
 }
 
 #[test]
@@ -34,15 +34,15 @@ fn test_cli_builder_mode_selection()
 {
   let builder = CliBuilder::new()
     .mode( AggregationMode::Static );
-  assert_eq!( *builder.get_mode(), AggregationMode::Static );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Static );
 
   let builder = CliBuilder::new()
     .mode( AggregationMode::Dynamic );
-  assert_eq!( *builder.get_mode(), AggregationMode::Dynamic );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Dynamic );
 
   let builder = CliBuilder::new()
     .mode( AggregationMode::Hybrid );
-  assert_eq!( *builder.get_mode(), AggregationMode::Hybrid );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Hybrid );
 }
 
 #[test]
@@ -114,10 +114,10 @@ fn test_cli_builder_configuration()
     .auto_help( false )
     .detect_conflicts( false );
 
-  assert_eq!( builder.get_config().app_name, "myapp" );
-  assert_eq!( builder.get_config().global_prefix, Some( "myapp".to_string() ) );
-  assert!( !builder.get_config().auto_help );
-  assert!( !builder.get_config().detect_conflicts );
+  assert_eq!( builder.config().app_name, "myapp" );
+  assert_eq!( builder.config().global_prefix, Some( "myapp".to_string() ) );
+  assert!( !builder.config().auto_help, "auto_help must be false when explicitly disabled" );
+  assert!( !builder.config().detect_conflicts, "detect_conflicts must be false when explicitly disabled" );
 }
 
 #[test]
@@ -140,7 +140,7 @@ fn test_cli_builder_build_static_only()
   let commands = registry.commands();
   println!("Available commands in registry: {:?}", commands.keys().collect::<Vec<_>>());
 
-  assert!( registry.command( ".version" ).is_some() );
+  assert!( registry.command( ".version" ).is_some(), ".version command must be present in static-only registry" );
 }
 
 #[test]
@@ -231,7 +231,7 @@ fn test_cli_builder_conditional_modules_enabled()
   // test_feature is enabled in our simulation, so debug command should exist
   let debug_cmd = registry.command( ".debug_module.debug" );
   println!("Debug command lookup for '.debug_module.debug': {:?}", debug_cmd.is_some());
-  assert!( debug_cmd.is_some() );
+  assert!( debug_cmd.is_some(), ".debug_module.debug must exist when test_feature is enabled" );
 }
 
 #[test]
@@ -248,7 +248,7 @@ fn test_cli_builder_conditional_modules_disabled()
     .expect( "Failed to build CLI" );
 
   // disabled_feature is not enabled, so command should not exist
-  assert!( registry.command( ".disabled_module.disabled" ).is_none() );
+  assert!( registry.command( ".disabled_module.disabled" ).is_none(), "disabled_module command must not exist when feature is disabled" );
 }
 
 #[test]
@@ -257,7 +257,7 @@ fn test_aggregate_cli_simple_macro()
   let registry = aggregate_cli_simple()
     .expect( "Failed to create simple aggregated CLI" );
 
-  assert!( registry.command( ".version" ).is_some() );
+  assert!( registry.command( ".version" ).is_some(), ".version must be present in simple aggregated CLI" );
   assert_eq!( registry.registry_mode(), RegistryMode::Hybrid );
 }
 
@@ -275,13 +275,13 @@ fn test_aggregate_cli_complex_macro()
   println!("Complex registry commands: {:?}", commands.keys().collect::<Vec<_>>());
 
   // Should have prefixed commands
-  assert!( registry.command( ".myapp.core.version" ).is_some() );
+  assert!( registry.command( ".myapp.core.version" ).is_some(), ".myapp.core.version must be present" );
 
   // Should have conditional command (test_feature is enabled)
-  assert!( registry.command( ".myapp.advanced.debug" ).is_some() );
+  assert!( registry.command( ".myapp.advanced.debug" ).is_some(), ".myapp.advanced.debug must be present when test_feature is enabled" );
 
   // Should have dynamic module command (from multi-YAML aggregation)
-  assert!( registry.command( ".myapp.util.example" ).is_some() );
+  assert!( registry.command( ".myapp.util.example" ).is_some(), ".myapp.util.example must be present from YAML aggregation" );
 }
 
 #[test]
@@ -296,7 +296,7 @@ fn test_backward_compatibility_with_existing_apis()
     .end();
 
   registry.register( cmd ).expect( "Registration should succeed" );
-  assert!( registry.command( ".legacy" ).is_some() );
+  assert!( registry.command( ".legacy" ).is_some(), ".legacy command must be registered" );
 
   // Test that new CliBuilder can coexist with existing registries
   let new_cmd = CommandDefinition::former()
@@ -313,11 +313,11 @@ fn test_backward_compatibility_with_existing_apis()
   let new_commands = new_registry.commands();
   println!("New registry commands: {:?}", new_commands.keys().collect::<Vec<_>>());
 
-  assert!( new_registry.command( ".new" ).is_some() );
+  assert!( new_registry.command( ".new" ).is_some(), ".new command must be registered in new_registry" );
 
   // Both should work independently
-  assert!( registry.command( ".legacy" ).is_some() );
-  assert!( new_registry.command( ".new" ).is_some() );
+  assert!( registry.command( ".legacy" ).is_some(), ".legacy command must still be present in original registry" );
+  assert!( new_registry.command( ".new" ).is_some(), ".new command must remain present in new_registry" );
 }
 
 #[test]
@@ -339,11 +339,11 @@ fn test_integration_with_hybrid_registry()
 
   // Test that we can use optimized lookup
   let cmd = registry.command_optimized( ".hybrid_test" );
-  assert!( cmd.is_some() );
+  assert!( cmd.is_some(), ".hybrid_test command must be found via command_optimized" );
 
   // Test performance metrics are available
   let metrics = registry.performance_metrics();
-  assert!( metrics.total_lookups > 0 );
+  assert!( metrics.total_lookups > 0, "total_lookups must be non-zero after at least one lookup" );
 }
 
 #[test]
@@ -423,11 +423,11 @@ fn test_complex_scenario_with_all_features()
   assert_eq!( registry.registry_mode(), RegistryMode::Hybrid );
 
   // Static command with full prefix: .app.st.static_cmd
-  assert!( registry.command( ".app.st.static_cmd" ).is_some() );
+  assert!( registry.command( ".app.st.static_cmd" ).is_some(), ".app.st.static_cmd must be present" );
 
   // Conditional command: .app.conditional.cond_cmd
-  assert!( registry.command( ".app.conditional.cond_cmd" ).is_some() );
+  assert!( registry.command( ".app.conditional.cond_cmd" ).is_some(), ".app.conditional.cond_cmd must be present" );
 
   // Dynamic command: .app.dyn.example
-  assert!( registry.command( ".app.dyn.example" ).is_some() );
+  assert!( registry.command( ".app.dyn.example" ).is_some(), ".app.dyn.example must be present from dynamic module" );
 }

@@ -406,7 +406,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &process_command, process_routine )?;
+  registry.register_with_routine( &process_command, process_routine )?;
 
   // Step 2: Create a simple command for comparison
   //
@@ -441,7 +441,7 @@ fn main() -> Result< (), unilang::error::Error >
     })
   });
 
-  registry.command_add_runtime( &simple_command, ping_routine )?;
+  registry.register_with_routine( &simple_command, ping_routine )?;
 
   println!( "✓ Registered commands with comprehensive documentation" );
 

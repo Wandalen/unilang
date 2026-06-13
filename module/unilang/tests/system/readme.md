@@ -14,3 +14,8 @@ End-to-end workflows, API compatibility, and external usage pattern tests.
 | `argv_api.rs` | argv-based API request parsing and dispatch |
 | `vocabulary_enforcement.rs` | IN-1..3 spec cases — actor taxonomy and canonical term enforcement |
 | `nfr_sensitive_data.rs` | IN-3 spec case — sensitive argument value excluded from error output |
+| `nfr_platform.rs` | FT-4 spec case — WASM build compiles without std-only features |
+| `nfr_robustness.rs` | IN-4 and IN-5 spec cases — panic safety and zero-feature build |
+| `nfr_performance.rs` | IN-1 and IN-2 spec cases — static registry startup cost and lookup throughput |
+| `nfr_modularity.rs` | IN-6 spec case — enabled feature is strict subset of full |
+| `invariant_03_governing_principles.rs` | IN-1..5 spec cases — governing principles enforcement |

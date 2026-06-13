@@ -125,8 +125,8 @@ impl DynamicCommandMap
     self.lookup_cache.cap().get()
   }
 
-  /// Get a command without updating cache or metrics (for backward compatibility)
-  pub fn get_readonly( &self, name: &str ) -> Option< CommandDefinition >
+  /// Get a command without updating cache or metrics
+  pub fn lookup( &self, name: &str ) -> Option< CommandDefinition >
   {
     self.commands.get( name ).cloned()
   }

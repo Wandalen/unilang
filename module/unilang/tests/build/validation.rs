@@ -67,7 +67,7 @@ use unilang::validation_core::{
 /// This simulates what build.rs should do when processing `invalid_missing_dot.yaml`
 // test_kind: ft_spec(FT-9), in_spec(IN-3)
 #[test]
-fn test_fixture_missing_dot_prefix_rejected()
+fn test_ft9_in3_build_time_dot_prefix_rejected()
 {
   // This mirrors the data from tests/test_data/build_time/invalid/missing_dot_prefix.yaml
   let result = validate_command_name_core( "invalid_no_dot" );
@@ -171,7 +171,7 @@ fn test_error_includes_file_path()
     "1.0.0",
     "commands/invalid.yaml"
   );
-  assert!( result.is_err() );
+  assert!( result.is_err(), "Expected validation error for non-dot-prefixed name \"invalid\"" );
 
   let err = result.unwrap_err();
   assert!(
@@ -185,7 +185,7 @@ fn test_error_includes_file_path()
 fn test_error_includes_invalid_value()
 {
   let result = validate_command_name_core( "bad_name" );
-  assert!( result.is_err() );
+  assert!( result.is_err(), "Expected validation error for name missing dot prefix: \"bad_name\"" );
 
   let err = result.unwrap_err();
   assert!(
@@ -199,7 +199,7 @@ fn test_error_includes_invalid_value()
 fn test_error_includes_fix_guidance()
 {
   let result = validate_command_name_core( "missing_dot" );
-  assert!( result.is_err() );
+  assert!( result.is_err(), "Expected validation error for name missing dot prefix: \"missing_dot\"" );
 
   let err = result.unwrap_err();
   assert!(
@@ -231,4 +231,39 @@ fn test_build_rs_integration_note()
     validate_command_name_core( ".valid" ).is_ok(),
     "Validation functions should be available for build.rs to use"
   );
+}
+
+/// IN-4: Build-time validation rejects manifest entry without dot prefix.
+///
+/// The command naming invariant requires every command name to start with a dot.
+/// The `validate_command_name_core` function enforces this rule in both build.rs
+/// and runtime contexts. A manifest entry like `build` (no dot) must be rejected
+/// with an actionable error that includes the invalid name and fix guidance.
+// test_kind: in_spec(IN-4)
+#[test]
+fn test_in4_build_time_validation_rejects_missing_dot_prefix()
+{
+  let invalid_names = vec![ "build", "deploy", "test_command", "video.convert" ];
+
+  for name in invalid_names
+  {
+    let result = validate_command_name_core( name );
+    assert!(
+      result.is_err(),
+      "IN-4: manifest entry {:?} without dot prefix must be rejected at build time",
+      name
+    );
+
+    let err = result.unwrap_err();
+    assert!(
+      err.contains( "dot prefix" ) || err.contains( "start with" ),
+      "IN-4: error must mention dot prefix requirement for {:?}: {}",
+      name, err
+    );
+    assert!(
+      err.contains( name ),
+      "IN-4: error must include the invalid name {:?}: {}",
+      name, err
+    );
+  }
 }

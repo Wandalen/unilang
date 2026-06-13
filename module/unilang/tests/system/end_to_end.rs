@@ -46,7 +46,7 @@ fn test_complete_system_integration()
       .auto_help_enabled(false)
       .end();
     
-    let result = registry.command_add_runtime(&cmd, Box::new(demo_handler));
+    let result = registry.register_with_routine(&cmd, Box::new(demo_handler));
     assert!(result.is_ok(), "Root command '{}' should register successfully", name);
     println!("  ✅ Registered: {}", name);
   }
@@ -69,7 +69,7 @@ fn test_complete_system_integration()
       .auto_help_enabled(false)
       .end();
     
-    let result = registry.command_add_runtime(&cmd, Box::new(demo_handler));
+    let result = registry.register_with_routine(&cmd, Box::new(demo_handler));
     assert!(result.is_ok(), "Namespaced command '{}/{}' should register successfully", namespace, name);
     println!("  ✅ Registered: {}{}", namespace, name.strip_prefix('.').unwrap_or(name));
   }
@@ -134,7 +134,7 @@ fn test_governing_principles_compliance()
     .auto_help_enabled(false)
     .end();
   
-  let result = registry.command_add_runtime(&explicit_cmd, Box::new(demo_handler));
+  let result = registry.register_with_routine(&explicit_cmd, Box::new(demo_handler));
   assert!(result.is_ok(), "Explicit command should be accepted");
   println!("  ✅ Explicit naming accepted");
   

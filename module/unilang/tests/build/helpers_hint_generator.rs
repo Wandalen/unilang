@@ -54,11 +54,11 @@ fn generates_boolean_message()
 
   let message = HintGenerator::generate_warning( &hint );
 
-  assert!( message.contains( "💡 Type Hint" ) );
-  assert!( message.contains( "kind: \"Boolean\"" ) );
-  assert!( message.contains( "default: true" ) );
-  assert!( message.contains( "get_boolean" ) );
-  assert!( message.contains( "suppress_type_hint: true" ) );
+  assert!( message.contains( "💡 Type Hint" ), "Message must contain '💡 Type Hint' section header; got: {message}" );
+  assert!( message.contains( "kind: \"Boolean\"" ), "Message must show kind: \"Boolean\" for boolean argument; got: {message}" );
+  assert!( message.contains( "default: true" ), "Message must include default value 'true'; got: {message}" );
+  assert!( message.contains( "get_boolean" ), "Message must reference get_boolean API; got: {message}" );
+  assert!( message.contains( "suppress_type_hint: true" ), "Message must include suppress_type_hint instruction; got: {message}" );
 }
 
 #[test]

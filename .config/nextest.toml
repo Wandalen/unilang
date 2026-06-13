@@ -17,3 +17,9 @@ max-threads = 1
 # and concurrent cargo invocations compete for the same target directory locks.
 filter = "binary_id(unilang::validation)"
 test-group = "validation-sequential"
+
+[[profile.default.overrides]]
+# Run NFR subprocess tests sequentially: FT-4 (WASM check), IN-5 (zero-feature build),
+# and IN-6 (modularity tree) all spawn external cargo processes.
+filter = "binary_id(unilang::system) and test(/test_(ft4_wasm|in5_zero|in6_enabled)/)"
+test-group = "validation-sequential"

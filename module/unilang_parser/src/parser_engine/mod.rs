@@ -520,10 +520,9 @@ impl Parser
   {
    match &item.kind
    {
-  ZeroCopyTokenKind ::Identifier( ref s ) =>
+  ZeroCopyTokenKind ::Identifier( ref s )
+   if command_path_slices.is_empty() || last_token_was_dot =>
   {
-   if command_path_slices.is_empty() || last_token_was_dot
-   {
   // Fix(issue-cmd-path): Lookahead to detect named argument pattern before consuming
   // Root cause: Parser was consuming identifiers without checking if they're part of
   //             the named argument pattern (name::value), violating spec.md:193 which
@@ -581,10 +580,9 @@ impl Parser
   last_token_was_dot = false;
   items_iter.next(); // Safe to consume now
  }
-   else
-   {
-  break; // End of command path
- }
+  ZeroCopyTokenKind ::Identifier( _ ) =>
+  {
+   break; // End of command path
  }
   ZeroCopyTokenKind ::Delimiter( "." ) =>
   {
@@ -736,12 +734,8 @@ impl Parser
           }
 
           // Loop to consume subsequent path segments
-          loop
+          while let Some( peeked_dot ) = items_iter.peek()
           {
-            let Some( peeked_dot ) = items_iter.peek() else
-            {
-              break;
-            };
             if let ZeroCopyTokenKind ::Delimiter( "." ) = &peeked_dot.kind
             {
               let _dot_item = items_iter.next().unwrap(); // Consume the dot
@@ -882,12 +876,8 @@ impl Parser
             }
 
             // Continue with the normal path-building loop for any additional dots
-            loop
+            while let Some( peeked_dot ) = items_iter.peek()
             {
-              let Some( peeked_dot ) = items_iter.peek() else
-              {
-                break;
-              };
               if let ZeroCopyTokenKind ::Delimiter( "." ) = &peeked_dot.kind
               {
                 let _dot_item = items_iter.next().unwrap(); // Consume the dot

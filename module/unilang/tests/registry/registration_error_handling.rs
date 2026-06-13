@@ -30,7 +30,7 @@
 //! ## Implementation Status
 //!
 //! These tests check that registration API returns Result<> instead of ().
-//! Currently `command_add_runtime()` returns Result, so these should pass.
+//! Currently `register_with_routine()` returns Result, so these should pass.
 //! After refactoring, `register()` should also return Result<>.
 
 #![ allow( deprecated ) ]
@@ -70,7 +70,7 @@ fn test_registration_returns_result()
   let cmd = create_test_command( ".test" );
 
   // Registration should return Result type
-  let result = registry.command_add_runtime( &cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &cmd, create_mock_routine() );
 
   // Verify it's a Result (can use ? operator)
   assert!(
@@ -104,7 +104,7 @@ fn test_successful_registration_returns_ok()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".deploy" );
 
-  let result = registry.command_add_runtime( &cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &cmd, create_mock_routine() );
 
   // Should return Ok for successful registration
   assert!(
@@ -135,8 +135,8 @@ fn test_error_propagation_with_question_mark()
     let cmd2 = create_test_command( ".second" );
 
     // Using ? operator for error propagation
-    registry.command_add_runtime( &cmd1, create_mock_routine() )?;
-    registry.command_add_runtime( &cmd2, create_mock_routine() )?;
+    registry.register_with_routine( &cmd1, create_mock_routine() )?;
+    registry.register_with_routine( &cmd2, create_mock_routine() )?;
 
     Ok( () )
   }
@@ -166,11 +166,11 @@ fn test_registration_error_types()
   let cmd = create_test_command( ".config" );
 
   // First registration succeeds
-  registry.command_add_runtime( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_mock_routine() )
     .expect( "First registration should succeed" );
 
   // Duplicate registration should error
-  let duplicate_result = registry.command_add_runtime( &cmd, create_mock_routine() );
+  let duplicate_result = registry.register_with_routine( &cmd, create_mock_routine() );
 
   if let Err( error ) = duplicate_result
   {

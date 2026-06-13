@@ -1,6 +1,8 @@
 //! Serde Serialize/Deserialize implementations for CommandDefinition.
 
-use super::super::validated_types::{ CommandName, NamespaceType, VersionType };
+use super::super::command_name::CommandName;
+use super::super::namespace_type::NamespaceType;
+use super::super::version_type::VersionType;
 use super::super::command_status::CommandStatus;
 use super::super::argument_types::ArgumentDefinition;
 use super::core::CommandDefinition;

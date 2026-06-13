@@ -390,7 +390,7 @@ fn main() {
     .end();
 
   let routine = Box::new(|cmd, ctx| { /* ... */ });
-  registry.command_add_runtime(&cmd, routine)?;
+  registry.register_with_routine(&cmd, routine)?;
 }
 
 // ✅ AFTER: YAML + Build-time Static (50x faster)

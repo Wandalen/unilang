@@ -44,7 +44,13 @@ impl SemanticAnalyzer< '_ >
       Value::Boolean( b ) => b.to_string(),
       Value::List( l ) => format!( "[{} items]", l.len() ),
       Value::Path( p ) | Value::File( p ) | Value::Directory( p ) => format!( "\"{}\"", p.display() ),
-      _ => "value".to_string(),
+      Value::Enum( s ) | Value::JsonString( s ) => format!( "\"{}\"", s ),
+      Value::Url( u ) => format!( "\"{}\"", u ),
+      Value::DateTime( dt ) => format!( "\"{}\"", dt.to_rfc3339() ),
+      Value::Pattern( r ) => format!( "\"{}\"", r.as_str() ),
+      Value::Map( m ) => format!( "{{{} entries}}", m.len() ),
+      #[ cfg( feature = "json_parser" ) ]
+      Value::Object( o ) => o.to_string(),
     };
 
     match rule
@@ -61,9 +67,16 @@ impl SemanticAnalyzer< '_ >
       {
         let actual_len = match value
         {
-          Value::String( s ) => s.len(),
+          Value::String( s ) | Value::Enum( s ) | Value::JsonString( s ) => s.len(),
           Value::List( l ) => l.len(),
-          _ => 0,
+          Value::Map( m ) => m.len(),
+          Value::Url( u ) => u.as_str().len(),
+          Value::DateTime( dt ) => dt.to_rfc3339().len(),
+          Value::Pattern( r ) => r.as_str().len(),
+          Value::Integer( _ ) | Value::Float( _ ) | Value::Boolean( _ )
+          | Value::Path( _ ) | Value::File( _ ) | Value::Directory( _ ) => 0,
+          #[ cfg( feature = "json_parser" ) ]
+          Value::Object( _ ) => 0,
         };
         format!(
           "Validation Error: Argument '{}' has length {} which is less than the minimum required length of {}. Please provide a value with at least {} characters/items.",
@@ -74,9 +87,16 @@ impl SemanticAnalyzer< '_ >
       {
         let actual_len = match value
         {
-          Value::String( s ) => s.len(),
+          Value::String( s ) | Value::Enum( s ) | Value::JsonString( s ) => s.len(),
           Value::List( l ) => l.len(),
-          _ => 0,
+          Value::Map( m ) => m.len(),
+          Value::Url( u ) => u.as_str().len(),
+          Value::DateTime( dt ) => dt.to_rfc3339().len(),
+          Value::Pattern( r ) => r.as_str().len(),
+          Value::Integer( _ ) | Value::Float( _ ) | Value::Boolean( _ )
+          | Value::Path( _ ) | Value::File( _ ) | Value::Directory( _ ) => 0,
+          #[ cfg( feature = "json_parser" ) ]
+          Value::Object( _ ) => 0,
         };
         format!(
           "Validation Error: Argument '{}' has length {} which exceeds the maximum allowed length of {}. Please provide a value with at most {} characters/items.",
@@ -92,7 +112,13 @@ impl SemanticAnalyzer< '_ >
         let actual_items = match value
         {
           Value::List( l ) => l.len(),
-          _ => 0,
+          Value::Map( m ) => m.len(),
+          Value::String( _ ) | Value::Integer( _ ) | Value::Float( _ ) | Value::Boolean( _ )
+          | Value::Path( _ ) | Value::File( _ ) | Value::Directory( _ )
+          | Value::Enum( _ ) | Value::Url( _ ) | Value::DateTime( _ )
+          | Value::Pattern( _ ) | Value::JsonString( _ ) => 0,
+          #[ cfg( feature = "json_parser" ) ]
+          Value::Object( _ ) => 0,
         };
         format!(
           "Validation Error: Argument '{}' has {} items which is less than the minimum required {} items. Please provide at least {} items.",

@@ -72,5 +72,5 @@ fn test_command_registry_trait_implementation() {
 
   // Test that non-existent command returns None
   assert!(registry.command("nonexistent").is_none());
-  assert!(registry.get_help_for_command("nonexistent").is_none());
+  assert!(registry.help_for_command("nonexistent").is_none());
 }

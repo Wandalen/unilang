@@ -1,0 +1,10 @@
+error[E0616]: field `description` of struct `CommandDefinition` is private
+ --> tests/compile_fail/t50b_private_field_description.rs:9:15
+  |
+9 |   let _ = cmd.description;
+  |               ^^^^^^^^^^^ private field
+  |
+help: a method `description` also exists, call it with parentheses
+  |
+9 |   let _ = cmd.description();
+  |                          ++

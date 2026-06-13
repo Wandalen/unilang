@@ -87,7 +87,7 @@ fn test_ic1_2_inline_closure_execution()
     .build();
 
   let cmd_def = registry.command( ".echo" ).expect( "Command not found" );
-  let routine = registry.get_routine( ".echo" ).expect( "Routine not found" );
+  let routine = registry.routine( ".echo" ).expect( "Routine not found" );
 
   // Create mock VerifiedCommand and ExecutionContext for testing
   let verified_cmd = VerifiedCommand
@@ -198,7 +198,7 @@ fn test_ic2_2_each_closure_executes_independently()
   let ctx = ExecutionContext::default();
 
   // Execute .add
-  let add_routine = registry.get_routine( ".add" ).expect( "Add routine not found" );
+  let add_routine = registry.routine( ".add" ).expect( "Add routine not found" );
   let add_cmd_def = registry.command( ".add" ).expect( "Add command not found" );
   let add_result = add_routine( VerifiedCommand
   {
@@ -208,7 +208,7 @@ fn test_ic2_2_each_closure_executes_independently()
   assert_eq!( add_result.unwrap().content, "42" );
 
   // Execute .multiply
-  let mul_routine = registry.get_routine( ".multiply" ).expect( "Multiply routine not found" );
+  let mul_routine = registry.routine( ".multiply" ).expect( "Multiply routine not found" );
   let mul_cmd_def = registry.command( ".multiply" ).expect( "Multiply command not found" );
   let mul_result = mul_routine( VerifiedCommand
   {
@@ -276,7 +276,7 @@ fn test_ic3_2_help_command_execution()
     )
     .build();
 
-  let help_routine = registry.get_routine( ".example.help" ).expect( "Help routine not found" );
+  let help_routine = registry.routine( ".example.help" ).expect( "Help routine not found" );
   let help_cmd_def = registry.command( ".example.help" ).expect( "Help command not found" );
 
   let ctx = ExecutionContext::default();
@@ -321,7 +321,7 @@ fn test_ic4_1_closure_captures_external_variables()
     )
     .build();
 
-  let routine = registry.get_routine( ".capture" ).expect( "Routine not found" );
+  let routine = registry.routine( ".capture" ).expect( "Routine not found" );
   let cmd_def = registry.command( ".capture" ).expect( "Command not found" );
 
   let ctx = ExecutionContext::default();
@@ -373,7 +373,7 @@ fn test_ic4_2_multiple_closures_different_captures()
 
   let ctx = ExecutionContext::default();
 
-  let first_routine = registry.get_routine( ".first" ).unwrap();
+  let first_routine = registry.routine( ".first" ).unwrap();
   let first_cmd_def = registry.command( ".first" ).unwrap();
   let first_result = first_routine( VerifiedCommand
   {
@@ -382,7 +382,7 @@ fn test_ic4_2_multiple_closures_different_captures()
   }, ctx.clone() );
   assert_eq!( first_result.unwrap().content, "First" );
 
-  let second_routine = registry.get_routine( ".second" ).unwrap();
+  let second_routine = registry.routine( ".second" ).unwrap();
   let second_cmd_def = registry.command( ".second" ).unwrap();
   let second_result = second_routine( VerifiedCommand
   {
@@ -442,8 +442,8 @@ fn test_ic5_1_mix_yaml_and_inline_closures()
   assert!( registry.command( ".inline_cmd" ).is_some() );
 
   // Only inline command should have routine
-  assert!( registry.get_routine( ".yaml_cmd" ).is_none() );
-  assert!( registry.get_routine( ".inline_cmd" ).is_some() );
+  assert!( registry.routine( ".yaml_cmd" ).is_none() );
+  assert!( registry.routine( ".inline_cmd" ).is_some() );
 }
 
 #[ cfg( feature = "json_parser" ) ]
@@ -497,8 +497,8 @@ fn test_ic5_2_mix_json_and_inline_closures()
   assert!( registry.command( ".inline_cmd" ).is_some() );
 
   // Only inline command should have routine
-  assert!( registry.get_routine( ".json_cmd" ).is_none() );
-  assert!( registry.get_routine( ".inline_cmd" ).is_some() );
+  assert!( registry.routine( ".json_cmd" ).is_none() );
+  assert!( registry.routine( ".inline_cmd" ).is_some() );
 }
 
 // ============================================================================

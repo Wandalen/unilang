@@ -108,7 +108,7 @@ graph TD
 
     subgraph "Run Time"
         style RunTime fill:#f9f9f9,stroke:#ddd,stroke-dasharray: 5 5
-        api_call("API Call<br/>(e.g., command_add_runtime)")
+        api_call("API Call<br/>(e.g., register_with_routine)")
         dynamic_map("Dynamic Registry (HashMap)")
         registry["Hybrid CommandRegistry"]
 

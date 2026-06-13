@@ -91,7 +91,7 @@ fn test_complete_command_processing_pipeline()
     })
   });
 
-  registry.command_add_runtime( &process_cmd, integration_routine ).unwrap();
+  registry.register_with_routine( &process_cmd, integration_routine ).unwrap();
 
   // Act - Exercise complete pipeline with real data flow
   let input_command = r#".process input::"test data" format::"json""#;
@@ -173,7 +173,7 @@ fn test_parser_semantic_analyzer_contract()
   let contract_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     Ok( OutputData { content : "contract_fulfilled".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
-  registry.command_add_runtime( &contract_cmd, contract_routine ).unwrap();
+  registry.register_with_routine( &contract_cmd, contract_routine ).unwrap();
 
   // Act - Test parser output meets semantic analyzer's contract
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -238,7 +238,7 @@ fn test_pipeline_state_transitions()
     let msg = cmd.get_string( "message" ).unwrap_or( "" );
     Ok( OutputData { content : msg.to_string(), format : "text".to_string(), execution_time_ms : None })
   });
-  registry.command_add_runtime( &echo_cmd, echo_routine ).unwrap();
+  registry.register_with_routine( &echo_cmd, echo_routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
 
@@ -317,7 +317,7 @@ fn test_error_propagation_through_components()
     }
   });
 
-  registry.command_add_runtime( &error_cmd, error_routine ).unwrap();
+  registry.register_with_routine( &error_cmd, error_routine ).unwrap();
 
   // Act & Assert - Test error propagation through each component
 
@@ -398,7 +398,7 @@ fn test_integration_performance_characteristics()
       Ok( OutputData { content : "performance_test_result".to_string(), format : "text".to_string(), execution_time_ms : None })
     });
 
-    registry.command_add_runtime( &cmd, perf_routine ).unwrap();
+    registry.register_with_routine( &cmd, perf_routine ).unwrap();
   }
 
   let parser = Parser::new( UnilangParserOptions::default() );

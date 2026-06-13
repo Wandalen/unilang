@@ -10,3 +10,4 @@ Split from `multi_yaml/aggregator.rs`. Merges multiple YAML command definition f
 | `core.rs` | `CommandAggregator` struct and aggregation orchestration |
 | `codegen.rs` | Code generation for static PHF command maps from aggregated data |
 | `conflict.rs` | Conflict detection and resolution for duplicate command names |
+| `aggregation_fns.rs` | Convenience free functions for registry construction |

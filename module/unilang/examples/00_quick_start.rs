@@ -68,7 +68,7 @@ fn main() -> Result<(), unilang::Error> {
     });
 
     // Register the command
-    registry.command_add_runtime(&greet_cmd, greet_routine)?;
+    registry.register_with_routine(&greet_cmd, greet_routine)?;
     
     // Use the Pipeline API to execute commands
     let pipeline = Pipeline::new(registry);

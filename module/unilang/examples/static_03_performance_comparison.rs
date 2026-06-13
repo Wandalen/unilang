@@ -98,7 +98,7 @@ fn setup_test_registries() -> Result< ( StaticCommandRegistry, CommandRegistry )
   // Create dynamic registry
   #[ allow( deprecated ) ]
   let mut dynamic_registry = CommandRegistry::new();
-  dynamic_registry.set_registry_mode( RegistryMode::DynamicOnly );
+  dynamic_registry.set_mode( RegistryMode::DynamicOnly );
 
   // Generate test commands for dynamic registry only
   // Note: In real usage, static commands would be generated at build time

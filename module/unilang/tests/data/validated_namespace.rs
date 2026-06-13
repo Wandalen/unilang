@@ -7,7 +7,7 @@ use unilang::data::NamespaceType;
 /// TC-1: Empty namespace is accepted (root-level commands).
 // test_kind: tc_spec(TC-1)
 #[ test ]
-fn namespace_valid_empty()
+fn test_tc1_empty_namespace_valid()
 {
   let empty = NamespaceType::new( "" );
 
@@ -32,7 +32,7 @@ fn namespace_valid_empty()
 /// TC-2 / TC-4: Dot-prefixed namespace is accepted (including nested).
 // test_kind: tc_spec(TC-2, TC-4)
 #[ test ]
-fn namespace_valid_with_dot_prefix()
+fn test_tc2_tc4_dot_prefixed_namespace_valid()
 {
   let namespaces = vec!
   [
@@ -68,7 +68,7 @@ fn namespace_valid_with_dot_prefix()
 /// TC-3: Non-empty non-dot-prefixed namespace is rejected.
 // test_kind: tc_spec(TC-3)
 #[ test ]
-fn namespace_rejects_missing_dot_prefix()
+fn test_tc3_missing_dot_prefix_rejected()
 {
   let invalid_namespaces = vec!
   [
@@ -163,7 +163,7 @@ fn namespace_serde_json_deserialize_valid()
 // test_kind: tc_spec(TC-5)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn namespace_serde_json_deserialize_rejects_invalid()
+fn test_tc5_serde_rejects_non_dot_prefix()
 {
   let json_invalid = "\"video\"";
   let result : Result< NamespaceType, _ > = serde_json::from_str( json_invalid );

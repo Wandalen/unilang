@@ -92,7 +92,7 @@ fn test_basic_named_argument_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_commands = parse_and_bind( &registry, r#".test param::"value""# ).expect( "Binding should succeed" );
 
@@ -142,7 +142,7 @@ fn test_positional_argument_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_commands = parse_and_bind( &registry, r#".test "hello" 42"# ).expect( "Positional binding should succeed" );
 
@@ -208,7 +208,7 @@ fn test_mixed_named_and_positional_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_commands = parse_and_bind( &registry, r#".test "first" named::"middle" "last""# ).expect( "Mixed binding should succeed" );
 
@@ -267,7 +267,7 @@ fn test_type_conversion_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_commands = parse_and_bind( &registry, r#".test string_val::"hello" int_val::42 bool_val::true float_val::3.15"# )
     .expect( "Type conversion binding should succeed" );
@@ -310,7 +310,7 @@ fn test_optional_argument_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test with only required argument
   let verified_commands = parse_and_bind( &registry, r#".test required::"value""# ).expect( "Should bind with only required" );
@@ -349,7 +349,7 @@ fn test_default_value_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test without providing the parameter (should use default)
   let verified_commands = parse_and_bind( &registry, r".test" ).expect( "Should bind with default value" );
@@ -387,7 +387,7 @@ fn test_alias_binding()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test binding with canonical name
   let verified_commands = parse_and_bind( &registry, r#".test parameter::"canonical""# ).expect( "Should bind with canonical name" );
@@ -440,7 +440,7 @@ fn test_validation_rule_enforcement()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test valid values (should succeed)
   let result = parse_and_bind( &registry, r#".test min_length::"valid_string" range_value::50"# );
@@ -476,7 +476,7 @@ fn test_missing_required_argument_error()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test without required argument (should fail)
   let result = parse_and_bind( &registry, r".test" );
@@ -505,7 +505,7 @@ fn test_type_conversion_error()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test with invalid integer value (should fail)
   let result = parse_and_bind( &registry, r#".test number::"not_a_number""# );
@@ -535,7 +535,7 @@ fn test_excess_arguments_error()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test with too many positional arguments (should fail)
   let result = parse_and_bind( &registry, r#".test "arg1" "arg2""# );
@@ -570,7 +570,7 @@ fn test_binding_performance()
   }
 
   let cmd = create_binding_test_command( ".perf", arguments );
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Test with all default values (many arguments to bind)
   let result = parse_and_bind( &registry, r".perf" );
@@ -600,7 +600,7 @@ fn test_pattern_validation_rejects_non_matching()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   // Valid email passes
   let result = parse_and_bind( &registry, r#".test email::"user@example.com""# );
@@ -629,7 +629,7 @@ fn test_path_type_coercion()
     }
   ]);
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
 
   let verified_commands = parse_and_bind( &registry, r#".test file::"/tmp/data.csv""# )
     .expect( "Path coercion should succeed" );

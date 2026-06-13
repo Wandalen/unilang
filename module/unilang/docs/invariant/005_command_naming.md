@@ -13,7 +13,7 @@ Every command name in the system MUST start with a dot prefix (e.g., `.command`,
 
 ### Enforcement Mechanism
 
-- Runtime registration: `CommandRegistry::command_add_runtime` validates the dot prefix via `validate_command_for_registration()` and returns an error for any command name not starting with `.`
+- Runtime registration: `CommandRegistry::register_with_routine` validates the dot prefix via `validate_command_for_registration()` and returns an error for any command name not starting with `.`
 - Build-time generation: `build.rs` applies dot-prefix normalization rules and rejects invalid manifests with actionable error messages before compilation completes
 - Namespace construction: the `compute_full_name()` function always produces a dot-prefixed result regardless of the two supported YAML formats (compound name or separate namespace field)
 - Static registry: `From<StaticCommandDefinition> for CommandDefinition` conversion is guaranteed not to panic only when build-time validation has already confirmed naming compliance

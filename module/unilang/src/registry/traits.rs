@@ -114,8 +114,8 @@ pub trait CommandRegistryTrait {
   fn commands(&self) -> std::collections::HashMap<String, crate::data::CommandDefinition>;
 
   /// Get a command routine for execution.
-  fn get_routine(&self, name: &str) -> Option<&CommandRoutine>;
+  fn routine(&self, name: &str) -> Option<&CommandRoutine>;
 
   /// Get formatted help text for a command.
-  fn get_help_for_command(&self, command_name: &str) -> Option<String>;
+  fn help_for_command(&self, command_name: &str) -> Option<String>;
 }

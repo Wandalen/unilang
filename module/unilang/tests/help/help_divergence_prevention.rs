@@ -78,7 +78,7 @@ fn test_registered_command_appears_in_help_listing()
   let cmd = create_test_command( ".languages", "Detect programming languages" );
   let cmd_name = cmd.name().to_string();
 
-  registry.command_add_runtime( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_mock_routine() )
     .expect( "Command registration should succeed" );
 
   // Generate help listing
@@ -113,7 +113,7 @@ fn test_help_command_auto_generated_on_registration()
   let cmd_name = cmd.name().to_string();
   let help_cmd_name = format!( "{cmd_name}.help" );
 
-  registry.command_add_runtime( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_mock_routine() )
     .expect( "Command registration should succeed" );
 
   // CRITICAL CHECK: Help command should exist automatically
@@ -151,7 +151,7 @@ fn test_multiple_commands_all_appear_in_help()
 
   for cmd in &commands
   {
-    registry.command_add_runtime( cmd, create_mock_routine() )
+    registry.register_with_routine( cmd, create_mock_routine() )
       .expect( "Command registration should succeed" );
   }
 
@@ -200,9 +200,9 @@ fn test_registry_help_synchronization()
   let cmd1 = create_test_command( ".config", "Manage configuration" );
   let cmd2 = create_test_command( ".status", "Show status" );
 
-  registry.command_add_runtime( &cmd1, create_mock_routine() )
+  registry.register_with_routine( &cmd1, create_mock_routine() )
     .expect( "First command registration should succeed" );
-  registry.command_add_runtime( &cmd2, create_mock_routine() )
+  registry.register_with_routine( &cmd2, create_mock_routine() )
     .expect( "Second command registration should succeed" );
 
   // Phase 2: Check help is synchronized
@@ -219,7 +219,7 @@ fn test_registry_help_synchronization()
 
   // Phase 3: Add third command
   let cmd3 = create_test_command( ".logs", "View logs" );
-  registry.command_add_runtime( &cmd3, create_mock_routine() )
+  registry.register_with_routine( &cmd3, create_mock_routine() )
     .expect( "Third command registration should succeed" );
 
   // Phase 4: Verify help updated automatically
@@ -242,12 +242,12 @@ fn test_registry_help_synchronization()
   );
 }
 
-/// Test that `register()` also auto-generates help (not just `command_add_runtime`)
+/// Test that `register()` also auto-generates help (not just `register_with_routine`)
 ///
 /// This test ensures both registration paths have identical behavior,
 /// preventing the help divergence bug where some commands don't appear in help.
 #[test]
-fn test_register_generates_help_like_command_add_runtime() {
+fn test_register_generates_help_like_register_with_routine() {
     let mut registry = CommandRegistry::new();
 
     let cmd = CommandDefinition::former()
@@ -255,7 +255,7 @@ fn test_register_generates_help_like_command_add_runtime() {
         .description("Deploy application")
         .end();  // auto_help_enabled defaults to true
 
-    // Use register(), not command_add_runtime()
+    // Use register(), not register_with_routine()
     registry.register(cmd).expect("Registration should succeed");
 
     // Main command should exist
@@ -268,7 +268,7 @@ fn test_register_generates_help_like_command_add_runtime() {
     assert!(
         registry.command(".deploy.help").is_some(),
         "HELP DIVERGENCE BUG: register() did NOT auto-generate .deploy.help!\n\
-         This violates requirement that both register() and command_add_runtime() \n\
+         This violates requirement that both register() and register_with_routine() \n\
          must auto-generate help commands."
     );
 

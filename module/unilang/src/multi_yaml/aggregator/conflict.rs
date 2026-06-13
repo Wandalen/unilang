@@ -2,7 +2,8 @@
 
 #[ allow( unused_imports ) ]
 use crate::*;
-use super::core::{ MultiYamlAggregator, ModuleConfig, ConflictReport, ConflictType, ConflictResolutionStrategy };
+use super::core::MultiYamlAggregator;
+use super::core_types::{ ModuleConfig, ConflictReport, ConflictType, ConflictResolutionStrategy };
 use std::collections::HashMap;
 
 impl MultiYamlAggregator

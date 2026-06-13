@@ -110,7 +110,7 @@ Apply all rulebooks discovered via `kbase .role name::dev`. Key references:
 - All 153 nextest tests pass in container (exit 0)
 - BUG-102 closed (state: Fixed, moved to `task/bug/closed/`)
 - Root cause: `register_mandatory_global_help_command()` set `hidden_from_list: false`; the interpreter's special `.help` handler calls `list_commands_filtered()` which unconditionally checks that flag
-- Key pitfall: `command_add_runtime(.help)` always fails with `CommandAlreadyExists` — the only place to set `hidden_from_list` for `.help` is the mandatory registration in `dynamic.rs`
+- Key pitfall: `register_with_routine(.help)` always fails with `CommandAlreadyExists` — the only place to set `hidden_from_list` for `.help` is the mandatory registration in `dynamic.rs`
 
 ## History
 

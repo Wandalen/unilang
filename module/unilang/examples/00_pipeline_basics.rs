@@ -65,7 +65,7 @@ fn main() -> Result<(), unilang::Error> {
         }
     });
     
-    registry.command_add_runtime(&add_cmd, add_routine)?;
+    registry.register_with_routine(&add_cmd, add_routine)?;
     
     // Step 2: Create a Pipeline
     // The Pipeline wraps the registry and provides high-level execution methods

@@ -81,7 +81,7 @@ fn regression_task_024_exact_scenario_reproduction()
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( regression_test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( regression_test_routine ) ).unwrap();
 
   // Parse the exact command from the original bug report
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -155,7 +155,7 @@ fn regression_task_024_with_multiple_true_still_works()
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( regression_test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( regression_test_routine ) ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".run_fixed command::"cargo build" command::"echo hello1" command::"cargo clippy""#;
@@ -221,7 +221,7 @@ fn regression_performance_no_degradation()
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( regression_test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( regression_test_routine ) ).unwrap();
 
   // Create input with 100 parameters to test scalability
   let mut input_parts = vec![ ".perf_test".to_string() ];
@@ -274,7 +274,7 @@ fn regression_single_parameter_backward_compatibility()
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( regression_test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( regression_test_routine ) ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let input = r#".single value::"single_item""#;
@@ -326,7 +326,7 @@ fn regression_edge_case_prevention()
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( regression_test_routine ) ).unwrap();
+  registry.register_with_routine( &cmd, Box::new( regression_test_routine ) ).unwrap();
 
   // Test with mixed aliases and canonical names
   let parser = Parser::new( UnilangParserOptions::default() );

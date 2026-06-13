@@ -16,7 +16,7 @@
 ### FT-2: Dynamic runtime registration makes command accessible
 
 - **Given:** A `CommandRegistry` initialized from the static map
-- **When:** `command_add_runtime(&mut registry, definition_for(".bar"))` is called and then `registry.get(".bar")` is called
+- **When:** `register_with_routine(&mut registry, definition_for(".bar"))` is called and then `registry.get(".bar")` is called
 - **Then:** Returns `Some(def)` with the dynamically registered definition; `.foo` from static initialization still accessible
 
 ### FT-3: Dot prefix is mandatory; command without leading dot is rejected
@@ -76,7 +76,7 @@
 ### FT-12: CliBuilder build_hybrid produces registry supporting both static and dynamic commands
 
 - **Given:** A `CliBuilder` with one static module containing `".db.migrate"` and `build_hybrid()` called to produce a `CommandRegistry`
-- **When:** `command_add_runtime(&mut registry, definition_for(".dynamic.cmd"))` is called, then both `".db.migrate"` and `".dynamic.cmd"` are queried
+- **When:** `register_with_routine(&mut registry, definition_for(".dynamic.cmd"))` is called, then both `".db.migrate"` and `".dynamic.cmd"` are queried
 - **Then:** Both lookups succeed; static commands from the builder coexist with dynamically registered commands
 
 ### FT-13: Declarative JSON loading produces valid CommandDefinition

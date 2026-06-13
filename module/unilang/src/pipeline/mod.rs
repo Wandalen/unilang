@@ -31,23 +31,25 @@
 //! - Secure input (passwords, API keys) should never be logged or stored in pipeline state
 
 mod core;
+mod result;
 mod batch;
 mod argv;
+mod error_parsing;
 
 /// Internal namespace (placeholder for mod_interface compatibility).
 mod private {}
 
 mod_interface::mod_interface!
 {
-  exposed use core::UnilangError;
-  exposed use core::CommandResult;
+  exposed use result::UnilangError;
+  exposed use result::CommandResult;
   exposed use batch::BatchResult;
   exposed use core::Pipeline;
   exposed use core::process_single_command;
   exposed use core::validate_single_command;
 
-  prelude use core::UnilangError;
-  prelude use core::CommandResult;
+  prelude use result::UnilangError;
+  prelude use result::CommandResult;
   prelude use batch::BatchResult;
   prelude use core::Pipeline;
   prelude use core::process_single_command;

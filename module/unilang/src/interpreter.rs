@@ -94,7 +94,7 @@ impl< 'a > Interpreter< 'a >
         }]);
       }
 
-      let routine = self.registry.get_routine( &full_command_name ).ok_or_else( ||
+      let routine = self.registry.routine( &full_command_name ).ok_or_else( ||
       {
         Error::Execution( ErrorData::new(
           ErrorCode::InternalError,

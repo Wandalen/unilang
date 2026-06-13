@@ -389,10 +389,10 @@ fn test_static_command_registry_command_registry_trait()
   let cmd = trait_registry.command( ".test.version" );
   assert!( cmd.is_some() );
 
-  let help = trait_registry.get_help_for_command( ".test.version" );
+  let help = trait_registry.help_for_command( ".test.version" );
   assert!( help.is_some() );
 
-  let routine = trait_registry.get_routine( ".test.version" );
+  let routine = trait_registry.routine( ".test.version" );
   assert!( routine.is_none() ); // No routine registered in test
 }
 
@@ -631,14 +631,14 @@ fn test_static_command_registry_help_generation()
   let registry = StaticCommandRegistry::from_commands( &TEST_STATIC_COMMANDS );
 
   // Test help generation for different commands
-  let version_help = registry.get_help_for_command( ".test.version" );
+  let version_help = registry.help_for_command( ".test.version" );
   assert!( version_help.is_some() );
   let help_text = version_help.unwrap();
   assert!( help_text.contains( "Show version information" ) );
   assert!( help_text.contains( ".test.version" ) );
 
   // Test help for command with arguments
-  let add_help = registry.get_help_for_command( ".test.add" );
+  let add_help = registry.help_for_command( ".test.add" );
   assert!( add_help.is_some() );
   let add_help_text = add_help.unwrap();
   assert!( add_help_text.contains( "Add two numbers" ) );
@@ -646,7 +646,7 @@ fn test_static_command_registry_help_generation()
   assert!( add_help_text.contains( "second number" ) );
 
   // Test help for non-existent command
-  let missing_help = registry.get_help_for_command( ".test.nonexistent" );
+  let missing_help = registry.help_for_command( ".test.nonexistent" );
   assert!( missing_help.is_none() );
 }
 
@@ -656,11 +656,11 @@ fn test_static_command_registry_routine_management()
   let registry = StaticCommandRegistry::from_commands( &TEST_STATIC_COMMANDS );
 
   // Test routine retrieval for static commands (should be None since no routines registered)
-  let routine = registry.get_routine( ".test.version" );
+  let routine = registry.routine( ".test.version" );
   assert!( routine.is_none() );
 
   // Test routine for non-existent command
-  let missing_routine = registry.get_routine( ".test.nonexistent" );
+  let missing_routine = registry.routine( ".test.nonexistent" );
   assert!( missing_routine.is_none() );
 
   // Test that we can check for routine existence

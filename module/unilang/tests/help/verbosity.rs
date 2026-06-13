@@ -66,7 +66,7 @@ fn test_verbosity_level_0_minimal()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Minimal );
   let help = help_gen.command( ".config" ).expect( "Command should exist" );
@@ -91,7 +91,7 @@ fn test_verbosity_level_1_basic()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Basic );
   let help = help_gen.command( ".config" ).expect( "Command should exist" );
@@ -118,7 +118,7 @@ fn test_verbosity_level_2_standard_default()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   // Test both default and explicit Standard
   let help_gen_default = HelpGenerator::new( &registry );
@@ -156,7 +156,7 @@ fn test_verbosity_level_3_detailed()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Detailed );
   let help = help_gen.command( ".config" ).expect( "Command should exist" );
@@ -181,7 +181,7 @@ fn test_verbosity_level_4_comprehensive()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Comprehensive );
   let help = help_gen.command( ".config" ).expect( "Command should exist" );
@@ -225,7 +225,7 @@ fn test_verbosity_set_and_get()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let mut help_gen = HelpGenerator::new( &registry );
   assert_eq!( help_gen.verbosity(), HelpVerbosity::Standard );
@@ -246,7 +246,7 @@ fn test_verbosity_progressive_information()
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
   #[ allow( deprecated ) ]
-  registry.command_add_runtime( &command, test_command_routine() ).unwrap();
+  registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   // Test that each level contains more information than the previous
   let help_0 = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Minimal )

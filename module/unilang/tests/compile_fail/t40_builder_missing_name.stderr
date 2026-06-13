@@ -1,0 +1,13 @@
+error[E0599]: no method named `end` found for struct `CommandDefinitionBuilder<NotSet, unilang::Set, NotSet, NotSet, NotSet, NotSet>` in the current scope
+ --> tests/compile_fail/t40_builder_missing_name.rs:8:4
+  |
+6 |     let _ = unilang::data::CommandDefinition::former()
+  |  ___________-
+7 | |   .description( String::from( "test description" ) )
+8 | |   .end();
+  | |   -^^^ method not found in `CommandDefinitionBuilder<NotSet, unilang::Set, NotSet, NotSet, NotSet, NotSet>`
+  | |___|
+  |
+  |
+  = note: the method was found for
+          - `CommandDefinitionBuilder<unilang::Set, unilang::Set, Namespace, Hint, Status, Version>`

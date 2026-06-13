@@ -238,6 +238,57 @@ impl MultiYamlAggregator
     content
   }
 
+  /// Generates all `const`/`static` declarations for a single command.
+  fn generate_command_consts( cmd_name : &str, cmd : &CommandDefinition ) -> String
+  {
+    let mut code = String::new();
+    let const_name_base = cmd_name.replace( [ '.', '-' ], "_" ).to_uppercase();
+
+    // Argument definitions
+    for ( arg_idx, arg ) in cmd.arguments().iter().enumerate()
+    {
+      code.push_str( &Self::generate_argument_definition( arg, &const_name_base, arg_idx ) );
+    }
+
+    // Arguments array
+    if !cmd.arguments().is_empty()
+    {
+      let args_array_name = format!( "{}_ARGS", const_name_base );
+      code.push_str( &format!( "const {}: &[StaticArgumentDefinition] = &[", args_array_name ) );
+      for arg_idx in 0..cmd.arguments().len()
+      {
+        code.push_str( &format!( "{}_{}_ARG, ", const_name_base, arg_idx ) );
+      }
+      code.push_str( "];\n\n" );
+    }
+
+    // Command-level string arrays
+    let tags_const_name = format!( "{}_TAGS", const_name_base );
+    let aliases_const_name = format!( "{}_ALIASES", const_name_base );
+    let permissions_const_name = format!( "{}_PERMISSIONS", const_name_base );
+    let examples_const_name = format!( "{}_EXAMPLES", const_name_base );
+
+    if !cmd.tags().is_empty() { code.push_str( &Self::generate_string_array( cmd.tags(), &tags_const_name ) ); }
+    if !cmd.aliases().is_empty() { code.push_str( &Self::generate_string_array( cmd.aliases(), &aliases_const_name ) ); }
+    if !cmd.permissions().is_empty() { code.push_str( &Self::generate_string_array( cmd.permissions(), &permissions_const_name ) ); }
+    if !cmd.examples().is_empty() { code.push_str( &Self::generate_string_array( cmd.examples(), &examples_const_name ) ); }
+
+    // Command definition static
+    let const_name = format!( "{}_CMD", const_name_base );
+    code.push_str( &format!( "\nstatic {}: StaticCommandDefinition = StaticCommandDefinition {{\n", const_name ) );
+    code.push_str( &Self::generate_command_definition_body(
+      cmd,
+      &const_name_base,
+      &tags_const_name,
+      &aliases_const_name,
+      &permissions_const_name,
+      &examples_const_name,
+    ) );
+    code.push_str( "};\n\n" );
+
+    code
+  }
+
   /// Generate static command registry source code for build-time compilation.
   ///
   /// Returns Rust source code that defines a compile-time optimized command registry.
@@ -272,64 +323,7 @@ impl MultiYamlAggregator
     // Generate each command
     for ( cmd_name, cmd ) in &self.commands
     {
-      let const_name_base = cmd_name.replace( [ '.', '-' ], "_" ).to_uppercase();
-
-      // Generate argument definitions
-      for ( arg_idx, arg ) in cmd.arguments().iter().enumerate()
-      {
-        source_code.push_str( &Self::generate_argument_definition( arg, &const_name_base, arg_idx ) );
-      }
-
-      // Generate arguments array
-      if !cmd.arguments().is_empty()
-      {
-        let args_array_name = format!( "{}_ARGS", const_name_base );
-        source_code.push_str( &format!( "const {}: &[StaticArgumentDefinition] = &[", args_array_name ) );
-        for arg_idx in 0..cmd.arguments().len()
-        {
-          source_code.push_str( &format!( "{}_{}_ARG, ", const_name_base, arg_idx ) );
-        }
-        source_code.push_str( "];\n\n" );
-      }
-
-      // Generate command-level arrays
-      let tags_const_name = format!( "{}_TAGS", const_name_base );
-      let aliases_const_name = format!( "{}_ALIASES", const_name_base );
-      let permissions_const_name = format!( "{}_PERMISSIONS", const_name_base );
-      let examples_const_name = format!( "{}_EXAMPLES", const_name_base );
-
-      if !cmd.tags().is_empty()
-      {
-        source_code.push_str( &Self::generate_string_array( cmd.tags(), &tags_const_name ) );
-      }
-      if !cmd.aliases().is_empty()
-      {
-        source_code.push_str( &Self::generate_string_array( cmd.aliases(), &aliases_const_name ) );
-      }
-      if !cmd.permissions().is_empty()
-      {
-        source_code.push_str( &Self::generate_string_array( cmd.permissions(), &permissions_const_name ) );
-      }
-      if !cmd.examples().is_empty()
-      {
-        source_code.push_str( &Self::generate_string_array( cmd.examples(), &examples_const_name ) );
-      }
-
-      // Generate command definition
-      let const_name = format!( "{}_CMD", const_name_base );
-      source_code.push_str( &format!(
-        "\nstatic {}: StaticCommandDefinition = StaticCommandDefinition {{\n",
-        const_name
-      ) );
-      source_code.push_str( &Self::generate_command_definition_body(
-        cmd,
-        &const_name_base,
-        &tags_const_name,
-        &aliases_const_name,
-        &permissions_const_name,
-        &examples_const_name,
-      ) );
-      source_code.push_str( "};\n\n" );
+      source_code.push_str( &Self::generate_command_consts( cmd_name, cmd ) );
     }
 
     // Fix(BUG-090): Use phf_codegen struct-literal generation — no phf_map! macro.

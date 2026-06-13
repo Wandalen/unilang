@@ -83,7 +83,7 @@ fn register_sample_commands( registry : &mut CommandRegistry ) -> Result< (), un
     })
   });
 
-  registry.command_add_runtime( &echo_cmd, echo_routine )?;
+  registry.register_with_routine( &echo_cmd, echo_routine )?;
 
   // Generic command
   let cmd1_cmd = CommandDefinition::former()
@@ -156,7 +156,7 @@ fn register_sample_commands( registry : &mut CommandRegistry ) -> Result< (), un
     })
   });
 
-  registry.command_add_runtime( &cmd1_cmd, cmd1_routine )?;
+  registry.register_with_routine( &cmd1_cmd, cmd1_routine )?;
 
   println!( "✓ Registered {} sample commands", registry.commands().len() );
 

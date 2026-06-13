@@ -72,7 +72,7 @@ fn test_from_static_preserves_routines()
 
   let cmd_registry : CommandRegistry = static_reg.into();
   assert!(
-    cmd_registry.get_routine( ".greet" ).is_some(),
+    cmd_registry.routine( ".greet" ).is_some(),
     "Routine for .greet must survive StaticCommandRegistry → CommandRegistry conversion"
   );
 }
@@ -122,7 +122,7 @@ fn test_pipeline_new_unaffected()
     format : "text".to_string(),
     execution_time_ms : None,
   }));
-  registry.command_add_runtime( &cmd, routine ).unwrap();
+  registry.register_with_routine( &cmd, routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
   let result = pipeline.process_command_simple( ".status" );

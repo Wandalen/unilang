@@ -1,35 +1,12 @@
-//! # unilang CLI Binary Entry Point
+//! Demo command definitions for the unilang CLI binary.
 //!
-//! This is a comprehensive CLI application for the `unilang` module that demonstrates:
-//! - Command registry initialization with multiple namespaces
-//! - Command-line argument parsing with proper error handling
-//! - Semantic analysis and command execution
-//! - Help system integration
-//!
-//! Following Design Rulebook principles:
-//! - Uses proper error handling with Result types
-//! - Implements comprehensive help system
-//! - Uses explicit parameter handling to avoid fragile defaults
-//! - Follows proper spacing and formatting per Codestyle Rulebook
+//! Provides the set of example commands registered in the demo registry,
+//! illustrating math, system, file, and search command patterns.
 
-use std::collections::HashMap;
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, OutputData };
 use unilang::data::Kind as ArgumentKind;
-use unilang::help::HelpGenerator;
-use unilang::interpreter::{ ExecutionContext, Interpreter };
 use unilang::registry::{ CommandRegistry, CommandRoutine };
-use unilang::semantic::SemanticAnalyzer;
 use unilang::types::Value;
-use unilang_parser::{ Parser, UnilangParserOptions };
-
-fn main()
-{
-  if let Err( err ) = run()
-  {
-    eprintln!( "Error: {err}" );
-    std::process::exit( 1 );
-  }
-}
 
 fn cmd_math_add() -> ( CommandDefinition, CommandRoutine )
 {
@@ -77,7 +54,7 @@ fn cmd_math_add() -> ( CommandDefinition, CommandRoutine )
         execution_time_ms : None,
       });
     }
-    unreachable!();
+    unreachable!( "cmd_math_add: arguments 'a' and 'b' must both be Integer — guaranteed by Kind::Integer argument definition" );
   });
 
   ( def, routine )
@@ -128,7 +105,7 @@ fn cmd_math_sub() -> ( CommandDefinition, CommandRoutine )
         execution_time_ms : None,
       });
     }
-    unreachable!();
+    unreachable!( "cmd_math_sub: arguments 'x' and 'y' must both be Integer — guaranteed by Kind::Integer argument definition" );
   });
 
   ( def, routine )
@@ -158,8 +135,10 @@ fn cmd_greet() -> ( CommandDefinition, CommandRoutine )
     .attributes( ArgumentAttributes
     {
       optional : true,
+      multiple : false,
       default : Some( "World".to_string() ),
-      ..Default::default()
+      sensitive : false,
+      interactive : false,
     })
     .end()
   ])
@@ -213,9 +192,11 @@ fn cmd_config_set() -> ( CommandDefinition, CommandRoutine )
     .hint( "Configuration value." )
     .attributes( ArgumentAttributes
     {
-      interactive : true,
+      optional : false,
+      multiple : false,
+      default : None,
       sensitive : true,
-      ..Default::default()
+      interactive : true,
     })
     .end(),
   ])
@@ -263,7 +244,10 @@ fn cmd_echo() -> ( CommandDefinition, CommandRoutine )
     .attributes( ArgumentAttributes
     {
       optional : true,
-      ..Default::default()
+      multiple : false,
+      default : None,
+      sensitive : false,
+      interactive : false,
     })
     .end(),
   ])
@@ -312,9 +296,10 @@ fn cmd_cat() -> ( CommandDefinition, CommandRoutine )
     .attributes( ArgumentAttributes
     {
       optional : false,
-      interactive : false,
+      multiple : false,
+      default : None,
       sensitive : false,
-      ..Default::default()
+      interactive : false,
     })
     .end()
   ])
@@ -447,146 +432,31 @@ fn cmd_video_search() -> ( CommandDefinition, CommandRoutine )
   ( def, routine )
 }
 
-fn build_registry() -> Result< CommandRegistry, unilang::error::Error >
+/// Builds the demo command registry with all example commands registered.
+pub fn build_registry() -> Result< CommandRegistry, unilang::error::Error >
 {
   let mut registry = CommandRegistry::new();
 
   let ( def, routine ) = cmd_math_add();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_math_sub();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_greet();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_config_set();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_echo();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_cat();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   let ( def, routine ) = cmd_video_search();
-  registry.command_add_runtime( &def, routine )?;
+  registry.register_with_routine( &def, routine )?;
 
   Ok( registry )
-}
-
-fn run() -> Result< (), unilang::error::Error >
-{
-  let registry = build_registry()?;
-
-  let args : Vec< String > = std::env::args().skip( 1 ).collect();
-
-  if args.is_empty()
-  {
-    let help_generator = HelpGenerator::from_env( &registry );
-    let help_text = help_generator.list_commands();
-    println!( "{help_text}" );
-    eprintln!( "Usage: unilang_cli <command> [args...]" );
-    eprintln!( "Examples:" );
-    eprintln!( "  unilang_cli greet name::\"Alice\"" );
-    eprintln!( "  unilang_cli math.add a::10 b::20" );
-    eprintln!( "  unilang_cli config.set key::\"theme\" value::\"dark\"" );
-    eprintln!( "  unilang_cli help greet" );
-    eprintln!( "Note: Arguments use name::value syntax. String values must be quoted." );
-    return Ok( () );
-  }
-
-  let verbosity = std::env::var( "UNILANG_VERBOSITY" )
-  .ok()
-  .and_then( | v | v.parse::< u8 >().ok() )
-  .unwrap_or( 1 );
-
-  if verbosity > 1
-  {
-    eprintln!( "DEBUG: Raw shell arguments: {args:?}" );
-  }
-
-  let parser = Parser::new( UnilangParserOptions { verbosity, ..Default::default() } );
-
-  let mut alias_map : HashMap< String, String > = HashMap::new();
-  for ( full_name, cmd_def ) in &registry.commands()
-  {
-    for alias in cmd_def.aliases()
-    {
-      alias_map.insert( alias.clone(), full_name.clone() );
-    }
-  }
-
-  let mut processed_args = args.clone();
-  if let Some( first_arg ) = processed_args.first_mut()
-  {
-    if let Some( canonical_name ) = alias_map.get( first_arg )
-    {
-      *first_arg = canonical_name.clone();
-    }
-  }
-
-  if processed_args.first().is_some_and( | arg | arg == "--help" )
-  {
-    let help_generator = HelpGenerator::from_env( &registry );
-    println!( "{}", help_generator.list_commands() );
-    return Ok( () );
-  }
-
-  if processed_args.first().is_some_and( | arg | arg == "help" )
-  {
-    let help_generator = HelpGenerator::from_env( &registry );
-    if processed_args.len() > 2
-    {
-      eprintln!( "Error: Invalid usage of help command. Use `help` or `help <command_name>`." );
-      std::process::exit( 1 );
-    }
-    else if let Some( command_name ) = processed_args.get( 1 )
-    {
-      if let Some( help_text ) = help_generator.command( command_name )
-      {
-        println!( "{help_text}" );
-      }
-      else
-      {
-        eprintln!( "Error: Command '{command_name}' not found for help." );
-        std::process::exit( 1 );
-      }
-    }
-    else
-    {
-      println!( "{}", help_generator.list_commands() );
-    }
-    return Ok( () );
-  }
-
-  if verbosity > 1
-  {
-    eprintln!( "DEBUG: Processing argv: {processed_args:?}" );
-  }
-
-  // Parse using argv-aware parser to properly handle multi-word parameter values.
-  // The shell removes quotes from arguments like query::"llm rust", resulting in
-  // argv = ["query::llm rust"] (one token). Using parse_from_argv() preserves these
-  // token boundaries, while parse_single_instruction() would re-tokenize on spaces.
-  let instruction = parser.parse_from_argv( &processed_args )?;
-  let instructions = &[ instruction ][ .. ];
-
-  let semantic_analyzer = SemanticAnalyzer::new( instructions, &registry );
-  let commands = match semantic_analyzer.analyze()
-  {
-    Ok( commands ) => commands,
-    Err( unilang::error::Error::Execution( error_data ) ) if error_data.code == unilang::data::ErrorCode::HelpRequested =>
-    {
-      println!( "{}", error_data.message );
-      return Ok( () );
-    },
-    Err( e ) => return Err( e ),
-  };
-
-  let interpreter = Interpreter::new( &commands, &registry );
-  let mut context = ExecutionContext::default();
-  interpreter.run( &mut context )?;
-
-  Ok( () )
 }

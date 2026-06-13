@@ -25,13 +25,13 @@ The framework **must** provide a mechanism, via a `build.rs` script, to register
 
 ### FR-REG-2 (Dynamic Registration)
 
-The framework **must** expose a public API (`CommandRegistry::command_add_runtime`) for registering new commands and their routines at runtime.
+The framework **must** expose a public API (`CommandRegistry::register_with_routine`) for registering new commands and their routines at runtime.
 
 - **Performance Guidance:** Runtime registration has 10-50x slower performance than compile-time registration (FR-REG-1). Production CLIs **should** prefer compile-time registration.
 - **Appropriate Use Cases:** REPL applications, plugin systems, and prototyping workflows **should** use runtime registration for necessary flexibility.
 - **Design Decision:** This API is not deprecated and will not be removed. The performance trade-off is intentional to support interactive and plugin-based use cases.
 
-**Implementation status:** ✅ Implemented as `CommandRegistry::command_add_runtime()`. Supports dynamic registration with full validation including dot-prefix enforcement, duplicate detection, and parameter validation.
+**Implementation status:** ✅ Implemented as `CommandRegistry::register_with_routine()`. Supports dynamic registration with full validation including dot-prefix enforcement, duplicate detection, and parameter validation.
 
 ### FR-REG-3 (Declarative Loading)
 
@@ -56,7 +56,7 @@ The framework **must** support command aliases. When an alias is invoked, the fr
 The framework **must** enforce explicit command naming with the following rules:
 
 - All fully-qualified command names **must** start with a dot prefix (e.g., `.chat`, `.session.list`)
-- Runtime API (`CommandRegistry::command_add_runtime`) **must** reject command registrations lacking a dot prefix with a clear error
+- Runtime API (`CommandRegistry::register_with_routine`) **must** reject command registrations lacking a dot prefix with a clear error
 - Runtime API **must not** automatically add, remove, or transform command names — commands are registered and executed exactly as specified
 - Build-time YAML manifests **may** use two valid formats that both produce dot-prefixed command names:
   - **Format 1 (Compound Names — Recommended for Examples):** `name: ".session.list"`, `namespace: ""` → produces `.session.list`

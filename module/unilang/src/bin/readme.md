@@ -6,4 +6,4 @@ Compiled binaries produced from this crate.
 
 | File | Responsibility |
 |------|----------------|
-| `unilang_cli.rs` | `unilang` CLI binary; demo REPL and command runner |
+| `unilang_cli/` | `unilang_cli` binary; demo REPL and command runner |

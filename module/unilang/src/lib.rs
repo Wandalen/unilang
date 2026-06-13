@@ -7,8 +7,6 @@
 #![ cfg_attr( doc, doc = include_str!( concat!( env!( "CARGO_MANIFEST_DIR" ), "/", "readme.md" ) ) ) ]
 #![ cfg_attr( not( doc ), doc = "Universal language processing" ) ]
 
-// All clippy pedantic lints have been resolved as of Phase 9 completion
-
 //!
 //! ## Design Rules Compliance Notice
 //!

@@ -335,7 +335,7 @@ fn setup_calc_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &add_cmd, add_routine )?;
+  registry.register_with_routine( &add_cmd, add_routine )?;
 
   // Multiply command
   let multiply_cmd = CommandDefinition::former()
@@ -392,7 +392,7 @@ fn setup_calc_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &multiply_cmd, multiply_routine )?;
+  registry.register_with_routine( &multiply_cmd, multiply_routine )?;
 
   // Divide command (with error handling)
   let divide_cmd = CommandDefinition::former()
@@ -459,7 +459,7 @@ fn setup_calc_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &divide_cmd, divide_routine )?;
+  registry.register_with_routine( &divide_cmd, divide_routine )?;
 
   Ok(())
 }
@@ -511,7 +511,7 @@ fn setup_text_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &reverse_cmd, reverse_routine )?;
+  registry.register_with_routine( &reverse_cmd, reverse_routine )?;
 
   Ok(())
 }
@@ -551,7 +551,7 @@ fn setup_util_commands( registry : &mut CommandRegistry ) -> Result< (), unilang
     })
   });
 
-  registry.command_add_runtime( &timestamp_cmd, timestamp_routine )?;
+  registry.register_with_routine( &timestamp_cmd, timestamp_routine )?;
 
   Ok(())
 }

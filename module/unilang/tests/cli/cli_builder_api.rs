@@ -77,11 +77,11 @@ fn test_fluent_api_builder_pattern_chaining()
     .dynamic_module_with_prefix( "yaml_prefix", PathBuf::from( "tests/test_data/external.yaml" ), "yaml" );
 
   // Verify configuration was applied correctly
-  assert_eq!( builder.get_config().app_name, "test_app" );
-  assert_eq!( *builder.get_mode(), AggregationMode::Static );
-  assert_eq!( builder.get_config().global_prefix, Some( "test".to_string() ) );
-  assert!( !builder.get_config().auto_help );
-  assert!( builder.get_config().detect_conflicts );
+  assert_eq!( builder.config().app_name, "test_app" );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Static );
+  assert_eq!( builder.config().global_prefix, Some( "test".to_string() ) );
+  assert!( !builder.config().auto_help, "auto_help must be false when explicitly disabled" );
+  assert!( builder.config().detect_conflicts, "detect_conflicts must remain true" );
   assert_eq!( builder.static_modules_count(), 2 );
   assert_eq!( builder.dynamic_modules_count(), 2 );
 }
@@ -92,11 +92,11 @@ fn test_fluent_api_default_configuration()
   let builder = CliBuilder::new();
 
   // Verify intelligent defaults
-  assert_eq!( *builder.get_mode(), AggregationMode::Auto );
-  assert_eq!( builder.get_config().app_name, "app" );
-  assert_eq!( builder.get_config().global_prefix, None );
-  assert!( builder.get_config().auto_help );
-  assert!( builder.get_config().detect_conflicts );
+  assert_eq!( *builder.aggregation_mode(), AggregationMode::Auto );
+  assert_eq!( builder.config().app_name, "app" );
+  assert_eq!( builder.config().global_prefix, None );
+  assert!( builder.config().auto_help, "auto_help must default to true" );
+  assert!( builder.config().detect_conflicts, "detect_conflicts must default to true" );
   assert_eq!( builder.static_modules_count(), 0 );
   assert_eq!( builder.dynamic_modules_count(), 0 );
   assert_eq!( builder.conditional_modules_count(), 0 );
@@ -111,11 +111,11 @@ fn test_fluent_api_configuration_methods()
     .auto_help( false )
     .detect_conflicts( false );
 
-  let config = builder.get_config();
+  let config = builder.config();
   assert_eq!( config.app_name, "my_app" );
   assert_eq!( config.global_prefix, Some( "global".to_string() ) );
-  assert!( !config.auto_help );
-  assert!( !config.detect_conflicts );
+  assert!( !config.auto_help, "auto_help must be false after .auto_help(false)" );
+  assert!( !config.detect_conflicts, "detect_conflicts must be false after .detect_conflicts(false)" );
 }
 
 #[test]
@@ -131,7 +131,7 @@ fn test_fluent_api_mode_configuration()
   for mode in modes
   {
     let builder = CliBuilder::new().mode( mode.clone() );
-    assert_eq!( *builder.get_mode(), mode );
+    assert_eq!( *builder.aggregation_mode(), mode );
   }
 }
 
@@ -142,7 +142,7 @@ fn test_fluent_api_mode_configuration()
 /// FT-10: CliBuilder module registration produces prefixed commands.
 // test_kind: ft_spec(FT-10)
 #[test]
-fn test_static_module_with_prefix_basic()
+fn test_ft10_cli_builder_prefix_produces_prefixed_commands()
 {
   let cmd = create_test_command( "test", "Test command" );
 
@@ -155,8 +155,8 @@ fn test_static_module_with_prefix_basic()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // Command should be accessible with prefix: .app.test
-  assert!( registry.command( ".app.test" ).is_some() );
-  assert!( registry.command( ".test" ).is_none() ); // Should not be accessible without prefix
+  assert!( registry.command( ".app.test" ).is_some(), ".app.test must be accessible with prefix" );
+  assert!( registry.command( ".test" ).is_none(), ".test must not be accessible without prefix" );
 }
 
 #[test]
@@ -170,15 +170,15 @@ fn test_static_module_with_prefix_multiple_commands()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // All commands should be prefixed
-  assert!( registry.command( ".util.version" ).is_some() );
-  assert!( registry.command( ".util.help" ).is_some() );
-  assert!( registry.command( ".util.status" ).is_some() );
+  assert!( registry.command( ".util.version" ).is_some(), ".util.version must be accessible with prefix" );
+  assert!( registry.command( ".util.help" ).is_some(), ".util.help must be accessible with prefix" );
+  assert!( registry.command( ".util.status" ).is_some(), ".util.status must be accessible with prefix" );
 
   // Commands should not be accessible without prefix
-  assert!( registry.command( ".version" ).is_none() );
+  assert!( registry.command( ".version" ).is_none(), ".version must not be accessible without prefix" );
   // NOTE: Global .help command is now mandatory in all registries (mandatory help enforcement)
-  assert!( registry.command( ".help" ).is_some() ); // Global help is always present
-  assert!( registry.command( ".status" ).is_none() );
+  assert!( registry.command( ".help" ).is_some(), "global .help must always be present" );
+  assert!( registry.command( ".status" ).is_none(), ".status must not be accessible without prefix" );
 }
 
 #[test]
@@ -193,9 +193,9 @@ fn test_static_module_with_prefix_and_global_prefix()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // Command should have both global and module prefix: .myapp.deploy.deploy
-  assert!( registry.command( ".myapp.deploy.deploy" ).is_some() );
-  assert!( registry.command( ".deploy.deploy" ).is_none() );
-  assert!( registry.command( ".myapp.deploy" ).is_none() );
+  assert!( registry.command( ".myapp.deploy.deploy" ).is_some(), ".myapp.deploy.deploy must have both global and module prefix" );
+  assert!( registry.command( ".deploy.deploy" ).is_none(), ".deploy.deploy must not be accessible without global prefix" );
+  assert!( registry.command( ".myapp.deploy" ).is_none(), ".myapp.deploy must not match — command name required" );
 }
 
 #[test]
@@ -210,7 +210,7 @@ fn test_static_module_with_prefix_empty_prefix()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // With empty prefix, the namespace becomes "." so the command becomes "..root"
-  assert!( registry.command( "..root" ).is_some() );
+  assert!( registry.command( "..root" ).is_some(), "..root must be accessible when empty-string prefix is used" );
 }
 
 #[test]
@@ -224,7 +224,7 @@ fn test_static_module_with_prefix_special_characters()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // Prefix with special characters should work
-  assert!( registry.command( ".my-app_v1.special" ).is_some() );
+  assert!( registry.command( ".my-app_v1.special" ).is_some(), "special characters in prefix must be preserved" );
 }
 
 // =============================================================================
@@ -234,7 +234,7 @@ fn test_static_module_with_prefix_special_characters()
 /// FT-11: CliBuilder conflict detection rejects duplicate command names across modules.
 // test_kind: ft_spec(FT-11)
 #[test]
-fn test_conflict_detection_duplicate_command_names()
+fn test_ft11_cli_builder_conflict_detection()
 {
   let cmd1 = create_test_command( "test", "First test command" );
   let cmd2 = create_test_command( "test", "Second test command" );
@@ -246,14 +246,14 @@ fn test_conflict_detection_duplicate_command_names()
 
   let conflicts = builder.detect_conflicts_report();
 
-  assert!( !conflicts.is_empty() );
+  assert!( !conflicts.is_empty(), "duplicate command name across modules must produce at least one conflict" );
   assert_eq!( conflicts.len(), 1 );
 
   let conflict = &conflicts[0];
   assert_eq!( conflict.command_name, ".app.test" );
   assert_eq!( conflict.modules.len(), 2 );
-  assert!( conflict.modules.contains( &"module1".to_string() ) );
-  assert!( conflict.modules.contains( &"module2".to_string() ) );
+  assert!( conflict.modules.contains( &"module1".to_string() ), "conflict must name module1" );
+  assert!( conflict.modules.contains( &"module2".to_string() ), "conflict must name module2" );
   assert_eq!( conflict.conflict_type, ConflictType::NameCollision );
 }
 
@@ -271,7 +271,7 @@ fn test_conflict_detection_different_prefixes_no_conflict()
   let conflicts = builder.detect_conflicts_report();
 
   // No conflicts should exist - different prefixes isolate the commands
-  assert!( conflicts.is_empty() );
+  assert!( conflicts.is_empty(), "different prefixes must prevent conflicts" );
 }
 
 #[test]
@@ -293,8 +293,8 @@ fn test_conflict_detection_multiple_conflicts()
 
   // Check that both version and help conflicts are detected
   let command_names: Vec< &String > = conflicts.iter().map( |c| &c.command_name ).collect();
-  assert!( command_names.contains( &&".app.version".to_string() ) );
-  assert!( command_names.contains( &&".app.help".to_string() ) );
+  assert!( command_names.contains( &&".app.version".to_string() ), ".app.version must appear in conflict list" );
+  assert!( command_names.contains( &&".app.help".to_string() ), ".app.help must appear in conflict list" );
 }
 
 #[test]
@@ -311,7 +311,7 @@ fn test_conflict_detection_disabled()
   let conflicts = builder.detect_conflicts_report();
 
   // No conflicts should be reported when detection is disabled
-  assert!( conflicts.is_empty() );
+  assert!( conflicts.is_empty(), "no conflicts must be reported when detection is disabled" );
 }
 
 #[test]
@@ -351,8 +351,8 @@ fn test_conflict_detection_mixed_static_and_dynamic_modules()
   assert_eq!( conflicts.len(), 1 );
 
   let conflict = &conflicts[0];
-  assert!( conflict.modules.contains( &"static_mod".to_string() ) );
-  assert!( conflict.modules.contains( &"dynamic_mod".to_string() ) );
+  assert!( conflict.modules.contains( &"static_mod".to_string() ), "conflict must name static_mod" );
+  assert!( conflict.modules.contains( &"dynamic_mod".to_string() ), "conflict must name dynamic_mod" );
 }
 
 // =============================================================================
@@ -374,17 +374,17 @@ fn test_namespace_isolation_different_prefixes()
     .expect( "Failed to build registry" );
 
   // Each command should only be accessible via its own namespace
-  assert!( registry.command( ".auth.login" ).is_some() );
-  assert!( registry.command( ".fs.read" ).is_some() );
-  assert!( registry.command( ".net.ping" ).is_some() );
+  assert!( registry.command( ".auth.login" ).is_some(), ".auth.login must be in auth namespace" );
+  assert!( registry.command( ".fs.read" ).is_some(), ".fs.read must be in fs namespace" );
+  assert!( registry.command( ".net.ping" ).is_some(), ".net.ping must be in net namespace" );
 
   // Commands should not be accessible via other namespaces
-  assert!( registry.command( ".fs.login" ).is_none() );
-  assert!( registry.command( ".net.login" ).is_none() );
-  assert!( registry.command( ".auth.read" ).is_none() );
-  assert!( registry.command( ".net.read" ).is_none() );
-  assert!( registry.command( ".auth.ping" ).is_none() );
-  assert!( registry.command( ".fs.ping" ).is_none() );
+  assert!( registry.command( ".fs.login" ).is_none(), "login must not leak into fs namespace" );
+  assert!( registry.command( ".net.login" ).is_none(), "login must not leak into net namespace" );
+  assert!( registry.command( ".auth.read" ).is_none(), "read must not leak into auth namespace" );
+  assert!( registry.command( ".net.read" ).is_none(), "read must not leak into net namespace" );
+  assert!( registry.command( ".auth.ping" ).is_none(), "ping must not leak into auth namespace" );
+  assert!( registry.command( ".fs.ping" ).is_none(), "ping must not leak into fs namespace" );
 }
 
 #[test]
@@ -403,18 +403,18 @@ fn test_namespace_isolation_same_command_names()
     .expect( "Failed to build registry" );
 
   // All commands should be isolated by their prefixes
-  assert!( registry.command( ".web.start" ).is_some() );
-  assert!( registry.command( ".db.start" ).is_some() );
-  assert!( registry.command( ".cache.start" ).is_some() );
+  assert!( registry.command( ".web.start" ).is_some(), ".web.start must be in web namespace" );
+  assert!( registry.command( ".db.start" ).is_some(), ".db.start must be in db namespace" );
+  assert!( registry.command( ".cache.start" ).is_some(), ".cache.start must be in cache namespace" );
 
   // Verify each command has correct description (namespace isolation working)
   let web_start = registry.command( ".web.start" ).unwrap();
   let db_start = registry.command( ".db.start" ).unwrap();
   let cache_start = registry.command( ".cache.start" ).unwrap();
 
-  assert!( web_start.description().contains( "web server" ) );
-  assert!( db_start.description().contains( "database" ) );
-  assert!( cache_start.description().contains( "cache" ) );
+  assert!( web_start.description().contains( "web server" ), ".web.start description must mention web server" );
+  assert!( db_start.description().contains( "database" ), ".db.start description must mention database" );
+  assert!( cache_start.description().contains( "cache" ), ".cache.start description must mention cache" );
 }
 
 #[test]
@@ -431,19 +431,19 @@ fn test_namespace_isolation_nested_prefixes()
     .expect( "Failed to build registry" );
 
   // Commands should be isolated by full namespace path
-  assert!( registry.command( ".myapp.user.create" ).is_some() );
-  assert!( registry.command( ".myapp.role.create" ).is_some() );
+  assert!( registry.command( ".myapp.user.create" ).is_some(), ".myapp.user.create must be accessible" );
+  assert!( registry.command( ".myapp.role.create" ).is_some(), ".myapp.role.create must be accessible" );
 
   // Verify commands are properly isolated
   let user_create_cmd = registry.command( ".myapp.user.create" ).unwrap();
   let role_create_cmd = registry.command( ".myapp.role.create" ).unwrap();
 
-  assert!( user_create_cmd.description().contains( "user" ) );
-  assert!( role_create_cmd.description().contains( "role" ) );
+  assert!( user_create_cmd.description().contains( "user" ), "user create description must mention user" );
+  assert!( role_create_cmd.description().contains( "role" ), "role create description must mention role" );
 
   // Cross-namespace access should fail
-  assert!( registry.command( ".myapp.user.role" ).is_none() );
-  assert!( registry.command( ".myapp.role.user" ).is_none() );
+  assert!( registry.command( ".myapp.user.role" ).is_none(), "role command must not be accessible in user namespace" );
+  assert!( registry.command( ".myapp.role.user" ).is_none(), "user command must not be accessible in role namespace" );
 }
 
 #[ cfg( feature = "advanced_cli_tests" ) ]
@@ -461,14 +461,14 @@ fn test_namespace_isolation_mixed_modules()
     .expect( "Failed to build registry" );
 
   // Each module type should maintain namespace isolation
-  assert!( registry.command( ".core.static_op" ).is_some() );
-  assert!( registry.command( ".ext.example" ).is_some() ); // Dynamic command from YAML file
-  assert!( registry.command( ".debug.debug_op" ).is_some() );
+  assert!( registry.command( ".core.static_op" ).is_some(), ".core.static_op must be in core namespace" );
+  assert!( registry.command( ".ext.example" ).is_some(), ".ext.example must be present from YAML file" );
+  assert!( registry.command( ".debug.debug_op" ).is_some(), ".debug.debug_op must be in debug namespace" );
 
   // Cross-module access should fail
-  assert!( registry.command( ".core.example" ).is_none() );
-  assert!( registry.command( ".ext.static_op" ).is_none() );
-  assert!( registry.command( ".debug.static_op" ).is_none() );
+  assert!( registry.command( ".core.example" ).is_none(), "dynamic example must not leak into core namespace" );
+  assert!( registry.command( ".ext.static_op" ).is_none(), "static_op must not leak into ext namespace" );
+  assert!( registry.command( ".debug.static_op" ).is_none(), "static_op must not leak into debug namespace" );
 }
 
 // =============================================================================
@@ -493,7 +493,7 @@ fn test_build_static_basic_functionality()
   println!("Available commands in static registry: {:?}", commands.keys().collect::<Vec<_>>());
 
   // Command should be accessible
-  assert!( static_registry.command( ".version" ).is_some() );
+  assert!( static_registry.command( ".version" ).is_some(), ".version must be accessible in static registry" );
 
   // Verify command count (total commands including dynamic)
   assert_eq!( static_registry.commands().len(), 1 );
@@ -510,9 +510,9 @@ fn test_build_static_with_prefix()
     .expect( "Failed to build static registry with prefix" );
 
   // All commands should be accessible with prefix
-  assert!( static_registry.command( ".svc.start" ).is_some() );
-  assert!( static_registry.command( ".svc.stop" ).is_some() );
-  assert!( static_registry.command( ".svc.restart" ).is_some() );
+  assert!( static_registry.command( ".svc.start" ).is_some(), ".svc.start must be accessible with prefix" );
+  assert!( static_registry.command( ".svc.stop" ).is_some(), ".svc.stop must be accessible with prefix" );
+  assert!( static_registry.command( ".svc.restart" ).is_some(), ".svc.restart must be accessible with prefix" );
 
   // Verify command count
   assert_eq!( static_registry.commands().len(), 3 );
@@ -531,10 +531,10 @@ fn test_build_static_multiple_modules()
     .expect( "Failed to build static registry with multiple modules" );
 
   // All commands from both modules should be accessible
-  assert!( static_registry.command( ".core.version" ).is_some() );
-  assert!( static_registry.command( ".core.help" ).is_some() );
-  assert!( static_registry.command( ".util.backup" ).is_some() );
-  assert!( static_registry.command( ".util.restore" ).is_some() );
+  assert!( static_registry.command( ".core.version" ).is_some(), ".core.version must be present from core module" );
+  assert!( static_registry.command( ".core.help" ).is_some(), ".core.help must be present from core module" );
+  assert!( static_registry.command( ".util.backup" ).is_some(), ".util.backup must be present from util module" );
+  assert!( static_registry.command( ".util.restore" ).is_some(), ".util.restore must be present from util module" );
 
   // Verify total command count
   assert_eq!( static_registry.commands().len(), 4 );
@@ -552,7 +552,7 @@ fn test_build_static_with_global_prefix()
     .expect( "Failed to build static registry with global prefix" );
 
   // Command should include both global and module prefix
-  assert!( static_registry.command( ".myapp.deploy.deploy" ).is_some() );
+  assert!( static_registry.command( ".myapp.deploy.deploy" ).is_some(), ".myapp.deploy.deploy must include both global and module prefix" );
 
   // Verify command count (total commands including dynamic)
   assert_eq!( static_registry.commands().len(), 1 );
@@ -576,7 +576,7 @@ fn test_build_static_zero_overhead_optimization()
   for i in 1..=5
   {
     let cmd_name = format!( ".cmd{i}" );
-    assert!( static_registry.command( &cmd_name ).is_some() );
+    assert!( static_registry.command( &cmd_name ).is_some(), "{cmd_name} must be accessible in static registry" );
   }
 
   // Verify performance: static registry should be optimized
@@ -586,7 +586,7 @@ fn test_build_static_zero_overhead_optimization()
 /// FT-12: `build()` and `build_static()` produce equivalent command access.
 // test_kind: ft_spec(FT-12)
 #[test]
-fn test_build_static_vs_build_comparison()
+fn test_ft12_build_static_vs_build_equivalent()
 {
   let cmd = create_test_command( ".test", "Test command" );
 
@@ -603,8 +603,8 @@ fn test_build_static_vs_build_comparison()
     .expect( "Failed to build dynamic registry" );
 
   // Both should have the command accessible
-  assert!( static_registry.command( ".test" ).is_some() );
-  assert!( dynamic_registry.command( ".test" ).is_some() );
+  assert!( static_registry.command( ".test" ).is_some(), ".test must be accessible in static registry" );
+  assert!( dynamic_registry.command( ".test" ).is_some(), ".test must be accessible in dynamic registry" );
 
   // But different registry modes
   assert_eq!( static_registry.mode(), RegistryMode::Hybrid );
@@ -623,10 +623,10 @@ fn test_build_static_ignores_dynamic_modules()
     .expect( "Failed to build static registry ignoring dynamic modules" );
 
   // Only static commands should be present in static registry
-  assert!( static_registry.command( ".static_cmd" ).is_some() );
+  assert!( static_registry.command( ".static_cmd" ).is_some(), ".static_cmd must be present in static build" );
 
   // Dynamic modules should be ignored in static build
-  assert!( static_registry.command( ".example" ).is_none() ); // Dynamic command from YAML file
+  assert!( static_registry.command( ".example" ).is_none(), "dynamic command from YAML must be excluded from static build" );
 
   // Only static commands counted
   assert_eq!( static_registry.commands().len(), 1 );
@@ -662,8 +662,8 @@ fn test_disabled_modules_excluded()
   let registry = builder.build().expect( "Failed to build registry" );
 
   // All modules should be enabled by default
-  assert!( registry.command( ".enabled.enabled" ).is_some() );
-  assert!( registry.command( ".other.disabled" ).is_some() );
+  assert!( registry.command( ".enabled.enabled" ).is_some(), ".enabled.enabled must be present from enabled_mod" );
+  assert!( registry.command( ".other.disabled" ).is_some(), ".other.disabled must be present from other_mod" );
 }
 
 #[ cfg( feature = "advanced_cli_tests" ) ]
@@ -694,17 +694,17 @@ fn test_comprehensive_builder_scenario()
   let static_registry = builder.build_static().expect( "Failed to build static registry" );
 
   // Verify commands exist in dynamic registry
-  assert!( dynamic_registry.command( ".app.core.version" ).is_some() );
-  assert!( dynamic_registry.command( ".app.auth.login" ).is_some() );
-  assert!( dynamic_registry.command( ".app.ext.example" ).is_some() ); // Dynamic from YAML
-  assert!( dynamic_registry.command( ".app.debug.trace" ).is_some() ); // Conditional enabled
+  assert!( dynamic_registry.command( ".app.core.version" ).is_some(), ".app.core.version must be in dynamic registry" );
+  assert!( dynamic_registry.command( ".app.auth.login" ).is_some(), ".app.auth.login must be in dynamic registry" );
+  assert!( dynamic_registry.command( ".app.ext.example" ).is_some(), ".app.ext.example (from YAML) must be in dynamic registry" );
+  assert!( dynamic_registry.command( ".app.debug.trace" ).is_some(), ".app.debug.trace (conditional) must be in dynamic registry" );
 
   // Verify commands exist in static registry (excluding dynamic/conditional)
-  assert!( static_registry.command( ".app.core.version" ).is_some() );
-  assert!( static_registry.command( ".app.auth.login" ).is_some() );
+  assert!( static_registry.command( ".app.core.version" ).is_some(), ".app.core.version must be in static registry" );
+  assert!( static_registry.command( ".app.auth.login" ).is_some(), ".app.auth.login must be in static registry" );
   // Dynamic and conditional modules should be excluded from static build
-  assert!( static_registry.command( ".app.ext.example" ).is_none() );
-  assert!( static_registry.command( ".app.debug.trace" ).is_none() );
+  assert!( static_registry.command( ".app.ext.example" ).is_none(), "dynamic YAML command must not appear in static build" );
+  assert!( static_registry.command( ".app.debug.trace" ).is_none(), "conditional command must not appear in static build" );
 
   // Verify registry modes
   assert_eq!( dynamic_registry.registry_mode(), RegistryMode::Hybrid );

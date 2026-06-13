@@ -33,7 +33,7 @@ The public API exposes the following data structures to integrators:
 
 **Command Construction**: `CommandDefinition::former()` provides a type-state builder requiring at minimum a name and description. The `end()` method provides sensible defaults; `build()` requires all fields to be set explicitly. `CommandName`, `NamespaceType`, `VersionType`, and `CommandStatus` newtypes enforce valid states at construction time.
 
-**Command Registration**: `CommandRegistry` accepts commands via `command_add_runtime()` (single command with full validation) or `register_with_auto_help()` (with automatic `.command.help` companion). `CommandRegistryBuilder` provides a fluent builder API where `build_checked()` propagates registration errors explicitly (preferred over `build()` which silently ignores errors for backward compatibility).
+**Command Registration**: `CommandRegistry` accepts commands via `register_with_routine()` (single command with full validation) or `register_with_auto_help()` (with automatic `.command.help` companion). `CommandRegistryBuilder` provides a fluent builder API where `build_checked()` propagates registration errors explicitly (preferred over `build()` which silently ignores errors for backward compatibility).
 
 **Pipeline Execution**: `Pipeline::process_command()` orchestrates the full Parse → SemanticAnalysis → Interpret flow. `process_batch()` executes multiple commands independently, collecting all results regardless of failures. `process_sequence()` stops on the first failure. `process_command_from_argv()` and `process_command_from_argv_simple()` accept OS argument arrays directly, preserving argument boundaries without re-quoting.
 

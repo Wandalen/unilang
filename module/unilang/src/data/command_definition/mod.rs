@@ -8,6 +8,8 @@ mod core;
 mod accessors;
 mod serde_impl;
 mod builder;
+mod builder_finalize;
+mod builder_optional;
 
 pub use core::CommandDefinition;
 pub use builder::{ CommandDefinitionBuilder, Set, NotSet };

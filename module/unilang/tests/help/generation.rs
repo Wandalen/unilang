@@ -97,7 +97,7 @@ fn test_command_specific_help_generation()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -125,7 +125,7 @@ fn test_help_includes_argument_details()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -150,7 +150,7 @@ fn test_help_includes_examples()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -173,7 +173,7 @@ fn test_help_includes_aliases()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -217,9 +217,9 @@ fn test_global_help_listing()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd1, mock_routine1 ).unwrap();
-  registry.command_add_runtime( &cmd2, mock_routine2 ).unwrap();
-  registry.command_add_runtime( &cmd3, mock_routine3 ).unwrap();
+  registry.register_with_routine( &cmd1, mock_routine1 ).unwrap();
+  registry.register_with_routine( &cmd2, mock_routine2 ).unwrap();
+  registry.register_with_routine( &cmd3, mock_routine3 ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.list_commands();
@@ -276,7 +276,7 @@ fn test_help_content_formatting()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -307,7 +307,7 @@ fn test_help_performance()
     let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
       Ok(OutputData::new("test", "text"))
     });
-    registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+    registry.register_with_routine( &cmd, mock_routine ).unwrap();
   }
 
   let help_generator = HelpGenerator::new( &registry );
@@ -353,7 +353,7 @@ fn test_command_help_with_complex_arguments()
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.command_add_runtime( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, mock_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );

@@ -10,13 +10,13 @@
 ### IN-1: Runtime registration rejects command name without leading dot
 
 - **Given:** A `CommandRegistry` and a `CommandDefinition` whose name is `"nodot"` (no leading dot)
-- **When:** `command_add_runtime(&mut registry, &definition)` is called
+- **When:** `register_with_routine(&mut registry, &definition)` is called
 - **Then:** Returns an `Err` variant; the error message references the missing dot prefix; the registry remains unmodified
 
 ### IN-2: Runtime registration accepts command name with leading dot
 
 - **Given:** A `CommandRegistry` and a `CommandDefinition` whose name is `".valid"`
-- **When:** `command_add_runtime(&mut registry, &definition)` is called
+- **When:** `register_with_routine(&mut registry, &definition)` is called
 - **Then:** Returns `Ok(())`; `registry.get(".valid")` subsequently returns `Some(_)`
 
 ### IN-3: Namespace construction always produces dot-prefixed full name

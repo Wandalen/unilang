@@ -124,7 +124,7 @@ fn main() -> Result< (), Box< dyn core::error::Error > >
     })
   });
 
-  registry.command_add_runtime( &validate_cmd, validate_routine )?;
+  registry.register_with_routine( &validate_cmd, validate_routine )?;
   println!( "✓ Registered validation test command" );
 
   println!( "\n=== Error Scenarios Demonstration ===\n" );

@@ -1,11 +1,10 @@
 //!
 //! Core data structures for the Unilang framework.
 //!
-//! ## Phase 2 Type-Safe Redesign
+//! ## Design: Parse-Don't-Validate
 //!
-//! This module underwent a complete type-safe redesign implementing the "parse don't validate"
-//! pattern. The redesign eliminates entire categories of bugs by making invalid states
-//! impossible to represent.
+//! This module implements the "parse don't validate" pattern, eliminating entire categories
+//! of bugs by making invalid states impossible to represent.
 //!
 //! ### Design Philosophy
 //!
@@ -118,8 +117,11 @@
 
 // Extracted modules for code organization (per codebase_hygiene.rulebook.md)
 mod error_types;
-mod validated_types;
+mod command_name;
+mod namespace_type;
+mod version_type;
 mod command_status;
+mod kind;
 mod argument_types;
 mod namespace;
 mod command_definition;
@@ -132,17 +134,23 @@ mod private
 } // mod private
 mod_interface::mod_interface!
 {
-  exposed use validated_types::{ CommandName, NamespaceType, VersionType };
+  exposed use command_name::CommandName;
+  exposed use namespace_type::NamespaceType;
+  exposed use version_type::VersionType;
   exposed use command_status::CommandStatus;
-  exposed use argument_types::{ ArgumentAttributes, ArgumentDefinition, Kind, ValidationRule };
+  exposed use kind::Kind;
+  exposed use argument_types::{ ArgumentAttributes, ArgumentDefinition, ValidationRule };
   exposed use command_definition::{ CommandDefinition, CommandDefinitionBuilder, Set, NotSet };
   exposed use namespace::{ Namespace, OutputData };
   exposed use error_types::{ ErrorData, ErrorCode };
 
-  prelude use validated_types::{ CommandName, NamespaceType, VersionType };
+  prelude use command_name::CommandName;
+  prelude use namespace_type::NamespaceType;
+  prelude use version_type::VersionType;
   prelude use command_status::CommandStatus;
   prelude use command_definition::CommandDefinition;
-  prelude use argument_types::{ ArgumentDefinition, ArgumentAttributes, Kind };
+  prelude use kind::Kind;
+  prelude use argument_types::{ ArgumentDefinition, ArgumentAttributes };
   prelude use namespace::OutputData;
   prelude use error_types::{ ErrorData, ErrorCode };
 }

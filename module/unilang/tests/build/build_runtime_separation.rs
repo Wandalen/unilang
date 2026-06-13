@@ -79,6 +79,7 @@ fn test_in1_runtime_deps_exclude_serde_yaml()
 // test_kind: in_spec(IN-2)
 #[ cfg( feature = "static_registry" ) ]
 #[ test ]
+#[ allow( clippy::assertions_on_constants ) ] // IN-2: asserts const-derived defaults — vacuousness is intentional
 fn test_in2_static_data_accessible_without_parsing()
 {
   use unilang::static_data::StaticCommandDefinition;

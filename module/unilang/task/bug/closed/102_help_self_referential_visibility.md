@@ -68,9 +68,9 @@ dream .help 2>&1 | grep -E '^\s+\.' | wc -l
 | ID | Hypothesis | State | Summary | Evidence |
 |----|-----------|--------|---------|----------|
 | H1 | `.help` registered with `hidden_from_list: false` | ✅ Root Cause | `dynamic.rs:583` sets `false`; `help.rs:705` filters by `!cmd.hidden_from_list()` | E1, E2, E3 |
-| H2 | Override from YAML/static/other registration path makes `.help` visible | ❌ Disproved | No `.help` in YAML; `command_add_runtime` rejects duplicates; `from_static_commands` skips if exists | E4, E5 |
+| H2 | Override from YAML/static/other registration path makes `.help` visible | ❌ Disproved | No `.help` in YAML; `register_with_routine` rejects duplicates; `from_static_commands` skips if exists | E4, E5 |
 | H3 | Filter logic in `list_commands_filtered` ignores the `hidden_from_list` flag | ❌ Disproved | `help.rs:705` unconditionally checks `!cmd.hidden_from_list()`; `accessors.rs:142` is direct field return | E3 |
-| H4 | Double registration — second registration with `hidden_from_list: false` wins | ❌ Disproved | `command_add_runtime` returns `CommandAlreadyExists`; `from_static_commands` skips `.help`; single registration path | E5, E6 |
+| H4 | Double registration — second registration with `hidden_from_list: false` wins | ❌ Disproved | `register_with_routine` returns `CommandAlreadyExists`; `from_static_commands` skips `.help`; single registration path | E5, E6 |
 
 ## Evidence Table
 
@@ -80,7 +80,7 @@ dream .help 2>&1 | grep -E '^\s+\.' | wc -l
 | E2 | `src/interpreter/interpreter.rs:84-87` | `.help` invocation special-cased: calls `list_commands_filtered(None)` | ✅ H1 Root Cause |
 | E3 | `src/help/help.rs:705` | Filter: `let is_visible = !cmd.hidden_from_list()` — unconditional check; no bypass | ✅ H1 Root Cause, ❌ H3 |
 | E4 | dream YAML files | No `.help` definition in any YAML command file | ❌ H2 |
-| E5 | `src/registry/dynamic.rs:229-234` | `command_add_runtime` rejects duplicates with `CommandAlreadyExists` error | ❌ H2, ❌ H4 |
+| E5 | `src/registry/dynamic.rs:229-234` | `register_with_routine` rejects duplicates with `CommandAlreadyExists` error | ❌ H2, ❌ H4 |
 | E6 | `src/registry/dynamic.rs:697-701` | `from_static_commands` explicitly skips `.help` if it already exists | ❌ H4 |
 
 ## Root Cause
@@ -91,7 +91,7 @@ CommandRegistry::new()                          (dynamic.rs:80)
     → CommandBuilder::new(".help")
       .with_hidden_from_list( false )           (dynamic.rs:583) ← BUG: should be true
       .build()
-    → self.command_add_runtime(.help_cmd)
+    → self.register_with_routine(.help_cmd)
 
 When .help is invoked:
   interpreter.rs:84  → special-case match for ".help"

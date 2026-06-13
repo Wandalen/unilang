@@ -23,9 +23,25 @@ examples/wasm-repl/
 │   ├── index.html      # Main HTML interface
 │   ├── style.css       # Modern dark theme styles
 │   └── bootstrap.js    # JavaScript WASM loader
+├── tests/              # WASM integration tests
+│   ├── integration.rs  # WASM integration test suite
+│   └── wasm.rs         # Browser-side WASM tests
 ├── pkg/                # Generated WASM bindings (after build)
 └── readme.md          # This file
 ```
+
+## Files
+
+| File | Responsibility |
+|------|----------------|
+| `Cargo.toml` | WASM-specific dependencies and build config |
+| `readme.md` | WASM REPL documentation and usage guide |
+| `src/lib.rs` | Rust/WASM bridge using wasm-bindgen |
+| `tests/integration.rs` | WASM integration test suite |
+| `tests/wasm.rs` | Browser-side WASM tests |
+| `www/bootstrap.js` | JavaScript WASM module loader |
+| `www/index.html` | Main web interface HTML |
+| `www/style.css` | Dark theme UI styles |
 
 ## 🚀 Quick Start
 

@@ -111,7 +111,7 @@ fn test_empty_parameter() -> Result< (), Box< dyn std::error::Error > >
     .description( "Test command" )
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 
@@ -153,7 +153,7 @@ fn test_unicode_parameters() -> Result< (), Box< dyn std::error::Error > >
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 
@@ -206,7 +206,7 @@ fn test_long_parameter() -> Result< (), Box< dyn std::error::Error > >
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 
@@ -252,7 +252,7 @@ fn test_multiline_parameter() -> Result< (), Box< dyn std::error::Error > >
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 
@@ -320,7 +320,7 @@ fn test_typo_suggestion() -> Result< (), Box< dyn std::error::Error > >
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 
@@ -371,7 +371,7 @@ fn test_multiple_params() -> Result< (), Box< dyn std::error::Error > >
     ])
     .end();
 
-  registry.command_add_runtime( &cmd, Box::new( test_routine ))?;
+  registry.register_with_routine( &cmd, Box::new( test_routine ))?;
 
   let pipeline = Pipeline::new( registry );
 

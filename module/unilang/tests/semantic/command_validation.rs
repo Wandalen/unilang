@@ -46,7 +46,7 @@ fn test_reject_invalid_namespace()
   // Manually set invalid namespace after creation
   invalid_cmd.namespace = "session".to_string(); // ❌ Namespace missing dot
   
-    let result = registry.command_add_runtime(&invalid_cmd, Box::new(dummy_handler));
+    let result = registry.register_with_routine(&invalid_cmd, Box::new(dummy_handler));
   
   // Should fail with explicit error message
   assert!(result.is_err(), "Namespace without dot prefix should be rejected");
@@ -71,7 +71,7 @@ fn test_accept_correctly_formatted_commands()
     .description( "Correctly formatted root command" )
     .end(); // ✅ Empty namespace for root
   
-    let result = registry.command_add_runtime(&root_cmd, Box::new(dummy_handler));
+    let result = registry.register_with_routine(&root_cmd, Box::new(dummy_handler));
   assert!(result.is_ok(), "Correctly formatted root command should be accepted");
   println!("✅ Accepted correctly formatted root command");
   
@@ -84,7 +84,7 @@ fn test_accept_correctly_formatted_commands()
   // Set valid namespace
   namespaced_cmd.namespace = ".session".to_string(); // ✅ Correct namespace with dot
   
-    let result2 = registry.command_add_runtime(&namespaced_cmd, Box::new(dummy_handler));
+    let result2 = registry.register_with_routine(&namespaced_cmd, Box::new(dummy_handler));
   assert!(result2.is_ok(), "Correctly formatted namespaced command should be accepted");
   println!("✅ Accepted correctly formatted namespaced command");
 }
@@ -110,7 +110,7 @@ fn test_principle_minimum_implicit_magic()
     .description( "Testing name: .chat" )
     .end();
 
-    let result = registry.command_add_runtime(&cmd, Box::new(dummy_handler));
+    let result = registry.register_with_routine(&cmd, Box::new(dummy_handler));
 
   assert!(result.is_ok(), "Command '.chat' should be accepted");
   println!("   {} Command '.chat' correctly accepted", "✅");

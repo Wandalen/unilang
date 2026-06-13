@@ -7,8 +7,10 @@
 
 use unilang::data::CommandName;
 
+/// TC-1: Valid dot-prefixed names are accepted.
+// test_kind: tc_spec(TC-1)
 #[ test ]
-fn command_name_valid_construction()
+fn test_tc1_valid_dot_prefix_construction()
 {
   let names = vec!
   [
@@ -37,8 +39,10 @@ fn command_name_valid_construction()
   }
 }
 
+/// TC-2: Empty name is rejected.
+// test_kind: tc_spec(TC-2)
 #[ test ]
-fn command_name_rejects_empty_name()
+fn test_tc2_empty_name_rejected()
 {
   let result = CommandName::new( "" );
 
@@ -57,8 +61,10 @@ fn command_name_rejects_empty_name()
   );
 }
 
+/// TC-3: Non-dot-prefixed names are rejected.
+// test_kind: tc_spec(TC-3)
 #[ test ]
-fn command_name_rejects_missing_dot_prefix()
+fn test_tc3_missing_dot_prefix_rejected()
 {
   let invalid_names = vec!
   [
@@ -192,9 +198,11 @@ fn command_name_serde_json_deserialize_valid()
   );
 }
 
+/// TC-6: Serde deserialization rejects empty and non-dot-prefixed names.
+// test_kind: tc_spec(TC-6)
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
-fn command_name_serde_json_deserialize_rejects_invalid()
+fn test_tc6_serde_rejects_invalid_command_name()
 {
   let json_empty = "\"\"";
   let result : Result< CommandName, _ > = serde_json::from_str( json_empty );
@@ -309,8 +317,10 @@ fn command_name_long_names()
   );
 }
 
+/// TC-4: Single dot is a valid command name.
+// test_kind: tc_spec(TC-4)
 #[ test ]
-fn command_name_single_dot()
+fn test_tc4_single_dot_valid()
 {
   let result = CommandName::new( "." );
 
@@ -356,6 +366,35 @@ fn command_name_multiple_dots()
       result.is_ok(),
       "CommandName::new({:?}) should succeed - multiple dots are allowed",
       name
+    );
+  }
+}
+
+/// TC-5: Nested dot-separated command names are accepted.
+// test_kind: tc_spec(TC-5)
+#[ test ]
+fn test_tc5_nested_dot_name_valid()
+{
+  let names = vec!
+  [
+    ".video.convert",
+    ".git.remote.add",
+    ".a.b",
+    ".cloud.storage.upload",
+  ];
+
+  for name in names
+  {
+    let result = CommandName::new( name );
+    assert!(
+      result.is_ok(),
+      "CommandName::new({:?}) should succeed — nested dot-separated names are valid",
+      name
+    );
+    assert_eq!(
+      result.unwrap().as_str(),
+      name,
+      "Nested name should be preserved exactly"
     );
   }
 }
