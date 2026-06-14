@@ -70,13 +70,15 @@ mod tests {
   fs::write(crate_path.join("src/lib.rs"), lib_rs)
     .expect("Failed to write lib.rs");
 
+  // Share target dir across validation tests to cache unilang compilation
+  let validation_target = std::env::temp_dir().join("unilang_validation_target");
+
   // Build the downstream crate
-  // Use isolated target dir to avoid workspace lock contention during nextest runs
   println!("Building downstream crate...");
   let build_output = Command::new("cargo")
     .args(["build"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo build");
 
@@ -94,7 +96,7 @@ mod tests {
   let test_output = Command::new("cargo")
     .args(["test"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo test");
 
@@ -111,7 +113,7 @@ mod tests {
   let output = Command::new("cargo")
     .args(["tree", "-i", "phf"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo tree");
 

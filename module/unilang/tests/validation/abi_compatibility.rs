@@ -114,11 +114,11 @@ mod tests {
     .expect("Failed to write lib.rs");
 
   // Build and test
-  // Use isolated target dir to avoid workspace lock contention during nextest runs
+  // Share target dir across validation tests to cache unilang compilation
   let build_result = Command::new("cargo")
     .args(["test"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", std::env::temp_dir().join("unilang_validation_target"))
     .output()
     .expect("Failed to execute cargo test");
 

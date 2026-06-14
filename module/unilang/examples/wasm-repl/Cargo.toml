@@ -20,8 +20,6 @@ js-sys = "0.3"
 
 # Console logging for WASM
 console_error_panic_hook = { version = "0.1", optional = true }
-wee_alloc = { version = "0.4", optional = true }
-
 # Web APIs
 web-sys = { version = "0.3", features = [
   "console",
@@ -37,20 +35,15 @@ web-sys = { version = "0.3", features = [
 ] }
 
 # Unilang with WebAssembly-compatible features
-unilang = { path = "../..", default-features = false, features = ["enabled"] }
-
-# JSON support for command definitions
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+unilang = { path = "../..", default-features = false, features = ["wasm"] }
 
 [profile.release]
 # Optimize for small code size in WebAssembly
 opt-level = "s"
 lto = true
 
-# Enable panic hook and allocator optimizations
 [features]
-default = ["console_error_panic_hook", "wee_alloc"]
+default = ["console_error_panic_hook"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

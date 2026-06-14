@@ -43,12 +43,14 @@ pub static TEST: Map<&str, i32> = phf::phf_map! {
   fs::write(crate_path.join("src/lib.rs"), lib_rs)
     .expect("Failed to write lib.rs");
 
+  // Share target dir across validation tests to cache unilang compilation
+  let validation_target = std::env::temp_dir().join("unilang_validation_target");
+
   // Build to ensure dependencies are resolved
-  // Use isolated target dir to avoid workspace lock contention during nextest runs
   let build_result = Command::new("cargo")
     .args(["build"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo build");
 
@@ -58,7 +60,7 @@ pub static TEST: Map<&str, i32> = phf::phf_map! {
   let tree_output = Command::new("cargo")
     .args(["tree", "--depth=1"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo tree");
 
@@ -80,7 +82,7 @@ pub static TEST: Map<&str, i32> = phf::phf_map! {
   let full_tree = Command::new("cargo")
     .args(["tree"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", &validation_target)
     .output()
     .expect("Failed to execute cargo tree");
 

@@ -41,11 +41,11 @@ pub static TEST: Map<&str, i32> = phf::phf_map! {
     .expect("Failed to write lib.rs");
 
   // Build should succeed WITH feature
-  // Use isolated target dir to avoid workspace lock contention during nextest runs
+  // Share target dir across validation tests to cache unilang compilation
   let result = Command::new("cargo")
     .args(["build"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", std::env::temp_dir().join("unilang_validation_target"))
     .output()
     .expect("Failed to execute cargo build");
 
@@ -95,11 +95,11 @@ pub static TEST: Map<&str, i32> = phf::phf_map! {
     .expect("Failed to write lib.rs");
 
   // Build should FAIL WITHOUT feature
-  // Use isolated target dir to avoid workspace lock contention during nextest runs
+  // Share target dir across validation tests to cache unilang compilation
   let result = Command::new("cargo")
     .args(["build"])
     .current_dir(crate_path)
-    .env("CARGO_TARGET_DIR", crate_path.join("target"))
+    .env("CARGO_TARGET_DIR", std::env::temp_dir().join("unilang_validation_target"))
     .output()
     .expect("Failed to execute cargo build");
 

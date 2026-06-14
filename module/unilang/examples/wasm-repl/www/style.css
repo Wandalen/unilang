@@ -189,41 +189,6 @@ main {
     font-size: 13px;
 }
 
-#json-commands {
-    width: 100%;
-    min-height: 100px;
-    padding: 12px;
-    background: #1a202c;
-    border: 1px solid #4a5568;
-    border-radius: 8px;
-    color: #f7fafc;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    resize: vertical;
-    outline: none;
-    margin-bottom: 10px;
-}
-
-#json-commands:focus {
-    border-color: #f093fb;
-    box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.1);
-}
-
-#load-commands-btn {
-    width: 100%;
-    padding: 10px;
-    background: #4a5568;
-    color: #f7fafc;
-    border: 1px solid #718096;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#load-commands-btn:hover {
-    background: #718096;
-}
-
 footer {
     text-align: center;
     margin-top: 30px;

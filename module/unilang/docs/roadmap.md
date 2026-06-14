@@ -54,7 +54,7 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Purpose:** Implement compile-time validation to make illegal states unrepresentable: (1) Duplicate command name detection via HashMap tracking, (2) Parameter storage type validation (multiple:true requires List), (3) Actionable error messages with fix guidance. Resolves 8 of 10 items from Task 085. All 833 tests pass.
     *   **Completed:** 2025_11_24
 
-### Phase 5: Core API Enhancements & Modality Support
+### Phase 5: Core API Enhancements & Modality Support 🏁
 *   **Goal:** To implement the remaining mandatory functional requirements from Spec v2.2.0, ensuring the framework fully supports REPL, interactive CLI, and WebAssembly (WASM) modalities.
 *   **Outcome:** A functionally complete and validated API for building sophisticated, user-friendly command-line applications that can run in native and web environments.
 
@@ -69,11 +69,12 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   [✅] **M5.3: test_create_interactive_prompting_verification:**
     *   **Prerequisites:** M5.2
     *   **Deliverable:** A new unit test for the `SemanticAnalyzer` and an updated CLI binary demonstrating how to catch the interactive signal.
-*   [⚫] **M5.4: example_create_wasm_repl:**
+*   [✅] **M5.4: example_create_wasm_repl:**
     *   **Prerequisites:** M5.1
     *   **Spec Reference:** NFR-PLATFORM-1
     *   **Deliverable:** A working, browser-based REPL example compiled to WebAssembly.
     *   **Purpose:** Create a minimal web application that uses the `unilang` WASM package to provide a fully client-side REPL, proving the WASM compatibility NFR.
+    *   **Completed:** WASM REPL example at `examples/wasm-repl/` compiles for `wasm32-unknown-unknown` (2.4MB release binary). Registers `.demo.echo` and `.calc.add` commands via `CommandDefinition::former()` builder, processes commands through `Pipeline::process_command_simple()`. Web frontend with HTML/CSS/JS, command history, and error display.
 
 ### Phase 6: Performance Hardening & SIMD Optimization
 *   **Goal:** To meet the stringent performance NFRs by systematically eliminating bottlenecks identified in the performance analysis, with a focus on reducing string allocations and leveraging SIMD instructions.

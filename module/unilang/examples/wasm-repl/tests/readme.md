@@ -6,5 +6,4 @@ WASM integration and browser-side tests for the WebAssembly REPL.
 
 | File | Responsibility |
 |------|----------------|
-| `integration.rs` | End-to-end WASM integration test suite |
-| `wasm.rs` | Browser-side WASM behavior tests |
+| `wasm.rs` | Browser-side WASM behavior tests via wasm-bindgen-test |

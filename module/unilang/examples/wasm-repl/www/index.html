@@ -18,7 +18,7 @@
                     <div class="welcome">
                         Welcome to UniLang WebAssembly REPL! 🎉<br>
                         Type <code>.help</code> to see available commands.<br>
-                        Try: <code>.demo.echo Hello World</code> or <code>.calc.add 5 3</code>
+                        Try: <code>.demo.echo text::Hello</code> or <code>.calc.add a::5 b::3</code>
                     </div>
                 </div>
                 
@@ -34,8 +34,8 @@
                     <h3>📖 Quick Help</h3>
                     <ul>
                         <li><code>.help</code> - Show all commands</li>
-                        <li><code>.demo.echo &lt;text&gt;</code> - Echo text</li>
-                        <li><code>.calc.add &lt;a&gt; &lt;b&gt;</code> - Add numbers</li>
+                        <li><code>.demo.echo text::&lt;text&gt;</code> - Echo text</li>
+                        <li><code>.calc.add a::&lt;n&gt; b::&lt;n&gt;</code> - Add numbers</li>
                     </ul>
                 </div>
                 
@@ -49,11 +49,6 @@
                     </ul>
                 </div>
                 
-                <div class="section">
-                    <h3>🔧 Load Custom Commands</h3>
-                    <textarea id="json-commands" placeholder='{"commands": [...]}'></textarea>
-                    <button id="load-commands-btn">Load JSON Commands</button>
-                </div>
             </div>
         </main>
         

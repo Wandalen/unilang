@@ -86,10 +86,7 @@ lto = true          # Link-time optimization
 
 ```toml
 # WebAssembly-compatible features only
-default = ["console_error_panic_hook", "wee_alloc"]
-
-# Memory allocator optimized for WASM
-wee_alloc = { version = "0.4", optional = true }
+default = ["console_error_panic_hook"]
 
 # Better error messages in development
 console_error_panic_hook = { version = "0.1", optional = true }
@@ -133,8 +130,8 @@ UniLang WASM REPL initialized successfully! 🚀
 
 Test these commands:
 - `.help` - Show available commands
-- `.demo.echo Hello World` - Echo text
-- `.calc.add 5 3` - Simple calculator
+- `.demo.echo text::Hello` - Echo text
+- `.calc.add a::5 b::3` - Simple calculator
 
 ## 📈 Performance Metrics
 
