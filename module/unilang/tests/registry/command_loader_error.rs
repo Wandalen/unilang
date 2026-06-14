@@ -6,13 +6,10 @@ use unilang::
 {
   registry::CommandRegistry,
 };
-// use unilang_parser::SourceLocation; // Temporarily commented out
-
 // Test Matrix for Command Loader
 // This matrix covers successful loading of command definitions from valid YAML/JSON strings,
 // error handling for invalid YAML/JSON, and basic testing of `routine_link` resolution.
 
-// T1.1: Load a simple command from YAML
 // T1.1: Load a simple command from YAML
 // T1.2: Load a command with all scalar argument types from YAML
 // T1.3: Load a command with collection argument types (List, Map) from YAML
@@ -75,8 +72,8 @@ fn test_load_from_yaml_str_invalid_yaml()
 
   let result = CommandRegistry::builder().load_from_yaml_str( yaml_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Yaml( _ ) ), "expected Yaml deserialization error; got: {err}" );
 }
 
 #[ cfg( feature = "json_parser" ) ]
@@ -111,8 +108,8 @@ fn test_load_from_json_str_invalid_json()
 
   let result = CommandRegistry::builder().load_from_json_str( json_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Json( _ ) ), "expected Json deserialization error; got: {err}" );
 }
 
 #[ test ]
@@ -152,8 +149,8 @@ fn test_load_from_yaml_str_invalid_kind()
 
   let result = CommandRegistry::builder().load_from_yaml_str( yaml_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Yaml( _ ) ), "expected Yaml deserialization error; got: {err}" );
 }
 
 #[ cfg( feature = "json_parser" ) ]
@@ -187,8 +184,8 @@ fn test_load_from_json_str_invalid_kind()
 
   let result = CommandRegistry::builder().load_from_json_str( json_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Json( _ ) ), "expected Json deserialization error; got: {err}" );
 }
 
 #[ test ]
@@ -228,8 +225,8 @@ fn test_load_from_yaml_str_invalid_list_format()
 
   let result = CommandRegistry::builder().load_from_yaml_str( yaml_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Yaml( _ ) ), "expected Yaml deserialization error; got: {err}" );
 }
 
 #[ test ]
@@ -269,8 +266,8 @@ fn test_load_from_yaml_str_invalid_map_format()
 
   let result = CommandRegistry::builder().load_from_yaml_str( yaml_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Yaml( _ ) ), "expected Yaml deserialization error; got: {err}" );
 }
 
 #[ test ]
@@ -310,6 +307,6 @@ fn test_load_from_yaml_str_invalid_enum_format()
 
   let result = CommandRegistry::builder().load_from_yaml_str( yaml_str );
 
-  assert!( result.is_err() );
-  // qqq: Check for specific error type/message if possible
+  let err = result.err().expect( "invalid input should return error" );
+  assert!( matches!( err, unilang::error::Error::Yaml( _ ) ), "expected Yaml deserialization error; got: {err}" );
 }

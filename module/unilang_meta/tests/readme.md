@@ -4,7 +4,7 @@
 
 ```
 tests/
-  smoke_test.rs     — Basic crate compilation smoke test
+  smoke_test.rs     — Pipeline integration tests for #[command] macro
   trybuild.rs       — Trybuild UI test harness (runs all tests/ui/*.rs)
   ui/               — Trybuild UI test fixture files
 ```
@@ -13,6 +13,6 @@ tests/
 
 | File / Dir | Responsibility |
 |------------|----------------|
-| smoke_test.rs | Basic compilation and crate import smoke test |
+| smoke_test.rs | Pipeline integration tests for #[command] macro |
 | trybuild.rs | Trybuild harness; orchestrates all UI test cases |
 | ui/ | Trybuild UI test fixture .rs files and .stderr snapshots |

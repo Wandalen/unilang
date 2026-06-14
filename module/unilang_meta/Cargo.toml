@@ -51,6 +51,7 @@ unilang = { workspace = true, features = [ "enabled" ], optional = true }
 
 [dev-dependencies]
 trybuild = { workspace = true }
+unilang = { workspace = true, features = [ "enabled" ] }
 
 [package.metadata.cargo-udeps.ignore]
 # `unilang` is used in proc macro token streams via `qt! { ::unilang::data::... }` — udeps
