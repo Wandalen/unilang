@@ -7,11 +7,11 @@
 - **In Scope:** Build-time codegen produces valid static data, runtime code never imports parsing crates, validation_core include!() pattern works in both contexts
 - **Out of Scope:** PHF implementation details (see `architecture/`); specific YAML schema rules
 
-### IN-1: Runtime binary does not link serde_yaml
+### IN-1: Runtime binary does not link serde_yaml_ng
 
 - **Given:** A built `unilang` library crate with static command definitions loaded from YAML
 - **When:** The dependency tree of the compiled output is inspected (e.g., `cargo tree --edges=normal` filtered for runtime deps)
-- **Then:** `serde_yaml` does not appear as a runtime dependency (only as a build dependency)
+- **Then:** `serde_yaml_ng` does not appear as a runtime dependency (only as a build dependency)
 
 ### IN-2: Generated static data is accessible at runtime without parsing
 

@@ -53,25 +53,6 @@ approach_json_runtime = [ "json_parser" ]                                       
 approach_rust_dsl_const = [ "static_registry" ]                                # #8: Rust DSL const fn → Static
 approach_hybrid = [ "static_registry" ]                                         # #18: Hybrid (static + runtime)
 
-# Future approaches (12 features):
-approach_macro_declarative = [ "static_registry" ]                             # #9: Declarative macro → Static
-approach_macro_proc = [ "static_registry" ]                                    # #10: Proc macro → Static
-
-approach_toml_single_build = [ "static_registry", "toml_parser" ]              # #11: Single TOML → Build-time static
-approach_toml_multi_build = [ "static_registry", "toml_parser", "multi_file" ] # #11+multi: Multi-TOML → Build-time static
-approach_toml_runtime = [ "toml_parser" ]                                      # #12: TOML → Runtime loading
-
-approach_ron_single_build = [ "static_registry", "ron_parser" ]                # #13: Single RON → Build-time static
-approach_ron_multi_build = [ "static_registry", "ron_parser", "multi_file" ]   # #13+multi: Multi-RON → Build-time static
-approach_ron_runtime = [ "ron_parser" ]                                        # #14: RON → Runtime loading
-
-approach_protobuf = [ "static_registry", "protobuf_support" ]                  # #15: Protobuf → Build-time static
-approach_graphql = [ "static_registry", "graphql_support" ]                    # #16: GraphQL → Build-time static
-approach_openapi = [ "static_registry", "openapi_support" ]                    # #17: OpenAPI → Build-time static
-
-approach_plugin = [ "static_registry", "plugin_system" ]                       # #19: Plugin system (.so/.dll)
-approach_binary = [ "static_registry", "binary_serialization" ]                # #20: Binary serialization
-approach_inline_literals = [ "static_registry", "const_parsing" ]              # #21: Inline YAML/JSON literals
 
 # ========================================
 # Infrastructure Features (Building Blocks)
@@ -91,15 +72,6 @@ yaml_parser = [ "dep:serde_yaml_ng" ]        # YAML parsing support (build-time 
 json_parser = [ "dep:serde_json" ]           # JSON parsing support (build-time + runtime)
 multi_file = [ "dep:walkdir" ]               # Multi-file auto-discovery (any format)
 
-# Future infrastructure:
-toml_parser = [ "dep:toml" ]                 # TOML parsing (future)
-ron_parser = [ "dep:ron" ]                   # RON parsing (future)
-protobuf_support = [ "dep:prost" ]           # Protobuf (future)
-graphql_support = [ "dep:async-graphql" ]    # GraphQL (future)
-openapi_support = [ "dep:utoipa" ]           # OpenAPI (future)
-plugin_system = [ "dep:libloading" ]         # Dynamic library loading (future)
-binary_serialization = [ "dep:bincode" ]     # Binary serialization (future)
-const_parsing = [ ]                          # Const eval parsing (future)
 
 
 # ========================================
@@ -189,8 +161,6 @@ regex = { workspace = true, optional = true }
 # Format parsers (optional, gated by infrastructure features):
 serde_json = { workspace = true, optional = true }      # Enabled by json_parser
 serde_yaml_ng = { workspace = true, optional = true }   # Enabled by yaml_parser
-toml = { workspace = true, optional = true }            # Enabled by toml_parser (future)
-ron = { workspace = true, optional = true }             # Enabled by ron_parser (future)
 
 # Static registry infrastructure (optional):
 phf = { workspace = true, features = ["macros"], optional = true }  # Enabled by static_registry
@@ -199,14 +169,6 @@ phf_codegen = { workspace = true, optional = true }                 # Enabled by
 # Multi-file discovery (optional):
 walkdir = { workspace = true, optional = true }         # Enabled by multi_file
 
-# Future dependencies (optional):
-prost = { workspace = true, optional = true }          # Enabled by protobuf_support (future)
-async-graphql = { workspace = true, optional = true }   # Enabled by graphql_support (future)
-utoipa = { workspace = true, optional = true }          # Enabled by openapi_support (future)
-libloading = { workspace = true, optional = true }      # Enabled by plugin_system (future)
-bincode = { workspace = true, optional = true }         # Enabled by binary_serialization (future)
-# REMOVED: sysinfo - was unused (declared but never imported anywhere in the crate)
-# REMOVED: num_cpus - only used in deleted cv_analysis.rs benchmark file (Phase 1)
 
 ## internal
 error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_untyped" ], optional = true }
@@ -419,13 +381,10 @@ path = "examples/assess_quality_cli.rs"
 
 [build-dependencies]
 # Core (always available):
-serde = { workspace = true }
 serde_yaml_ng = { workspace = true }  # Always available for build.rs (only used when static_registry enabled)
 
 # Build-time format parsers (optional, gated by infrastructure features):
 serde_json = { workspace = true, optional = true }     # Enabled by json_parser
-toml = { workspace = true, optional = true }           # Enabled by toml_parser (future)
-ron = { workspace = true, optional = true }            # Enabled by ron_parser (future)
 
 # Static registry codegen (optional):
 phf_codegen = { workspace = true, optional = true }   # Enabled by static_registry
@@ -434,18 +393,13 @@ phf_codegen = { workspace = true, optional = true }   # Enabled by static_regist
 walkdir = { workspace = true, optional = true }        # Enabled by multi_file
 
 [dev-dependencies]
-test_tools = { workspace = true, features = [ "full" ] }
 assert_cmd = { workspace = true }
 predicates = { workspace = true }
 assert_fs = { workspace = true }
-clap = { workspace = true }
-pico-args = { workspace = true }
-chrono = { workspace = true }
 tempfile = { workspace = true }
 walkdir = { workspace = true }  # For build-time test verification
 trybuild = { workspace = true }  # For compile_fail tests (M2)
 
-criterion = { workspace = true }
 
 [package.metadata.cargo-udeps.ignore]
 # REMOVED: num_cpus and sysinfo (dependencies removed in Phase 2)

@@ -6,7 +6,7 @@
 //! ## What You DON'T Need to Write
 //!
 //! **❌ NO build.rs** - unilang provides this automatically
-//! **❌ NO `serde_yaml`** - already included via `yaml_parser` feature
+//! **❌ NO `serde_yaml_ng`** - already included via `yaml_parser` feature
 //! **❌ NO `walkdir`** - already included via `multi_file` feature
 //! **❌ NO `phf`** - already included via `static_registry` feature
 //! **❌ NO manual YAML parsing** - happens at compile-time automatically

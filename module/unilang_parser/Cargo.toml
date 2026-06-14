@@ -23,7 +23,7 @@ simd = ["enabled", "strs_tools/simd"]  # SIMD optimizations enabled by default, 
 no_std = []
 
 
-enabled = ["dep:strs_tools", "dep:error_tools", "dep:iter_tools"]
+enabled = ["dep:strs_tools"]
 full = [
   "enabled",
   "simd",
@@ -31,11 +31,4 @@ full = [
 
 [dependencies]
 strs_tools = { workspace = true, features = ["std", "string_parse_request", "string_split"], optional = true }
-error_tools = { workspace = true, features = [ "enabled", "error_typed" ], optional = true }
-iter_tools = { workspace = true, features = [ "enabled" ], optional = true }
-
-[dev-dependencies]
-test_tools = { workspace = true, features = [ "full" ] }
-
-
 

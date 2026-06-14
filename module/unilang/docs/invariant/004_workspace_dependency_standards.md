@@ -55,6 +55,10 @@ The workspace `Cargo.toml` and all library member crates MUST continuously compl
 |------|--------------|
 | [001_mandates.md](../architecture/001_mandates.md) | `enabled` feature gate mandate source of R4 requirement |
 
+### Known Pitfalls
+
+**bincode 3.0.0 — poison-pill release:** bincode published v3.0.0 as an intentionally breaking release that is incompatible with v1.x APIs and has known stability issues. If bincode is ever reintroduced as a dependency, stay on the `^1.0` range until the 3.x line stabilizes. Do not upgrade to `^3.0` without explicit validation.
+
 ### Sources
 
 | File | Relationship |

@@ -13,13 +13,13 @@ For all command definitions loaded via build-time approaches (YAML/JSON single/m
 
 ### Enforcement Mechanism
 
-The build script (`build/main.rs`) orchestrates: discovery (`build/discovery.rs`) finds YAML/JSON files, parsing uses `serde_yaml`/`serde_json` (build-only deps), validation runs via `include!("../../src/validation_core.rs")` (shared source, not shared linkage), and codegen (`build/codegen.rs`) writes Rust source to `OUT_DIR`. The generated file is `include!()`d by `src/static_data.rs` at compile time. Runtime code never imports `serde_yaml` or `serde_json`.
+The build script (`build/main.rs`) orchestrates: discovery (`build/discovery.rs`) finds YAML/JSON files, parsing uses `serde_yaml_ng`/`serde_json` (build-only deps), validation runs via `include!("../../src/validation_core.rs")` (shared source, not shared linkage), and codegen (`build/codegen.rs`) writes Rust source to `OUT_DIR`. The generated file is `include!()`d by `src/static_data.rs` at compile time. Runtime code never imports `serde_yaml_ng` or `serde_json`.
 
 The `validation_core` module uses `include!()` in both `build/main.rs` and `src/validation_core.rs` to share validation logic without creating a runtime dependency on the build pipeline.
 
 ### Violation Consequences
 
-If YAML/JSON parsing crates leak into runtime: binary size increases (~500KB+ for serde_yaml), startup latency increases, and the zero-overhead static registry guarantee (NFR-PERF-1) is compromised. Users who only need build-time command definitions would pay for unused runtime parsing capability.
+If YAML/JSON parsing crates leak into runtime: binary size increases (~500KB+ for serde_yaml_ng), startup latency increases, and the zero-overhead static registry guarantee (NFR-PERF-1) is compromised. Users who only need build-time command definitions would pay for unused runtime parsing capability.
 
 ### Architectures
 

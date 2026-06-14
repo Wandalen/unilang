@@ -109,7 +109,7 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
 *   [✅] **M7.2: feature_gate_implement_granular:**
     *   **Prerequisites:** M7.1
     *   **Deliverable:** An updated `Cargo.toml` and codebase where all non-essential functionality is gated by feature flags (e.g., `declarative_loading`, `chrono_types`).
-    *   **Completed:** 2025_10_19. Implemented 2-tier architecture: 20 approach features + 12 infrastructure features. All format parsers optional.
+    *   **Completed:** 2025_10_19. Implemented 2-tier architecture: initially 20 approach features + 12 infrastructure features. All format parsers optional. Updated 2026_06_14: reduced to 8 approach features + 5 infrastructure features after dep hygiene audit (YAGNI) removed 14 unimplemented approach feature declarations and 7 future dep declarations with zero implementation behind them.
 *   [✅] **M7.3: profile_create_minimal_core:**
     *   **Prerequisites:** M7.2
     *   **Deliverable:** A working `unilang` crate when compiled with `--no-default-features`.

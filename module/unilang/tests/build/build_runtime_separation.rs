@@ -39,7 +39,7 @@
 /// (which pulls `yaml_parser`) is NOT active. Inspects stdout — exit code is irrelevant.
 // test_kind: in_spec(IN-1)
 #[ test ]
-fn test_in1_runtime_deps_exclude_serde_yaml()
+fn test_in1_runtime_deps_exclude_serde_yaml_ng()
 {
   use std::process::Command;
 

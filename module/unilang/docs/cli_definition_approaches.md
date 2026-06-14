@@ -35,21 +35,21 @@ Ridiculous/impractical approaches have been excluded (e.g., Windows Registry, HT
 | 6 | JSON file → Runtime | `approach_json_runtime` | ❌ | ✅ YES | ✅ Very Easy | ⚠️ Slow | ✅ High | Runtime config loading |
 | 7 | Rust DSL (builder) | *(always available)* | ✅ Core API | ✅ YES | 🔥 Hard | ⚠️ Slower (~500ns) | ✅ Highest | REPL, plugins, tests |
 | 8 | Rust DSL (const fn) → Static | `approach_rust_dsl_const` | ❌ | ✅ YES | 🔥 Hard | ⚡ Best (~80ns) | ⚠️ Medium | High-perf DSL |
-| 9 | Declarative macro → Static | `approach_macro_declarative` | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Clean syntax (future) |
-| 10 | Proc macro (derive) → Static | `approach_macro_proc` | ❌ | ❌ NO | ✅ Easy | ⚡ Best | ⚠️ Low | Derive-style like clap (future) |
-| 11 | TOML file → Build-time static | `approach_toml_single_build` | ❌ | ❌ NO | ✅ Very Easy | ⚡ Best | ⚠️ Medium | Config-heavy projects (future) |
-| 11+ | TOML files → Build-time static | `approach_toml_multi_build` | ❌ | ❌ NO | ✅ Easy | ⚡ Best | ⚠️ Medium | Large TOML projects (future) |
-| 12 | TOML file → Runtime | `approach_toml_runtime` | ❌ | ❌ NO | ✅ Very Easy | ⚠️ Slow | ✅ High | Runtime TOML config (future) |
-| 13 | RON file → Build-time static | `approach_ron_single_build` | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Rust-native syntax (future) |
-| 13+ | RON files → Build-time static | `approach_ron_multi_build` | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Large RON projects (future) |
-| 14 | RON file → Runtime | `approach_ron_runtime` | ❌ | ❌ NO | ⚠️ Medium | ⚠️ Slow | ✅ High | Rust-native runtime (future) |
-| 15 | Protobuf schema → Static | `approach_protobuf` | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | gRPC services (future) |
-| 16 | GraphQL schema → Static | `approach_graphql` | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | GraphQL API → CLI (future) |
-| 17 | OpenAPI spec → Static | `approach_openapi` | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Low | REST API → CLI (future) |
+| 9 | Declarative macro → Static | — | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Clean syntax (future) |
+| 10 | Proc macro (derive) → Static | — | ❌ | ❌ NO | ✅ Easy | ⚡ Best | ⚠️ Low | Derive-style like derive macros (future) |
+| 11 | TOML file → Build-time static | — | ❌ | ❌ NO | ✅ Very Easy | ⚡ Best | ⚠️ Medium | Config-heavy projects (future) |
+| 11+ | TOML files → Build-time static | — | ❌ | ❌ NO | ✅ Easy | ⚡ Best | ⚠️ Medium | Large TOML projects (future) |
+| 12 | TOML file → Runtime | — | ❌ | ❌ NO | ✅ Very Easy | ⚠️ Slow | ✅ High | Runtime TOML config (future) |
+| 13 | RON file → Build-time static | — | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Rust-native syntax (future) |
+| 13+ | RON files → Build-time static | — | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Medium | Large RON projects (future) |
+| 14 | RON file → Runtime | — | ❌ | ❌ NO | ⚠️ Medium | ⚠️ Slow | ✅ High | Rust-native runtime (future) |
+| 15 | Protobuf schema → Static | — | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | gRPC services (future) |
+| 16 | GraphQL schema → Static | — | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | GraphQL API → CLI (future) |
+| 17 | OpenAPI spec → Static | — | ❌ | ❌ NO | ⚠️ Medium | ⚡ Best | ⚠️ Low | REST API → CLI (future) |
 | 18 | Hybrid (static + runtime) | `approach_hybrid` | ❌ | ✅ YES | ⚠️ Medium | ⚡/⚠️ Mixed | ✅ Highest | Base CLI + plugins |
-| 19 | Plugin system (.so/.dll) | `approach_plugin` | ❌ | ❌ NO | 🔥 Very Hard | ⚡ + dlopen | ✅ High | True plugin architecture (future) |
-| 20 | Binary serialization | `approach_binary` | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | Maximum performance (future) |
-| 21 | Inline YAML/JSON literals | `approach_inline_literals` | ❌ | ❌ NO | ✅ Very Easy | ⚡ Best | ⚠️ Medium | Self-contained binaries (future) |
+| 19 | Plugin system (.so/.dll) | — | ❌ | ❌ NO | 🔥 Very Hard | ⚡ + dlopen | ✅ High | True plugin architecture (future) |
+| 20 | Binary serialization | — | ❌ | ❌ NO | 🔥 Hard | ⚡ Best | ⚠️ Low | Maximum performance (future) |
+| 21 | Inline YAML/JSON literals | — | ❌ | ❌ NO | ✅ Very Easy | ⚡ Best | ⚠️ Medium | Self-contained binaries (future) |
 
 **Total**: 23 approaches (21 base + 2 multi-file variants for TOML/RON)
 **Implemented**: 9 approaches
@@ -95,7 +95,7 @@ Ridiculous/impractical approaches have been excluded (e.g., Windows Registry, HT
 
 ## Current Implementations (✅ YES)
 
-### Summary: 10 of 21 approaches implemented ✅ **COMPLETE YAML/JSON PARITY + Row 7/8**
+### Summary: 9 of 21 approaches implemented ✅ **COMPLETE YAML/JSON PARITY + Row 7/8**
 
 **Implemented (✅ YES)**:
 - #1: YAML file → Build-time static ✅
@@ -201,7 +201,7 @@ let registry = CommandRegistry::builder()
 
 ---
 
-### #5: JSON File → Runtime Loading
+### #6: JSON File → Runtime Loading
 
 **Implementation**: `CommandRegistryBuilder::load_from_json_str()`
 
@@ -338,7 +338,7 @@ let registry = CommandRegistry::builder()
 
 ---
 
-### #17: Hybrid (Static Optimized + Runtime Dynamic)
+### #18: Hybrid (Static Optimized + Runtime Dynamic)
 
 **Implementation**: `StaticCommandRegistry`
 
@@ -516,7 +516,7 @@ If you need something different, we make it easy - just enable the feature! But 
 
 ## Future Enhancements (❌ Not Implemented)
 
-### Priority 1: Approach #8 - Declarative Macro
+### Priority 1: Approach #9 - Declarative Macro
 
 **Proposed syntax**:
 ```rust
@@ -548,7 +548,7 @@ command! {
 
 ---
 
-### Priority 2: Approach #20 - Inline YAML/JSON
+### Priority 2: Approach #21 - Inline YAML/JSON literals
 
 **Proposed syntax**:
 ```rust
@@ -573,7 +573,7 @@ static_commands_from_yaml!(COMMANDS);
 
 ---
 
-### Priority 3: Approach #10-13 - TOML/RON Support
+### Priority 3: Approaches #11-14 - TOML/RON Support
 
 **Why TOML**:
 - Many Rust devs prefer TOML over YAML
@@ -597,20 +597,9 @@ optional = false
 
 ---
 
-### Priority 4: Approach #4 - JSON Build-time Support
-
-**Why JSON**:
-- Already have runtime JSON loading (#5)
-- Easy to generate from APIs/codegen
-- Just needs build.rs integration
-
-**Implementation effort**: 1 day
-
----
-
 ## Advanced Possibilities
 
-### Approach #14: Protobuf Schema
+### Approach #15: Protobuf Schema
 
 **Use case**: Generate CLI from existing gRPC service definitions
 
@@ -632,13 +621,15 @@ $ mycli .video.search query::"rust tutorial" limit::10
 
 **Implementation**: protoc plugin → YAML/JSON → static registry
 
+**Note**: requires adding `prost = { version = "^0.14" }` to Cargo.toml when implementing (removed from workspace deps as YAGNI until approach is active).
+
 **Complexity**: 🔥 Complex (3-4 weeks)
 
 **When to use**: Projects with existing protobuf APIs
 
 ---
 
-### Approach #15: GraphQL Schema
+### Approach #16: GraphQL Schema
 
 **Use case**: Generate CLI from GraphQL schema
 
@@ -655,11 +646,13 @@ $ mycli .query.search query::"rust tutorial" limit::10
 
 **Implementation**: GraphQL parser → YAML/JSON → static registry
 
+**Note**: requires adding `async-graphql = { version = "^7.0" }` to Cargo.toml when implementing (removed from workspace deps as YAGNI until approach is active).
+
 **Complexity**: 🔥 Complex (3-4 weeks)
 
 ---
 
-### Approach #16: OpenAPI Spec
+### Approach #17: OpenAPI Spec
 
 **Use case**: Generate CLI from REST API OpenAPI definitions
 
@@ -683,13 +676,15 @@ $ mycli .api.search query::"rust tutorial"
 
 **Implementation**: OpenAPI parser → YAML/JSON → static registry
 
+**Note**: requires adding `utoipa = { version = "^5.0" }` to Cargo.toml when implementing (removed from workspace deps as YAGNI until approach is active).
+
 **Complexity**: 🔥 Complex (3-4 weeks)
 
 **Real-world benefit**: Auto-generate CLI clients for any REST API
 
 ---
 
-### Approach #18: Plugin System
+### Approach #19: Plugin System
 
 **Use case**: True plugin architecture with dynamic library loading
 
@@ -701,6 +696,7 @@ pub extern "C" fn register_commands() -> Vec<CommandDefinition> {
 }
 
 // Host application
+// Note: requires adding libloading = { version = "^0.9" } to Cargo.toml when implementing
 let plugin = unsafe { libloading::Library::new("myplugin.so")? };
 let register: Symbol<fn() -> Vec<CommandDefinition>> =
   unsafe { plugin.get(b"register_commands")? };
@@ -746,8 +742,8 @@ Real-world benchmark for 1,000 command lookups:
 | #6: JSON runtime | 4,200ns | 238K ops/sec | 512KB |
 | #7: Rust DSL inline closures | 4,200ns | 238K ops/sec | 512KB |
 | **#8: Rust DSL const fn + Static** | **80ns** | **12.5M ops/sec** | **0 bytes** |
-| #17: Hybrid (static) | 80ns | 12.5M ops/sec | 0 bytes |
-| #17: Hybrid (dynamic) | 4,200ns | 238K ops/sec | 512KB |
+| #18: Hybrid (static) | 80ns | 12.5M ops/sec | 0 bytes |
+| #18: Hybrid (dynamic) | 4,200ns | 238K ops/sec | 512KB |
 
 **Conclusion**: Build-time static approaches (#1, #2, #4, #5, #8) are 50x faster and use zero extra memory
 
@@ -772,22 +768,22 @@ Based on goal: **"Make YAML + build-time static the obvious default choice"**
 
 ### Phase 2: Developer Experience (2-3 weeks)
 
-6. ⚡ Implement declarative macro (Approach #8)
-7. ⚡ Add inline YAML support (Approach #20)
+6. ⚡ Implement declarative macro (Approach #9)
+7. ⚡ Add inline YAML support (Approach #21)
 8. ⚡ Improve build.rs error messages
 9. ⚡ Add YAML schema validation at build-time
 
 ### Phase 3: Format Expansion (Optional, 1-2 weeks)
 
-10. ⚡ Add TOML support (Approaches #10-11)
-11. ⚡ Add JSON build-time support (Approach #4)
-12. ⚡ Add RON support (Approaches #12-13)
+10. ✅ JSON build-time support (Approaches #4 and #5) — complete
+11. ⚡ Add TOML support (Approaches #11, #11+, #12)
+12. ⚡ Add RON support (Approaches #13, #13+, #14)
 
 ### Phase 4: Advanced Integrations (Future)
 
-13. ⚡ OpenAPI integration (Approach #16) - most practical
-14. ⚡ Protobuf integration (Approach #14) - for gRPC projects
-15. ⚡ Plugin system (Approach #18) - for extensible applications
+13. ⚡ OpenAPI integration (Approach #17) — most practical
+14. ⚡ Protobuf integration (Approach #15) — for gRPC projects
+15. ⚡ Plugin system (Approach #19) — for extensible applications
 
 ---
 
@@ -841,7 +837,7 @@ Based on goal: **"Make YAML + build-time static the obvious default choice"**
 
 ### Q: Can I mix static and dynamic?
 
-**A**: Yes! Use Approach #17 (Hybrid Registry):
+**A**: Yes! Use Approach #18 (Hybrid Registry):
 ```rust
 let mut registry = StaticCommandRegistry::from_commands(&STATIC_COMMANDS);
 registry.register(dynamic_command); // Add dynamic commands
