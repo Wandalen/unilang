@@ -36,7 +36,6 @@ use unilang::help::HelpGenerator;
 #[ test ]
 fn test_format_category_name_generic_transformation()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -82,7 +81,6 @@ fn test_format_category_name_generic_transformation()
 #[ test ]
 fn test_format_category_name_empty_string()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -94,7 +92,6 @@ fn test_format_category_name_empty_string()
 #[ test ]
 fn test_format_category_name_single_word()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -113,7 +110,6 @@ fn test_format_category_name_single_word()
 #[ test ]
 fn test_format_category_name_multiple_underscores()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -130,7 +126,6 @@ fn test_format_category_name_multiple_underscores()
 #[ test ]
 fn test_format_category_name_is_pure()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -152,7 +147,6 @@ fn test_format_category_name_is_pure()
 #[ test ]
 fn test_no_hardcoded_mappings()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -186,7 +180,6 @@ fn test_no_hardcoded_mappings()
 #[ test ]
 fn test_domain_agnostic_transformation()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 

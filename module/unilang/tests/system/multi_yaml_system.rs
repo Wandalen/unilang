@@ -142,12 +142,18 @@ fn test_yaml_file_loading()
   // Try to load YAML files (should handle missing files gracefully)
   let result = aggregator.load_yaml_files();
 
-  // Should either succeed with mock data or fail gracefully
-  if let Ok(()) = result {
-    // If successful, verify no commands were loaded from missing files
-    assert_eq!( aggregator.commands().len(), 0 );
-  } else {
-    // Expected for missing files - this is fine
+  // Should either succeed with empty result or fail with a describable error
+  match result
+  {
+    Ok( () ) =>
+    {
+      assert_eq!( aggregator.commands().len(), 0, "Missing files should load 0 commands" );
+    },
+    Err( e ) =>
+    {
+      let msg = format!( "{e:?}" );
+      assert!( !msg.is_empty(), "Error from missing files should have a description" );
+    }
   }
 }
 
@@ -220,12 +226,8 @@ fn test_auto_discovery()
   // Try to discover YAML files
   let result = aggregator.discover_yaml_files();
 
-  // Should complete without errors (whether files are found or not)
-  if let Ok(()) = result {
-    // Discovery completed successfully
-  } else {
-    // Discovery failed gracefully
-  }
+  // Verify the function completes without panicking; file presence is non-deterministic
+  let _ = result;
 }
 
 #[test]
@@ -256,11 +258,17 @@ fn test_aggregation_workflow()
   // Test the complete workflow (will use mock data)
   let result = aggregator.aggregate();
 
-  // Should complete the workflow, even with mock data
-  if let Ok(()) = result {
-    // Verify aggregation completed
-    assert_eq!( aggregator.conflicts().len(), 0 );
-  } else {
-    // Expected with missing files - this is normal
+  // Should complete the workflow, even with missing files
+  match result
+  {
+    Ok( () ) =>
+    {
+      assert_eq!( aggregator.conflicts().len(), 0, "No conflicts expected on empty aggregation" );
+    },
+    Err( e ) =>
+    {
+      let msg = format!( "{e:?}" );
+      assert!( !msg.is_empty(), "Aggregation error should have a description" );
+    }
   }
 }

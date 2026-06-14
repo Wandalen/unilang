@@ -139,15 +139,17 @@ The project has successfully completed Phase 4 (Zero-Overhead Static Command Reg
     *   **Prerequisites:** M8.3
     *   **Deliverable:** An example application that serves a `unilang` registry as a REST API.
 
-### Phase 9: Advanced Features - Developer Experience
+### Phase 9: Advanced Features - Developer Experience 🏁
 *   **Goal:** To significantly improve the developer experience by providing procedural macros that reduce boilerplate code.
 *   **Outcome:** A framework that is not only powerful but also ergonomic for developers to use.
 
-*   [⚫] **M9.1: macro_design_procedural:**
+*   [✅] **M9.1: macro_design_procedural:**
     *   **Deliverable:** An API design for the `#[command]` procedural macro in the `unilang_meta` crate.
-*   [⚫] **M9.2: macro_implement_command:**
+    *   **Completed:** `unilang_meta` v0.3.0 — `#[command]` macro API designed and stabilised.
+*   [✅] **M9.2: macro_implement_command:**
     *   **Prerequisites:** M9.1
     *   **Deliverable:** A working `#[command]` macro that generates `CommandDefinition` structs from Rust functions.
+    *   **Completed:** `unilang_meta` v0.3.0 (commit `3dc2f3a`) — `#[command]` procedural macro implemented and integrated.
 
 ### Phase 10: Release Candidate Preparation
 *   **Goal:** Focus on stability, developer experience, and documentation to prepare for a v1.0 release.

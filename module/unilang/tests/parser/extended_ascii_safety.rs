@@ -16,7 +16,6 @@
 //! - **GREEN PHASE**: All extended ASCII characters parse without panics
 //! - **REFACTOR PHASE**: Optimize character encoding detection
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentDefinition, CommandDefinition, Kind, ArgumentAttributes };
 use unilang::registry::CommandRegistry;

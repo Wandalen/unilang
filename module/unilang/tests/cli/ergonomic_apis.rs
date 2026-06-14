@@ -11,7 +11,6 @@
 //! - Integration with hybrid registry and multi-YAML build system
 //! - Backward compatibility with existing `CliAggregator`
 
-#![ allow( deprecated ) ]
 
 use unilang::prelude::*;
 use unilang::multi_yaml::{ CliBuilder, AggregationMode, aggregate_cli_simple };

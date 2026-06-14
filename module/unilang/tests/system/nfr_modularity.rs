@@ -1,6 +1,6 @@
 //! NFR modularity tests: enabled feature is a strict subset of full.
 //!
-//! Implements IN-6 from `tests/docs/invariant/02_non_functional_requirements.md`.
+//! Implements IN-6 from `tests/docs/invariant/002_non_functional_requirements.md`.
 //!
 //! Verifies that the `enabled` feature set compiles cleanly and that a capability
 //! present only in `full` (YAML runtime loading via `serde_yaml_ng`) is absent from
@@ -12,7 +12,7 @@
 /// check on `--features enabled` confirms `serde_yaml_ng` (a `full`-only runtime dep)
 /// is absent from the `enabled` runtime dependency tree, proving `enabled ⊂ full`.
 ///
-/// Spec: invariant/02_non_functional_requirements.md § IN-6
+/// Spec: invariant/002_non_functional_requirements.md § IN-6
 // test_kind: in_spec(IN-6)  [invariant/02_non_functional_requirements]
 #[ test ]
 fn test_in6_enabled_feature_is_strict_subset_of_full()

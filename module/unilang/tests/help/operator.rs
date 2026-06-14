@@ -4,7 +4,7 @@
 //! generating missing argument errors.
 
 /// FT-3 / FT-4: `?` and `??` operators produce help output, not errors.
-// test_kind: ft_spec(FT-3, FT-4)
+// test_kind: ft_spec(FT-3, FT-4)  [feature/04_help_system]
 #[test]
 fn test_help_operator_shows_help_not_error()
 {

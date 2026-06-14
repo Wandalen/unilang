@@ -8,7 +8,6 @@
 //! - FR-REG-1 (FT-1): static PHF registry lookup returns registered command
 //! - FR-REG-8 (FT-7): `StaticCommandRegistry` and `CommandRegistry` return identical definitions
 
-#![ allow( deprecated ) ]
 
 use unilang::registry::{ CommandRegistry, CommandRegistryTrait };
 use unilang::static_data::{ StaticCommandDefinition, StaticCommandMap };

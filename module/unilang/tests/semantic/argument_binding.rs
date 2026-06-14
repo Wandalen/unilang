@@ -25,7 +25,6 @@
 //! - `unit/parser/argument_parsing.rs` - Parser argument extraction
 //! - `unit/data/types.rs` - Value types and conversions
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
 use unilang::registry::CommandRegistry;
@@ -70,7 +69,7 @@ fn parse_and_bind( registry : &CommandRegistry, input : &str ) -> Result< Vec< V
 }
 
 /// FT-1: Named binding with `param::value` syntax extracts correct value.
-// test_kind: ft_spec(FT-1)
+// test_kind: ft_spec(FT-1)  [feature/02_argument_system]
 #[test]
 fn test_basic_named_argument_binding()
 {
@@ -107,7 +106,7 @@ fn test_basic_named_argument_binding()
 }
 
 /// FT-5: Positional binding assigns value by position when no name given.
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/02_argument_system]
 #[test]
 fn test_positional_argument_binding()
 {
@@ -226,7 +225,7 @@ fn test_mixed_named_and_positional_binding()
 
 /// FT-6: Type coercion — integer token parsed into Kind::Integer value.
 /// FT-11: Type coercion — float token parsed into Kind::Float value.
-// test_kind: ft_spec(FT-6, FT-11)
+// test_kind: ft_spec(FT-6, FT-11)  [feature/02_argument_system]
 #[test]
 fn test_type_conversion_binding()
 {
@@ -328,7 +327,7 @@ fn test_optional_argument_binding()
 }
 
 /// FT-3: Default value is used when optional argument is absent.
-// test_kind: ft_spec(FT-3)
+// test_kind: ft_spec(FT-3)  [feature/02_argument_system]
 #[test]
 fn test_default_value_binding()
 {
@@ -365,7 +364,7 @@ fn test_default_value_binding()
 }
 
 /// FT-8: Alias-based named binding resolves to canonical argument.
-// test_kind: ft_spec(FT-8)
+// test_kind: ft_spec(FT-8)  [feature/02_argument_system]
 #[test]
 fn test_alias_binding()
 {
@@ -407,7 +406,7 @@ fn test_alias_binding()
 
 /// FT-9: ValidationRule MinLength rejects too-short value.
 /// FT-13: ValidationRule Max rejects over-limit integer value.
-// test_kind: ft_spec(FT-9, FT-13)
+// test_kind: ft_spec(FT-9, FT-13)  [feature/02_argument_system]
 #[test]
 fn test_validation_rule_enforcement()
 {
@@ -456,7 +455,7 @@ fn test_validation_rule_enforcement()
 }
 
 /// FT-7: Missing required argument produces structured error.
-// test_kind: ft_spec(FT-7)
+// test_kind: ft_spec(FT-7)  [feature/02_argument_system]
 #[test]
 fn test_missing_required_argument_error()
 {
@@ -582,7 +581,7 @@ fn test_binding_performance()
 }
 
 /// FT-10: ValidationRule Pattern rejects non-matching value.
-// test_kind: ft_spec(FT-10)
+// test_kind: ft_spec(FT-10)  [feature/02_argument_system]
 #[test]
 fn test_pattern_validation_rejects_non_matching()
 {
@@ -612,7 +611,7 @@ fn test_pattern_validation_rejects_non_matching()
 }
 
 /// FT-12: Type coercion — path token parsed into Kind::Path value.
-// test_kind: ft_spec(FT-12)
+// test_kind: ft_spec(FT-12)  [feature/02_argument_system]
 #[test]
 fn test_path_type_coercion()
 {

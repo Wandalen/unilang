@@ -8,7 +8,7 @@
 use unilang::data::CommandName;
 
 /// TC-1: Valid dot-prefixed names are accepted.
-// test_kind: tc_spec(TC-1)
+// test_kind: tc_spec(TC-1)  [type/01_command_name]
 #[ test ]
 fn test_tc1_valid_dot_prefix_construction()
 {
@@ -40,7 +40,7 @@ fn test_tc1_valid_dot_prefix_construction()
 }
 
 /// TC-2: Empty name is rejected.
-// test_kind: tc_spec(TC-2)
+// test_kind: tc_spec(TC-2)  [type/01_command_name]
 #[ test ]
 fn test_tc2_empty_name_rejected()
 {
@@ -62,7 +62,7 @@ fn test_tc2_empty_name_rejected()
 }
 
 /// TC-3: Non-dot-prefixed names are rejected.
-// test_kind: tc_spec(TC-3)
+// test_kind: tc_spec(TC-3)  [type/01_command_name]
 #[ test ]
 fn test_tc3_missing_dot_prefix_rejected()
 {
@@ -199,7 +199,7 @@ fn command_name_serde_json_deserialize_valid()
 }
 
 /// TC-6: Serde deserialization rejects empty and non-dot-prefixed names.
-// test_kind: tc_spec(TC-6)
+// test_kind: tc_spec(TC-6)  [type/01_command_name]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc6_serde_rejects_invalid_command_name()
@@ -318,7 +318,7 @@ fn command_name_long_names()
 }
 
 /// TC-4: Single dot is a valid command name.
-// test_kind: tc_spec(TC-4)
+// test_kind: tc_spec(TC-4)  [type/01_command_name]
 #[ test ]
 fn test_tc4_single_dot_valid()
 {
@@ -371,7 +371,7 @@ fn command_name_multiple_dots()
 }
 
 /// TC-5: Nested dot-separated command names are accepted.
-// test_kind: tc_spec(TC-5)
+// test_kind: tc_spec(TC-5)  [type/01_command_name]
 #[ test ]
 fn test_tc5_nested_dot_name_valid()
 {

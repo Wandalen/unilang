@@ -26,7 +26,6 @@
 //! - `tests/help/help_divergence_prevention.rs` - Bug demonstration
 //! - `tests/registry/auto_help_integration.rs` - Automatic help generation
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ CommandDefinition, OutputData };
 use unilang::registry::CommandRegistry;
@@ -46,7 +45,7 @@ fn create_test_command( name : &str, description : &str ) -> CommandDefinition
 }
 
 /// Helper: Create mock routine
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
 {
   Box::new( | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, unilang::data::ErrorData >
   {
@@ -69,11 +68,11 @@ fn test_validate_all_commands_have_help()
   let cmd2 = create_test_command( ".test", "Run tests" );
   let cmd3 = create_test_command( ".deploy", "Deploy application" );
 
-  registry.register_with_routine( &cmd1, create_mock_routine() )
+  registry.register_with_routine( &cmd1, create_test_routine() )
     .expect( "Command registration should succeed" );
-  registry.register_with_routine( &cmd2, create_mock_routine() )
+  registry.register_with_routine( &cmd2, create_test_routine() )
     .expect( "Command registration should succeed" );
-  registry.register_with_routine( &cmd3, create_mock_routine() )
+  registry.register_with_routine( &cmd3, create_test_routine() )
     .expect( "Command registration should succeed" );
 
   // Validate help completeness
@@ -99,7 +98,7 @@ fn test_detect_missing_help_commands()
 
   // Register command with auto_help enabled
   let cmd = create_test_command( ".deploy", "Deploy application" );
-  registry.register_with_routine( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_test_routine() )
     .expect( "Command registration should succeed" );
 
   // With auto_help_enabled, the help command should be auto-generated
@@ -134,7 +133,7 @@ fn test_formatted_listing_completeness()
   for ( name, desc ) in &commands
   {
     let cmd = create_test_command( name, desc );
-    registry.register_with_routine( &cmd, create_mock_routine() )
+    registry.register_with_routine( &cmd, create_test_routine() )
       .expect( "Command registration should succeed" );
   }
 

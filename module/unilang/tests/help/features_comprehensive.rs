@@ -22,7 +22,6 @@ use unilang::help::HelpGenerator;
 /// Creates a test registry with commands matching task 084 examples
 fn create_task084_test_registry() -> CommandRegistry
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
 
   // Repository Management commands

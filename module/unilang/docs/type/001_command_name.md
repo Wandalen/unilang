@@ -55,7 +55,7 @@ Invalid states are impossible to represent. If you hold a `CommandName`, it is v
 
 | File | Relationship |
 |------|--------------|
-| `src/data/validated_types.rs` | CommandName struct and impl |
+| `src/data/command_name.rs` | CommandName struct and impl |
 
 ### Tests
 

@@ -59,13 +59,16 @@ Compile-time command registration with zero-overhead lookups using Perfect Hash 
 
 ## Aggregation Examples
 
+- `assess_quality_cli.rs` - Binary example: test organization quality assessment
 - `compile_time_aggregation.rs` - Compile-time CLI aggregation demo
+- `compile_time_demo.yaml` - YAML command definitions for compile-time demo
+- `cli_export_best_practices.md` - Best practices guide for CLI export patterns
 - `ergonomic_cli_aggregation.rs` - Ergonomic CLI export and aggregation
 - `full_cli_example.rs` - Comprehensive CLI framework usage
+- `manual_corner_cases.rs` - Edge cases difficult to cover in automated tests
 - `practical_cli_aggregation.rs` - Real-world CLI aggregation patterns
 - `repl_comparison.rs` - REPL feature comparison
 - `yaml_cli_aggregation.rs` - YAML-based CLI aggregation workflow
-- `manual_corner_case_test.rs` - Edge cases difficult to cover in automated tests
 
 ## Running Examples
 

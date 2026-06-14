@@ -1,6 +1,6 @@
 //! Invariant tests for the dot-prefix naming contract.
 //!
-//! Covers spec cases IN-1..IN-3 from `tests/docs/invariant/05_command_naming.md`.
+//! Covers spec cases IN-1..IN-3 from `tests/docs/invariant/005_command_naming.md`.
 //!
 //! ## Spec Coverage
 //!
@@ -29,7 +29,6 @@
 //! YAML strings (no leading dot) and adds the dot internally — the invariant
 //! holds in both cases.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
 use unilang::registry::CommandRegistry;
@@ -37,7 +36,7 @@ use unilang::interpreter::ExecutionContext;
 use unilang::semantic::VerifiedCommand;
 use unilang::validation_core::compute_full_name_core;
 
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
 {
   Box::new( | _cmd, _ctx | Ok( OutputData::new( "ok", "text" ) ) )
 }
@@ -48,7 +47,7 @@ fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> 
 /// Phase 2 behaviour: the panic happens at `CommandDefinition::former().name()`,
 /// before any registration call.  `catch_unwind` captures the panic so the test
 /// can also verify the post-condition "registry remains unmodified".
-// test_kind: in_spec(IN-1)
+// test_kind: in_spec(IN-1)  [invariant/05_command_naming]
 #[ test ]
 fn test_in1_runtime_registration_rejects_name_without_dot()
 {
@@ -86,7 +85,7 @@ fn test_in1_runtime_registration_rejects_name_without_dot()
 
 /// IN-2: Construction and registration of a `CommandDefinition` with a leading dot
 /// succeeds; the command is subsequently retrievable from the registry.
-// test_kind: in_spec(IN-2)
+// test_kind: in_spec(IN-2)  [invariant/05_command_naming]
 #[ test ]
 fn test_in2_runtime_registration_accepts_name_with_dot()
 {
@@ -110,7 +109,7 @@ fn test_in2_runtime_registration_accepts_name_with_dot()
   ])
   .end();
 
-  let result = registry.register_with_routine( &valid_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &valid_cmd, create_test_routine() );
 
   assert!( result.is_ok(), "Registration of '.valid' must succeed, got: {result:?}" );
   assert!(
@@ -126,7 +125,7 @@ fn test_in2_runtime_registration_accepts_name_with_dot()
 /// `compute_full_name_core(".math", "add")` mirrors the YAML entry
 /// `namespace: "math", name: "add"` after the build-time dot normalization step,
 /// and must produce `".math.add"` — exactly one leading dot.
-// test_kind: in_spec(IN-3)
+// test_kind: in_spec(IN-3)  [invariant/05_command_naming]
 #[ test ]
 fn test_in3_namespace_construction_produces_dot_prefixed_full_name()
 {

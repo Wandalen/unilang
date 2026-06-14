@@ -1,7 +1,6 @@
 //! Tests for `StaticCommandRegistry` routine management:
 //! `into_routines()` and `From<StaticCommandRegistry>` routine transfer.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ CommandDefinition, CommandName, OutputData };
 use unilang::pipeline::Pipeline;

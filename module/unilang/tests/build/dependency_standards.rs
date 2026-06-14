@@ -1,6 +1,6 @@
 //! Workspace dependency format standards tests.
 //!
-//! Implements IN-1..3, IN-5 specification cases from `tests/docs/invariant/04_workspace_dependency_standards.md`.
+//! Implements IN-1..3, IN-5 specification cases from `tests/docs/invariant/004_workspace_dependency_standards.md`.
 //!
 //! Tests verify that all four dependency format rules (R1–R3) defined in
 //! `docs/invariant/004_workspace_dependency_standards.md` hold in the workspace Cargo files.
@@ -26,7 +26,7 @@
 ///
 /// External deps must use `^X.Y` — they must not use `=` (exact pin) or bare version
 /// numbers without a leading operator.
-// test_kind: in_spec(IN-1)
+// test_kind: in_spec(IN-1)  [invariant/04_workspace_dependency_standards]
 #[ test ]
 fn test_in1_external_deps_use_caret_version_format()
 {
@@ -95,7 +95,7 @@ fn test_in1_external_deps_use_caret_version_format()
 /// Reads the workspace `Cargo.toml` and verifies that entries with `path =` use
 /// the exact-pin `=X.Y.Z` format (with leading `=`). The four workspace members are
 /// `unilang`, `unilang_parser`, `unilang_meta`, and `cargo_unilang`.
-// test_kind: in_spec(IN-2)
+// test_kind: in_spec(IN-2)  [invariant/04_workspace_dependency_standards]
 #[ test ]
 fn test_in2_workspace_internal_path_deps_use_exact_pin_format()
 {
@@ -152,7 +152,7 @@ fn test_in2_workspace_internal_path_deps_use_exact_pin_format()
 ///
 /// Checks the `unilang` crate only (the crate under test). Inspects `[dependencies]` and
 /// `[dev-dependencies]` sections.
-// test_kind: in_spec(IN-3)
+// test_kind: in_spec(IN-3)  [invariant/04_workspace_dependency_standards]
 #[ test ]
 fn test_in3_crate_cargo_toml_uses_workspace_inheritance()
 {
@@ -208,7 +208,7 @@ fn test_in3_crate_cargo_toml_uses_workspace_inheritance()
 /// Runs `cargo check --no-default-features` on the unilang crate and verifies
 /// it exits with code 0. This confirms all optional dependencies are properly gated
 /// and the crate compiles to a no-op with no features enabled.
-// test_kind: in_spec(IN-4)
+// test_kind: in_spec(IN-4)  [invariant/04_workspace_dependency_standards]
 #[ test ]
 fn test_in4_no_default_features_builds_cleanly()
 {
@@ -240,7 +240,7 @@ fn test_in4_no_default_features_builds_cleanly()
 /// `[dependencies]` includes `optional = true`. Binary crate `cargo_unilang` is exempt.
 /// `[build-dependencies]` and `[dev-dependencies]` are also exempt since they are not
 /// part of the library's public dependency surface.
-// test_kind: in_spec(IN-5)
+// test_kind: in_spec(IN-5)  [invariant/04_workspace_dependency_standards]
 #[ test ]
 fn test_in5_library_deps_all_optional()
 {

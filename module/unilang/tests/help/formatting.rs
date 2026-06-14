@@ -7,7 +7,6 @@
 //! or contains redundant information that makes it difficult for users to quickly
 //! understand command usage.
 
-#![ allow( deprecated ) ]
 
 use unilang::prelude::*;
 

@@ -58,14 +58,12 @@ fn create_test_command() -> CommandDefinition
 }
 
 /// FT-5 (partial): UNILANG_HELP_VERBOSITY=0 produces minimal output.
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_0_minimal()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Minimal );
@@ -83,14 +81,12 @@ fn test_verbosity_level_0_minimal()
 }
 
 /// FT-10: UNILANG_HELP_VERBOSITY=1 produces Basic level output.
-// test_kind: ft_spec(FT-10)
+// test_kind: ft_spec(FT-10)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_1_basic()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Basic );
@@ -110,14 +106,12 @@ fn test_verbosity_level_1_basic()
 }
 
 /// FT-9: Default verbosity level is Level 2 (Standard).
-// test_kind: ft_spec(FT-9)
+// test_kind: ft_spec(FT-9)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_2_standard_default()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   // Test both default and explicit Standard
@@ -148,14 +142,12 @@ fn test_verbosity_level_2_standard_default()
 }
 
 /// FT-11: UNILANG_HELP_VERBOSITY=3 produces Detailed level output with metadata.
-// test_kind: ft_spec(FT-11)
+// test_kind: ft_spec(FT-11)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_3_detailed()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Detailed );
@@ -173,14 +165,12 @@ fn test_verbosity_level_3_detailed()
 }
 
 /// FT-5 (partial): UNILANG_HELP_VERBOSITY=4 produces Comprehensive output.
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_4_comprehensive()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Comprehensive );
@@ -221,10 +211,8 @@ fn test_verbosity_default()
 #[test]
 fn test_verbosity_set_and_get()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   let mut help_gen = HelpGenerator::new( &registry );
@@ -238,14 +226,12 @@ fn test_verbosity_set_and_get()
 }
 
 /// FT-5 coverage: Progressive information — each level strictly more detailed.
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/04_help_system]
 #[test]
 fn test_verbosity_progressive_information()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let command = create_test_command();
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
   // Test that each level contains more information than the previous

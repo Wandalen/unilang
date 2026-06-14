@@ -81,7 +81,7 @@ Migration is considered complete when ALL of the following conditions are met:
 2. **Full New Patterns:** Measurement script reports 4/4 new pattern score
 3. **100% Migration Progress:** Measurement script reports 100% completion
 4. **All Tests Passing:** Full test suite passes with `w3 .test l::3`
-5. **No Application References:** Zero mentions of specific application names in `src/help.rs`
+5. **No Application References:** Zero mentions of specific application names in `src/help/`
 6. **Generic Documentation:** All comments are self-contained and domain-agnostic
 7. **Test Validation:** Tests validate generic behavior, not specific CLI patterns
 
@@ -125,7 +125,7 @@ Final verification results:
 
 **Status:** ✅ MIGRATION COMPLETE
 **Completed:** 2025_12_04
-**Files Modified:** `src/help.rs`, 2 new test files, 1 existing test updated
+**Files Modified:** `src/help/`, 2 new test files, 1 existing test updated
 **Breaking Changes:** Applications relying on auto-categorization must now specify categories explicitly
 
 ### Features
@@ -144,7 +144,7 @@ Final verification results:
 
 | File | Relationship |
 |------|--------------|
-| `src/help.rs` | Decoupled help module |
+| `src/help/` | Decoupled help module |
 
 ### Tests
 

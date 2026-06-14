@@ -105,7 +105,7 @@ use unilang::{ CommandRegistry, Pipeline };
 /// Or handle help display at higher level before calling parser. Current design forces all
 /// callers to special-case HelpRequested, violating DRY principle.
 /// FT-5: Empty REPL input handled without panic.
-// test_kind: ft_spec(FT-5), bug_reproducer(BUG-093)
+// test_kind: ft_spec(FT-5)  [feature/05_repl_interactive], bug_reproducer(BUG-093)
 #[ test ]
 fn test_ft5_empty_repl_input_handled_without_panic()
 {

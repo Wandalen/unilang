@@ -15,7 +15,6 @@
 //! - `unit/help/conventions.rs` - Help system conventions
 //! - `unit/help/formatting.rs` - Help output formatting
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentDefinition, CommandDefinition, Kind, ArgumentAttributes, OutputData };
 use unilang::registry::CommandRegistry;
@@ -93,11 +92,11 @@ fn test_command_specific_help_generation()
   let cmd_name = cmd.name().clone();
 
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -112,7 +111,7 @@ fn test_command_specific_help_generation()
 }
 
 /// FT-2: Detailed help output includes argument names and descriptions.
-// test_kind: ft_spec(FT-2)
+// test_kind: ft_spec(FT-2)  [feature/04_help_system]
 #[test]
 fn test_help_includes_argument_details()
 {
@@ -121,11 +120,11 @@ fn test_help_includes_argument_details()
   let cmd_name = cmd.name().clone();
 
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -146,11 +145,11 @@ fn test_help_includes_examples()
   let cmd_name = cmd.name().clone();
 
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -169,11 +168,11 @@ fn test_help_includes_aliases()
   let cmd_name = cmd.name().clone();
 
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -184,7 +183,7 @@ fn test_help_includes_aliases()
 }
 
 /// FT-1: Command list returns all registered command names.
-// test_kind: ft_spec(FT-1)
+// test_kind: ft_spec(FT-1)  [feature/04_help_system]
 #[test]
 fn test_global_help_listing()
 {
@@ -207,19 +206,19 @@ fn test_global_help_listing()
     .end();
 
   // Use runtime registration for all commands
-  let mock_routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
-  let mock_routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
-  let mock_routine3 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine3 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd1, mock_routine1 ).unwrap();
-  registry.register_with_routine( &cmd2, mock_routine2 ).unwrap();
-  registry.register_with_routine( &cmd3, mock_routine3 ).unwrap();
+  registry.register_with_routine( &cmd1, test_routine1 ).unwrap();
+  registry.register_with_routine( &cmd2, test_routine2 ).unwrap();
+  registry.register_with_routine( &cmd3, test_routine3 ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.list_commands();
@@ -272,11 +271,11 @@ fn test_help_content_formatting()
   let cmd_name = cmd.name().clone();
 
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );
@@ -304,10 +303,10 @@ fn test_help_performance()
       .description( format!( "Test command number {i}" ) )
       .end();
 
-    let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
       Ok(OutputData::new("test", "text"))
     });
-    registry.register_with_routine( &cmd, mock_routine ).unwrap();
+    registry.register_with_routine( &cmd, test_routine ).unwrap();
   }
 
   let help_generator = HelpGenerator::new( &registry );
@@ -349,11 +348,11 @@ fn test_command_help_with_complex_arguments()
 
   let cmd_name = cmd.name().clone();
   // Use runtime registration instead since command_add is deprecated
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
     Ok(OutputData::new("test", "text"))
   });
 
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   let help_generator = HelpGenerator::new( &registry );
   let help_content = help_generator.command( cmd_name.as_str() ).expect( "Help should be generated" );

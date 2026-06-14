@@ -22,7 +22,6 @@
 //! - `unit/semantic/argument_binding.rs` - General argument binding logic
 //! - `regression/parameter_collection.rs` - Regression prevention for Task 024
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
 use unilang::registry::CommandRegistry;
@@ -145,7 +144,7 @@ fn parse_and_analyze( registry : &CommandRegistry, input : &str ) -> Result< Vec
 }
 
 /// FT-4: Multiple-parameter collection accumulates repeated values into Vec.
-// test_kind: ft_spec(FT-4)
+// test_kind: ft_spec(FT-4)  [feature/02_argument_system]
 #[test]
 fn test_basic_multiple_parameter_collection()
 {

@@ -2,6 +2,13 @@
 //!
 //! Tests for `Pipeline::process_command`, `process_batch`, `validate_command`,
 //! and the `process_single_command` / `validate_single_command` convenience functions.
+//!
+//! ## Spec Coverage
+//!
+//! | Spec File | Cases | Description |
+//! |-----------|-------|-------------|
+//! | `feature/03_pipeline` | FT-1..5 | Pipeline orchestration: single, batch, sequence, argv, error |
+//! | `feature/05_repl_interactive` | FT-1, FT-5 | Stateless REPL and empty input handling |
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
 use unilang::types::Value;
@@ -73,7 +80,7 @@ fn create_test_registry() -> CommandRegistry
 }
 
 /// FT-1: Pipeline processes a valid command and returns expected output.
-// test_kind: ft_spec(FT-1)
+// test_kind: ft_spec(FT-1)  [feature/03_pipeline]
 #[ test ]
 fn test_ft1_pipeline_processes_valid_command()
 {
@@ -118,7 +125,7 @@ fn test_pipeline_process_command_semantic_error()
 }
 
 /// FT-2: Batch mode processes all commands regardless of individual failures.
-// test_kind: ft_spec(FT-2)
+// test_kind: ft_spec(FT-2)  [feature/03_pipeline]
 #[ test ]
 fn test_ft2_batch_mode_processes_all_commands()
 {
@@ -158,7 +165,7 @@ fn test_pipeline_validate_command()
 /// `BatchResult.results.len()` equals the number of commands actually processed.
 /// If the sequence stopped at the first failure, `results.len() == 1` and
 /// `total_commands == 2`, proving the second command was skipped.
-// test_kind: ft_spec(FT-3)
+// test_kind: ft_spec(FT-3)  [feature/03_pipeline]
 #[ test ]
 fn test_ft3_sequence_stops_at_first_failure()
 {
@@ -202,7 +209,7 @@ fn test_convenience_functions()
 /// generic error; it must return a result where `requires_interactive_input() == true` and
 /// `interactive_argument()` names the missing argument.
 ///
-/// Spec: feature/05_repl_interactive.md § FT-2
+/// Spec: feature/005_repl_interactive.md § FT-2
 // test_kind: ft_spec(FT-2)  [feature/05_repl_interactive]
 #[ test ]
 fn test_ft2_interactive_arg_absent_returns_interactive_required()
@@ -286,7 +293,7 @@ fn test_ft2_interactive_arg_absent_returns_interactive_required()
 /// When a command has an `interactive: true` required argument but the caller already
 /// supplies the value, the pipeline must execute successfully with no interactive signal.
 ///
-/// Spec: feature/05_repl_interactive.md § FT-3
+/// Spec: feature/005_repl_interactive.md § FT-3
 // test_kind: ft_spec(FT-3)  [feature/05_repl_interactive]
 #[ test ]
 fn test_ft3_interactive_arg_provided_executes_without_prompt()
@@ -371,7 +378,7 @@ fn test_ft3_interactive_arg_provided_executes_without_prompt()
 /// is the command name and subsequent elements are arguments. The pipeline must join
 /// these into a single command and execute it correctly, preserving argument values
 /// that contain spaces (the OS provides them as a single argv element).
-// test_kind: ft_spec(FT-4)
+// test_kind: ft_spec(FT-4)  [feature/03_pipeline]
 #[ test ]
 fn test_ft4_argv_execution_joins_elements()
 {
@@ -394,7 +401,7 @@ fn test_ft4_argv_execution_joins_elements()
 /// Invoking a command not in the registry must produce a failed result with
 /// an error message referencing the unknown command name. The pipeline must
 /// not panic.
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/03_pipeline]
 #[ test ]
 fn test_ft5_pipeline_returns_command_not_found()
 {
@@ -416,7 +423,9 @@ fn test_ft5_pipeline_returns_command_not_found()
 ///
 /// The Pipeline holds no mutable per-call state. Two consecutive calls to
 /// `process_command` with different arguments must produce independent results.
-// test_kind: ft_spec(FT-1)
+///
+/// Spec: feature/005_repl_interactive.md § FT-1
+// test_kind: ft_spec(FT-1)  [feature/05_repl_interactive]
 #[ test ]
 fn test_ft1_stateless_repl_no_state_leakage()
 {
@@ -437,4 +446,32 @@ fn test_ft1_stateless_repl_no_state_leakage()
   let result3 = pipeline.process_command( ".test", ExecutionContext::default() );
   assert!( result3.success, "FT-1: third call must succeed with default arg" );
   assert_eq!( result3.outputs[ 0 ].content, "hello", "Default value must be used, not leaked state" );
+}
+
+/// FT-5: Empty REPL input handled without panic.
+///
+/// An empty string `""` passed to `process_command` must not cause a panic. The pipeline
+/// may return an error (e.g., parse error for empty input) or succeed with no-op output,
+/// but it must never unwind.
+///
+/// Spec: feature/005_repl_interactive.md § FT-5
+// test_kind: ft_spec(FT-5)  [feature/05_repl_interactive]
+#[ test ]
+fn test_ft5_empty_repl_input_no_panic()
+{
+  let registry = create_test_registry();
+  let pipeline = Pipeline::new( registry );
+
+  // Empty string — must not panic; error or no-op is acceptable
+  let result = pipeline.process_command( "", ExecutionContext::default() );
+
+  // The pipeline did not panic (reaching this line is the primary assertion).
+  // Actual behavior: empty input triggers the help system, returning a command listing
+  // as successful output. This is a valid non-panic response per the spec ("Ok with
+  // no-op behavior" — the help listing is the empty-input fallback, not a side effect).
+  if !result.success
+  {
+    // Error path — also acceptable per spec
+    assert!( result.error.is_some(), "FT-5: failed result must carry an error message" );
+  }
 }

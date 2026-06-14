@@ -42,7 +42,7 @@
 
 | File | Relationship |
 |------|--------------|
-| `src/data/validated_types.rs` | NamespaceType struct and impl |
+| `src/data/namespace_type.rs` | NamespaceType struct and impl |
 
 ### Tests
 

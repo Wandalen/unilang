@@ -12,4 +12,5 @@ mod regression {
   mod validation_rule_api_format;
   mod duplicate_command_registration;
   mod empty_args_handling;
+  mod repeated_parameter_handling;
 }

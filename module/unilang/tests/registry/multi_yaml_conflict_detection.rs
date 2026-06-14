@@ -116,7 +116,7 @@ fn test_no_conflict_different_commands()
 ///
 /// Module A: `.foo`, Module B: `.foo`
 /// Expected: One conflict detected
-// test_kind: ft_spec(FT-5)
+// test_kind: ft_spec(FT-5)  [feature/01_command_registry]
 #[ test ]
 fn test_conflict_same_command_name()
 {

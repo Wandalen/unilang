@@ -39,7 +39,6 @@ use unilang::help::HelpGenerator;
 #[ test ]
 fn test_auto_categorize_returns_empty_string()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -79,7 +78,6 @@ fn test_auto_categorize_returns_empty_string()
 #[ test ]
 fn test_auto_categorize_is_pure_function()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -102,7 +100,6 @@ fn test_auto_categorize_is_pure_function()
 #[ test ]
 fn test_auto_categorize_edge_cases()
 {
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 
@@ -177,7 +174,6 @@ fn test_auto_categorize_implementation_simplicity()
   // If this test compiles and runs, it proves the implementation is minimal.
   // Any attempt to add complex logic will require changes to this test.
 
-  #[ allow( deprecated ) ]
   let registry = CommandRegistry::new();
   let help_gen = HelpGenerator::new( &registry );
 

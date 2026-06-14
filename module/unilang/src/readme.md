@@ -15,10 +15,10 @@ Library source code for the `unilang` crate.
 | `pipeline/` | Command pipeline: batch and single-command processing |
 | `semantic/` | Semantic analysis: argument binding and validation |
 | `interpreter.rs` | Command execution engine |
-| `help.rs` | Help text generation and formatting |
+| `help/` | Help text generation and formatting |
 | `loader.rs` | Load command definitions from YAML/JSON strings |
 | `interner.rs` | String interning for zero-copy command name lookups |
-| `static_data.rs` | Compile-time static command data structures |
+| `static_data/` | Compile-time static command data structures |
 | `error.rs` | Error types for the crate |
 | `types.rs` | Shared type aliases |
 | `config_extraction.rs` | Extract configuration values from command arguments |

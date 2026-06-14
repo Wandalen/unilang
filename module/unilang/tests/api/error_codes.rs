@@ -1,6 +1,6 @@
 //! API error code contract tests.
 //!
-//! Implements AP-1..14 specification cases from `tests/docs/api/02_error_codes.md`.
+//! Implements AP-1..14 specification cases from `tests/docs/api/002_error_codes.md`.
 //!
 //! Tests verify that each `ErrorCode` variant is produced under its documented condition
 //! and that enum derives (`Clone`, `PartialEq`, `Eq`) are present and functional.
@@ -20,7 +20,6 @@
 //! AP-10 uses `Interpreter::run` because `CommandNotImplemented` is returned by the
 //! command routine at execution time, not during semantic analysis.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, ErrorCode, Kind, OutputData };
 use unilang::data::ErrorData;
@@ -78,7 +77,7 @@ fn test_arg( name : &str, kind : Kind, attrs : ArgumentAttributes ) -> ArgumentD
 /// A registry that does not contain `.unknown` must cause the semantic analyzer
 /// to return `Error::Execution(ErrorData { code: CommandNotFound, ... })` with a
 /// non-empty message when `.unknown` is invoked.
-// test_kind: ap_spec(AP-1)
+// test_kind: ap_spec(AP-1)  [api/02_error_codes]
 #[ test ]
 fn test_ap1_command_not_found_for_unregistered_command()
 {
@@ -114,7 +113,7 @@ fn test_ap1_command_not_found_for_unregistered_command()
 /// `.greet` is registered with a required `name: String` argument. Invoking
 /// `.greet` without supplying `name` must produce `ErrorCode::ArgumentMissing`
 /// with the argument name present in the error message.
-// test_kind: ap_spec(AP-2)
+// test_kind: ap_spec(AP-2)  [api/02_error_codes]
 #[ test ]
 fn test_ap2_argument_missing_for_absent_required_arg()
 {
@@ -160,7 +159,7 @@ fn test_ap2_argument_missing_for_absent_required_arg()
 /// `name` is declared optional here to isolate the `UnknownParameter` failure.
 /// If `name` were required, the validation order (unknown params vs. missing args)
 /// could determine which error fires first, making the test fragile.
-// test_kind: ap_spec(AP-3)
+// test_kind: ap_spec(AP-3)  [api/02_error_codes]
 #[ test ]
 fn test_ap3_unknown_parameter_for_undefined_named_arg()
 {
@@ -201,7 +200,7 @@ fn test_ap3_unknown_parameter_for_undefined_named_arg()
 /// `.add` is registered with argument `x` of `Kind::Integer`. Invoking `.add x::"not_a_number"`
 /// must produce `ErrorCode::ArgumentTypeMismatch` because `"not_a_number"` cannot be parsed
 /// as an integer during semantic type coercion.
-// test_kind: ap_spec(AP-4)
+// test_kind: ap_spec(AP-4)  [api/02_error_codes]
 #[ test ]
 fn test_ap4_argument_type_mismatch_for_non_coercible_value()
 {
@@ -238,7 +237,7 @@ fn test_ap4_argument_type_mismatch_for_non_coercible_value()
 /// After `.dup` is registered once via `register_with_routine`, a second registration
 /// attempt with the same name must fail with `ErrorCode::CommandAlreadyExists`.
 /// The error comes from `register_with_routine` at registration time, not from the pipeline.
-// test_kind: ap_spec(AP-5)
+// test_kind: ap_spec(AP-5)  [api/02_error_codes]
 #[ test ]
 fn test_ap5_command_already_exists_for_duplicate_registration()
 {
@@ -280,7 +279,7 @@ fn test_ap5_command_already_exists_for_duplicate_registration()
 /// - Two identical variants compare equal (`PartialEq`)
 /// - A cloned value equals the original (`Clone + PartialEq`)
 /// - Different variants compare unequal (`Eq` transitivity)
-// test_kind: ap_spec(AP-6)
+// test_kind: ap_spec(AP-6)  [api/02_error_codes]
 #[ test ]
 fn test_ap6_error_code_derives_clone_partial_eq_eq()
 {
@@ -300,7 +299,7 @@ fn test_ap6_error_code_derives_clone_partial_eq_eq()
 /// `.single` is registered with one positional `item: String` argument. Invoking
 /// `.single val1 val2 val3` provides three positional values but the command only
 /// accepts one. The semantic analyzer must produce `ErrorCode::TooManyArguments`.
-// test_kind: ap_spec(AP-7)
+// test_kind: ap_spec(AP-7)  [api/02_error_codes]
 #[ test ]
 fn test_ap7_too_many_arguments_for_excess_positional_args()
 {
@@ -337,7 +336,7 @@ fn test_ap7_too_many_arguments_for_excess_positional_args()
 /// `.count` is registered with argument `n` of `Kind::Integer` and `ValidationRule::Min(1)`.
 /// Invoking `.count n::0` supplies a valid integer but violates the minimum. The semantic
 /// analyzer must produce `ErrorCode::ValidationRuleFailed`.
-// test_kind: ap_spec(AP-8)
+// test_kind: ap_spec(AP-8)  [api/02_error_codes]
 #[ test ]
 fn test_ap8_validation_rule_failed_for_constraint_violation()
 {
@@ -407,7 +406,7 @@ fn test_ap8_validation_rule_failed_for_constraint_violation()
 /// `optional = false`. Invoking `.auth` without providing `token` must produce
 /// `ErrorCode::ArgumentInteractiveRequired` — distinct from `ArgumentMissing` — to
 /// signal that the REPL should prompt the user for secure input.
-// test_kind: ap_spec(AP-9)
+// test_kind: ap_spec(AP-9)  [api/02_error_codes]
 #[ test ]
 fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
 {
@@ -448,7 +447,7 @@ fn test_ap9_argument_interactive_required_for_missing_interactive_arg()
 /// `.stub` is registered with a routine that returns `ErrorData` with
 /// `ErrorCode::CommandNotImplemented` — mirroring the CliBuilder stub pattern.
 /// Executing the command through the interpreter must surface that error code.
-// test_kind: ap_spec(AP-10)
+// test_kind: ap_spec(AP-10)  [api/02_error_codes]
 #[ test ]
 fn test_ap10_command_not_implemented_for_stub_routine()
 {
@@ -497,7 +496,7 @@ fn test_ap10_command_not_implemented_for_stub_routine()
 /// When `.greet ?` is processed, the semantic analyzer returns `HelpRequested`.
 /// The pipeline intercepts this and converts it to `Ok(CommandResult { success: true, ... })`
 /// containing the help text as output content.
-// test_kind: ap_spec(AP-11)
+// test_kind: ap_spec(AP-11)  [api/02_error_codes]
 #[ test ]
 fn test_ap11_help_requested_converted_to_successful_output()
 {
@@ -534,7 +533,7 @@ fn test_ap11_help_requested_converted_to_successful_output()
 ///
 /// A routine that returns `ErrorData` with `ErrorCode::InternalError` must surface
 /// that code through the interpreter.
-// test_kind: ap_spec(AP-12)
+// test_kind: ap_spec(AP-12)  [api/02_error_codes]
 #[ test ]
 fn test_ap12_internal_error_for_unexpected_failure()
 {
@@ -587,7 +586,7 @@ fn test_ap12_internal_error_for_unexpected_failure()
 ///
 /// Triggering a type conversion failure (e.g., `TypeError`) must produce
 /// `ErrorCode::TypeMismatch` via the `From<TypeError>` impl on `Error`.
-// test_kind: ap_spec(AP-13)
+// test_kind: ap_spec(AP-13)  [api/02_error_codes]
 #[ test ]
 fn test_ap13_type_mismatch_for_type_conversion_error()
 {
@@ -626,7 +625,7 @@ fn test_ap13_type_mismatch_for_type_conversion_error()
 ///
 /// Each `ErrorCode` variant must produce its documented `UNILANG_*` string
 /// representation via `Display` / `.to_string()`.
-// test_kind: ap_spec(AP-14)
+// test_kind: ap_spec(AP-14)  [api/02_error_codes]
 #[ test ]
 fn test_ap14_error_code_string_representations_match_catalog()
 {

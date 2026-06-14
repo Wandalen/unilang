@@ -5,7 +5,7 @@
 - **Purpose:** Verify the CommandStatus enum defined in `docs/type/004_command_status.md` provides correct lifecycle stage classification and serde behavior
 - **Responsibility:** Test cases confirming variant query methods, deprecation metadata, serde roundtrip for all forms
 - **In Scope:** Four variants (Active, Deprecated, Experimental, Internal), query methods, deprecation_info(), serde serialization/deserialization for both simple and map forms
-- **Out of Scope:** How status affects registry behavior (see `feature/01_command_registry.md`); help output formatting
+- **Out of Scope:** How status affects registry behavior (see `feature/001_command_registry.md`); help output formatting
 
 ### TC-1: Active variant is default and queryable
 

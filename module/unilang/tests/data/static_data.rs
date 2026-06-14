@@ -64,7 +64,7 @@
 use unilang::static_data::*;
 
 /// IN-2: Generated static data is accessible at runtime without parsing.
-// test_kind: in_spec(IN-2)
+// test_kind: in_spec(IN-2)  [invariant/06_build_runtime_separation]
 #[test]
 fn test_in2_static_data_type_conversion_accessible()
 {

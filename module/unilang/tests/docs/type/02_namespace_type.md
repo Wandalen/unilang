@@ -5,7 +5,7 @@
 - **Purpose:** Verify the NamespaceType validated newtype defined in `docs/type/002_namespace_type.md` enforces empty-or-dot-prefixed construction rules
 - **Responsibility:** Test cases confirming valid construction for both empty and dot-prefixed namespaces, non-dot rejection
 - **In Scope:** `NamespaceType::new()` validation, empty namespace special case (root-level commands), serde deserialization
-- **Out of Scope:** Namespace isolation in aggregation (see `feature/01_command_registry.md`)
+- **Out of Scope:** Namespace isolation in aggregation (see `feature/001_command_registry.md`)
 
 ### TC-1: Empty namespace is accepted (root-level commands)
 

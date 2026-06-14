@@ -48,7 +48,6 @@
 //!
 //! **Solution:** If multiple:true, storage MUST be Vec/List type
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentDefinition, CommandDefinition, Kind, ArgumentAttributes, OutputData };
 use unilang::interpreter::ExecutionContext;
@@ -84,7 +83,7 @@ fn create_command_with_parameter(
 }
 
 /// Helper: Create mock routine for runtime registration
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
 {
   Box::new( | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, unilang::data::ErrorData >
   {
@@ -149,7 +148,7 @@ fn test_detect_multiple_true_with_wrong_kind()
   );
 
   // This command should be REJECTED during registration
-  let result = registry.register_with_routine( &incorrect_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &incorrect_cmd, create_test_routine() );
 
   // Verify registration failed
   assert!(
@@ -187,7 +186,7 @@ fn test_validation_at_registration()
   );
 
   // Registry validation should catch this
-  let result = registry.register_with_routine( &invalid_cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &invalid_cmd, create_test_routine() );
 
   assert!(
     result.is_err(),

@@ -29,7 +29,6 @@
 //! will panic on degenerate input. Parser output is user-controlled and must
 //! be treated as untrusted even within internal analysis passes.
 
-#![ allow( deprecated ) ]
 
 use unilang::registry::CommandRegistry;
 use unilang::semantic::SemanticAnalyzer;

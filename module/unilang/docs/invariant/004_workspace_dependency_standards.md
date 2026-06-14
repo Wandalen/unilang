@@ -65,3 +65,9 @@ The workspace `Cargo.toml` and all library member crates MUST continuously compl
 |------|--------------|
 | `Cargo.toml` | Workspace dependency centralization |
 | `module/unilang/Cargo.toml` | Feature flag and dependency configuration |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/build/dependency_standards.rs` | R1–R4 compliance: version format, centralization, optional deps, no-op feature gate |

@@ -202,53 +202,6 @@ required-features = ["enabled"]
 
 
 
-[[test]]
-name = "command_loader_yaml"
-path = "tests/registry/command_loader_yaml.rs"
-
-[[test]]
-name = "command_loader_json"
-path = "tests/registry/command_loader_json.rs"
-required-features = ["json_parser"]
-
-[[test]]
-name = "command_loader_build_time"
-path = "tests/registry/command_loader_build_time.rs"
-required-features = ["json_parser"]
-
-[[test]]
-name = "command_loader_error"
-path = "tests/registry/command_loader_error.rs"
-required-features = ["json_parser"]
-
-[[test]]
-name = "cli_integration"
-path = "tests/cli/cli_integration.rs"
-
-[[test]]
-name = "centralized_validation"
-path = "tests/semantic/centralized_validation.rs"
-
-[[test]]
-name = "cli_help_invocation"
-path = "tests/help/cli_invocation.rs"
-
-[[test]]
-name = "rust_dsl_inline_closure"
-path = "tests/registry/rust_dsl_inline_closure.rs"
-required-features = ["json_parser"]
-
-[[test]]
-name = "static_const_constructor"
-path = "tests/registry/static_const_constructor.rs"
-
-[[test]]
-name = "data_model_features"
-path = "tests/data/data_model_features.rs"
-
-[[test]]
-name = "get_string_normalized"
-path = "tests/data/get_string_normalized.rs"
 
 # Performance tests excluded from regular 'cargo test' - run manually if needed
 # [[test]]

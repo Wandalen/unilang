@@ -13,7 +13,7 @@ For all command definitions loaded via build-time approaches (YAML/JSON single/m
 
 ### Enforcement Mechanism
 
-The build script (`build/main.rs`) orchestrates: discovery (`build/discovery.rs`) finds YAML/JSON files, parsing uses `serde_yaml_ng`/`serde_json` (build-only deps), validation runs via `include!("../../src/validation_core.rs")` (shared source, not shared linkage), and codegen (`build/codegen.rs`) writes Rust source to `OUT_DIR`. The generated file is `include!()`d by `src/static_data.rs` at compile time. Runtime code never imports `serde_yaml_ng` or `serde_json`.
+The build script (`build/main.rs`) orchestrates: discovery (`build/discovery.rs`) finds YAML/JSON files, parsing uses `serde_yaml_ng`/`serde_json` (build-only deps), validation runs via `include!("../../src/validation_core.rs")` (shared source, not shared linkage), and codegen (`build/codegen.rs`) writes Rust source to `OUT_DIR`. The generated file is `include!()`d by `src/static_data/` at compile time. Runtime code never imports `serde_yaml_ng` or `serde_json`.
 
 The `validation_core` module uses `include!()` in both `build/main.rs` and `src/validation_core.rs` to share validation logic without creating a runtime dependency on the build pipeline.
 
@@ -44,11 +44,11 @@ If YAML/JSON parsing crates leak into runtime: binary size increases (~500KB+ fo
 | File | Relationship |
 |------|--------------|
 | `build/main.rs` | Build-time orchestration |
-| `src/static_data.rs` | Runtime include!() of generated code |
+| `src/static_data/` | Runtime include!() of generated code |
 | `src/validation_core.rs` | Shared validation logic (include!() pattern) |
 
 ### Tests
 
 | File | Relationship |
 |------|--------------|
-| `tests/build/` | Build pipeline validation |
+| `tests/build/build_runtime_separation.rs` | IN-1..4: serde_yaml_ng/serde_json absent at runtime, static const access, validation identity |

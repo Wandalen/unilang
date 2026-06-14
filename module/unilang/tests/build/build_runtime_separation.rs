@@ -1,7 +1,7 @@
 //! Build-runtime separation invariant tests.
 //!
 //! Implements IN-1..IN-4 specification cases from
-//! `tests/docs/invariant/06_build_runtime_separation.md`.
+//! `tests/docs/invariant/006_build_runtime_separation.md`.
 //!
 //! Tests verify that the build-time/runtime separation boundary defined in
 //! `docs/invariant/006_build_runtime_separation.md` holds: YAML/JSON parsing
@@ -37,7 +37,7 @@
 /// to inspect only normal (runtime) edges — build-dependencies are excluded by `--edges=normal`.
 /// The `enabled` feature activates the runtime-only feature set; `approach_yaml_multi_build`
 /// (which pulls `yaml_parser`) is NOT active. Inspects stdout — exit code is irrelevant.
-// test_kind: in_spec(IN-1)
+// test_kind: in_spec(IN-1)  [invariant/06_build_runtime_separation]
 #[ test ]
 fn test_in1_runtime_deps_exclude_serde_yaml_ng()
 {
@@ -76,7 +76,7 @@ fn test_in1_runtime_deps_exclude_serde_yaml_ng()
 /// Reads fields directly with no YAML parsing call in between. This confirms that
 /// runtime code accessing the static registry incurs zero parsing overhead; all data
 /// is encoded into the binary by `build/main.rs` during `cargo build`.
-// test_kind: in_spec(IN-2)
+// test_kind: in_spec(IN-2)  [invariant/06_build_runtime_separation]
 #[ cfg( feature = "static_registry" ) ]
 #[ test ]
 #[ allow( clippy::assertions_on_constants ) ] // IN-2: asserts const-derived defaults — vacuousness is intentional
@@ -110,7 +110,7 @@ fn test_in2_static_data_accessible_without_parsing()
 /// dependency-free by design so it can be `include!()`d by build scripts when needed;
 /// at runtime it is exposed via the normal module path. Correct results here confirm
 /// the validation logic is accessible at runtime without linking any build-only dependencies.
-// test_kind: in_spec(IN-3)
+// test_kind: in_spec(IN-3)  [invariant/06_build_runtime_separation]
 #[ test ]
 fn test_in3_validation_core_identity()
 {
@@ -146,7 +146,7 @@ fn test_in3_validation_core_identity()
 /// JSON parsing (via `serde_json`) is confined to build-time codegen only — loading JSON command
 /// manifests during `cargo build`. It must not appear in the runtime binary produced when
 /// only the `enabled` feature is active.
-// test_kind: in_spec(IN-4)
+// test_kind: in_spec(IN-4)  [invariant/06_build_runtime_separation]
 #[ test ]
 fn test_in4_runtime_deps_exclude_serde_json()
 {

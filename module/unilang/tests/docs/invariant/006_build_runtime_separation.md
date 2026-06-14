@@ -16,7 +16,7 @@
 ### IN-2: Generated static data is accessible at runtime without parsing
 
 - **Given:** A YAML command definition processed by `build/main.rs` during `cargo build`
-- **When:** Runtime code accesses the static registry via `include!()` in `src/static_data.rs`
+- **When:** Runtime code accesses the static registry via `include!()` in `src/static_data/`
 - **Then:** Command definitions are available as compile-time constants; no parsing function is called at runtime
 
 ### IN-3: validation_core shared logic produces identical results in both contexts

@@ -68,7 +68,7 @@ use unilang::prelude::*;
 ///
 /// This is CORRECT behavior per H2 - validation at the earliest possible point.
 /// The builder validates, so `register()` doesn't need to re-validate.
-// test_kind: ft_spec(FT-3)
+// test_kind: ft_spec(FT-3)  [feature/01_command_registry]
 #[cfg(feature = "static_registry")]
 #[test]
 fn test_static_register_validates_command_name()
@@ -243,7 +243,7 @@ fn test_static_registry_no_help_for_help()
 /// FT-4: Alias resolution returns canonical command definition.
 ///
 /// Command aliases should be resolvable for static commands.
-// test_kind: ft_spec(FT-4)
+// test_kind: ft_spec(FT-4)  [feature/01_command_registry]
 #[cfg(feature = "static_registry")]
 #[test]
 fn test_alias_resolution_works_for_static()

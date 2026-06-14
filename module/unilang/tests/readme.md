@@ -33,7 +33,6 @@ tests/
 ├── regression.rs       # Regression domain entry point
 ├── semantic.rs         # Semantic domain entry point
 ├── system.rs           # System domain entry point
-├── tools.rs            # Tools domain entry point
 ├── validation.rs       # Validation domain entry point
 ├── acceptance/         # User-facing acceptance criteria tests
 ├── api/                # Public API contract tests (AP- spec cases)
@@ -84,7 +83,7 @@ tests/
 
 - **`validation/`**: CI-level crate-wide property tests (clippy, ABI, feature gates, PHF re-export)
 - **`build/`**: Build-time code generation, PHF codegen, static registry creation
-- **`api/`**: Public API contract tests — AP-1..8 spec cases from `tests/docs/api/01_public_types.md`
+- **`api/`**: Public API contract tests — AP-1..8 spec cases from `tests/docs/api/001_public_types.md`
 
 ## Test Methodology
 
@@ -171,7 +170,6 @@ Each top-level `.rs` file is a domain entry point that compiles as its own test 
 | `regression.rs` | Regression domain entry point: critical bug prevention tests |
 | `semantic.rs` | Semantic domain entry point: validation, argument binding, type checking |
 | `system.rs` | System domain entry point: cross-cutting end-to-end workflow tests |
-| `tools.rs` | Tools domain entry point: test infrastructure tool tests (QualityAssessor) |
 | `validation.rs` | Validation domain entry point: CI-level crate-wide property tests |
 
 ### Support Files

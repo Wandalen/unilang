@@ -12,7 +12,7 @@ use unilang::data::{ VersionType, CommandStatus };
 
 /// TC-1 / TC-3 / TC-4: Non-empty version strings are accepted (including single char
 /// and arbitrary non-empty formats).
-// test_kind: tc_spec(TC-1, TC-3, TC-4)
+// test_kind: tc_spec(TC-1, TC-3, TC-4)  [type/03_version_type]
 #[ test ]
 fn test_tc1_tc3_tc4_version_non_empty_valid()
 {
@@ -46,7 +46,7 @@ fn test_tc1_tc3_tc4_version_non_empty_valid()
 }
 
 /// TC-2: Empty string is rejected.
-// test_kind: tc_spec(TC-2)
+// test_kind: tc_spec(TC-2)  [type/03_version_type]
 #[ test ]
 fn test_tc2_version_empty_rejected()
 {
@@ -119,7 +119,7 @@ fn version_serde_json_deserialize_valid()
 }
 
 /// TC-5: Serde deserialization rejects empty version string.
-// test_kind: tc_spec(TC-5)
+// test_kind: tc_spec(TC-5)  [type/03_version_type]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc5_version_serde_rejects_empty()
@@ -159,7 +159,7 @@ fn version_serde_yaml_ng_deserialize_rejects_empty()
 //
 
 /// TC-1: Active variant is default and queryable.
-// test_kind: tc_spec(TC-1)
+// test_kind: tc_spec(TC-1)  [type/04_command_status]
 #[ test ]
 fn test_tc1_command_status_active()
 {
@@ -174,7 +174,7 @@ fn test_tc1_command_status_active()
 }
 
 /// TC-6: Experimental variant is queryable.
-// test_kind: tc_spec(TC-6)
+// test_kind: tc_spec(TC-6)  [type/04_command_status]
 #[ test ]
 fn test_tc6_command_status_experimental()
 {
@@ -189,7 +189,7 @@ fn test_tc6_command_status_experimental()
 }
 
 /// TC-7: Internal variant is queryable.
-// test_kind: tc_spec(TC-7)
+// test_kind: tc_spec(TC-7)  [type/04_command_status]
 #[ test ]
 fn test_tc7_command_status_internal()
 {
@@ -204,7 +204,7 @@ fn test_tc7_command_status_internal()
 }
 
 /// TC-2: Deprecated variant carries metadata.
-// test_kind: tc_spec(TC-2)
+// test_kind: tc_spec(TC-2)  [type/04_command_status]
 #[ test ]
 fn test_tc2_command_status_deprecated_carries_metadata()
 {
@@ -278,7 +278,7 @@ fn command_status_clone_and_equality()
 }
 
 /// TC-3: Simple variant serde roundtrip (lowercase string).
-// test_kind: tc_spec(TC-3)
+// test_kind: tc_spec(TC-3)  [type/04_command_status]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc3_command_status_serde_json_active()
@@ -319,7 +319,7 @@ fn command_status_serde_json_internal()
 }
 
 /// TC-4: Deprecated variant serde roundtrip (map form).
-// test_kind: tc_spec(TC-4)
+// test_kind: tc_spec(TC-4)  [type/04_command_status]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc4_command_status_serde_json_deprecated()
@@ -370,7 +370,7 @@ fn command_status_serde_json_backward_compatible()
 }
 
 /// TC-5: Case-insensitive deserialization.
-// test_kind: tc_spec(TC-5)
+// test_kind: tc_spec(TC-5)  [type/04_command_status]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc5_command_status_serde_case_insensitive()

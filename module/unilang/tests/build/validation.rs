@@ -65,7 +65,7 @@ use unilang::validation_core::{
 ///
 /// Verify that the validation functions correctly reject the invalid fixture.
 /// This simulates what build.rs should do when processing `invalid_missing_dot.yaml`
-// test_kind: ft_spec(FT-9), in_spec(IN-3)
+// test_kind: ft_spec(FT-9)  [feature/01_command_registry], in_spec(IN-3)  [invariant/05_command_naming]
 #[test]
 fn test_ft9_in3_build_time_dot_prefix_rejected()
 {
@@ -239,7 +239,7 @@ fn test_build_rs_integration_note()
 /// The `validate_command_name_core` function enforces this rule in both build.rs
 /// and runtime contexts. A manifest entry like `build` (no dot) must be rejected
 /// with an actionable error that includes the invalid name and fix guidance.
-// test_kind: in_spec(IN-4)
+// test_kind: in_spec(IN-4)  [invariant/05_command_naming]
 #[test]
 fn test_in4_build_time_validation_rejects_missing_dot_prefix()
 {

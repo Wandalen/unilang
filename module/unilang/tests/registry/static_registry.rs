@@ -12,7 +12,6 @@
 //!
 //! All tests use real implementations without mocking.
 
-#![ allow( deprecated ) ]
 
 use unilang::prelude::*;
 use unilang::data::CommandDefinition;
@@ -243,7 +242,7 @@ fn test_static_command_registry_from_commands()
 }
 
 /// FT-1: Static PHF registry lookup returns registered command.
-// test_kind: ft_spec(FT-1)
+// test_kind: ft_spec(FT-1)  [feature/01_command_registry]
 #[test]
 fn test_static_command_lookup_functionality()
 {
@@ -349,7 +348,7 @@ fn test_static_command_registry_performance_characteristics()
 }
 
 /// FT-2: Dynamic runtime registration makes command accessible alongside static commands.
-// test_kind: ft_spec(FT-2)
+// test_kind: ft_spec(FT-2)  [feature/01_command_registry]
 #[test]
 fn test_static_command_registry_with_dynamic_commands()
 {
@@ -421,7 +420,7 @@ fn test_static_command_registry_static_commands_count()
 ///
 /// Demonstrates that `.test.version` and `.test.dynamic_only` are distinct via
 /// namespace isolation, and that mode switching preserves lookup behavior.
-// test_kind: ft_spec(FT-6, FT-7)
+// test_kind: ft_spec(FT-6, FT-7)  [feature/01_command_registry]
 #[test]
 fn test_static_command_registry_registry_mode_behavior()
 {

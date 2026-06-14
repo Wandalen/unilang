@@ -76,3 +76,9 @@ Term collision causes: (1) ambiguous API contracts, (2) incorrect test assumptio
 | File | Relationship |
 |------|--------------|
 | `src/lib.rs` | Module structure reflecting actor boundaries |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/system/vocabulary_enforcement.rs` | Canonical actor/term usage enforced in public API |

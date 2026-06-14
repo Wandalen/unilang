@@ -16,7 +16,7 @@ impl SemanticAnalyzer< '_ >
       {
         if !Self::apply_validation_rule( value, rule )
         {
-          let error_message = Self::format_validation_error( &arg_def.name, value, rule );
+          let error_message = Self::format_validation_error( &arg_def.name, value, rule, arg_def.attributes.sensitive );
           return Err( Error::Execution( ErrorData::new(
             ErrorCode::ValidationRuleFailed,
             error_message,
@@ -32,25 +32,34 @@ impl SemanticAnalyzer< '_ >
   ///
   /// This provides user-friendly error messages that explain exactly what validation
   /// rule failed, what value was provided, and what was expected.
-  pub( in super ) fn format_validation_error( arg_name : &str, value : &Value, rule : &crate::data::ValidationRule ) -> String
+  /// When `sensitive` is true the raw value is replaced with `[REDACTED]` to prevent
+  /// credential leakage in error logs (NFR-SEC-1).
+  pub( in super ) fn format_validation_error( arg_name : &str, value : &Value, rule : &crate::data::ValidationRule, sensitive : bool ) -> String
   {
     use crate::data::ValidationRule;
 
-    let value_str = match value
+    let value_str = if sensitive
     {
-      Value::String( s ) => format!( "\"{}\"", s ),
-      Value::Integer( i ) => i.to_string(),
-      Value::Float( f ) => f.to_string(),
-      Value::Boolean( b ) => b.to_string(),
-      Value::List( l ) => format!( "[{} items]", l.len() ),
-      Value::Path( p ) | Value::File( p ) | Value::Directory( p ) => format!( "\"{}\"", p.display() ),
-      Value::Enum( s ) | Value::JsonString( s ) => format!( "\"{}\"", s ),
-      Value::Url( u ) => format!( "\"{}\"", u ),
-      Value::DateTime( dt ) => format!( "\"{}\"", dt.to_rfc3339() ),
-      Value::Pattern( r ) => format!( "\"{}\"", r.as_str() ),
-      Value::Map( m ) => format!( "{{{} entries}}", m.len() ),
-      #[ cfg( feature = "json_parser" ) ]
-      Value::Object( o ) => o.to_string(),
+      "[REDACTED]".to_string()
+    }
+    else
+    {
+      match value
+      {
+        Value::String( s ) => format!( "\"{}\"", s ),
+        Value::Integer( i ) => i.to_string(),
+        Value::Float( f ) => f.to_string(),
+        Value::Boolean( b ) => b.to_string(),
+        Value::List( l ) => format!( "[{} items]", l.len() ),
+        Value::Path( p ) | Value::File( p ) | Value::Directory( p ) => format!( "\"{}\"", p.display() ),
+        Value::Enum( s ) | Value::JsonString( s ) => format!( "\"{}\"", s ),
+        Value::Url( u ) => format!( "\"{}\"", u ),
+        Value::DateTime( dt ) => format!( "\"{}\"", dt.to_rfc3339() ),
+        Value::Pattern( r ) => format!( "\"{}\"", r.as_str() ),
+        Value::Map( m ) => format!( "{{{} entries}}", m.len() ),
+        #[ cfg( feature = "json_parser" ) ]
+        Value::Object( o ) => o.to_string(),
+      }
     };
 
     match rule

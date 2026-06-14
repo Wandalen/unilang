@@ -22,7 +22,7 @@ Demonstrates:
 - ✅ **Boundary testing** - Edge cases and limits
 - ✅ **Error condition testing** - Comprehensive error scenarios
 - ✅ **Property-based testing** - Robustness with generated inputs
-- ✅ **Mock and dependency injection** - Proper mocking patterns
+- ✅ **Test routine injection** - Injecting test routines to verify interactions
 - ✅ **Test helper functions** - Reusable utilities
 
 **Key Patterns:**
@@ -60,7 +60,7 @@ Demonstrates:
 fn test_complete_command_processing_pipeline()
 {
   // 1. Parse command
-  let instruction = parser.parse_single_instruction(input_command).expect(...);
+  let instruction = parser.parse_repl_input(input_command).expect(...);
 
   // 2. Semantic analysis
   let verified_commands = analyzer.analyze().expect(...);
@@ -127,7 +127,7 @@ fn regression_task_024_multiple_parameter_collection_exact_reproduction()
   // FIX IMPLEMENTED: Modified collection logic for backward compatibility
 
   // Execute the EXACT failing scenario from Task 024
-  let instruction = parser.parse_single_instruction(
+  let instruction = parser.parse_repl_input(
     r#".run command::"cargo build" command::"echo hello" command::"cargo clippy""#
   ).expect("Should parse the exact Task 024 command");
 
@@ -201,22 +201,22 @@ let recovery_result = system.process_valid_input();
 assert!(recovery_result.is_ok(), "System should recover from errors");
 ```
 
-### 3. Mock and Test Double Patterns
+### 3. Test Routine and Interaction Verification Patterns
 
-**Dependency Injection for Testing**
+**Routine Injection for Testing**
 ```rust
-let mock_routine = Box::new(|cmd: VerifiedCommand, _ctx: ExecutionContext| {
-  // Mock implementation that can be verified
-  Ok(OutputData { content: "mock_response".to_string(), format: "text".to_string() })
+let test_routine = Box::new(|cmd: VerifiedCommand, _ctx: ExecutionContext| {
+  // Test routine implementation that can be verified
+  Ok(OutputData { content: "test_response".to_string(), format: "text".to_string() })
 });
 
-registry.register_with_routine(&cmd, mock_routine).unwrap();
+registry.register_with_routine(&cmd, test_routine).unwrap();
 ```
 
 **Interaction Verification**
 ```rust
 let call_count = Arc::new(Mutex::new(0));
-let mock_routine = Box::new(move |cmd: VerifiedCommand, _ctx: ExecutionContext| {
+let test_routine = Box::new(move |cmd: VerifiedCommand, _ctx: ExecutionContext| {
   *call_count_clone.lock().unwrap() += 1;
   // Verify parameters passed correctly
   assert_eq!(cmd.definition.name, ".expected_command");

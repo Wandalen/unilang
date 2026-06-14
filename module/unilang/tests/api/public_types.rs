@@ -1,6 +1,6 @@
 //! API public types contract tests.
 //!
-//! Implements AP-1..10 specification cases from `tests/docs/api/01_public_types.md`.
+//! Implements AP-1..10 specification cases from `tests/docs/api/001_public_types.md`.
 //!
 //! ## Compile-Time Cases (AP-1, AP-5)
 //!
@@ -36,11 +36,10 @@ use unilang::prelude::HelpVerbosity;
 ///
 /// Named argument syntax in unilang uses `name::"value"` (double colon, quoted value).
 /// The spec writes `msg::hello` as shorthand but the parser requires quotes around the value.
-// test_kind: ap_spec(AP-2)
+// test_kind: ap_spec(AP-2)  [api/01_public_types]
 #[ test ]
 fn test_pipeline_round_trip_correct_arguments()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
 
   let echo_command = CommandDefinition::former()
@@ -81,7 +80,6 @@ fn test_pipeline_round_trip_correct_arguments()
     Ok( OutputData { content : msg, format : "text".to_string(), execution_time_ms : None } )
   });
 
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &echo_command, routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
@@ -101,7 +99,7 @@ fn test_pipeline_round_trip_correct_arguments()
 ///
 /// Verifies that every variant of the `Kind` enum can be created and used in an
 /// `ArgumentDefinition` without panicking.
-// test_kind: ap_spec(AP-3)
+// test_kind: ap_spec(AP-3)  [api/01_public_types]
 #[ test ]
 fn test_all_15_kind_variants_constructable()
 {
@@ -139,11 +137,10 @@ fn test_all_15_kind_variants_constructable()
 /// AP-4: CommandRegistry lookup returns the expected definition.
 ///
 /// Verifies that `registry.command()` returns the registered command with its correct description.
-// test_kind: ap_spec(AP-4)
+// test_kind: ap_spec(AP-4)  [api/01_public_types]
 #[ test ]
 fn test_registry_lookup_returns_expected_definition()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
 
   let query_command = CommandDefinition::former()
@@ -158,7 +155,6 @@ fn test_registry_lookup_returns_expected_definition()
     Ok( OutputData { content : String::new(), format : "text".to_string(), execution_time_ms : None } )
   );
 
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &query_command, noop ).unwrap();
 
   let definition = registry.command( ".query" );
@@ -176,7 +172,7 @@ fn test_registry_lookup_returns_expected_definition()
 ///
 /// Verifies that `From<&StaticCommandDefinition>` produces a `CommandDefinition` with identical
 /// observable attributes: name string and argument count.
-// test_kind: ap_spec(AP-6)
+// test_kind: ap_spec(AP-6)  [api/01_public_types]
 #[ test ]
 fn test_static_to_dynamic_conversion_preserves_attributes()
 {
@@ -247,7 +243,7 @@ fn test_static_to_dynamic_conversion_preserves_attributes()
 /// AP-7 describes a JSON serde round-trip with a `command_name` field. The current
 /// `OutputData` struct has `content`, `format`, and `execution_time_ms` fields without
 /// serde derives. This test verifies the actual API field contract.
-// test_kind: ap_spec(AP-7)
+// test_kind: ap_spec(AP-7)  [api/01_public_types]
 #[ test ]
 fn test_output_data_field_access()
 {
@@ -280,7 +276,7 @@ fn test_output_data_field_access()
 ///
 /// This test mutates a process-level env var. nextest runs each test in a separate
 /// process, so env var mutation does not affect sibling tests.
-// test_kind: ap_spec(AP-8)
+// test_kind: ap_spec(AP-8)  [api/01_public_types]
 #[ test ]
 fn test_help_verbosity_env_var_recognized()
 {
@@ -306,11 +302,10 @@ fn test_help_verbosity_env_var_recognized()
 ///
 /// Argv-based processing preserves spaces within argument values because the OS
 /// keeps them in a single argv element. The pipeline must not re-split them.
-// test_kind: ap_spec(AP-9)
+// test_kind: ap_spec(AP-9)  [api/01_public_types]
 #[ test ]
 fn test_ap9_process_command_from_argv_preserves_boundaries()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
 
   let echo_command = CommandDefinition::former()
@@ -351,7 +346,6 @@ fn test_ap9_process_command_from_argv_preserves_boundaries()
     Ok( OutputData { content : msg, format : "text".to_string(), execution_time_ms : None } )
   });
 
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &echo_command, routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );
@@ -375,11 +369,10 @@ fn test_ap9_process_command_from_argv_preserves_boundaries()
 /// Batch mode must execute ALL commands without short-circuiting on failures.
 /// Three commands `[".nonexistent", ".ok", ".also_nonexistent"]` must produce
 /// exactly 3 results: `[Err, Ok, Err]`.
-// test_kind: ap_spec(AP-10)
+// test_kind: ap_spec(AP-10)  [api/01_public_types]
 #[ test ]
 fn test_ap10_process_batch_collects_all_results()
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
 
   let ok_command = CommandDefinition::former()
@@ -394,7 +387,6 @@ fn test_ap10_process_batch_collects_all_results()
     Ok( OutputData { content : "ok".to_string(), format : "text".to_string(), execution_time_ms : None } )
   );
 
-  #[ allow( deprecated ) ]
   registry.register_with_routine( &ok_command, ok_routine ).unwrap();
 
   let pipeline = Pipeline::new( registry );

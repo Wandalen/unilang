@@ -149,14 +149,16 @@ fn test_load_command_definitions_from_json_empty()
 #[test]
 fn test_resolve_routine_link_placeholder()
 {
-  // Test the current placeholder implementation
+  // resolve_routine_link must succeed at load time (registry can be built), but the
+  // returned stub must fail at call time with CommandNotImplemented — not silently
+  // return empty output, which would hide the unimplemented gap from callers.
   let result = resolve_routine_link("some.routine.link");
-  assert!(result.is_ok());
-  
-  // The placeholder routine should be callable
+  assert!(result.is_ok(), "resolve_routine_link must return Ok (load must succeed)");
+
   let routine = result.unwrap();
-  let dummy_command = unilang::semantic::VerifiedCommand {
-    definition: unilang::data::CommandDefinition::former()
+  let dummy_command = unilang::semantic::VerifiedCommand
+  {
+    definition : unilang::data::CommandDefinition::former()
       .name(".test")
       .namespace(String::new())
       .description(String::new())
@@ -173,11 +175,22 @@ fn test_resolve_routine_link_placeholder()
       .examples(vec![])
       .routine_link(Some(String::new()))
       .end(),
-    arguments: std::collections::HashMap::new(),
+    arguments : std::collections::HashMap::new(),
   };
   let context = unilang::interpreter::ExecutionContext::default();
-  let result = routine(dummy_command, context);
-  assert!(result.is_ok());
+  let call_result = routine(dummy_command, context);
+  assert!(call_result.is_err(), "stub routine must return Err at call time");
+  let err = call_result.unwrap_err();
+  assert_eq!(
+    err.code,
+    unilang::data::ErrorCode::CommandNotImplemented,
+    "stub must report CommandNotImplemented, not a generic error"
+  );
+  assert!(
+    err.message.contains("some.routine.link"),
+    "error message must include the link name; got: {}",
+    err.message
+  );
 }
 
 #[test]

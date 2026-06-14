@@ -28,8 +28,8 @@
 ### IN-4: Panicking command handler is caught and returned as structured error
 
 - **Given:** A command `.panic_cmd` whose handler closure calls `panic!("intentional")`
-- **When:** `pipeline.run(".panic_cmd")` is called
-- **Then:** Returns `Err` with `error_data.code == ErrorCode::InternalError` rather than unwinding the caller stack; the process does not abort (panics are caught via `std::panic::catch_unwind` in `SemanticAnalyzer::analyze` and mapped to `InternalError`)
+- **When:** `pipeline.process_command(".panic_cmd", context)` is called
+- **Then:** `result.success == false`; `result.error` is `Some(msg)` where `msg.contains("panicked")`; the caller stack is not unwound; the process does not abort (handler panics are caught via `std::panic::catch_unwind` in `Interpreter::run` and mapped to `ErrorCode::InternalError`)
 
 ### IN-5: Zero-feature build compiles without errors
 

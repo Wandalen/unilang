@@ -69,5 +69,6 @@ The framework **must** provide argv-based parsing and execution APIs (`Pipeline:
 
 | File | Relationship |
 |------|--------------|
+| `tests/pipeline/pipeline_core.rs` | FR-PIPE-1..4: process, batch, sequence, argv spec cases |
 | `tests/cli/` | CLI integration tests |
 | `tests/interpreter/` | Interpreter execution tests |

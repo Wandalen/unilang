@@ -33,7 +33,6 @@
 //! Currently `register_with_routine()` returns Result, so these should pass.
 //! After refactoring, `register()` should also return Result<>.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ CommandDefinition, OutputData };
 use unilang::registry::CommandRegistry;
@@ -51,7 +50,7 @@ fn create_test_command( name : &str ) -> CommandDefinition
 }
 
 /// Helper: Create mock routine
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
 {
   Box::new( | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, unilang::data::ErrorData >
   {
@@ -70,7 +69,7 @@ fn test_registration_returns_result()
   let cmd = create_test_command( ".test" );
 
   // Registration should return Result type
-  let result = registry.register_with_routine( &cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &cmd, create_test_routine() );
 
   // Verify it's a Result (can use ? operator)
   assert!(
@@ -104,7 +103,7 @@ fn test_successful_registration_returns_ok()
   let mut registry = CommandRegistry::new();
   let cmd = create_test_command( ".deploy" );
 
-  let result = registry.register_with_routine( &cmd, create_mock_routine() );
+  let result = registry.register_with_routine( &cmd, create_test_routine() );
 
   // Should return Ok for successful registration
   assert!(
@@ -135,8 +134,8 @@ fn test_error_propagation_with_question_mark()
     let cmd2 = create_test_command( ".second" );
 
     // Using ? operator for error propagation
-    registry.register_with_routine( &cmd1, create_mock_routine() )?;
-    registry.register_with_routine( &cmd2, create_mock_routine() )?;
+    registry.register_with_routine( &cmd1, create_test_routine() )?;
+    registry.register_with_routine( &cmd2, create_test_routine() )?;
 
     Ok( () )
   }
@@ -166,11 +165,11 @@ fn test_registration_error_types()
   let cmd = create_test_command( ".config" );
 
   // First registration succeeds
-  registry.register_with_routine( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_test_routine() )
     .expect( "First registration should succeed" );
 
   // Duplicate registration should error
-  let duplicate_result = registry.register_with_routine( &cmd, create_mock_routine() );
+  let duplicate_result = registry.register_with_routine( &cmd, create_test_routine() );
 
   if let Err( error ) = duplicate_result
   {

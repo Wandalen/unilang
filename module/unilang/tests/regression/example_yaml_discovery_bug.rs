@@ -30,7 +30,6 @@
 //! `unilang.commands.yaml` or `UNILANG_STATIC_COMMANDS_PATH`.
 
 #![ allow( clippy::unnecessary_wraps ) ]
-#![ allow( deprecated ) ]
 
 use unilang::{ CommandRegistry, Pipeline };
 

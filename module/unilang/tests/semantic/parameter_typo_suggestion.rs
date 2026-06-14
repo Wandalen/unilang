@@ -130,7 +130,7 @@ fn create_verbose_command() -> CommandDefinition
 }
 
 /// FT-2: Unknown parameter produces error with Levenshtein suggestion.
-// test_kind: ft_spec(FT-2)
+// test_kind: ft_spec(FT-2)  [feature/02_argument_system]
 #[test]
 fn test_typo_suggestion_for_required_parameter()
 {

@@ -1,6 +1,6 @@
 //! Governing principles invariant tests.
 //!
-//! Implements IN-1..5 specification cases from `tests/docs/invariant/03_governing_principles.md`.
+//! Implements IN-1..5 specification cases from `tests/docs/invariant/003_governing_principles.md`.
 //!
 //! ## Compile-Time Case (IN-2)
 //!
@@ -10,7 +10,6 @@
 
 // IN-2: Compile-time only — type-state builder enforces required fields at compile time.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, ErrorCode, Kind, OutputData };
 use unilang::data::ErrorData;
@@ -24,7 +23,7 @@ use unilang::pipeline::Pipeline;
 ///
 /// An unparseable token like `"@invalid!command"` must produce a `ParseError` variant
 /// from the Parser, not from later stages. The error is caught early.
-// test_kind: in_spec(IN-1)
+// test_kind: in_spec(IN-1)  [invariant/03_governing_principles]
 #[ test ]
 fn test_in1_fail_fast_malformed_input_rejected_at_parse_stage()
 {
@@ -52,7 +51,7 @@ fn test_in1_fail_fast_malformed_input_rejected_at_parse_stage()
 /// `CommandRegistry::new()` does pre-register a `.help` system command (by design, FR-HELP-6).
 /// The spec intent is that no OTHER implicit commands exist beyond the documented auto-help.
 /// We verify that truly arbitrary command names are absent.
-// test_kind: in_spec(IN-3)
+// test_kind: in_spec(IN-3)  [invariant/03_governing_principles]
 #[ test ]
 fn test_in3_no_implicit_magic_no_hidden_commands()
 {
@@ -80,7 +79,7 @@ fn test_in3_no_implicit_magic_no_hidden_commands()
 /// Note: `??` as a bare token is a parser-level restriction (the `?` help operator must
 /// be the last token, so `??` is rejected by the parser before reaching semantics).
 /// The two working routes are `?` (parser-level operator) and `.cmd.help` (auto-registered).
-// test_kind: in_spec(IN-4)
+// test_kind: in_spec(IN-4)  [invariant/03_governing_principles]
 #[ test ]
 fn test_in4_consistent_help_access_three_routes_equivalent()
 {
@@ -156,7 +155,7 @@ fn test_in4_consistent_help_access_three_routes_equivalent()
 ///
 /// After `.dup` is registered once, a second registration attempt with the same name
 /// must fail with `ErrorCode::CommandAlreadyExists`.
-// test_kind: in_spec(IN-5)
+// test_kind: in_spec(IN-5)  [invariant/03_governing_principles]
 #[ test ]
 fn test_in5_single_source_of_truth_duplicate_registration_rejected()
 {

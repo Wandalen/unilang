@@ -25,7 +25,7 @@ fn test_routine( _cmd : unilang::semantic::VerifiedCommand, _ctx : ExecutionCont
 }
 
 /// FT-6: `.cmd.help` command is automatically available and returns help.
-// test_kind: ft_spec(FT-6)
+// test_kind: ft_spec(FT-6)  [feature/04_help_system]
 #[ test ]
 fn test_mandatory_help_counterpart_generation()
 {
@@ -431,7 +431,7 @@ fn test_help_content_comprehensive()
 /// registration in `register_mandatory_global_help_command()`; `register_with_routine`
 /// for `.help` always fails silently (suppressed at `lib.rs:150`).
 ///
-// test_kind: ft_spec(FT-8), bug_reproducer(BUG-102)
+// test_kind: ft_spec(FT-8)  [feature/04_help_system], bug_reproducer(BUG-102)
 #[ test ]
 fn test_help_not_self_referential_bug_102()
 {

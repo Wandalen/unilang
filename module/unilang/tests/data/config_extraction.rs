@@ -324,10 +324,8 @@ fn extract_string_array_missing_key_returns_none()
 
 /// Custom source type for testing generics.
 #[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 enum TestSource
 {
-  Default,
   Cli,
   Env,
 }

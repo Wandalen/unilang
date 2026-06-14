@@ -10,7 +10,6 @@
 #![ allow( clippy::uninlined_format_args ) ]
 #![ allow( clippy::map_unwrap_or ) ]
 
-#![ allow( deprecated ) ]
 
 use unilang::{ CommandDefinition, CommandRegistry, Pipeline, ExecutionContext, VerifiedCommand, OutputData, ErrorData };
 

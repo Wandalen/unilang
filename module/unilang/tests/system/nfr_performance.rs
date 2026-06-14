@@ -1,6 +1,6 @@
 //! NFR performance tests: static registry startup cost and lookup throughput.
 //!
-//! Implements IN-1 and IN-2 from `tests/docs/invariant/02_non_functional_requirements.md`.
+//! Implements IN-1 and IN-2 from `tests/docs/invariant/002_non_functional_requirements.md`.
 //!
 //! Both tests require `static_registry` feature (PHF-backed registries).
 //! They are skipped at compile time when the feature is absent.
@@ -13,7 +13,7 @@
 /// the architectural guarantee: the map is accessible without any setup call, and the
 /// first access is as fast as any subsequent access.
 ///
-/// Spec: invariant/02_non_functional_requirements.md § IN-1
+/// Spec: invariant/002_non_functional_requirements.md § IN-1
 // test_kind: in_spec(IN-1)  [invariant/02_non_functional_requirements]
 #[ cfg( feature = "static_registry" ) ]
 #[ test ]
@@ -61,7 +61,7 @@ fn test_in1_static_registry_startup_zero_cost()
 /// PHF lookup cost is two hash operations regardless of map size; the threshold is
 /// a floor test against catastrophic regression, not a rigorous p99 benchmark.
 ///
-/// Spec: invariant/02_non_functional_requirements.md § IN-2
+/// Spec: invariant/002_non_functional_requirements.md § IN-2
 // test_kind: in_spec(IN-2)  [invariant/02_non_functional_requirements]
 #[ cfg( feature = "static_registry" ) ]
 #[ test ]

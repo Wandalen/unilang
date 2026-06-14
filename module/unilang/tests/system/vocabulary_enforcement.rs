@@ -1,6 +1,6 @@
 //! System actor vocabulary enforcement tests.
 //!
-//! Implements IN-1..3 specification cases from `tests/docs/invariant/01_system_actors_vocabulary.md`.
+//! Implements IN-1..3 specification cases from `tests/docs/invariant/001_system_actors_vocabulary.md`.
 //!
 //! Tests verify that the canonical actor taxonomy defined in
 //! `docs/invariant/001_system_actors_vocabulary.md` is enforced in source code and
@@ -38,7 +38,7 @@ fn count_pattern_in_rs_files( dir : &str, pattern : &str ) -> usize
 /// Scans `src/` for Rust type declarations (`struct Executor`, `enum Executor`,
 /// `type Executor`) only — incidental word matches (comments, variable names) are
 /// excluded by the specific pattern.
-// test_kind: in_spec(IN-1)
+// test_kind: in_spec(IN-1)  [invariant/01_system_actors_vocabulary]
 #[ test ]
 fn test_in1_executor_synonym_absent_as_type_definition()
 {
@@ -61,7 +61,7 @@ fn test_in1_executor_synonym_absent_as_type_definition()
 /// The `docs/invariant/001_system_actors_vocabulary.md` file must enumerate all three
 /// categories from the canonical taxonomy: Human Actors, External System Actors, and
 /// Internal System Actors.
-// test_kind: in_spec(IN-2)
+// test_kind: in_spec(IN-2)  [invariant/01_system_actors_vocabulary]
 #[ test ]
 fn test_in2_actor_taxonomy_contains_all_three_categories()
 {
@@ -100,13 +100,12 @@ fn test_in2_actor_taxonomy_contains_all_three_categories()
 ///
 /// Compile-time name enforcement is stronger than a grep test because it fails at build
 /// time rather than at test runtime, and it cannot produce false positives.
-// test_kind: in_spec(IN-3)
+// test_kind: in_spec(IN-3)  [invariant/01_system_actors_vocabulary]
 #[ test ]
 fn test_in3_semantic_analyzer_is_canonical_name()
 {
   // Using SemanticAnalyzer proves the canonical name exists in the public API.
   // This test compiles only if the struct is exported under this exact name.
-  #[ allow( deprecated ) ]
   let registry = unilang::registry::CommandRegistry::new();
   let instructions : &[ unilang_parser::GenericInstruction ] = &[];
   let _analyzer = SemanticAnalyzer::new( instructions, &registry );

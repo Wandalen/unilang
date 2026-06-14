@@ -35,7 +35,6 @@
 //! - No automatic help command generation
 //! - Manual help maintenance allows divergence
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ CommandDefinition, OutputData };
 use unilang::registry::CommandRegistry;
@@ -55,7 +54,7 @@ fn create_test_command( name : &str, description : &str ) -> CommandDefinition
 }
 
 /// Helper: Create mock routine for runtime registration
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, unilang::data::ErrorData > + Send + Sync + 'static >
 {
   Box::new( | _cmd : VerifiedCommand, _ctx : ExecutionContext | -> Result< OutputData, unilang::data::ErrorData >
   {
@@ -78,7 +77,7 @@ fn test_registered_command_appears_in_help_listing()
   let cmd = create_test_command( ".languages", "Detect programming languages" );
   let cmd_name = cmd.name().to_string();
 
-  registry.register_with_routine( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_test_routine() )
     .expect( "Command registration should succeed" );
 
   // Generate help listing
@@ -113,7 +112,7 @@ fn test_help_command_auto_generated_on_registration()
   let cmd_name = cmd.name().to_string();
   let help_cmd_name = format!( "{cmd_name}.help" );
 
-  registry.register_with_routine( &cmd, create_mock_routine() )
+  registry.register_with_routine( &cmd, create_test_routine() )
     .expect( "Command registration should succeed" );
 
   // CRITICAL CHECK: Help command should exist automatically
@@ -151,7 +150,7 @@ fn test_multiple_commands_all_appear_in_help()
 
   for cmd in &commands
   {
-    registry.register_with_routine( cmd, create_mock_routine() )
+    registry.register_with_routine( cmd, create_test_routine() )
       .expect( "Command registration should succeed" );
   }
 
@@ -200,9 +199,9 @@ fn test_registry_help_synchronization()
   let cmd1 = create_test_command( ".config", "Manage configuration" );
   let cmd2 = create_test_command( ".status", "Show status" );
 
-  registry.register_with_routine( &cmd1, create_mock_routine() )
+  registry.register_with_routine( &cmd1, create_test_routine() )
     .expect( "First command registration should succeed" );
-  registry.register_with_routine( &cmd2, create_mock_routine() )
+  registry.register_with_routine( &cmd2, create_test_routine() )
     .expect( "Second command registration should succeed" );
 
   // Phase 2: Check help is synchronized
@@ -219,7 +218,7 @@ fn test_registry_help_synchronization()
 
   // Phase 3: Add third command
   let cmd3 = create_test_command( ".logs", "View logs" );
-  registry.register_with_routine( &cmd3, create_mock_routine() )
+  registry.register_with_routine( &cmd3, create_test_routine() )
     .expect( "Third command registration should succeed" );
 
   // Phase 4: Verify help updated automatically

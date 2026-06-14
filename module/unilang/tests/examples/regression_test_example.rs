@@ -4,7 +4,6 @@
 //! organization structure. It shows proper patterns for preventing the recurrence
 //! of known bugs and maintaining backward compatibility.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentDefinition, CommandDefinition, Kind, ArgumentAttributes };
 use unilang::registry::CommandRegistry;
@@ -495,7 +494,7 @@ fn regression_api_stability()
 
   // Method should exist and return expected type
   assert!( parse_result.is_ok() || parse_result.is_err(),
-          "parse_single_instruction method should exist and return Result" );
+          "parse_repl_input method should exist and return Result" );
 
   // Test that data structures maintain expected fields
   let mut registry = CommandRegistry::new();

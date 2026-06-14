@@ -9,7 +9,6 @@
 //! ## FR Coverage
 //! - FR-ARG-8 (FT-2): unknown parameter produces error with Levenshtein suggestion
 
-#![ allow( deprecated ) ]
 
 use unilang::
 {

@@ -1,28 +1,34 @@
-//! Task 079: Repeated Parameter Investigation - Root Cause Identified and Fixed
+//! Repeated Parameter Handling — Regression Tests (Task 079)
 //!
-//! **Root Cause Found**: Shell argument handling, NOT unilang core
-//!
-//! **Investigation Result**: Unilang parser and semantic analyzer correctly handle
-//! repeated parameter names with `multiple: true` attribute for ALL test scenarios.
-//!
-//! **Production Bug**: wrun CLI failed because it joined shell arguments with spaces
-//! after the shell had already stripped quotes:
+//! ## Root Cause
+//! Production `wrun` CLI failed on repeated parameters because it joined shell
+//! argv elements with spaces AFTER the shell had already stripped quotes:
 //! ```text
 //! Shell:  wrun .run command::"echo a" command::"echo b"
-//! Args:   [".run", "command::echo a", "command::echo b"]  ← quotes stripped
-//! Joined: ".run command::echo a command::echo b"         ← parser sees unquoted
+//! Args:   [".run", "command::echo a", "command::echo b"]  ← shell strips quotes
+//! Joined: ".run command::echo a command::echo b"          ← parser sees unquoted
 //! ```
+//! The unilang parser then tokenized the joined string incorrectly.
+//! Root cause: wrun argument handling, NOT unilang core.
 //!
-//! **Solution**: Re-quote values containing spaces before joining (see task_079_fix_shell_argument_handling.rs)
+//! ## Why Not Caught
+//! Tests for repeated parameters were written at the unilang API level (direct
+//! `parse_repl_input` calls), bypassing the shell-join step in wrun. The CLI
+//! binary had no end-to-end tests that exercised the quote-stripping path.
 //!
-//! ## Test Strategy
+//! ## Fix Applied
+//! wrun re-quotes values containing spaces before joining them into a single
+//! input string for `parse_repl_input`. Unilang core required no changes.
 //!
-//! These tests validate unilang core handles the production scenario correctly:
-//! 1. Test 2 repeated parameters (baseline) ✅
-//! 2. Test 3 repeated parameters (validation) ✅
-//! 3. Test 4 repeated parameters (validates core works) ✅
-//! 4. Verify command definition structure matches wrun ✅
-//! 5. Shell argument fix implemented and tested separately ✅
+//! ## Prevention
+//! These tests confirm that unilang core correctly collects repeated parameters
+//! into `Value::List` for all counts (2, 3, 4+), with and without multi-word
+//! values. CLI-level integration tests for wrun cover the re-quoting path separately.
+//!
+//! ## Pitfall
+//! Never join shell argv into a single string without re-quoting values that contain
+//! spaces. The shell strips outer quotes; any consumer of argv must re-add them if
+//! passing to a parser that expects a single quoted-string input format.
 
 #![allow(clippy::doc_markdown)] // Allow command-line syntax in documentation
 
@@ -75,10 +81,9 @@ fn create_run_command_definition() -> CommandDefinition
 /// Helper: Parse and verify a command string
 fn parse_and_verify_command( input: &str ) -> Result< String, String >
 {
-  #[ allow( deprecated ) ]
   let mut registry = CommandRegistry::new();
   let cmd_def = create_run_command_definition();
-  registry.register( cmd_def );
+  registry.register( cmd_def ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
@@ -252,7 +257,7 @@ fn test_multiple_attribute_is_set()
 {
   let cmd_def = create_run_command_definition();
 
-  let command_arg = cmd_def.arguments
+  let command_arg = cmd_def.arguments()
     .iter()
     .find( |arg| arg.name == "command" )
     .expect( "command argument should exist" );
@@ -260,17 +265,11 @@ fn test_multiple_attribute_is_set()
   assert!( command_arg.attributes.multiple,
     "command argument MUST have multiple:true attribute" );
 
-  // Verify it's Kind::List, not Kind::String
-  match &command_arg.kind
-  {
-    Kind::List( inner, _ ) =>
-    {
-      assert_eq!( **inner, Kind::String, "Inner type should be String" );
-      println!( "✅ Command definition matches wrun: Kind::List(String) + multiple=true" );
-    },
-    other =>
-    {
-      panic!( "Expected Kind::List, got {other:?}" );
-    }
-  }
+  // Verify it's Kind::List(String), not Kind::String
+  assert_eq!(
+    command_arg.kind,
+    Kind::List( Box::new( Kind::String ), None ),
+    "Inner type should be Kind::List(String)"
+  );
+  println!( "✅ Command definition matches wrun: Kind::List(String) + multiple=true" );
 }

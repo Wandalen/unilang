@@ -45,7 +45,7 @@ A command registered without a dot prefix: (1) fails registration with a clear e
 
 | File | Relationship |
 |------|--------------|
-| `src/data/validated_types.rs` | CommandName dot-prefix validation |
+| `src/data/command_name.rs` | CommandName dot-prefix validation |
 | `src/command_validation.rs` | Command name validation at registration |
 
 ### Tests

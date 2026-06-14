@@ -84,5 +84,6 @@ This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requ
 
 | File | Relationship |
 |------|--------------|
-| `examples/wasm-repl/` | WASM REPL example |
+| `tests/pipeline/pipeline_core.rs` | FT-1 stateless REPL, FT-2 interactive arg absent, FT-3 arg provided, FT-5 empty input |
+| `tests/system/nfr_platform.rs` | FT-4 WASM build compiles without std-only APIs |
 | `tests/manual/readme.md` | Manual REPL testing plan |

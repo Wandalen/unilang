@@ -142,4 +142,4 @@ After implementing these improvements:
 | File | Relationship |
 |------|--------------|
 | `src/semantic/` | Usability analysis target: validation messages |
-| `src/help.rs` | Usability analysis target: help output |
+| `src/help/` | Usability analysis target: help output |

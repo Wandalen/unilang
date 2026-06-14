@@ -5,7 +5,7 @@
 - **Purpose:** Verify the CommandName validated newtype defined in `docs/type/001_command_name.md` enforces non-empty dot-prefix construction rules
 - **Responsibility:** Test cases confirming valid construction, empty rejection, missing dot rejection, serde roundtrip
 - **In Scope:** `CommandName::new()` validation, serde deserialization rejection, accessor correctness
-- **Out of Scope:** Registry behavior on valid names (see `feature/01_command_registry.md`); naming policy (see `invariant/05_command_naming.md`)
+- **Out of Scope:** Registry behavior on valid names (see `feature/001_command_registry.md`); naming policy (see `invariant/005_command_naming.md`)
 
 ### TC-1: Valid dot-prefixed name is accepted
 

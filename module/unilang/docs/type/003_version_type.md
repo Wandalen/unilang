@@ -34,7 +34,7 @@
 
 | File | Relationship |
 |------|--------------|
-| `src/data/validated_types.rs` | VersionType struct and impl |
+| `src/data/version_type.rs` | VersionType struct and impl |
 
 ### Tests
 

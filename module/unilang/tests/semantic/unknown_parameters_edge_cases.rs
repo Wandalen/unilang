@@ -3,7 +3,6 @@
 //! Comprehensive test coverage for boundary conditions, special characters,
 //! Levenshtein distance edge cases, and complex scenarios.
 
-#![ allow( deprecated ) ]
 
 use unilang::
 {

@@ -82,4 +82,5 @@ The `HelpRequested` code is an internal pipeline signal. Integrators using `Pipe
 
 | File | Relationship |
 |------|--------------|
+| `tests/api/error_codes.rs` | AP-1..12 error code taxonomy, string forms, derives |
 | `tests/data/error_handling.rs` | Error code construction and matching |

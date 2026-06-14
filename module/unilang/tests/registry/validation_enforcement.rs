@@ -48,7 +48,6 @@
 //! Tests validating registration-time failures (e.g., duplicates, invalid namespaces) use
 //! traditional `assert!(result.is_err())` pattern.
 
-#![ allow( deprecated ) ]
 
 use unilang::data::CommandDefinition;
 use unilang::registry::CommandRegistry;
@@ -57,7 +56,7 @@ use unilang::data::{ OutputData, ErrorData };
 use unilang::semantic::VerifiedCommand;
 
 /// Helper: Create mock routine for testing
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync + 'static >
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync + 'static >
 {
   Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result< OutputData, ErrorData >
   {
@@ -272,7 +271,7 @@ fn test_both_paths_accept_valid_commands_identically()
 
   // Both paths should accept
   let result1 = registry1.register( valid_cmd.clone() );
-  let result2 = registry2.register_with_routine( &valid_cmd, create_mock_routine() );
+  let result2 = registry2.register_with_routine( &valid_cmd, create_test_routine() );
 
   assert!(
     result1.is_ok() && result2.is_ok(),

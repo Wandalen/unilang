@@ -5,7 +5,7 @@
 use unilang::data::NamespaceType;
 
 /// TC-1: Empty namespace is accepted (root-level commands).
-// test_kind: tc_spec(TC-1)
+// test_kind: tc_spec(TC-1)  [type/02_namespace_type]
 #[ test ]
 fn test_tc1_empty_namespace_valid()
 {
@@ -30,7 +30,7 @@ fn test_tc1_empty_namespace_valid()
 }
 
 /// TC-2 / TC-4: Dot-prefixed namespace is accepted (including nested).
-// test_kind: tc_spec(TC-2, TC-4)
+// test_kind: tc_spec(TC-2, TC-4)  [type/02_namespace_type]
 #[ test ]
 fn test_tc2_tc4_dot_prefixed_namespace_valid()
 {
@@ -66,7 +66,7 @@ fn test_tc2_tc4_dot_prefixed_namespace_valid()
 }
 
 /// TC-3: Non-empty non-dot-prefixed namespace is rejected.
-// test_kind: tc_spec(TC-3)
+// test_kind: tc_spec(TC-3)  [type/02_namespace_type]
 #[ test ]
 fn test_tc3_missing_dot_prefix_rejected()
 {
@@ -160,7 +160,7 @@ fn namespace_serde_json_deserialize_valid()
 }
 
 /// TC-5: Serde deserialization rejects non-dot-prefixed namespace.
-// test_kind: tc_spec(TC-5)
+// test_kind: tc_spec(TC-5)  [type/02_namespace_type]
 #[ cfg( feature = "json_parser" ) ]
 #[ test ]
 fn test_tc5_serde_rejects_non_dot_prefix()

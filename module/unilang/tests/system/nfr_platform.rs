@@ -1,6 +1,6 @@
 //! NFR platform compatibility tests.
 //!
-//! Implements FT-4 specification case from `tests/docs/feature/05_repl_interactive.md`.
+//! Implements FT-4 specification case from `tests/docs/feature/005_repl_interactive.md`.
 //!
 //! Tests verify that the `unilang` crate compiles for `wasm32-unknown-unknown` without
 //! referencing std-only APIs (threads, filesystem, process exit), satisfying FR-MOD-WASM-REPL.
@@ -14,7 +14,7 @@
 ///
 /// Skips with an informational message when `wasm32-unknown-unknown` is not installed.
 ///
-/// Spec: feature/05_repl_interactive.md § FT-4
+/// Spec: feature/005_repl_interactive.md § FT-4
 // test_kind: ft_spec(FT-4)  [feature/05_repl_interactive]
 #[ test ]
 fn test_ft4_wasm_build_compiles_without_std_only_features()

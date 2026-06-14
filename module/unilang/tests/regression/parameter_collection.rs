@@ -1,9 +1,33 @@
 //! Parameter Collection Regression Tests
 //!
-//! ## Scope
-//! Prevents regression of the critical parameter collection bug where multiple parameters
-//! with the same name would lose all but the first value during semantic analysis.
-//! This bug was originally identified and fixed in Task 024.
+//! ## Root Cause
+//! During semantic analysis, multiple parameters with the same name were silently
+//! overwritten rather than collected into a `Value::List`. The `HashMap::insert()`
+//! call in the argument binding loop replaced each prior value, retaining only the
+//! last one. Fix: detect repeated named arguments and accumulate into a list.
+//!
+//! ## Why Not Caught
+//! Initial tests only exercised single-parameter scenarios. The collection path with
+//! repeated names had no test coverage at all, so the overwrite was invisible until
+//! a real multi-command invocation surfaced it in production (Task 024).
+//!
+//! ## Fix Applied
+//! Semantic analyzer now checks whether a parameter name already exists in the
+//! bound map. On the second and subsequent occurrences it wraps or extends a
+//! `Value::List` rather than overwriting. Alias names are resolved to canonical
+//! names before the check, so alias repeats are collected correctly too.
+//!
+//! ## Prevention
+//! This file locks the fix in place. `regression_task_024_exact_scenario_reproduction`
+//! must always pass. `regression_single_parameter_backward_compatibility` guards the
+//! single-value path from accidental List-wrapping. Run with `RUSTFLAGS="-D warnings"`
+//! to catch any re-introduction of the overwrite pattern.
+//!
+//! ## Pitfall
+//! `multiple: true` on `ArgumentAttributes` is NOT required for collection. Repeating
+//! any parameter name produces a `Value::List` automatically. Setting `multiple: false`
+//! while providing repeated values still collects them — the attribute only signals
+//! intent; the semantic layer does not gate on it.
 //!
 //! ## Coverage
 //! - Exact reproduction of the original Task 024 bug scenario
@@ -12,10 +36,9 @@
 //! - Performance characteristics to prevent degradation
 //!
 //! ## Related
-//! - `unit/semantic/multiple_parameters.rs` - Comprehensive multiple parameter testing
+//! - `tests/semantic/multiple_parameters.rs` - Comprehensive multiple parameter testing
 //! - Original bug report: Task 024 Comprehensive Tokenization Failure Analysis
 
-#![ allow( deprecated ) ]
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
 use unilang::registry::CommandRegistry;

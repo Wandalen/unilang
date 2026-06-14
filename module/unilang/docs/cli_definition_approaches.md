@@ -315,7 +315,7 @@ let registry = CommandRegistry::builder()
 
 **Performance**: ⚡ ~80ns per command lookup (50x faster than Row 7)
 
-**Code location**: `src/static_data.rs:1-400`
+**Code location**: `src/static_data/`
 
 **When to use**:
 - ✅ Performance-critical applications
@@ -795,7 +795,7 @@ Based on goal: **"Make YAML + build-time static the obvious default choice"**
 - **YAML manifest**: `unilang.commands.yaml` - default command definitions
 - **Loader module**: `src/loader.rs` - runtime YAML/JSON loading
 - **Registry**: `src/registry.rs` - CommandRegistry, StaticCommandRegistry
-- **Static data**: `src/static_data.rs` - Static registry-compatible types
+- **Static data**: `src/static_data/` - Static registry-compatible types
 - **Generated code**: `$OUT_DIR/static_commands.rs` - compile-time optimized map
 
 ### Test Data
@@ -856,6 +856,6 @@ Static commands are fast (<100ns), dynamic commands are flexible. Zero additiona
 - Cargo build scripts: https://doc.rust-lang.org/cargo/reference/build-scripts.html
 - Command registry implementation: `src/registry.rs`
 - Static command optimization: See `architecture/004_implementation_details.md` for implementation details
-- Static data structures: `src/static_data.rs`
+- Static data structures: `src/static_data/`
 - Build script implementation: `build.rs:1-409`
 - YAML specification: https://yaml.org/spec/

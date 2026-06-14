@@ -142,5 +142,11 @@ The framework **must** adhere to the principle of explicit command naming with m
 
 | File | Relationship |
 |------|--------------|
-| `src/data/validated_types.rs` | Make-illegal-states-unrepresentable principle |
+| `src/data/` | Validated newtypes embody make-illegal-states-unrepresentable |
 | `src/command_validation.rs` | Fail-fast validation principle |
+
+### Tests
+
+| File | Relationship |
+|------|--------------|
+| `tests/system/invariant_03_governing_principles.rs` | Minimum implicit magic, fail-fast, illegal-state, help-access principles |

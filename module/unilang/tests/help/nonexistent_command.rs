@@ -33,7 +33,7 @@ use unilang::semantic::SemanticAnalyzer;
 use unilang_parser::{ Parser, UnilangParserOptions };
 
 /// FT-7: `?` operator with unknown command name returns not-found message.
-// test_kind: ft_spec(FT-7)
+// test_kind: ft_spec(FT-7)  [feature/04_help_system]
 #[test]
 fn test_help_operator_on_nonexistent_command()
 {

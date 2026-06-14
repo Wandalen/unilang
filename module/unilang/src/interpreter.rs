@@ -104,18 +104,32 @@ impl< 'a > Interpreter< 'a >
 
       // Capture execution timing
       let start_time = std::time::Instant::now();
-      let output_or_error = routine( command.clone(), context.clone() ); // Clone command and context for routine
+      let output_or_error = std::panic::catch_unwind( std::panic::AssertUnwindSafe( ||
+      {
+        routine( command.clone(), context.clone() )
+      }));
       let execution_time_ms = start_time.elapsed().as_millis() as u64;
 
       match output_or_error
       {
-        Ok( mut output ) =>
+        Ok( Ok( mut output ) ) =>
         {
           // Add execution timing to output
           output.execution_time_ms = Some( execution_time_ms );
           results.push( output );
         },
-        Err( error_data ) => return Err( Error::Execution( error_data ) ), // Stop on first error
+        Ok( Err( error_data ) ) => return Err( Error::Execution( error_data ) ),
+        Err( _panic_info ) =>
+        {
+          return Err( Error::Execution( ErrorData::new(
+            ErrorCode::InternalError,
+            format!(
+              "Internal Error: Command handler for '{}' panicked. \
+              This is a bug in the command implementation.",
+              command.definition.name().as_str()
+            ),
+          )));
+        }
       }
     }
     Ok( results )

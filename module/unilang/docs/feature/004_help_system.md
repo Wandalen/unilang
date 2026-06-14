@@ -127,7 +127,7 @@ The `.help` system command **must not** appear in its own listing when the user 
 
 | File | Relationship |
 |------|--------------|
-| `src/help.rs` | Help text generation and formatting |
+| `src/help/` | Help text generation and formatting |
 
 ### Tests
 

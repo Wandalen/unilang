@@ -53,12 +53,12 @@
 | 14 | `approaches` | Rust DSL const fn static | ✅ | 3 | 4 | 4 | 48 | Approach #8; `feature = approach_rust_dsl_const` |
 | 15 | `approaches` | Hybrid static + runtime registry | ✅ | 3 | 4 | 4 | 48 | Approach #18; `feature = approach_hybrid` |
 | 16 | `registry` | Dynamic command registry | ✅ | 4 | 5 | 5 | 100 | `src/registry.rs` — `CommandRegistry` |
-| 17 | `registry` | PHF static command registry | ✅ | 4 | 5 | 5 | 100 | `src/static_data.rs` + PHF codegen |
+| 17 | `registry` | PHF static command registry | ✅ | 4 | 5 | 5 | 100 | `src/static_data/` + PHF codegen |
 | 18 | `registry` | StaticCommandRegistry trait bridge | ✅ | 3 | 4 | 4 | 48 | Converts static → dynamic at runtime |
 | 19 | `performance` | SIMD tokenizer | ✅ | 3 | 4 | 3 | 36 | `src/simd_tokenizer.rs`; `feature = simd` |
 | 20 | `performance` | SIMD JSON parser | ✅ | 3 | 4 | 3 | 36 | `src/simd_json_parser.rs`; `feature = simd` |
 | 21 | `performance` | String interning cache | ✅ | 4 | 4 | 3 | 48 | `src/interner.rs`; zero-copy command names |
-| 22 | `help_sys` | Auto-generated help text | ✅ | 4 | 5 | 5 | 100 | `src/help.rs` |
+| 22 | `help_sys` | Auto-generated help text | ✅ | 4 | 5 | 5 | 100 | `src/help/` |
 | 23 | `help_sys` | Version display in help | ✅ | 5 | 4 | 4 | 80 | `UNILANG_HELP_HIDE_VERSION` env var |
 | 24 | `help_sys` | Verbosity control | ✅ | 4 | 3 | 3 | 36 | `UNILANG_VERBOSITY`; CLI binary only |
 | 25 | `build_time` | Multi-YAML conflict detection | ✅ | 4 | 5 | 5 | 100 | `src/multi_yaml/aggregator.rs` |

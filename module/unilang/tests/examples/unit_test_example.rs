@@ -47,15 +47,15 @@ fn test_semantic_analyzer_validates_required_arguments()
     ])
     .end();
 
-  // Register command with mock routine
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
+  // Register command with test routine
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     Ok( OutputData {
       content : "success".to_string(),
       format : "text".to_string(),
       execution_time_ms : None,
     })
   });
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   // Create instruction missing the required argument
   let parser = Parser::new( UnilangParserOptions::default() );
@@ -130,10 +130,10 @@ fn test_argument_parsing_handles_edge_case_values()
   }
 }
 
-/// Example: Mock and dependency injection patterns
+/// Example: Routine injection and interaction verification patterns
 ///
 /// This test demonstrates:
-/// - Proper mocking of dependencies
+/// - Injecting test routines to verify registration behavior
 /// - Testing component behavior without external dependencies
 /// - Verification of interactions
 #[test]
@@ -144,8 +144,8 @@ fn test_command_registry_runtime_integration()
 
   // Create a simple test command
   let cmd = CommandDefinition::former()
-    .name( ".mock_test" )
-    .description( "Mock test command" )
+    .name( ".test_command" )
+    .description( "Test command for interaction verification" )
     .arguments( vec![
       ArgumentDefinition {
         name : "input".to_string(),
@@ -163,17 +163,17 @@ fn test_command_registry_runtime_integration()
     ])
     .end();
 
-  // Mock routine that tracks if it was called
+  // Test routine that tracks if it was called
   use std::sync::{ Arc, Mutex };
   let call_count = Arc::new( Mutex::new( 0 ) );
   let call_count_clone = call_count.clone();
 
-  let mock_routine = Box::new( move |cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
+  let test_routine = Box::new( move |cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     // Track that routine was called
     *call_count_clone.lock().unwrap() += 1;
 
     // Verify command data was passed correctly
-    assert_eq!( cmd.definition.name().as_str(), ".mock_test" );
+    assert_eq!( cmd.definition.name().as_str(), ".test_command" );
     assert!( cmd.arguments.contains_key( "input" ) );
 
     Ok( OutputData {
@@ -184,10 +184,10 @@ fn test_command_registry_runtime_integration()
   });
 
   // Act - Register and use command
-  registry.register_with_routine( &cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &cmd, test_routine ).unwrap();
 
   // Verify command was registered
-  let retrieved_cmd = registry.command( ".mock_test" );
+  let retrieved_cmd = registry.command( ".test_command" );
   assert!( retrieved_cmd.is_some(), "Command should be registered" );
 
   // Verify no calls yet
@@ -260,10 +260,10 @@ fn test_semantic_analyzer_error_conditions()
     ])
     .end();
 
-  let mock_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
+  let test_routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, ErrorData> {
     Ok( OutputData { content : "success".to_string(), format : "text".to_string(), execution_time_ms : None })
   });
-  registry.register_with_routine( &valid_cmd, mock_routine ).unwrap();
+  registry.register_with_routine( &valid_cmd, test_routine ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
 
@@ -332,12 +332,12 @@ fn create_simple_test_command( name : &str ) -> CommandDefinition
     .end()
 }
 
-/// Helper function to create a mock routine for testing
-fn create_mock_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync >
+/// Helper function to create a test routine
+fn create_test_routine() -> Box< dyn Fn( VerifiedCommand, ExecutionContext ) -> Result< OutputData, ErrorData > + Send + Sync >
 {
   Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result< OutputData, ErrorData > {
     Ok( OutputData {
-      content : "mock response".to_string(),
+      content : "test response".to_string(),
       format : "text".to_string(),
       execution_time_ms : None,
     })
@@ -351,7 +351,7 @@ fn test_with_helper_functions()
   // Arrange - Using helpers for cleaner setup
   let mut registry = CommandRegistry::new();
   let cmd = create_simple_test_command( ".helper_test" );
-  registry.register_with_routine( &cmd, create_mock_routine() ).unwrap();
+  registry.register_with_routine( &cmd, create_test_routine() ).unwrap();
 
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( ".helper_test" ).unwrap();

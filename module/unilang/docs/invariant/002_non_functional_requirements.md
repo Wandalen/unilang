@@ -194,5 +194,8 @@ These are enabled automatically by approach features and should not be used dire
 
 | File | Relationship |
 |------|--------------|
-| `tests/build/` | Build pipeline validation tests |
-| `tests/parser/simd_tokenization.rs` | SIMD tokenizer correctness |
+| `tests/system/nfr_performance.rs` | IN-1 startup zero-cost, IN-2 throughput ≥5M/sec |
+| `tests/system/nfr_sensitive_data.rs` | IN-3 sensitive value absent from error output (coercion + validation paths) |
+| `tests/system/nfr_robustness.rs` | IN-4 handler panic caught as InternalError, IN-5 zero-feature build |
+| `tests/system/nfr_platform.rs` | FT-4 WASM build compiles without std-only APIs |
+| `tests/system/nfr_modularity.rs` | IN-6 enabled is strict subset of full feature set |

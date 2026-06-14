@@ -7,7 +7,7 @@ mod private
 {
   use crate::
   {
-    data::OutputData,
+    data::{ ErrorCode, ErrorData, OutputData },
     error::Error,
     registry::CommandRoutine,
   };
@@ -57,19 +57,34 @@ pub fn load_command_definitions_from_json_str( json_str : &str ) -> Result< Vec<
 /// Returns an `Error::Execution` if the link is not recognized or if
 /// dynamic loading fails (in future increments).
 ///
-pub fn resolve_routine_link( _link : &str ) -> Result< CommandRoutine, Error >
+pub fn resolve_routine_link( link : &str ) -> Result< CommandRoutine, Error >
 {
-  // xxx: dynamic library loading not yet implemented — commands with routine_link silently succeed with empty output.
-  Ok( Box::new( move | _args, _context |
-  {
-    // println!( "Dummy routine executed for link: {}", link );
-    Ok( OutputData
-    {
-      content : String::new(),
-      format : String::new(),
-      execution_time_ms : None,
-    })
-  }) )
+  // Dynamic library loading is not yet implemented. Return a stub routine that fails loudly
+  // at call time rather than returning silent empty output. Failing at load time would
+  // prevent the registry from being built at all — failing at call time correctly surfaces
+  // the "not implemented" error when the command is actually invoked.
+  let owned_link = link.to_owned();
+  Ok
+  (
+    Box::new
+    (
+      move | _args, _context | -> Result< OutputData, ErrorData >
+      {
+        Err
+        (
+          ErrorData::new
+          (
+            ErrorCode::CommandNotImplemented,
+            format!
+            (
+              "Routine link '{}' cannot be resolved: dynamic library loading is not yet implemented",
+              owned_link
+            ),
+          )
+        )
+      }
+    )
+  )
 }
 
 }

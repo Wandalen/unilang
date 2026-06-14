@@ -164,35 +164,6 @@ commands:
   Ok( () )
 }
 
-/// Test that examples can be compiled (simulated)
-#[ test ]
-fn test_examples_compilation()
-{
-  println!( "🔧 Testing examples compilation (simulated)" );
-
-  let expected_examples = vec![
-  "static_01_basic_compile_time",
-  "static_02_yaml_build_integration",
-  "static_03_performance_comparison",
-  "static_04_multi_module_aggregation",
-  "practical_cli_aggregation",
-  "ergonomic_cli_aggregation",
-  "yaml_cli_aggregation",
-  "compile_time_aggregation",
- ];
-
-  for example in &expected_examples
-  {
-  // Simulate compilation check
-  let compilation_result = simulate_example_compilation( example );
-  assert!( compilation_result.success, "Example {example} should compile successfully" );
-
-  println!( "✅ Example '{example}' compilation: OK" );
- }
-
-  let example_count = expected_examples.len();
-  println!( "✅ All {example_count} examples compilation verified" );
-}
 
 /// Test benchmark infrastructure
 #[ test ]
@@ -220,6 +191,12 @@ fn test_benchmark_infrastructure()
   assert!( !comparison_results.is_empty(), "Comparative benchmark should produce results" );
 
   let algo_count = comparison_results.len();
+  for result in &comparison_results
+  {
+    let name = &result.algorithm_name;
+    let nanos = result.average_time.as_nanos();
+    println!( "  {name}: {nanos}ns" );
+  }
   println!( "🏁 Comparative benchmark completed with {algo_count} algorithms" );
 
   // Test optimization workflow
@@ -436,25 +413,6 @@ fn aggregate_yaml_commands(
   aggregated
 }
 
-#[ derive( Debug ) ]
-#[ allow( dead_code ) ]
-struct CompilationResult
-{
-  success: bool,
-  errors: Vec< String >,
-}
-
-fn simulate_example_compilation( example_name: &str ) -> CompilationResult
-{
-  // Simulate compilation - in real implementation would run cargo check
-  println!( "  Checking example: {example_name}" );
-
-  CompilationResult
-  {
-  success: true, // Assume success for enabled examples
-  errors: Vec::new(),
- }
-}
 
 #[ derive( Debug ) ]
 struct CvAnalysisResult
@@ -489,7 +447,6 @@ fn calculate_coefficient_of_variation( times: &[ Duration ] ) -> CvAnalysisResul
 }
 
 #[ derive( Debug ) ]
-#[ allow( dead_code ) ]
 struct ComparativeResult
 {
   algorithm_name: String,

@@ -34,7 +34,6 @@
 #![ allow( clippy::inefficient_to_string ) ]
 #![ allow( clippy::uninlined_format_args ) ]
 
-#![ allow( deprecated ) ]
 
 use unilang::{ CommandDefinition, CommandRegistry, Pipeline, ExecutionContext, VerifiedCommand, OutputData, ErrorData };
 
