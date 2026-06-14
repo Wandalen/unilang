@@ -18,7 +18,7 @@ discord_url = "https://discord.gg/m3yKnHRAGr"
 # ========================================
 unilang = { version = "=0.57.0", path = "module/unilang", default-features = false }
 unilang_parser = { version = "=0.38.0", path = "module/unilang_parser", default-features = false }
-unilang_meta = { version = "=0.3.0", path = "module/unilang_meta", default-features = false }
+unilang_meta = { version = "=0.4.0", path = "module/unilang_meta", default-features = false }
 cargo_unilang = { version = "=0.4.0", path = "module/cargo_unilang", default-features = false }
 
 # ========================================
