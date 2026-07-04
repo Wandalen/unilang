@@ -16,8 +16,9 @@ Task tracking for the unilang crate.
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | Status | Executor | Task | Purpose |
 |-------|----|--------------|-------|----------|--------|----------|--------|----------|------|---------|
-| 1 | 002 | 0 | 8 | 5 | 7 | 0 | ✅ | claude-sonnet-4-6 | [Implement test surface specs](completed/002_implement_test_surface_specs.md) | Implement Rust tests for all 121 spec cases across 17 feature/invariant/api/type spec files |
-| 2 | 001 | 0 | 6 | 4 | 7 | 0 | ✅ | claude-sonnet-4-6 | [Fix phf_map! codegen absolute path expansion](completed/001_fix_phf_map_codegen_absolute_path_expansion.md) | Fix codegen so downstream crates don't need direct phf dependency |
+| 1 | 003 | 7 | 8 | 6 | 7 | 7 | ❓ | unclaimed | [Fix semantic analyzer empty-path bypasses named-argument validation](003_fix_semantic_analyzer_empty_path_bypasses_named_argument_validation.md) | Fix `analyze_internal()` silently returning help listing instead of validating named arguments when command_path_slices is empty |
+| 2 | 002 | 0 | 8 | 5 | 7 | 0 | ✅ | claude-sonnet-4-6 | [Implement test surface specs](completed/002_implement_test_surface_specs.md) | Implement Rust tests for all 121 spec cases across 17 feature/invariant/api/type spec files |
+| 3 | 001 | 0 | 6 | 4 | 7 | 0 | ✅ | claude-sonnet-4-6 | [Fix phf_map! codegen absolute path expansion](completed/001_fix_phf_map_codegen_absolute_path_expansion.md) | Fix codegen so downstream crates don't need direct phf dependency |
 
 ---
 
@@ -36,17 +37,17 @@ Task tracking for the unilang crate.
 
 <!-- task_system_metadata
 type: local
-total_tasks: 2
+total_tasks: 3
 completed: 2
 active: 0
 backlog: 0
-last_updated: 2026-06-13
+last_updated: 2026-07-04
 -->
 
 ## Task System Metadata
 
-- **Last Updated:** 2026-06-13
-- **Total Tasks:** 2
+- **Last Updated:** 2026-07-04
+- **Total Tasks:** 3
 - **Completed:** 2
 - **Active:** 0
 - **Backlog:** 0

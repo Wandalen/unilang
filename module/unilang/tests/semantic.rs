@@ -8,6 +8,7 @@ mod semantic {
   mod auto_categorize_decoupling;
   mod centralized_validation;
   mod command_validation;
+  mod empty_path_named_argument;
   mod format_category_name_decoupling;
   mod multiple_parameters;
   mod parameter_storage_validation;
