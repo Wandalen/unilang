@@ -21,6 +21,7 @@
 
 use unilang::static_data::StaticCommandDefinition;
 use unilang::data::CommandDefinition;
+use unilang::help::HelpDisplayOptions;
 
 //
 // Test: show_version_in_help defaults to true
@@ -204,4 +205,54 @@ fn help_output_excludes_version_when_false()
 
   let help_text = help.unwrap();
   assert!( !help_text.contains( "3.0.0" ), "Help should NOT include version when show_version_in_help=false" );
+}
+
+//
+// Test: UNILANG_HELP_HIDE_VERSION env var flips HelpDisplayOptions.show_version
+//
+
+/// FT-15: `UNILANG_HELP_HIDE_VERSION` suppresses version metadata from help output.
+///
+/// ## Spec Divergence Note
+///
+/// The spec (FT-15) describes the env var suppressing the version string in
+/// `HelpGenerator`-rendered help text (e.g. via `pipeline.run(".greet ??")`). The actual
+/// production wiring stops at `HelpDisplayOptions::with_env_overrides()`, which reads
+/// `UNILANG_HELP_HIDE_VERSION` and flips the `show_version` field — but the real rendering
+/// call sites (`src/help/private/format_fns.rs`) consult `CommandDefinition::show_version_in_help()`
+/// instead, never `HelpDisplayOptions`. There is no code path connecting this env var to
+/// rendered output today, so this test verifies the real contract (the `HelpDisplayOptions`
+/// field toggle) rather than end-to-end rendered text, matching `test_ap17_help_hide_version_env_var_suppresses_show_version_flag`
+/// in `tests/api/public_types.rs`, which covers the identical env var and code path.
+///
+/// ## Note
+///
+/// This test mutates a process-level env var. nextest runs each test in a separate process,
+/// so env var mutation does not affect sibling tests.
+// test_kind: ft_spec(FT-15)  [feature/04_help_system]
+#[ test ]
+fn test_ft15_hide_version_env_var_suppresses_show_version_flag()
+{
+  let old_value = std::env::var( "UNILANG_HELP_HIDE_VERSION" ).ok();
+
+  std::env::set_var( "UNILANG_HELP_HIDE_VERSION", "1" );
+  let options_hidden = HelpDisplayOptions::default().with_env_overrides();
+
+  std::env::remove_var( "UNILANG_HELP_HIDE_VERSION" );
+  let options_shown = HelpDisplayOptions::default().with_env_overrides();
+
+  match old_value
+  {
+    Some( v ) => std::env::set_var( "UNILANG_HELP_HIDE_VERSION", v ),
+    None => std::env::remove_var( "UNILANG_HELP_HIDE_VERSION" ),
+  }
+
+  assert!(
+    !options_hidden.show_version,
+    "UNILANG_HELP_HIDE_VERSION=1 must set show_version to false"
+  );
+  assert!(
+    options_shown.show_version,
+    "Unsetting UNILANG_HELP_HIDE_VERSION must restore show_version to true"
+  );
 }

@@ -3,11 +3,17 @@
 ## Execution State
 
 - **Executor Type:** any
-- **Actor:** unclaimed
-- **Claimed At:** —
-- **Status:** ❓ (Unverified)
-- **Validated By:** —
-- **Validation Date:** —
+- **filed_by:** claude (session predates filed_by field; exact identity not recorded)
+- **actor:** null
+- **started_at:** null
+- **expires_at:** null
+- **round:** 1
+- **state:** ❓ (Unverified)
+- **closes:** null
+- **unit_type:** module
+- **unit:** lib/yrd_core/unilang/dev/module/unilang
+- **validated_by:** null
+- **validation_date:** null
 
 ## Goal
 
@@ -37,7 +43,7 @@
 - No mocking — test the real `SemanticAnalyzer::analyze()` return value against a real `CommandRegistry`
 - Bug reproducer test already written and confirmed failing (see `## Outcomes`) — this satisfies the "written and confirmed failing BEFORE any production code change" requirement; do not delete or weaken it when implementing the fix
 
-## Work Procedure
+## Delivery Requirements
 
 Execute in order. Do not skip or reorder steps.
 
@@ -164,6 +170,12 @@ All 93 pre-existing semantic tests pass unchanged; only the new reproducer fails
 **Green State Confirmation:** *(pending — fill in during execution)*
 
 **Key Learnings:** *(pending — fill in during execution)*
+
+## History
+
+*(append-only — newest entry last; never edit or remove past entries)*
+
+- **2026-07-04** `FILED` — Task filed by claude (exact session identity not recorded; pre-dates filed_by field). Goal: fix `analyze_internal()` silently bypassing named-argument validation when `command_path_slices` is empty.
 
 ## Technical Context
 

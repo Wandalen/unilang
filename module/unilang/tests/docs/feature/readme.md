@@ -14,8 +14,8 @@ Case prefix: `FT-`. Minimum 4 cases per spec.
 
 | Name | Purpose | Status |
 |------|---------|--------|
-| `001_command_registry.md` | `feature` spec for command registry (FR-REG-1..9) | ✅ |
-| `002_argument_system.md` | `feature` spec for argument system (FR-ARG-1..8) | ✅ |
-| `003_pipeline.md` | `feature` spec for pipeline orchestration (FR-PIPE-1..4) | ✅ |
-| `004_help_system.md` | `feature` spec for help system (FR-HELP-1..8) | ✅ |
-| `005_repl_interactive.md` | `feature` spec for REPL and interactive mode | ✅ |
+| `01_command_registry.md` | `feature` spec for command registry (FR-REG-1..9) | ⏳ |
+| `02_argument_system.md` | `feature` spec for argument system (FR-ARG-1..8) | ⏳ |
+| `03_pipeline.md` | `feature` spec for pipeline orchestration (FR-PIPE-1..4) | ⏳ |
+| `04_help_system.md` | `feature` spec for help system (FR-HELP-1..8) | ⏳ |
+| `05_repl_interactive.md` | `feature` spec for REPL and interactive mode | ⏳ |

@@ -112,3 +112,8 @@ Expected results:
 - Runtime registration: ~4,000ns per lookup
 - Compile-time registration: ~80-100ns per lookup
 - Performance gain: ~50x
+
+## See Also
+
+- [feature/001_command_registry.md](../feature/001_command_registry.md) — CommandRegistry and CommandDefinition being migrated
+- [api/001_public_types.md](../api/001_public_types.md) — Public types referenced in the migration steps

@@ -36,3 +36,21 @@
 - **Given:** The `Cargo.toml` files for library crates `unilang` and `unilang_parser`
 - **When:** Each file's `[dependencies]` section is inspected for `optional` flags
 - **Then:** Every dependency entry includes `optional = true`; no non-optional dependency exists in library crates (binary crate `cargo_unilang` is exempt from this rule)
+
+### IN-6: `--no-default-features` build compiles zero external dependencies
+
+- **Given:** The `unilang` crate built with `cargo build -p unilang --no-default-features`
+- **When:** The build output (or `cargo tree --edges=normal` for the no-default-features configuration) is inspected for compiled/linked external crates
+- **Then:** Zero external dependency crates are compiled or linked; only the `unilang` crate itself is present, confirming the `enabled` feature gate fully isolates all optional functionality rather than merely suppressing warnings
+
+### IN-7: Workspace manifest declares no `features` lists
+
+- **Given:** The workspace `Cargo.toml` `[workspace.dependencies]` section
+- **When:** Each dependency entry is inspected for a `features = [...]` list
+- **Then:** No entry in `[workspace.dependencies]` declares a `features = [...]` list; feature selection lives exclusively in member crate `Cargo.toml` files (`default-features = false` on path deps is permitted since it is not a `features` list)
+
+### IN-8: The `enabled` feature activates dependencies via `dep:name` syntax
+
+- **Given:** The `unilang` crate `Cargo.toml` `[features]` section
+- **When:** The `enabled` feature's activation list is inspected
+- **Then:** Every dependency activated by `enabled` uses the `dep:name` syntax (e.g., `dep:serde`, `dep:regex`); no bare crate name (which would implicitly enable a same-named feature rather than gating an optional dependency) appears in the list

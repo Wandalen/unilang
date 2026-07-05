@@ -1,21 +1,27 @@
 //! NFR platform compatibility tests.
 //!
-//! Implements FT-4 specification case from `tests/docs/feature/005_repl_interactive.md`.
+//! Implements FT-4 specification case from `tests/docs/feature/05_repl_interactive.md`
+//! and IN-7 (NFR-PLATFORM-1) from `tests/docs/invariant/02_non_functional_requirements.md`.
 //!
 //! Tests verify that the `unilang` crate compiles for `wasm32-unknown-unknown` without
 //! referencing std-only APIs (threads, filesystem, process exit), satisfying FR-MOD-WASM-REPL.
 //! If the WASM target is not installed the test skips gracefully with a diagnostic message.
 
-/// FT-4: WASM build compiles without std-only features.
+/// FT-4 / IN-7 (NFR-PLATFORM-1): WASM build compiles without std-only features.
 ///
 /// Runs `cargo check --target wasm32-unknown-unknown --no-default-features --features enabled`
 /// in a subprocess. A zero exit code confirms the crate is WASM-compatible: no thread APIs,
 /// no filesystem calls, and no process-exit paths are reachable in the `enabled` feature set.
 ///
+/// This single subprocess check satisfies both FT-4 (feature spec: WASM REPL buildability)
+/// and IN-7 (invariant spec: NFR-PLATFORM-1 core crate WASM compatibility) — they describe
+/// the identical underlying condition from two spec angles, so one test covers both citations
+/// rather than duplicating the subprocess-spawning logic.
+///
 /// Skips with an informational message when `wasm32-unknown-unknown` is not installed.
 ///
-/// Spec: feature/005_repl_interactive.md § FT-4
-// test_kind: ft_spec(FT-4)  [feature/05_repl_interactive]
+/// Spec: feature/005_repl_interactive.md § FT-4; invariant/002_non_functional_requirements.md § IN-7
+// test_kind: ft_spec(FT-4)  [feature/05_repl_interactive], in_spec(IN-7)  [invariant/02_non_functional_requirements]
 #[ test ]
 fn test_ft4_wasm_build_compiles_without_std_only_features()
 {

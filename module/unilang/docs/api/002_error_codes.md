@@ -53,6 +53,12 @@ The `HelpRequested` code is an internal pipeline signal. Integrators using `Pipe
 - The `InternalError` string representation (`UNILANG_INTERNAL_ERROR`) is stable; its message field is not guaranteed stable
 - The `ErrorCode` enum implements `Display`, `Debug`, `Clone`, `PartialEq`, and `Eq`
 
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](001_public_types.md) | Defines the ErrorCode type referenced in this catalog |
+
 ### Features
 
 | File | Relationship |
@@ -66,12 +72,6 @@ The `HelpRequested` code is an internal pipeline signal. Integrators using `Pipe
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFR-ROBUST-1 mandates structured `ErrorData` for all user-facing errors |
 
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [001_public_types.md](001_public_types.md) | Defines the ErrorCode type referenced in this catalog |
-
 ### Sources
 
 | File | Relationship |
@@ -82,5 +82,5 @@ The `HelpRequested` code is an internal pipeline signal. Integrators using `Pipe
 
 | File | Relationship |
 |------|--------------|
-| `tests/api/error_codes.rs` | AP-1..12 error code taxonomy, string forms, derives |
+| `tests/api/error_codes.rs` | AP-1..14 error code taxonomy, string forms, derives, type-mismatch, catalog match |
 | `tests/data/error_handling.rs` | Error code construction and matching |

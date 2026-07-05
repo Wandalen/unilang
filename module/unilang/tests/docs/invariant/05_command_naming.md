@@ -21,9 +21,15 @@
 
 ### IN-3: Namespace construction always produces dot-prefixed full name
 
-- **Given:** A YAML command entry using the separate `namespace` + `name` fields (e.g., `namespace: "math"`, `name: "add"`)
+- **Given:** A YAML command entry using the separate `namespace` + `name` fields, where `namespace` already carries its required dot prefix per FR-REG-6 Format 2 (e.g., `namespace: ".math"`, `name: "add"`)
 - **When:** The build-time `compute_full_name()` function processes this entry
-- **Then:** The resulting full name is `".math.add"` — exactly one leading dot regardless of whether namespace is empty or populated
+- **Then:** The resulting full name is `".math.add"` — exactly one leading dot
+
+### IN-3b: Namespace lacking required dot prefix is rejected before full-name construction
+
+- **Given:** A YAML command entry with `namespace: "math"` (no leading dot) and `name: "add"`
+- **When:** `validate_namespace_core()` processes this entry ahead of `compute_full_name()`
+- **Then:** Returns `Err` referencing the missing dot prefix on the namespace; `compute_full_name()` is never reached for this entry — the malformed namespace is rejected, not silently corrected
 
 ### IN-4: Build-time validation rejects manifest entry without dot prefix
 

@@ -190,8 +190,10 @@ fn test_verbosity_level_4_comprehensive()
   assert!( help.contains( "Aliases: cfg" ) );
 }
 
+/// FT-14: `HelpVerbosity::from_level` caps values above 4 at Comprehensive, without panicking.
+// test_kind: ft_spec(FT-14)  [feature/04_help_system]
 #[test]
-fn test_verbosity_from_level()
+fn test_ft14_from_level_caps_above_four_at_comprehensive()
 {
   assert_eq!( HelpVerbosity::from_level( 0 ), HelpVerbosity::Minimal );
   assert_eq!( HelpVerbosity::from_level( 1 ), HelpVerbosity::Basic );
@@ -199,7 +201,7 @@ fn test_verbosity_from_level()
   assert_eq!( HelpVerbosity::from_level( 3 ), HelpVerbosity::Detailed );
   assert_eq!( HelpVerbosity::from_level( 4 ), HelpVerbosity::Comprehensive );
   assert_eq!( HelpVerbosity::from_level( 5 ), HelpVerbosity::Comprehensive ); // Capped at 4
-  assert_eq!( HelpVerbosity::from_level( 100 ), HelpVerbosity::Comprehensive );
+  assert_eq!( HelpVerbosity::from_level( 100 ), HelpVerbosity::Comprehensive ); // Capped at 4, no panic
 }
 
 #[test]

@@ -42,3 +42,9 @@
 - **Given:** The `unilang` crate compiled once with `--features enabled` and once with `--features full`
 - **When:** The available public API surface is compared between the two builds
 - **Then:** The `full` build exposes additional functionality not present in the `enabled` build; the `enabled` build is a strict subset of `full`
+
+### IN-7: NFR-PLATFORM-1 — core crate compiles for the WASM target without std-only APIs
+
+- **Given:** The `unilang` crate configured with `--target wasm32-unknown-unknown --no-default-features --features enabled`
+- **When:** `cargo check` is run for that target and feature set
+- **Then:** Exits with code 0 and zero compiler errors; no native-thread, direct-filesystem, or process-exit API is reachable in the `enabled` feature path

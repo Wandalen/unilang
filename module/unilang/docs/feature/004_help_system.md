@@ -98,6 +98,12 @@ The `.help` system command **must not** appear in its own listing when the user 
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of help request detection patterns |
 
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | HelpGenerator and HelpVerbosity public types |
+
 ### Architectures
 
 | File | Relationship |
@@ -116,12 +122,6 @@ The `.help` system command **must not** appear in its own listing when the user 
 | File | Relationship |
 |------|--------------|
 | [003_governing_principles.md](../invariant/003_governing_principles.md) | Consistent help access principle |
-
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [001_public_types.md](../api/001_public_types.md) | HelpGenerator and HelpVerbosity public types |
 
 ### Sources
 

@@ -1,6 +1,6 @@
 //! NFR sensitive data exclusion tests.
 //!
-//! Implements IN-3 specification case from `tests/docs/invariant/002_non_functional_requirements.md`.
+//! Implements IN-3 specification case from `tests/docs/invariant/02_non_functional_requirements.md`.
 //!
 //! Tests verify that sensitive argument values are never exposed in error messages,
 //! enforcing NFR-SEC-1: no sensitive data (passwords, API keys, tokens) may appear

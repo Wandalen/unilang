@@ -1,6 +1,6 @@
 //! Invariant tests for the dot-prefix naming contract.
 //!
-//! Covers spec cases IN-1..IN-3 from `tests/docs/invariant/005_command_naming.md`.
+//! Covers spec cases IN-1..IN-3 from `tests/docs/invariant/05_command_naming.md`.
 //!
 //! ## Spec Coverage
 //!

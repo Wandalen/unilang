@@ -26,7 +26,9 @@
 //! - `unit/data/types.rs` - Value types and conversions
 
 
-use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
+use std::collections::HashMap;
+use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, ErrorCode, Kind, OutputData, ValidationRule };
+use unilang::error::Error;
 use unilang::registry::CommandRegistry;
 use unilang::semantic::{ SemanticAnalyzer, VerifiedCommand };
 use unilang::interpreter::ExecutionContext;
@@ -66,6 +68,18 @@ fn parse_and_bind( registry : &CommandRegistry, input : &str ) -> Result< Vec< V
   let instructions_array = [instruction];
   let analyzer = SemanticAnalyzer::new( &instructions_array, registry );
   analyzer.analyze().map_err( |e| format!( "Binding error: {e:?}" ) )
+}
+
+/// Helper to parse and analyze a command, preserving the raw `Error` (not stringified).
+/// Used where a test must assert on the precise `ErrorCode` rather than a message substring.
+fn parse_and_bind_raw( registry : &CommandRegistry, input : &str ) -> Result< Vec< VerifiedCommand >, Error >
+{
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed for well-formed test input" );
+
+  let instructions_array = [instruction];
+  let analyzer = SemanticAnalyzer::new( &instructions_array, registry );
+  analyzer.analyze()
 }
 
 /// FT-1: Named binding with `param::value` syntax extracts correct value.
@@ -641,4 +655,753 @@ fn test_path_type_coercion()
     Value::Path( p ) => assert_eq!( p.to_string_lossy(), "/tmp/data.csv" ),
     _ => panic!( "Expected Path value, got: {file_value:?}" ),
   }
+}
+
+/// FT-14: `Kind::Enum` accepts only predefined choices.
+// test_kind: ft_spec(FT-14)  [feature/02_argument_system]
+#[test]
+fn test_ft14_enum_accepts_only_predefined_choices()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "level".to_string(),
+      description : "Severity level".to_string(),
+      kind : Kind::Enum( vec![ "low".to_string(), "medium".to_string(), "high".to_string() ] ),
+      hint : "One of low/medium/high".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Out-of-choice value is rejected as a type mismatch.
+  let result = parse_and_bind_raw( &registry, r#".test level::"extreme""# );
+  assert!( result.is_err(), "Value outside the enum choices must fail" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ArgumentTypeMismatch,
+        "Must produce ArgumentTypeMismatch; got: {:?}", error_data.code
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // In-choice value binds to Value::Enum with no error.
+  let verified_commands = parse_and_bind_raw( &registry, r#".test level::"medium""# )
+    .expect( "Valid enum choice should bind successfully" );
+  let verified_cmd = &verified_commands[0];
+  assert_eq!( verified_cmd.arguments.get( "level" ).unwrap(), &Value::Enum( "medium".to_string() ) );
+}
+
+/// FT-15: `Kind::File` and `Kind::Directory` validate filesystem existence and category.
+// test_kind: ft_spec(FT-15)  [feature/02_argument_system]
+#[test]
+fn test_ft15_file_and_directory_validate_existence_and_category()
+{
+  let tmp_dir = tempfile::tempdir().expect( "Should create temp dir" );
+  let existing_file = tmp_dir.path().join( "existing.txt" );
+  std::fs::write( &existing_file, "content" ).expect( "Should write temp file" );
+  let existing_dir = tmp_dir.path().join( "existing_subdir" );
+  std::fs::create_dir( &existing_dir ).expect( "Should create temp subdir" );
+  let nonexistent = tmp_dir.path().join( "does_not_exist.txt" );
+
+  let mut file_registry = CommandRegistry::new();
+  let file_cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "target".to_string(),
+      description : "File target".to_string(),
+      kind : Kind::File,
+      hint : "Path to an existing file".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  file_registry.register_with_routine( &file_cmd, Box::new( test_routine ) ).unwrap();
+
+  // (a) Existing regular file binds Value::File with no error.
+  let input_a = format!( r#".test target::"{}""#, existing_file.to_string_lossy() );
+  let verified_commands = parse_and_bind_raw( &file_registry, &input_a ).expect( "Existing file should bind" );
+  match verified_commands[0].arguments.get( "target" ).unwrap()
+  {
+    Value::File( p ) => assert_eq!( p, &existing_file ),
+    other => panic!( "Expected Value::File, got: {other:?}" ),
+  }
+
+  // (b) Existing directory is rejected: expected a file, found a directory.
+  let input_b = format!( r#".test target::"{}""#, existing_dir.to_string_lossy() );
+  let result_b = parse_and_bind_raw( &file_registry, &input_b );
+  assert!( result_b.is_err(), "Directory supplied where File expected must fail" );
+  match result_b.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch );
+      assert!(
+        error_data.message.contains( "directory" ) || error_data.message.contains( "Directory" ),
+        "Error should state a directory was found; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // (c) Nonexistent path is rejected: no file found at the path.
+  let input_c = format!( r#".test target::"{}""#, nonexistent.to_string_lossy() );
+  let result_c = parse_and_bind_raw( &file_registry, &input_c );
+  assert!( result_c.is_err(), "Nonexistent path supplied where File expected must fail" );
+  match result_c.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // Symmetric behavior for Kind::Directory: file/directory cases reversed.
+  let mut dir_registry = CommandRegistry::new();
+  let dir_cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "target".to_string(),
+      description : "Directory target".to_string(),
+      kind : Kind::Directory,
+      hint : "Path to an existing directory".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  dir_registry.register_with_routine( &dir_cmd, Box::new( test_routine ) ).unwrap();
+
+  // Existing directory binds Value::Directory with no error.
+  let verified_commands = parse_and_bind_raw( &dir_registry, &input_b ).expect( "Existing directory should bind" );
+  match verified_commands[0].arguments.get( "target" ).unwrap()
+  {
+    Value::Directory( p ) => assert_eq!( p, &existing_dir ),
+    other => panic!( "Expected Value::Directory, got: {other:?}" ),
+  }
+
+  // Existing file is rejected for Kind::Directory: expected a directory, found a file.
+  let result_reversed = parse_and_bind_raw( &dir_registry, &input_a );
+  assert!( result_reversed.is_err(), "File supplied where Directory expected must fail" );
+  match result_reversed.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch );
+      assert!(
+        error_data.message.contains( "file" ) || error_data.message.contains( "File" ),
+        "Error should state a file was found; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-16: `Kind::Url` and `Kind::DateTime` parse into their typed values.
+// test_kind: ft_spec(FT-16)  [feature/02_argument_system]
+#[test]
+fn test_ft16_url_and_datetime_parse_into_typed_values()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "endpoint".to_string(),
+      description : "Endpoint URL".to_string(),
+      kind : Kind::Url,
+      hint : "A URL".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    },
+    ArgumentDefinition {
+      name : "when".to_string(),
+      description : "A timestamp".to_string(),
+      kind : Kind::DateTime,
+      hint : "An RFC 3339 date-time".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Valid URL and DateTime both parse successfully.
+  let verified_commands = parse_and_bind_raw(
+    &registry,
+    r#".test endpoint::"https://api.example.com/v1" when::"2024-01-15T10:30:00+00:00""#,
+  ).expect( "Valid URL and DateTime should bind" );
+  let verified_cmd = &verified_commands[0];
+
+  match verified_cmd.arguments.get( "endpoint" ).unwrap()
+  {
+    Value::Url( u ) =>
+    {
+      assert_eq!( u.scheme(), "https" );
+      assert_eq!( u.host_str(), Some( "api.example.com" ) );
+      assert_eq!( u.path(), "/v1" );
+    },
+    other => panic!( "Expected Value::Url, got: {other:?}" ),
+  }
+  match verified_cmd.arguments.get( "when" ).unwrap()
+  {
+    Value::DateTime( dt ) =>
+    {
+      use chrono::{ Datelike, Timelike };
+      assert_eq!( ( dt.year(), dt.month(), dt.day() ), ( 2024, 1, 15 ) );
+      assert_eq!( ( dt.hour(), dt.minute(), dt.second() ), ( 10, 30, 0 ) );
+    },
+    other => panic!( "Expected Value::DateTime, got: {other:?}" ),
+  }
+
+  // Malformed URL produces a type-mismatch error, not a panic.
+  let mut url_only_registry = CommandRegistry::new();
+  let url_only_cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "endpoint".to_string(),
+      description : "Endpoint URL".to_string(),
+      kind : Kind::Url,
+      hint : "A URL".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  url_only_registry.register_with_routine( &url_only_cmd, Box::new( test_routine ) ).unwrap();
+  let result_bad_url = parse_and_bind_raw( &url_only_registry, r#".test endpoint::"not a url""# );
+  assert!( result_bad_url.is_err(), "Malformed URL must fail, not panic" );
+  match result_bad_url.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // Malformed DateTime produces a type-mismatch error, not a panic.
+  let mut dt_only_registry = CommandRegistry::new();
+  let dt_only_cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "when".to_string(),
+      description : "A timestamp".to_string(),
+      kind : Kind::DateTime,
+      hint : "An RFC 3339 date-time".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  dt_only_registry.register_with_routine( &dt_only_cmd, Box::new( test_routine ) ).unwrap();
+  let result_bad_dt = parse_and_bind_raw( &dt_only_registry, r#".test when::"not-a-date""# );
+  assert!( result_bad_dt.is_err(), "Malformed DateTime must fail, not panic" );
+  match result_bad_dt.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-17: `Kind::Pattern` compiles input into a regular expression value.
+// test_kind: ft_spec(FT-17)  [feature/02_argument_system]
+#[test]
+fn test_ft17_pattern_compiles_into_regex_value()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "regex".to_string(),
+      description : "Regex pattern".to_string(),
+      kind : Kind::Pattern,
+      hint : "A regular expression".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Valid regex source compiles into Value::Pattern whose source matches the input.
+  let verified_commands = parse_and_bind_raw( &registry, r#".test regex::"^[a-z]+$""# )
+    .expect( "Valid regex should compile" );
+  match verified_commands[0].arguments.get( "regex" ).unwrap()
+  {
+    Value::Pattern( r ) => assert_eq!( r.as_str(), "^[a-z]+$" ),
+    other => panic!( "Expected Value::Pattern, got: {other:?}" ),
+  }
+
+  // Invalid regex source produces a type-mismatch error, not a panic.
+  let result = parse_and_bind_raw( &registry, r#".test regex::"[unclosed""# );
+  assert!( result.is_err(), "Invalid regex must fail, not panic" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-18: `Kind::List` and `Kind::Map` parse with default and custom delimiters.
+// test_kind: ft_spec(FT-18)  [feature/02_argument_system]
+#[test]
+fn test_ft18_list_and_map_parse_with_default_and_custom_delimiters()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "tags".to_string(),
+      description : "Comma-delimited tags".to_string(),
+      kind : Kind::List( Box::new( Kind::String ), None ),
+      hint : "List with default delimiter".to_string(),
+      attributes : ArgumentAttributes { optional : true, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    },
+    ArgumentDefinition {
+      name : "tags2".to_string(),
+      description : "Semicolon-delimited tags".to_string(),
+      kind : Kind::List( Box::new( Kind::String ), Some( ';' ) ),
+      hint : "List with custom delimiter".to_string(),
+      attributes : ArgumentAttributes { optional : true, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    },
+    ArgumentDefinition {
+      name : "opts".to_string(),
+      description : "Key-value options".to_string(),
+      kind : Kind::Map( Box::new( Kind::String ), Box::new( Kind::String ), None, None ),
+      hint : "Map with default delimiters".to_string(),
+      attributes : ArgumentAttributes { optional : true, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Default ',' delimiter produces a correct 3-element list.
+  let verified_commands = parse_and_bind_raw( &registry, r#".test tags::"a,b,c""# )
+    .expect( "Default-delimiter list should bind" );
+  match verified_commands[0].arguments.get( "tags" ).unwrap()
+  {
+    Value::List( items ) => assert_eq!(
+      items,
+      &vec![ Value::String( "a".to_string() ), Value::String( "b".to_string() ), Value::String( "c".to_string() ) ]
+    ),
+    other => panic!( "Expected Value::List, got: {other:?}" ),
+  }
+
+  // Custom ';' delimiter produces the same shape of 3-element list.
+  let verified_commands2 = parse_and_bind_raw( &registry, r#".test tags2::"a;b;c""# )
+    .expect( "Custom-delimiter list should bind" );
+  match verified_commands2[0].arguments.get( "tags2" ).unwrap()
+  {
+    Value::List( items ) => assert_eq!(
+      items,
+      &vec![ Value::String( "a".to_string() ), Value::String( "b".to_string() ), Value::String( "c".to_string() ) ]
+    ),
+    other => panic!( "Expected Value::List, got: {other:?}" ),
+  }
+
+  // Map with default ',' entry delimiter and '=' key-value delimiter produces a 2-entry map.
+  let verified_commands3 = parse_and_bind_raw( &registry, r#".test opts::"k1=v1,k2=v2""# )
+    .expect( "Map should bind" );
+  match verified_commands3[0].arguments.get( "opts" ).unwrap()
+  {
+    Value::Map( m ) =>
+    {
+      assert_eq!( m.len(), 2, "Map should have exactly 2 entries" );
+      assert_eq!( m.get( "k1" ), Some( &Value::String( "v1".to_string() ) ) );
+      assert_eq!( m.get( "k2" ), Some( &Value::String( "v2".to_string() ) ) );
+    },
+    other => panic!( "Expected Value::Map, got: {other:?}" ),
+  }
+}
+
+/// FT-19: `Kind::JsonString` and `Kind::Object` parse and validate JSON payloads.
+/// Requires the `json_parser` feature.
+// test_kind: ft_spec(FT-19)  [feature/02_argument_system]
+#[cfg(feature = "json_parser")]
+#[test]
+fn test_ft19_jsonstring_and_object_parse_and_validate_json_payloads()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "payload".to_string(),
+      description : "Raw JSON string".to_string(),
+      kind : Kind::JsonString,
+      hint : "A JSON string".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // Valid JSON binds Value::JsonString with the original text preserved.
+  let verified_commands = parse_and_bind_raw( &registry, r#".test payload::"{\"a\":1}""# )
+    .expect( "Valid JSON string should bind" );
+  match verified_commands[0].arguments.get( "payload" ).unwrap()
+  {
+    Value::JsonString( s ) => assert_eq!( s, r#"{"a":1}"# ),
+    other => panic!( "Expected Value::JsonString, got: {other:?}" ),
+  }
+
+  let mut object_registry = CommandRegistry::new();
+  let object_cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "data".to_string(),
+      description : "Parsed JSON object".to_string(),
+      kind : Kind::Object,
+      hint : "A JSON object".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+  object_registry.register_with_routine( &object_cmd, Box::new( test_routine ) ).unwrap();
+
+  // Valid JSON binds Value::Object as a parsed serde_json::Value.
+  let verified_commands2 = parse_and_bind_raw( &object_registry, r#".test data::"{\"a\":1}""# )
+    .expect( "Valid JSON object should bind" );
+  match verified_commands2[0].arguments.get( "data" ).unwrap()
+  {
+    Value::Object( v ) => assert_eq!( v[ "a" ], 1 ),
+    other => panic!( "Expected Value::Object, got: {other:?}" ),
+  }
+
+  // Malformed JSON produces a type-mismatch error for both kinds, not a panic.
+  let result_json_string = parse_and_bind_raw( &registry, r#".test payload::"{not json}""# );
+  assert!( result_json_string.is_err(), "Malformed JSON must fail JsonString binding, not panic" );
+  match result_json_string.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  let result_object = parse_and_bind_raw( &object_registry, r#".test data::"{not json}""# );
+  assert!( result_object.is_err(), "Malformed JSON must fail Object binding, not panic" );
+  match result_object.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-20: `ValidationRule::Min` rejects an under-limit numeric value.
+// test_kind: ft_spec(FT-20)  [feature/02_argument_system]
+#[test]
+fn test_ft20_validation_rule_min_rejects_under_limit_value()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "age".to_string(),
+      description : "Age in years".to_string(),
+      kind : Kind::Integer,
+      hint : "Non-negative age".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![ ValidationRule::Min( 0.0 ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let result = parse_and_bind_raw( &registry, r#".test age::"-1""# );
+  assert!( result.is_err(), "Value below the minimum must fail validation" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ValidationRuleFailed,
+        "Must produce ValidationRuleFailed; got: {:?}", error_data.code
+      );
+      assert!(
+        error_data.message.contains( "minimum" ),
+        "Error should mention the minimum constraint; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-21: `ValidationRule::MaxLength` rejects a too-long string value.
+// test_kind: ft_spec(FT-21)  [feature/02_argument_system]
+#[test]
+fn test_ft21_validation_rule_maxlength_rejects_too_long_value()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "code".to_string(),
+      description : "Short code".to_string(),
+      kind : Kind::String,
+      hint : "At most 4 characters".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![ ValidationRule::MaxLength( 4 ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let result = parse_and_bind_raw( &registry, r#".test code::"abcdef""# );
+  assert!( result.is_err(), "Value exceeding the maximum length must fail validation" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ValidationRuleFailed,
+        "Must produce ValidationRuleFailed; got: {:?}", error_data.code
+      );
+      assert!(
+        error_data.message.contains( "maximum" ),
+        "Error should mention the maximum length constraint; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-22: `ValidationRule::MinItems` rejects a list with too few elements.
+// test_kind: ft_spec(FT-22)  [feature/02_argument_system]
+#[test]
+fn test_ft22_validation_rule_minitems_rejects_too_few_elements()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "tags".to_string(),
+      description : "At least 2 tags".to_string(),
+      kind : Kind::List( Box::new( Kind::String ), None ),
+      hint : "A list with at least 2 items".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      validation_rules : vec![ ValidationRule::MinItems( 2 ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let result = parse_and_bind_raw( &registry, r#".test tags::"solo""# );
+  assert!( result.is_err(), "List with fewer than the minimum items must fail validation" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ValidationRuleFailed,
+        "Must produce ValidationRuleFailed; got: {:?}", error_data.code
+      );
+      assert!(
+        error_data.message.contains( "minimum required 2 items" ),
+        "Error should mention the minimum items required; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-23: Sensitive argument attribute redacts the value in validation error messages.
+///
+/// Note on rule choice: the spec's example rule is `ValidationRule::MinLength(8)`, but the
+/// real `format_validation_error()` implementation (`src/semantic/validation.rs`) only
+/// interpolates the (possibly redacted) `value_str` into the message for the `Min`, `Max`,
+/// and `Pattern` rule variants — `MinLength`/`MaxLength`/`MinItems` messages report only
+/// numeric lengths/counts and never reference `value_str` (so they never leak the raw value,
+/// but they also never emit the literal `"[REDACTED]"` marker). `Pattern` is used here instead
+/// so the test can genuinely observe the documented `"[REDACTED]"` marker while still exercising
+/// the same `sensitive` redaction code path and the same `UNILANG_VALIDATION_RULE_FAILED` code.
+// test_kind: ft_spec(FT-23)  [feature/02_argument_system]
+#[test]
+fn test_ft23_sensitive_attribute_redacts_value_in_validation_error()
+{
+  let mut registry = CommandRegistry::new();
+
+  let raw_value = "abc";
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "password".to_string(),
+      description : "Account password".to_string(),
+      kind : Kind::String,
+      hint : "Must match the required password pattern".to_string(),
+      attributes : ArgumentAttributes { optional : false, sensitive : true, ..Default::default() },
+      validation_rules : vec![ ValidationRule::Pattern( r"^[a-z]{8,}$".to_string() ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let result = parse_and_bind_raw( &registry, &format!( r#".test password::"{raw_value}""# ) );
+  assert!( result.is_err(), "Too-short sensitive password must fail validation" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ValidationRuleFailed,
+        "Must produce ValidationRuleFailed; got: {:?}", error_data.code
+      );
+      assert!(
+        error_data.message.contains( "[REDACTED]" ),
+        "Error message must contain a redaction marker; got: {:?}", error_data.message
+      );
+      assert!(
+        !error_data.message.contains( raw_value ),
+        "Error message must NOT contain the literal raw sensitive value '{}'; got: {:?}", raw_value, error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-24: Interactive argument attribute signals a distinct error instead of a missing-argument failure.
+// test_kind: ft_spec(FT-24)  [feature/02_argument_system]
+#[test]
+fn test_ft24_interactive_attribute_signals_distinct_error()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "token".to_string(),
+      description : "Auth token".to_string(),
+      kind : Kind::String,
+      hint : "Provided interactively".to_string(),
+      attributes : ArgumentAttributes { optional : false, interactive : true, ..Default::default() },
+      validation_rules : vec![], aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  let result = parse_and_bind_raw( &registry, ".test" );
+  assert!( result.is_err(), "Missing required interactive argument must fail" );
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ArgumentInteractiveRequired,
+        "Must produce ArgumentInteractiveRequired (not ArgumentMissing); got: {:?}", error_data.code
+      );
+      assert_ne!(
+        error_data.code,
+        ErrorCode::ArgumentMissing,
+        "Interactive-required error must be distinct from the generic ArgumentMissing code"
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// FT-25: `VerifiedCommand` typed extraction methods retrieve, coerce-check, and report missing arguments.
+// test_kind: ft_spec(FT-25)  [feature/02_argument_system]
+#[test]
+fn test_ft25_verified_command_typed_extraction_methods()
+{
+  let mut arguments = HashMap::new();
+  arguments.insert( "name".to_string(), Value::String( "Alice".to_string() ) );
+  arguments.insert( "count".to_string(), Value::Integer( 3 ) );
+
+  let verified_cmd = VerifiedCommand
+  {
+    definition : create_binding_test_command( ".test", vec![] ),
+    arguments,
+  };
+
+  // "name": correct-type accessors succeed.
+  assert_eq!( verified_cmd.get_string( "name" ), Some( "Alice" ) );
+  assert_eq!( verified_cmd.require_string( "name" ).unwrap(), "Alice" );
+  assert!( verified_cmd.has_argument( "name" ) );
+  assert_eq!( verified_cmd.get_value( "name" ), Some( &Value::String( "Alice".to_string() ) ) );
+
+  // "count": wrong-type access for get_string/require_string.
+  assert_eq!( verified_cmd.get_string( "count" ), None, "Wrong-type get_* must return None" );
+  match verified_cmd.require_string( "count" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  // Correct-type accessor for "count" succeeds.
+  assert_eq!( verified_cmd.get_integer( "count" ), Some( 3 ) );
+  assert_eq!( verified_cmd.require_integer( "count" ).unwrap(), 3 );
+
+  // "missing": every get_* returns None, every require_* returns Err(ArgumentTypeMismatch).
+  assert_eq!( verified_cmd.get_string( "missing" ), None );
+  assert_eq!( verified_cmd.get_integer( "missing" ), None );
+  assert_eq!( verified_cmd.get_float( "missing" ), None );
+  assert_eq!( verified_cmd.get_boolean( "missing" ), None );
+  assert_eq!( verified_cmd.get_path( "missing" ), None );
+  assert_eq!( verified_cmd.get_list( "missing" ), None );
+
+  match verified_cmd.require_string( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  match verified_cmd.require_integer( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  match verified_cmd.require_float( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  match verified_cmd.require_boolean( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  match verified_cmd.require_path( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+  match verified_cmd.require_list( "missing" )
+  {
+    Err( Error::Execution( error_data ) ) => assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch ),
+    other => panic!( "Expected Err(Error::Execution) with ArgumentTypeMismatch, got: {other:?}" ),
+  }
+
+  assert!( !verified_cmd.has_argument( "missing" ) );
+  assert_eq!( verified_cmd.get_value( "missing" ), None );
+}
+
+/// FT-26: Normalized string extraction trims surrounding whitespace.
+// test_kind: ft_spec(FT-26)  [feature/02_argument_system]
+#[test]
+fn test_ft26_normalized_string_extraction_trims_whitespace()
+{
+  let mut padded_args = HashMap::new();
+  padded_args.insert( "name".to_string(), Value::String( "  Alice  ".to_string() ) );
+  let padded_cmd = VerifiedCommand
+  {
+    definition : create_binding_test_command( ".test", vec![] ),
+    arguments : padded_args,
+  };
+
+  assert_eq!( padded_cmd.get_string_normalized( "name" ), Some( "Alice" ) );
+  assert_eq!( padded_cmd.require_string_normalized( "name" ).unwrap(), "Alice" );
+
+  // Whitespace-only value normalizes to Some("")/Ok("") — not None/error.
+  let mut whitespace_args = HashMap::new();
+  whitespace_args.insert( "name".to_string(), Value::String( "   ".to_string() ) );
+  let whitespace_cmd = VerifiedCommand
+  {
+    definition : create_binding_test_command( ".test", vec![] ),
+    arguments : whitespace_args,
+  };
+
+  assert_eq!( whitespace_cmd.get_string_normalized( "name" ), Some( "" ) );
+  assert_eq!( whitespace_cmd.require_string_normalized( "name" ).unwrap(), "" );
 }

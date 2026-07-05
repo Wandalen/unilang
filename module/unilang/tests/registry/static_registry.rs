@@ -665,3 +665,145 @@ fn test_static_command_registry_routine_management()
   // Test that we can check for routine existence
   assert!( registry.routine( ".test.version" ).is_none() );
 }
+
+/// FT-19: StaticCommandRegistry auto-generates help companion for registered command.
+///
+/// A `StaticCommandRegistry` with a command `.report` registered via `register_with_routine`
+/// with `auto_help_enabled` true, converted via `.into()` into a `CommandRegistry`, must
+/// expose `.report.help` returning `Some(def)` — matching the auto-help behavior documented
+/// for `CommandRegistry::register()`.
+// test_kind: ft_spec(FT-19)  [feature/01_command_registry]
+#[test]
+fn test_ft19_static_registry_help_companion_after_conversion()
+{
+  let mut static_registry = StaticCommandRegistry::new();
+
+  let cmd = CommandDefinition::former()
+    .name( ".report" )
+    .description( "Generate a report" )
+    .auto_help_enabled( true )
+    .end();
+
+  let routine = Box::new( | _cmd, _ctx |
+  {
+    Ok( unilang::data::OutputData::new( "report generated", "text" ) )
+  });
+
+  static_registry.register_with_routine( cmd, routine )
+    .expect( "Registering '.report' should succeed" );
+
+  let command_registry : CommandRegistry = static_registry.into();
+
+  let help_cmd = command_registry.command( ".report.help" );
+  assert!(
+    help_cmd.is_some(),
+    "Converted CommandRegistry should expose a generated '.report.help' companion"
+  );
+}
+
+/// FT-20: Registering static commands also registers the global `.help` command.
+///
+/// A fresh `StaticCommandRegistry` converted into a `CommandRegistry` via
+/// `From<StaticCommandRegistry>` must expose `.help` returning `Some(def)`, present even
+/// though no command explicitly registered `.help` itself.
+// test_kind: ft_spec(FT-20)  [feature/01_command_registry]
+#[test]
+fn test_ft20_static_registry_conversion_registers_global_help()
+{
+  let static_registry = StaticCommandRegistry::new();
+
+  let command_registry : CommandRegistry = static_registry.into();
+
+  let global_help = command_registry.command( ".help" );
+  assert!(
+    global_help.is_some(),
+    "CommandRegistry converted from a fresh StaticCommandRegistry should expose the global '.help' command"
+  );
+}
+
+/// FT-23: Generated help companion carries a short alias, is hidden from listings, and disables recursive auto-help.
+///
+/// A `CommandDefinition` named `.example` registered with `auto_help_enabled` true, whose
+/// `.example.help` companion is generated during registration, must have alias
+/// `.example.h`, `hidden_from_list() == true`, `priority() == 999`, and
+/// `auto_help_enabled() == false` — preventing a further `.example.help.help` from being
+/// generated.
+// test_kind: ft_spec(FT-23)  [feature/01_command_registry]
+#[test]
+fn test_ft23_generated_help_companion_metadata()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = CommandDefinition::former()
+    .name( ".example" )
+    .description( "Example command" )
+    .auto_help_enabled( true )
+    .end();
+
+  registry.register( cmd ).expect( "Registering '.example' should succeed" );
+
+  let help_cmd = registry.command( ".example.help" )
+    .expect( "'.example.help' companion should be generated during registration" );
+
+  assert!(
+    help_cmd.aliases().contains( &".example.h".to_string() ),
+    "Generated help companion should carry alias '.example.h', got: {:?}",
+    help_cmd.aliases()
+  );
+  assert!(
+    help_cmd.hidden_from_list(),
+    "Generated help companion should be hidden from listings"
+  );
+  assert_eq!(
+    help_cmd.priority(), 999,
+    "Generated help companion should have priority 999"
+  );
+  assert!(
+    !help_cmd.auto_help_enabled(),
+    "Generated help companion should have auto_help_enabled() == false to prevent recursive help generation"
+  );
+}
+
+/// FT-24: Builder `status("deprecated")` produces structured deprecation metadata distinct from the active default.
+///
+/// A `CommandDefinition` built via
+/// `CommandDefinition::former().name(".old").description("Old command").status("deprecated")`
+/// with a deprecation message set must have `status()` return
+/// `CommandStatus::Deprecated { reason, .. }` where `reason` matches the supplied message,
+/// `is_deprecated() == true`, and `is_active() == false` — distinct from a command built
+/// without `.status(...)`, which defaults to `CommandStatus::Active`.
+// test_kind: ft_spec(FT-24)  [feature/01_command_registry]
+#[test]
+fn test_ft24_builder_status_deprecated_produces_structured_metadata()
+{
+  use unilang::data::CommandStatus;
+
+  let deprecated_cmd = CommandDefinition::former()
+    .name( ".old" )
+    .description( "Old command" )
+    .status( "deprecated" )
+    .deprecation_message( "Use .new instead" )
+    .end();
+
+  match deprecated_cmd.status()
+  {
+    CommandStatus::Deprecated { reason, .. } =>
+    {
+      assert_eq!( reason, "Use .new instead", "Deprecation reason should match the supplied message" );
+    }
+    other => panic!( "Expected CommandStatus::Deprecated {{ reason, .. }}, got: {other:?}" ),
+  }
+
+  assert!( deprecated_cmd.status().is_deprecated(), "is_deprecated() should be true" );
+  assert!( !deprecated_cmd.status().is_active(), "is_active() should be false for a deprecated command" );
+
+  // Distinct from the active default when .status(...) is not called
+  let active_cmd = CommandDefinition::former()
+    .name( ".fresh" )
+    .description( "Fresh command" )
+    .end();
+
+  assert_eq!( active_cmd.status(), &CommandStatus::Active, "Command without .status(...) should default to CommandStatus::Active" );
+  assert!( active_cmd.status().is_active() );
+  assert!( !active_cmd.status().is_deprecated() );
+}

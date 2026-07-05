@@ -216,3 +216,112 @@ fn test_duplicate_error_message_clarity()
     );
   }
 }
+
+/// FT-21: Duplicate registration via `register()` and `register_with_routine()` return different error variants.
+///
+/// `register()` on an already-registered `.dup` returns `Err(Error::Registration(_))`;
+/// `register_with_routine()` returns `Err(Error::Execution(ErrorData))` carrying
+/// `ErrorCode::CommandAlreadyExists`. Both reject the duplicate but surface it through
+/// distinct error variants.
+// test_kind: ft_spec(FT-21)  [feature/01_command_registry]
+#[ test ]
+fn test_ft21_duplicate_registration_error_variants_differ()
+{
+  use unilang::error::Error;
+  use unilang::data::ErrorCode;
+
+  // register() path
+  let mut registry_register = CommandRegistry::new();
+  let cmd1 = create_test_command( ".dup", "First dup implementation" );
+  registry_register.register( cmd1.clone() ).expect( "First register() should succeed" );
+
+  let cmd2 = create_test_command( ".dup", "Second dup implementation" );
+  let register_result = registry_register.register( cmd2 );
+
+  assert!(
+    matches!( register_result, Err( Error::Registration( _ ) ) ),
+    "register() on duplicate '.dup' should return Err(Error::Registration(_))"
+  );
+
+  // register_with_routine() path
+  let mut registry_routine = CommandRegistry::new();
+  let cmd3 = create_test_command( ".dup", "First dup implementation" );
+  registry_routine.register_with_routine( &cmd3, create_test_routine_with_output( "first" ) )
+    .expect( "First register_with_routine() should succeed" );
+
+  let cmd4 = create_test_command( ".dup", "Second dup implementation" );
+  let routine_result = registry_routine.register_with_routine( &cmd4, create_test_routine_with_output( "second" ) );
+
+  match routine_result
+  {
+    Err( Error::Execution( error_data ) ) =>
+    {
+      assert_eq!(
+        error_data.code, ErrorCode::CommandAlreadyExists,
+        "register_with_routine() duplicate error should carry ErrorCode::CommandAlreadyExists"
+      );
+    }
+    other => panic!(
+      "register_with_routine() on duplicate '.dup' should return Err(Error::Execution(ErrorData)), got: {other:?}"
+    ),
+  }
+}
+
+/// FT-22: `CommandRegistryBuilder::build()` silently ignores registration errors while `build_checked()` propagates them.
+///
+/// Two `command_with_routine` calls using the same command name: the second registration
+/// fails internally. `.build()` returns a `CommandRegistry` containing only the first
+/// command with no error surfaced; `.build_checked()` returns `Err(Error::Registration(_))`
+/// whose message references the failed duplicate registration.
+// test_kind: ft_spec(FT-22)  [feature/01_command_registry]
+#[ test ]
+fn test_ft22_builder_build_silent_vs_build_checked_propagates()
+{
+  use unilang::error::Error;
+  use unilang::registry::CommandRegistry;
+
+  // .build() ignores the duplicate registration error silently
+  let registry = CommandRegistry::builder()
+    .command_with_routine( ".dup_builder", "First implementation", | _cmd, _ctx |
+    {
+      Ok( unilang::data::OutputData::new( "first", "text" ) )
+    })
+    .command_with_routine( ".dup_builder", "Second implementation", | _cmd, _ctx |
+    {
+      Ok( unilang::data::OutputData::new( "second", "text" ) )
+    })
+    .build();
+
+  let stored_cmd = registry.command( ".dup_builder" )
+    .expect( "First command should be present after build()" );
+  assert_eq!(
+    stored_cmd.description(), "First implementation",
+    "build() should silently keep only the first registration"
+  );
+
+  // .build_checked() propagates the duplicate registration error
+  let checked_result = CommandRegistry::builder()
+    .command_with_routine( ".dup_builder", "First implementation", | _cmd, _ctx |
+    {
+      Ok( unilang::data::OutputData::new( "first", "text" ) )
+    })
+    .command_with_routine( ".dup_builder", "Second implementation", | _cmd, _ctx |
+    {
+      Ok( unilang::data::OutputData::new( "second", "text" ) )
+    })
+    .build_checked();
+
+  match checked_result
+  {
+    Err( Error::Registration( msg ) ) =>
+    {
+      assert!(
+        msg.contains( ".dup_builder" ),
+        "build_checked() error should reference the failed duplicate '.dup_builder': {msg}"
+      );
+    }
+    other => panic!(
+      "build_checked() should return Err(Error::Registration(_)) for duplicate registration, got: {other:?}"
+    ),
+  }
+}

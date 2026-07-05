@@ -25,6 +25,10 @@ The public API exposes the following data structures to integrators:
 - **Value**: Runtime argument value union type matching the `Kind` enum variants.
 - **StaticCommandMap**: Opaque wrapper for compile-time optimized command maps; hides PHF implementation from downstream crates.
 - **StaticCommandDefinition**: Const-compatible command definition for static storage.
+- **StaticArgumentDefinition**: Const-compatible argument definition for static storage; converts to `ArgumentDefinition` via `From<&StaticArgumentDefinition>`.
+- **StaticArgumentAttributes**: Const-compatible version of `ArgumentAttributes` for static argument definitions.
+- **StaticKind**: Const-compatible version of `Kind` for static argument definitions.
+- **StaticValidationRule**: Const-compatible version of `ValidationRule` for static argument definitions.
 - **VerifiedCommand**: Validated command output from the semantic analyzer — contains bound, typed argument values.
 - **Pipeline**: High-level orchestration object for the Parse → SemanticAnalysis → Interpret flow.
 - **CommandRegistry**: Runtime registry for command definitions and their associated routines.
@@ -69,6 +73,18 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 |------|--------------|
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of public type usage patterns and boilerplate |
 
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [002_error_codes.md](002_error_codes.md) | Error codes stable API contract |
+
+### Architectures
+
+| File | Relationship |
+|------|--------------|
+| [004_implementation_details.md](../architecture/004_implementation_details.md) | Internal implementation of StaticCommandMap |
+
 ### Features
 
 | File | Relationship |
@@ -83,18 +99,6 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 | File | Relationship |
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFRs that govern API performance |
-
-### Architectures
-
-| File | Relationship |
-|------|--------------|
-| [004_implementation_details.md](../architecture/004_implementation_details.md) | Internal implementation of StaticCommandMap |
-
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [002_error_codes.md](002_error_codes.md) | Error codes stable API contract |
 
 ### Types
 
@@ -119,3 +123,9 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 |------|--------------|
 | `tests/data/` | Data model and type validation tests |
 | `tests/api/` | Public API contract tests |
+
+### Guides
+
+| File | Relationship |
+|------|--------------|
+| [phf_reexport.md](../phf_reexport.md) | Usage and migration guide for the public `unilang::phf` re-export |

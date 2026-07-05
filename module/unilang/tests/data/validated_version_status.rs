@@ -433,3 +433,86 @@ replacement: .new
   assert_eq!( since.as_ref().unwrap(), "2.0.0" );
   assert_eq!( replacement.as_ref().unwrap(), ".new" );
 }
+
+/// TC-8: Default trait produces Active.
+// test_kind: tc_spec(TC-8)  [type/04_command_status]
+#[ test ]
+fn test_tc8_command_status_default_is_active()
+{
+  let default = CommandStatus::default();
+  assert_eq!( default, CommandStatus::Active, "CommandStatus::default() should be Active" );
+}
+
+/// TC-9: from_str_lossy maps recognized and unrecognized strings.
+// test_kind: tc_spec(TC-9)  [type/04_command_status]
+#[ test ]
+fn test_tc9_command_status_from_str_lossy()
+{
+  assert_eq!( CommandStatus::from_str_lossy( "experimental" ), CommandStatus::Experimental );
+  assert_eq!( CommandStatus::from_str_lossy( "internal" ), CommandStatus::Internal );
+  assert_eq!( CommandStatus::from_str_lossy( "stable" ), CommandStatus::Active );
+  assert_eq!( CommandStatus::from_str_lossy( "unknown" ), CommandStatus::Active );
+}
+
+/// TC-10: Display formats simple variants as lowercase words.
+// test_kind: tc_spec(TC-10)  [type/04_command_status]
+#[ test ]
+fn test_tc10_command_status_display_simple_variants()
+{
+  assert_eq!( format!( "{}", CommandStatus::Active ), "active" );
+  assert_eq!( format!( "{}", CommandStatus::Experimental ), "experimental" );
+  assert_eq!( format!( "{}", CommandStatus::Internal ), "internal" );
+}
+
+/// TC-11: Display formats Deprecated variant with all metadata segments.
+// test_kind: tc_spec(TC-11)  [type/04_command_status]
+#[ test ]
+fn test_tc11_command_status_display_deprecated_full()
+{
+  let deprecated = CommandStatus::Deprecated
+  {
+    reason : "use .new".to_string(),
+    since : Some( "2.0".to_string() ),
+    replacement : Some( ".new".to_string() ),
+  };
+
+  assert_eq!( format!( "{}", deprecated ), "deprecated (since 2.0): use .new → .new" );
+}
+
+/// TC-12: Deserialization accepts "stable" as an alias for Active.
+// test_kind: tc_spec(TC-12)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc12_command_status_serde_stable_alias()
+{
+  let deserialized : CommandStatus = serde_json::from_str( "\"stable\"" )
+    .expect( "deserialization of \"stable\" should succeed" );
+  assert_eq!( deserialized, CommandStatus::Active );
+}
+
+/// TC-13: Deserialization of unrecognized string defaults to Active.
+// test_kind: tc_spec(TC-13)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc13_command_status_serde_unrecognized_defaults_to_active()
+{
+  let deserialized : CommandStatus = serde_json::from_str( "\"bogus\"" )
+    .expect( "deserialization of unrecognized value should not error" );
+  assert_eq!( deserialized, CommandStatus::Active );
+}
+
+/// TC-14: Deserialization of simple "deprecated" string yields empty metadata.
+// test_kind: tc_spec(TC-14)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc14_command_status_serde_plain_deprecated_string()
+{
+  let deserialized : CommandStatus = serde_json::from_str( "\"deprecated\"" )
+    .expect( "deserialization of plain \"deprecated\" string should succeed" );
+
+  assert!( deserialized.is_deprecated() );
+  let ( reason, since, replacement ) = deserialized.deprecation_info().unwrap();
+  assert_eq!( reason, "" );
+  assert!( since.is_none() );
+  assert!( replacement.is_none() );
+}

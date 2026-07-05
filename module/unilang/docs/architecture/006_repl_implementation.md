@@ -115,17 +115,17 @@ Test the four combinations: default (enhanced REPL), basic REPL only (`--no-defa
 
 Arrow keys can only be tested interactively in a terminal. Start the REPL, enter several commands, then use the up arrow to navigate backward through history and the down arrow to navigate forward. Edit a recalled command and press Enter to execute the modified version.
 
-### Features
-
-| File | Relationship |
-|------|--------------|
-| [005_repl_interactive.md](../feature/005_repl_interactive.md) | FR-REPL-* requirements this implements |
-
 ### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [003_vision_scope.md](003_vision_scope.md) | REPL as a supported modality |
+
+### Features
+
+| File | Relationship |
+|------|--------------|
+| [005_repl_interactive.md](../feature/005_repl_interactive.md) | FR-REPL-* requirements this implements |
 
 ### Sources
 

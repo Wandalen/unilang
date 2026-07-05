@@ -36,3 +36,15 @@
 - **Given:** A `Pipeline` and input string `""` (empty)
 - **When:** `pipeline.process_command("", context)` is called
 - **Then:** Returns a failed result with `result.error.is_some()`, or succeeds with no-op behavior (e.g., help listing as fallback); no panic occurs under any path
+
+### FT-6: Interactive argument retry succeeds after value is supplied following the signal
+
+- **Given:** The same `.greet` command with a required `"name"` argument (`interactive: true`); first invocation `".greet"` (argument absent) has already returned `result.requires_interactive_input() == true` and `result.interactive_argument() == Some("name")` (per FT-2)
+- **When:** The REPL layer re-submits the command with the previously missing value supplied — `pipeline.process_command(".greet name::alice")` is called on the same pipeline instance
+- **Then:** `result.success == true`; `result.requires_interactive_input() == false`; output contains `"Hello, alice!"` — completing the full FR-INTERACTIVE-1 round trip: signal detection (FT-2) followed by successful resubmission with the supplied value, with no residual interactive-required state carried over from the first call
+
+### FT-7: WASM REPL glue executes commands and returns formatted output or error string
+
+- **Given:** A `UniLangWasmRepl` instance (from `examples/wasm-repl/src/lib.rs`) constructed via `UniLangWasmRepl::new()`, registering its demo `.echo` and `.add` commands
+- **When:** `repl.execute_command(".demo.echo text::hello")` is called for a valid command, and `repl.execute_command(".invalid.command")` is called for an unregistered one; `repl.get_help()` is also called
+- **Then:** For the valid command, the returned `String` is non-empty and does not start with `"Error:"` (contains the joined output content); for the invalid command, the returned `String` starts with `"Error:"`; `repl.get_help()` returns non-empty content that does not start with `"Error:"` — confirming the browser-facing glue (built on `pipeline.process_command_simple`) surfaces success and failure as plain strings suitable for JS consumption, distinct from FT-4's core-crate compilation check

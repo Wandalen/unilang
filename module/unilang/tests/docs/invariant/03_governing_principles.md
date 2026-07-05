@@ -2,9 +2,9 @@
 
 ### Scope
 
-- **Purpose:** Verify that the five governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time
-- **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, and Consistent Help Access
-- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`?`/`.cmd.help` equivalence), Single Source of Truth (no duplicate definitions)
+- **Purpose:** Verify that the seven governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time
+- **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, Consistent Help Access, Explicit Dependencies, and Explicit Command Naming
+- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`?`/`.cmd.help` equivalence), Single Source of Truth (no duplicate definitions), Explicit Dependencies (required argument rejection), Explicit Command Naming (dot-prefix enforcement)
 - **Out of Scope:** NFR thresholds (invariant 002); specific FR behaviors (feature specs)
 
 ### IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage
@@ -37,3 +37,15 @@
 - **Given:** A `CommandRegistry` that already contains `.dup`
 - **When:** `register_with_routine` is called a second time with a definition named `".dup"`
 - **Then:** Returns an error with code `CommandAlreadyExists`; the registry retains the original definition unmodified
+
+### IN-6: Explicit Dependencies — missing required argument is rejected with actionable error
+
+- **Given:** A command `.needs_arg` with an `ArgumentDefinition` whose `attributes.optional` is `false` (a required argument, making the dependency explicit)
+- **When:** The command is invoked without providing that argument
+- **Then:** Semantic analysis returns an error with code `ErrorCode::ArgumentMissing`; the error message names the missing argument and instructs the caller to provide it
+
+### IN-7: Explicit Command Naming — registration without dot prefix is rejected
+
+- **Given:** A command name string `"build"` (no leading dot) passed to `CommandName::new`
+- **When:** The name is validated at construction
+- **Then:** Returns `Err`, not a silently auto-corrected `".build"`; the framework never adds an implicit dot prefix or otherwise transforms the name on the caller's behalf

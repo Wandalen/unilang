@@ -24,3 +24,15 @@
 - **Given:** The struct or type that performs semantic validation in the `unilang` or `unilang_parser` crate
 - **When:** Its public name (struct name, module name, or doc comment) is inspected
 - **Then:** The name contains `SemanticAnalyzer` or `semantic_analyzer` (not `validator`, `checker`, or `verifier`)
+
+### IN-4: Canonical term "Command Registry" used without synonym variants in source
+
+- **Given:** The source code of the `unilang` crate, where `CommandRegistry` is the dual-defined term (both an Internal System Actor and a Ubiquitous Language term)
+- **When:** The codebase is searched for the deprecated synonyms `"CommandStore"`, `"CommandCache"`, and `"CommandDatabase"` as type names
+- **Then:** Zero occurrences of these synonym type names are found; `CommandRegistry` (and `StaticCommandMap` for the static variant) are used exclusively for the runtime command database
+
+### IN-5: Canonical term "Kind" used for argument data type without synonym variants
+
+- **Given:** The source code of the `unilang` crate, where `Kind` is the canonical Ubiquitous Language term for an argument's data type
+- **When:** The codebase is searched for the deprecated synonym type names `"ArgType"`, `"DataType"`, and `"ValueType"` used to represent an argument's data type
+- **Then:** Zero occurrences of these synonym type names are found; `Kind` is used exclusively as the enum name for argument data types

@@ -1,6 +1,6 @@
 //! API error code contract tests.
 //!
-//! Implements AP-1..14 specification cases from `tests/docs/api/002_error_codes.md`.
+//! Implements AP-1..16 specification cases from `tests/docs/api/02_error_codes.md`.
 //!
 //! Tests verify that each `ErrorCode` variant is produced under its documented condition
 //! and that enum derives (`Clone`, `PartialEq`, `Eq`) are present and functional.
@@ -650,6 +650,96 @@ fn test_ap14_error_code_string_representations_match_catalog()
     assert_eq!(
       &actual, expected_str,
       "ErrorCode::{:?} must produce {:?}; got: {:?}", code, expected_str, actual
+    );
+  }
+}
+
+/// AP-15: `ErrorCode` enum derives `Debug` for diagnostic formatting.
+///
+/// `format!("{:?}", error_code)` on `ErrorCode::ValidationRuleFailed` must produce
+/// output containing the variant name `"ValidationRuleFailed"`. The enum's derive
+/// attribute lists `Debug` alongside `Clone, PartialEq, Eq` with no manually written
+/// `impl core::fmt::Debug for ErrorCode`, so this test compiling and passing confirms
+/// the derive is present rather than a hand-rolled implementation.
+// test_kind: ap_spec(AP-15)  [api/02_error_codes]
+#[ test ]
+fn test_ap15_error_code_derives_debug_for_diagnostic_formatting()
+{
+  let error_code = ErrorCode::ValidationRuleFailed;
+  let formatted = format!( "{:?}", error_code );
+
+  assert!(
+    formatted.contains( "ValidationRuleFailed" ),
+    "Debug output must contain the variant name; got: {:?}", formatted
+  );
+}
+
+/// AP-16: Non-exhaustive matching on `ErrorCode` remains forward-compatible with a wildcard arm.
+///
+/// Integrator code matching on `ErrorCode` with explicit arms for all 12 currently-documented
+/// variants plus a trailing `_ => ErrorCode::InternalError` wildcard must compile (the wildcard
+/// satisfies exhaustiveness checking) and each of the 12 variants must be matched by its own
+/// explicit arm — the wildcard is only reached if a future minor-release variant is added.
+///
+/// # Implementation Note
+///
+/// `ErrorCode` (`src/data/error_types.rs`) is a closed (non-`#[non_exhaustive]`) enum with
+/// exactly these 12 variants today, so the 12 explicit arms below are already exhaustive on
+/// their own — the trailing `_` arm is provably unreachable *right now* and `rustc` correctly
+/// flags it (`unreachable_patterns`, denied via `-D warnings`). `#[allow(unreachable_patterns)]`
+/// is applied deliberately: it documents the exact forward-compatibility idiom integrators
+/// should use (all current variants + wildcard) without treating the current-version
+/// unreachability as a defect. The loop below still asserts real runtime behavior — every
+/// documented variant must route through its own explicit arm, never the wildcard.
+// test_kind: ap_spec(AP-16)  [api/02_error_codes]
+#[ test ]
+fn test_ap16_non_exhaustive_match_with_wildcard_arm_is_forward_compatible()
+{
+  #[ allow( unreachable_patterns ) ] // AP-16: wildcard demonstrates the forward-compat idiom; unreachable only because ErrorCode has no undocumented variants yet — see Implementation Note above
+  fn classify( code : &ErrorCode ) -> ErrorCode
+  {
+    match code
+    {
+      ErrorCode::CommandNotFound => ErrorCode::CommandNotFound,
+      ErrorCode::ArgumentMissing => ErrorCode::ArgumentMissing,
+      ErrorCode::ArgumentTypeMismatch => ErrorCode::ArgumentTypeMismatch,
+      ErrorCode::ArgumentInteractiveRequired => ErrorCode::ArgumentInteractiveRequired,
+      ErrorCode::ValidationRuleFailed => ErrorCode::ValidationRuleFailed,
+      ErrorCode::TooManyArguments => ErrorCode::TooManyArguments,
+      ErrorCode::UnknownParameter => ErrorCode::UnknownParameter,
+      ErrorCode::CommandAlreadyExists => ErrorCode::CommandAlreadyExists,
+      ErrorCode::CommandNotImplemented => ErrorCode::CommandNotImplemented,
+      ErrorCode::TypeMismatch => ErrorCode::TypeMismatch,
+      ErrorCode::InternalError => ErrorCode::InternalError,
+      ErrorCode::HelpRequested => ErrorCode::HelpRequested,
+      _ => ErrorCode::InternalError,
+    }
+  }
+
+  let documented_variants = vec!
+  [
+    ErrorCode::CommandNotFound,
+    ErrorCode::ArgumentMissing,
+    ErrorCode::ArgumentTypeMismatch,
+    ErrorCode::ArgumentInteractiveRequired,
+    ErrorCode::ValidationRuleFailed,
+    ErrorCode::TooManyArguments,
+    ErrorCode::UnknownParameter,
+    ErrorCode::CommandAlreadyExists,
+    ErrorCode::CommandNotImplemented,
+    ErrorCode::TypeMismatch,
+    ErrorCode::InternalError,
+    ErrorCode::HelpRequested,
+  ];
+
+  assert_eq!( documented_variants.len(), 12, "Spec documents exactly 12 ErrorCode variants" );
+
+  for variant in &documented_variants
+  {
+    let result = classify( variant );
+    assert_eq!(
+      &result, variant,
+      "Each documented variant must be matched by its own explicit arm, not the wildcard; got: {:?}", result
     );
   }
 }

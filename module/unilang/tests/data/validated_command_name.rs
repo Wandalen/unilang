@@ -398,3 +398,87 @@ fn test_tc5_nested_dot_name_valid()
     );
   }
 }
+
+/// TC-7: Display trait formats as the inner string.
+// test_kind: tc_spec(TC-7)  [type/01_command_name]
+#[ test ]
+fn test_tc7_display_formats_inner_string()
+{
+  let name = CommandName::new( ".build" ).unwrap();
+  let formatted = format!( "{}", name );
+
+  assert_eq!(
+    formatted,
+    ".build",
+    "Display output should match the inner string"
+  );
+
+  assert_eq!(
+    formatted,
+    name.as_str(),
+    "Display output should be identical to as_str()"
+  );
+}
+
+/// TC-8: Serialize produces a plain JSON string.
+// test_kind: tc_spec(TC-8)  [type/01_command_name]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc8_serialize_produces_plain_json_string()
+{
+  let name = CommandName::new( ".video.convert" ).unwrap();
+  let json = serde_json::to_string( &name ).expect( "serialization should succeed" );
+
+  assert_eq!(
+    json,
+    "\".video.convert\"",
+    "CommandName should serialize as a plain JSON string, not a map"
+  );
+}
+
+/// TC-9: Serde deserialization accepts a valid name.
+// test_kind: tc_spec(TC-9)  [type/01_command_name]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc9_serde_deserialize_accepts_valid_name()
+{
+  let json = "\".hello\"";
+  let name : CommandName = serde_json::from_str( json )
+    .expect( "deserialization should succeed for valid name" );
+
+  assert_eq!(
+    name.as_str(),
+    ".hello",
+    "Deserialized CommandName should have the expected value"
+  );
+}
+
+/// TC-10: into_inner consumes and returns the owned String.
+// test_kind: tc_spec(TC-10)  [type/01_command_name]
+#[ test ]
+fn test_tc10_into_inner_returns_owned_string()
+{
+  let name = CommandName::new( ".build" ).unwrap();
+  let inner : String = name.into_inner();
+
+  assert_eq!(
+    inner,
+    ".build",
+    "into_inner() should return the owned String matching the original value"
+  );
+}
+
+/// TC-11: Equal names compare as equal.
+// test_kind: tc_spec(TC-11)  [type/01_command_name]
+#[ test ]
+fn test_tc11_equal_names_compare_equal()
+{
+  let name1 = CommandName::new( ".build" ).unwrap();
+  let name2 = CommandName::new( ".build" ).unwrap();
+
+  assert_eq!(
+    name1 == name2,
+    true,
+    "Two CommandName values constructed from the same string should compare equal"
+  );
+}

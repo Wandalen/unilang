@@ -120,19 +120,19 @@ The `build.rs` script **must** validate all command definitions at compile time 
 | [001_api_analysis.md](../analysis/001_api_analysis.md) | Analysis of this registry's boilerplate patterns |
 | [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability recommendations for this registry API |
 
-### Architectures
-
-| File | Relationship |
-|------|--------------|
-| [003_vision_scope.md](../architecture/003_vision_scope.md) | Vision that drives registration requirements |
-| [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF static registry internals |
-
 ### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | Public types for registry and commands |
 | [002_error_codes.md](../api/002_error_codes.md) | Error codes from registry operations |
+
+### Architectures
+
+| File | Relationship |
+|------|--------------|
+| [003_vision_scope.md](../architecture/003_vision_scope.md) | Vision that drives registration requirements |
+| [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF static registry internals |
 
 ### Features
 
@@ -171,3 +171,10 @@ The `build.rs` script **must** validate all command definitions at compile time 
 |------|--------------|
 | `tests/registry/` | Registry integration tests |
 | `tests/data/validated_command_name.rs` | CommandName validation coverage |
+
+### Guides
+
+| File | Relationship |
+|------|--------------|
+| [cli_aggregation.md](../cli_aggregation.md) | CliBuilder usage guide for FR-REG-7 module aggregation |
+| [cli_definition_approaches.md](../cli_definition_approaches.md) | Catalog of command-definition approaches implementing FR-REG-1/3/6 |

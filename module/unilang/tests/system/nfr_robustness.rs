@@ -1,6 +1,6 @@
 //! NFR robustness tests: panic safety and zero-feature build.
 //!
-//! Implements IN-4 and IN-5 from `tests/docs/invariant/002_non_functional_requirements.md`.
+//! Implements IN-4 and IN-5 from `tests/docs/invariant/02_non_functional_requirements.md`.
 //!
 //! ## IN-4 implementation note
 //!

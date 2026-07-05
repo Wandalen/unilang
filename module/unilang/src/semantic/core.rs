@@ -315,10 +315,20 @@ impl< 'a > SemanticAnalyzer< 'a >
 
     for instruction in self.instructions
     {
-      // Handle special case: single dot "." should show help
+      // Handle special case: single dot "." (no path, no arguments) should show help.
+      // An empty path with attached named/positional arguments is NOT a help request —
+      // it means the parser excluded a `name::value` token (or bare token) from the path
+      // because it's actually an argument, and that argument is unknown (no command was
+      // resolved to validate it against). This must be rejected per FR-ARG-8, not silently
+      // routed to the help listing.
       if instruction.command_path_slices.is_empty()
       {
-        return self.generate_help_listing();
+        if instruction.named_arguments.is_empty() && instruction.positional_arguments.is_empty()
+        {
+          return self.generate_help_listing();
+        }
+
+        return Err( Error::Execution( Self::unknown_parameter_error_for_empty_path( instruction ) ) );
       }
 
       let command_path_refs : Vec< &str > = instruction.command_path_slices.iter().map( std::string::String::as_str ).collect();
@@ -358,6 +368,47 @@ impl< 'a > SemanticAnalyzer< 'a >
       });
     }
     Ok( verified_commands )
+  }
+
+  ///
+  /// Builds an `UnknownParameter` error for an instruction whose command path is empty
+  /// but which carries at least one named or positional argument.
+  ///
+  /// No command was resolved in this case (the path is empty), so there is no
+  /// `CommandDefinition` to validate against — the argument(s) are unconditionally
+  /// unknown. This mirrors the error format used by `check_unknown_named_arguments()`
+  /// in `validation.rs`, but is self-contained since it has no valid-parameter set to
+  /// compare against.
+  ///
+  fn unknown_parameter_error_for_empty_path( instruction : &GenericInstruction ) -> ErrorData
+  {
+    let mut unknown_names : Vec< &str > = instruction.named_arguments.keys().map( std::string::String::as_str ).collect();
+
+    let message = if unknown_names.is_empty()
+    {
+      // Only positional arguments are present; no command path means they cannot be bound.
+      let values : Vec< &str > = instruction.positional_arguments.iter().map( | arg | arg.value.as_str() ).collect();
+      format!(
+        "Argument Error: Unknown parameter(s) provided without a command path: {}. Use '.' to see all available commands.",
+        values.iter().map( | v | format!( "'{v}'" ) ).collect::< Vec< _ > >().join( ", " )
+      )
+    }
+    else if unknown_names.len() == 1
+    {
+      format!(
+        "Argument Error: Unknown parameter '{}'. No command was specified to validate it against. Use '.' to see all available commands.",
+        unknown_names.remove( 0 )
+      )
+    }
+    else
+    {
+      let params_list = unknown_names.iter().map( | p | format!( "'{p}'" ) ).collect::< Vec< _ > >().join( ", " );
+      format!(
+        "Argument Error: Unknown parameters: {params_list}. No command was specified to validate them against. Use '.' to see all available commands."
+      )
+    };
+
+    ErrorData::new( ErrorCode::UnknownParameter, message )
   }
 
   ///

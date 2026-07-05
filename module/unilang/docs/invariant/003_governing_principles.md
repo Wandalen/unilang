@@ -115,6 +115,13 @@ The framework **must** adhere to the principle of explicit command naming with m
 - **No Implicit Behavior**: The system **must not** automatically add dots, modify namespaces, or transform command names during registration or execution
 - **Principle of Least Surprise**: Command behavior should be predictable — what you register is exactly what gets executed
 
+### Architectures
+
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates derived from these principles |
+| [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Minimum implicit magic principle motivates help decoupling |
+
 ### Features
 
 | File | Relationship |
@@ -130,13 +137,6 @@ The framework **must** adhere to the principle of explicit command naming with m
 | [002_non_functional_requirements.md](002_non_functional_requirements.md) | NFRs that embody these principles |
 | [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Explicit dependencies principle source of R2 requirement |
 | [005_command_naming.md](005_command_naming.md) | Command naming invariant derived from explicit naming principle |
-
-### Architectures
-
-| File | Relationship |
-|------|--------------|
-| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates derived from these principles |
-| [005_help_decoupling.md](../architecture/005_help_decoupling.md) | Minimum implicit magic principle motivates help decoupling |
 
 ### Sources
 

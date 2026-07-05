@@ -30,3 +30,9 @@
 - **Given:** A built `unilang` library crate with the `enabled` feature active
 - **When:** The dependency tree is inspected (e.g., `cargo tree --edges=normal` filtered for runtime deps)
 - **Then:** `serde_json` does not appear as a runtime dependency; JSON parsing is confined to build-time codegen only
+
+### IN-5: Build-time codegen produces valid static data from a real YAML manifest
+
+- **Given:** A real YAML command manifest processed by the actual `build/main.rs` → `build/codegen.rs` pipeline during `cargo build` with the `static_registry` feature active (not a hand-constructed `const` in test code)
+- **When:** The generated `OUT_DIR/static_commands.rs` file is `include!()`d and its resulting static command data is read at runtime
+- **Then:** The generated static data structurally matches the source YAML manifest's command definitions; the actual build-time codegen output (not a synthetic stand-in) is valid and accessible without any runtime parsing call

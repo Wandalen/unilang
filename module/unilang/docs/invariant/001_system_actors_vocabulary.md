@@ -59,17 +59,17 @@ All actors and terms defined in this document MUST have exactly one meaning thro
 
 Term collision causes: (1) ambiguous API contracts, (2) incorrect test assumptions, (3) documentation drift from implementation.
 
-### Invariants
-
-| File | Relationship |
-|------|--------------|
-| [003_governing_principles.md](003_governing_principles.md) | Principles that govern how terms are used |
-
 ### Architectures
 
 | File | Relationship |
 |------|--------------|
 | [003_vision_scope.md](../architecture/003_vision_scope.md) | System context that defines these actors |
+
+### Invariants
+
+| File | Relationship |
+|------|--------------|
+| [003_governing_principles.md](003_governing_principles.md) | Principles that govern how terms are used |
 
 ### Sources
 

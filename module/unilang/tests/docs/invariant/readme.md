@@ -14,9 +14,9 @@ Case prefix: `IN-`. Minimum 2 cases per spec.
 
 | Name | Purpose | Status |
 |------|---------|--------|
-| `001_system_actors_vocabulary.md` | `invariant` spec for canonical actor taxonomy and vocabulary | ✅ |
-| `002_non_functional_requirements.md` | `invariant` spec for NFR-PERF, NFR-SEC, NFR-ROBUST, NFR-PLATFORM, NFR-MODULARITY | ✅ |
-| `003_governing_principles.md` | `invariant` spec for Minimum Implicit Magic, Fail-Fast, Illegal States | ✅ |
-| `004_workspace_dependency_standards.md` | `invariant` spec for dependency format rules R1–R4 | ✅ |
-| `005_command_naming.md` | `invariant` spec for dot-prefix naming contract at all registration boundaries | ✅ |
-| `006_build_runtime_separation.md` | `invariant` spec for compile-time-only YAML/JSON processing guarantee | ✅ |
+| `01_system_actors_vocabulary.md` | `invariant` spec for canonical actor taxonomy and vocabulary | ⏳ |
+| `02_non_functional_requirements.md` | `invariant` spec for NFR-PERF, NFR-SEC, NFR-ROBUST, NFR-PLATFORM, NFR-MODULARITY | ⏳ |
+| `03_governing_principles.md` | `invariant` spec for Minimum Implicit Magic, Fail-Fast, Illegal States | ⏳ |
+| `04_workspace_dependency_standards.md` | `invariant` spec for dependency format rules R1–R4 | ⏳ |
+| `05_command_naming.md` | `invariant` spec for dot-prefix naming contract at all registration boundaries | ⏳ |
+| `06_build_runtime_separation.md` | `invariant` spec for compile-time-only YAML/JSON processing guarantee | ⏳ |

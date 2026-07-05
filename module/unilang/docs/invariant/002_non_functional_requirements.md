@@ -152,6 +152,21 @@ These are enabled automatically by approach features and should not be used dire
 | `default` | Default features: `enabled`, `simd`, `repl`, `enhanced_repl`, `approach_yaml_multi_build` | Yes |
 | `full` | All features except dev-only | No |
 
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | ErrorCode type definition |
+| [002_error_codes.md](../api/002_error_codes.md) | Error codes stable API contract |
+
+### Architectures
+
+| File | Relationship |
+|------|--------------|
+| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates that enforce NFRs |
+| [002_benchmark_separation.md](../architecture/002_benchmark_separation.md) | Benchmark isolation satisfying NFR-MODULARITY-1 |
+| [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF implementation enabling NFR-PERF-1 |
+
 ### Features
 
 | File | Relationship |
@@ -166,21 +181,6 @@ These are enabled automatically by approach features and should not be used dire
 | [003_governing_principles.md](003_governing_principles.md) | Principles that these NFRs embody |
 | [004_workspace_dependency_standards.md](004_workspace_dependency_standards.md) | Dependency standards enable no-op compile pattern |
 | [006_build_runtime_separation.md](006_build_runtime_separation.md) | NFR-PERF-1 depends on build-runtime separation boundary |
-
-### Architectures
-
-| File | Relationship |
-|------|--------------|
-| [001_mandates.md](../architecture/001_mandates.md) | Architectural mandates that enforce NFRs |
-| [002_benchmark_separation.md](../architecture/002_benchmark_separation.md) | Benchmark isolation satisfying NFR-MODULARITY-1 |
-| [004_implementation_details.md](../architecture/004_implementation_details.md) | PHF implementation enabling NFR-PERF-1 |
-
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [001_public_types.md](../api/001_public_types.md) | ErrorCode type definition |
-| [002_error_codes.md](../api/002_error_codes.md) | Error codes stable API contract |
 
 ### Sources
 
@@ -197,5 +197,5 @@ These are enabled automatically by approach features and should not be used dire
 | `tests/system/nfr_performance.rs` | IN-1 startup zero-cost, IN-2 throughput ≥5M/sec |
 | `tests/system/nfr_sensitive_data.rs` | IN-3 sensitive value absent from error output (coercion + validation paths) |
 | `tests/system/nfr_robustness.rs` | IN-4 handler panic caught as InternalError, IN-5 zero-feature build |
-| `tests/system/nfr_platform.rs` | FT-4 WASM build compiles without std-only APIs |
+| `tests/system/nfr_platform.rs` | FT-4 / IN-7 WASM build compiles without std-only APIs (satisfies both feature FT-4 and invariant NFR-PLATFORM-1 IN-7) |
 | `tests/system/nfr_modularity.rs` | IN-6 enabled is strict subset of full feature set |

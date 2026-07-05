@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify all FR-HELP behavioral requirements for help generation and access
 - **Responsibility:** Test cases covering command list generation, detailed help, `?` operator, `.cmd.help` commands, `??` parameter, automatic help API, and verbosity levels
-- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`), FR-HELP-8 (`.help` self-exclusion from listing)
+- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`, `HelpGenerator` verbosity API, `UNILANG_HELP_HIDE_VERSION`), FR-HELP-8 (`.help` self-exclusion from listing)
 - **Out of Scope:** Registry initialization (FR-REG); argument parsing (FR-ARG); REPL state (FR-REPL)
 
 ### FT-1: Command list returns all registered command names
@@ -72,3 +72,27 @@
 - **Given:** A `Pipeline` with `.greet` registered (one argument `"name"` with description, type, default, version set to `"1.0"`, and aliases `["g"]`); `UNILANG_HELP_VERBOSITY=3` set in the environment
 - **When:** `pipeline.run(".greet ??")` is called
 - **Then:** Output includes USAGE line, PARAMETERS section with argument descriptions AND type information, and version metadata; output is strictly more detailed than Level 2 output
+
+### FT-12: UNILANG_HELP_VERBOSITY=4 produces Comprehensive level output
+
+- **Given:** A command `.greet` with one argument `"name"` that has a description, a type, a default value, a version, and tags; `UNILANG_HELP_VERBOSITY=4` set in the environment
+- **When:** `help_command` (or `pipeline.run(".greet ??")`) is called
+- **Then:** Output includes USAGE, DESCRIPTION, PARAMETERS (with type and validation detail), EXAMPLES, and TAGS sections; output is strictly more detailed than Level 3 output
+
+### FT-13: HelpGenerator::with_verbosity, set_verbosity, and verbosity round-trip correctly
+
+- **Given:** A `HelpGenerator` constructed via `HelpGenerator::with_verbosity(&registry, HelpVerbosity::Detailed)`
+- **When:** `verbosity()` is queried, then `set_verbosity(HelpVerbosity::Minimal)` is called, then `verbosity()` is queried again
+- **Then:** The first query returns `HelpVerbosity::Detailed`; the second query returns `HelpVerbosity::Minimal`; subsequent `command(...)` output reflects the newly-set Minimal level, not the original Detailed level
+
+### FT-14: HelpVerbosity::from_level caps values above 4 at Comprehensive
+
+- **Given:** No registry or pipeline setup required
+- **When:** `HelpVerbosity::from_level(level)` is called with `level` values `4`, `5`, and `100`
+- **Then:** All three calls return `HelpVerbosity::Comprehensive`; no panic or error for out-of-range input
+
+### FT-15: UNILANG_HELP_HIDE_VERSION suppresses version metadata from help output
+
+- **Given:** A command `.greet` registered with a version set (e.g., `"2.5.0"`) and verbosity at a level that would otherwise display version (Level 2 or higher); `UNILANG_HELP_HIDE_VERSION=1` set in the environment
+- **When:** Help output is generated for `.greet` (e.g., via `pipeline.run(".greet ??")`)
+- **Then:** The output does NOT contain the version string; with `UNILANG_HELP_HIDE_VERSION` unset, the same output DOES contain the version string

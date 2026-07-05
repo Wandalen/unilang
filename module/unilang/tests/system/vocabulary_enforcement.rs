@@ -1,6 +1,6 @@
 //! System actor vocabulary enforcement tests.
 //!
-//! Implements IN-1..3 specification cases from `tests/docs/invariant/001_system_actors_vocabulary.md`.
+//! Implements IN-1..5 specification cases from `tests/docs/invariant/01_system_actors_vocabulary.md`.
 //!
 //! Tests verify that the canonical actor taxonomy defined in
 //! `docs/invariant/001_system_actors_vocabulary.md` is enforced in source code and
@@ -111,4 +111,82 @@ fn test_in3_semantic_analyzer_is_canonical_name()
   let _analyzer = SemanticAnalyzer::new( instructions, &registry );
 
   // Compilation success is the assertion — no runtime check needed
+}
+
+/// IN-4: The deprecated synonyms `"CommandStore"`, `"CommandCache"`, and `"CommandDatabase"`
+/// do not appear as type definitions in source.
+///
+/// `CommandRegistry` (and `StaticCommandMap` for the static variant) are the canonical
+/// names for the runtime command database. Any type declaration named `CommandStore`,
+/// `CommandCache`, or `CommandDatabase` would violate the vocabulary contract.
+///
+/// ## Scope
+///
+/// Scans `src/` for Rust type declarations (`struct`/`enum`/`type` followed by one of the
+/// three synonym names) only — incidental word matches (comments, variable names) are
+/// excluded by the specific pattern.
+// test_kind: in_spec(IN-4)  [invariant/01_system_actors_vocabulary]
+#[ test ]
+fn test_in4_command_registry_synonyms_absent_as_type_definitions()
+{
+  let src_dir = format!( "{}/src", env!( "CARGO_MANIFEST_DIR" ) );
+
+  let synonyms = [ "CommandStore", "CommandCache", "CommandDatabase" ];
+
+  let total_count : usize = synonyms
+    .iter()
+    .map( | synonym |
+    {
+      let struct_count = count_pattern_in_rs_files( &src_dir, &format!( "struct {synonym}" ) );
+      let enum_count = count_pattern_in_rs_files( &src_dir, &format!( "enum {synonym}" ) );
+      let type_count = count_pattern_in_rs_files( &src_dir, &format!( "type {synonym}" ) );
+      struct_count + enum_count + type_count
+    })
+    .sum();
+
+  assert_eq!(
+    total_count,
+    0,
+    "No type declaration named 'CommandStore', 'CommandCache', or 'CommandDatabase' must exist \
+     in src/ — 'CommandRegistry' (and 'StaticCommandMap' for the static variant) are the \
+     canonical names for the runtime command database (IN-4 violation)"
+  );
+}
+
+/// IN-5: The deprecated synonyms `"ArgType"`, `"DataType"`, and `"ValueType"` do not appear
+/// as type definitions in source.
+///
+/// `Kind` is the canonical enum name for an argument's data type. Any type declaration
+/// named `ArgType`, `DataType`, or `ValueType` would violate the vocabulary contract.
+///
+/// ## Scope
+///
+/// Scans `src/` for Rust type declarations (`struct`/`enum`/`type` followed by one of the
+/// three synonym names) only — incidental word matches (comments, variable names) are
+/// excluded by the specific pattern.
+// test_kind: in_spec(IN-5)  [invariant/01_system_actors_vocabulary]
+#[ test ]
+fn test_in5_kind_synonyms_absent_as_type_definitions()
+{
+  let src_dir = format!( "{}/src", env!( "CARGO_MANIFEST_DIR" ) );
+
+  let synonyms = [ "ArgType", "DataType", "ValueType" ];
+
+  let total_count : usize = synonyms
+    .iter()
+    .map( | synonym |
+    {
+      let struct_count = count_pattern_in_rs_files( &src_dir, &format!( "struct {synonym}" ) );
+      let enum_count = count_pattern_in_rs_files( &src_dir, &format!( "enum {synonym}" ) );
+      let type_count = count_pattern_in_rs_files( &src_dir, &format!( "type {synonym}" ) );
+      struct_count + enum_count + type_count
+    })
+    .sum();
+
+  assert_eq!(
+    total_count,
+    0,
+    "No type declaration named 'ArgType', 'DataType', or 'ValueType' must exist in src/ — \
+     'Kind' is the canonical enum name for argument data types (IN-5 violation)"
+  );
 }

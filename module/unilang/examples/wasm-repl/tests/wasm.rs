@@ -17,6 +17,7 @@ fn test_repl_creation() {
   drop(repl);
 }
 
+// test_kind: ft_spec(FT-7)  [feature/05_repl_interactive]
 #[wasm_bindgen_test]
 fn test_help_command() {
   let repl = UniLangWasmRepl::new();
@@ -25,6 +26,7 @@ fn test_help_command() {
   assert!(!result.starts_with("Error:"), "Help should not be an error");
 }
 
+// test_kind: ft_spec(FT-7)  [feature/05_repl_interactive]
 #[wasm_bindgen_test]
 fn test_command_execution() {
   let repl = UniLangWasmRepl::new();
@@ -33,6 +35,7 @@ fn test_command_execution() {
   assert!(!result.is_empty(), "Command should return output");
 }
 
+// test_kind: ft_spec(FT-7)  [feature/05_repl_interactive]
 #[wasm_bindgen_test]
 fn test_invalid_command() {
   let repl = UniLangWasmRepl::new();

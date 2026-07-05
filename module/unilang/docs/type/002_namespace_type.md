@@ -26,17 +26,17 @@
 - `NamespaceType::new(impl Into<String>) -> Result<Self, Error>` — fallible constructor
 - Serde `Deserialize` — validates on deserialization
 
-### Invariants
-
-| File | Relationship |
-|------|--------------|
-| [005_command_naming.md](../invariant/005_command_naming.md) | Namespace naming convention this type enforces |
-
 ### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | Lists NamespaceType in public type surface |
+
+### Invariants
+
+| File | Relationship |
+|------|--------------|
+| [005_command_naming.md](../invariant/005_command_naming.md) | Namespace naming convention this type enforces |
 
 ### Sources
 

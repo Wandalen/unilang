@@ -1,22 +1,40 @@
 //! Minimal reproduction: empty `command_path_slices` with an attached unknown named argument
 //! bypasses argument validation and returns the help listing instead of an error.
 //!
-//! ## Bug Context
+//! ## Root Cause
 //!
-//! `SemanticAnalyzer::analyze_internal` (`unilang/src/semantic/core.rs`) unconditionally
-//! returns `self.generate_help_listing()` whenever `instruction.command_path_slices.is_empty()`
-//! is true — before `bind_arguments` / `check_unknown_named_arguments` ever run. This was
-//! originally reported as a 2-stage defect (parser + semantic analyzer); the parser side is
-//! already fixed (`unilang_parser/src/parser_engine/mod.rs`, `Fix(issue-cmd-path)`), which
-//! means an identifier immediately followed by `::` is correctly excluded from
-//! `command_path_slices` and instead becomes a named argument. That parser fix, combined with
-//! the still-unconditional early return here, means `. some_unknown_param::xyz` now produces
-//! an instruction with an EMPTY `command_path_slices` AND a non-empty `named_arguments` map —
-//! exactly the condition this file reproduces.
+//! `SemanticAnalyzer::analyze_internal` (`src/semantic/core.rs`) used to return
+//! `self.generate_help_listing()` unconditionally whenever `instruction.command_path_slices`
+//! was empty, without checking whether any named or positional arguments were attached —
+//! so an unknown named argument silently fell through to help output instead of an error.
 //!
-//! ## FR Coverage
-//! - Regression coverage for downstream consumer failure: `assistant::commands
-//!   help_unknown_named_parameter_rejected` (separate repo) fails because of this exact defect.
+//! ## Why Not Caught
+//!
+//! Originally a 2-stage defect spanning the parser and the semantic analyzer. It only became
+//! reproducible after the parser-side fix (`unilang_parser/src/parser_engine/mod.rs`,
+//! `Fix(issue-cmd-path)`) started correctly excluding a `name::value` identifier from
+//! `command_path_slices` — which is what first produces the empty-path-plus-non-empty-
+//! named-arguments combination this test exercises. No existing test covered that specific
+//! combination before this fix landed.
+//!
+//! ## Fix Applied
+//!
+//! `analyze_internal` now checks `named_arguments.is_empty() && positional_arguments.is_empty()`
+//! before falling back to the help listing; if either is non-empty, it returns
+//! `Error::Execution(Self::unknown_parameter_error_for_empty_path(instruction))` instead
+//! (`src/semantic/core.rs:324-331`).
+//!
+//! ## Prevention
+//!
+//! This test locks in the empty-path-with-arguments branch as a permanent regression guard.
+//! Also guards downstream consumer coverage: `assistant::commands
+//! help_unknown_named_parameter_rejected` (separate repo) depends on this exact behavior.
+//!
+//! ## Pitfall
+//!
+//! Easy to reintroduce by "simplifying" the empty-path branch back to an unconditional help
+//! listing — the bare `.` → help case is the common/expected path and looks like the whole
+//! story unless the parser-side history above is known.
 
 use unilang::
 {

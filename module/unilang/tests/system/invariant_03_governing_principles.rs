@@ -1,6 +1,6 @@
 //! Governing principles invariant tests.
 //!
-//! Implements IN-1..5 specification cases from `tests/docs/invariant/003_governing_principles.md`.
+//! Implements IN-1..7 specification cases from `tests/docs/invariant/03_governing_principles.md`.
 //!
 //! ## Compile-Time Case (IN-2)
 //!
@@ -14,10 +14,12 @@
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, ErrorCode, Kind, OutputData };
 use unilang::data::ErrorData;
 use unilang::error::Error;
+use unilang::data::CommandName;
 use unilang::registry::CommandRegistry;
 use unilang::interpreter::ExecutionContext;
-use unilang::semantic::VerifiedCommand;
+use unilang::semantic::{ SemanticAnalyzer, VerifiedCommand };
 use unilang::pipeline::Pipeline;
+use unilang_parser::{ Parser, UnilangParserOptions };
 
 /// IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage.
 ///
@@ -194,4 +196,108 @@ fn test_in5_single_source_of_truth_duplicate_registration_rejected()
     },
     other => panic!( "Expected Error::Execution, got: {other:?}" ),
   }
+}
+
+/// IN-6: Explicit Dependencies — missing required argument is rejected with actionable error.
+///
+/// `.needs_arg` declares an `ArgumentDefinition` whose `attributes.optional` is `false`
+/// (a required argument, making the dependency on that value explicit). Invoking the
+/// command without providing it must produce `ErrorCode::ArgumentMissing`, and the error
+/// message must name the missing argument and instruct the caller to provide it.
+// test_kind: in_spec(IN-6)  [invariant/03_governing_principles]
+#[ test ]
+fn test_in6_explicit_dependencies_missing_required_argument_rejected()
+{
+  let mut registry = CommandRegistry::new();
+  let needs_arg_command = CommandDefinition::former()
+    .name( ".needs_arg" )
+    .description( "Command with a required argument".to_string() )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "target".to_string(),
+        kind : Kind::String,
+        description : "Required target value".to_string(),
+        hint : String::new(),
+        attributes : ArgumentAttributes { optional : false, ..Default::default() },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  registry.register( needs_arg_command ).expect( "Registration must succeed" );
+
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let instruction = parser.parse_repl_input( ".needs_arg" ).unwrap();
+  let instructions = vec![ instruction ];
+
+  let analyzer = SemanticAnalyzer::new( &instructions, &registry );
+  let result = analyzer.analyze();
+
+  assert!( result.is_err(), "Invoking without the required argument must fail" );
+
+  match result.unwrap_err()
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!(
+        error_data.code,
+        ErrorCode::ArgumentMissing,
+        "Must produce ArgumentMissing; got: {:?}", error_data.code
+      );
+      assert!(
+        error_data.message.contains( "target" ),
+        "Error message must name the missing argument 'target'; got: {:?}", error_data.message
+      );
+      assert!(
+        error_data.message.to_lowercase().contains( "provide" ),
+        "Error message must instruct the caller to provide the value; got: {:?}", error_data.message
+      );
+    },
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+}
+
+/// IN-7: Explicit Command Naming — registration without dot prefix is rejected.
+///
+/// A command name string `"build"` (no leading dot) passed to `CommandName::new` must
+/// return `Err`, not a silently auto-corrected `".build"`. The framework never adds an
+/// implicit dot prefix or otherwise transforms the name on the caller's behalf.
+// test_kind: in_spec(IN-7)  [invariant/03_governing_principles]
+#[ test ]
+fn test_in7_explicit_command_naming_no_dot_prefix_rejected()
+{
+  let result = CommandName::new( "build" );
+
+  assert!(
+    result.is_err(),
+    "CommandName::new must reject a name without a leading dot prefix"
+  );
+
+  match result.unwrap_err()
+  {
+    Error::MissingDotPrefix( original ) =>
+    {
+      assert_eq!(
+        original, "build",
+        "Error must preserve the original caller-supplied string unmodified; got: {original:?}"
+      );
+    },
+    other => panic!( "Expected Error::MissingDotPrefix, got: {other:?}" ),
+  }
+
+  // Confirm no implicit auto-correction ever succeeds silently: a properly dot-prefixed
+  // name is required, and the framework does not derive one from the rejected input.
+  let corrected = CommandName::new( ".build" );
+  assert!(
+    corrected.is_ok(),
+    "A caller-supplied dot-prefixed name must still succeed on its own merits"
+  );
+  assert_eq!(
+    corrected.unwrap().as_str(),
+    ".build",
+    "CommandName must never transform the caller-supplied value beyond validation"
+  );
 }

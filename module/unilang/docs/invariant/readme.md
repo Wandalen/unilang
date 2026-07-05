@@ -7,7 +7,7 @@ System properties and constraints that must always hold, regardless of code path
 - **Purpose:** Document system invariants: NFRs, vocabulary contracts, and governing principles
 - **Responsibility:** Answers: what constraints must always be true, what are the measurable thresholds
 - **In Scope:** Performance NFRs with measurable thresholds, vocabulary definitions, framework governing principles
-- **Out of Scope:** Feature requirements, public API specs, project goals, conformance checklists
+- **Out of Scope:** Feature requirements (see feature/), public API specs (see api/), project goals (see architecture/)
 
 ### Overview Table
 

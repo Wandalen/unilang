@@ -90,3 +90,15 @@
 - **Given:** Each `ErrorCode` variant (`CommandNotFound`, `ArgumentMissing`, `TooManyArguments`, etc.)
 - **When:** `format!("{}", error_code)` or `.to_string()` is called on each variant
 - **Then:** `CommandNotFound` produces `"UNILANG_COMMAND_NOT_FOUND"`, `ArgumentMissing` produces `"UNILANG_ARGUMENT_MISSING"`, `HelpRequested` produces `"HELP_REQUESTED"`, and all others match their documented `UNILANG_*` string representation
+
+### AP-15: ErrorCode enum derives Debug for diagnostic formatting
+
+- **Given:** An instance of `ErrorCode::ValidationRuleFailed`
+- **When:** `format!("{:?}", error_code)` is called
+- **Then:** The output contains the variant name `"ValidationRuleFailed"`; the code compiles without a manually written `Debug` implementation, confirming the `Debug` derive is present
+
+### AP-16: Non-exhaustive matching on ErrorCode remains forward-compatible with a wildcard arm
+
+- **Given:** Integrator code that matches on `ErrorCode` using explicit arms for all 12 currently-documented variants plus a trailing `_ => ErrorCode::InternalError` wildcard arm
+- **When:** The match expression is compiled and evaluated against each of the 12 variants
+- **Then:** Compilation succeeds (the wildcard arm satisfies exhaustiveness checking); each of the 12 variants is matched by its own explicit arm and the wildcard is never reached — demonstrating the pattern integrators should use per the documented forward-compatibility guarantee for future minor-release variants

@@ -91,6 +91,7 @@ fn test_validate_namespace_core_valid_empty()
   assert!( validate_namespace_core( "" ).is_ok() );
 }
 
+// test_kind: in_spec(IN-3b)  [invariant/05_command_naming]
 #[test]
 fn test_validate_namespace_core_invalid_missing_dot()
 {
@@ -98,6 +99,50 @@ fn test_validate_namespace_core_invalid_missing_dot()
   assert!( result.is_err() );
   let err = result.unwrap_err();
   assert!( err.contains( "dot prefix" ), "Error should mention dot prefix: {err}" );
+
+  // IN-3b: namespace lacking a dot prefix must be rejected by the real production
+  // pipeline (validate_command_definition_core) BEFORE compute_full_name_core() is
+  // ever reached. We prove "never reached" with evidence, not a comment:
+  //
+  // If validate_namespace_core's early-return were skipped (bug: falls through to
+  // full-name construction), compute_full_name_core( "math", ".add" ) would silently
+  // produce "math..add", and validate_command_definition_core would instead fail with
+  // the full-name-stage message ("Invalid full command name '...'") referencing that
+  // constructed value. By asserting the error is the namespace-stage message (not the
+  // full-name-stage message) AND does not reference the would-be-constructed full name,
+  // we confirm compute_full_name_core was never invoked with a used result.
+  // `name` is given its own valid dot prefix (".add") so that validate_command_name_core
+  // passes and validate_namespace_core is the actual isolated point of failure — matching
+  // the sibling test test_validate_command_definition_core_invalid_namespace's pattern.
+  let pipeline_result = validate_command_definition_core( ".add", "math", "1.0.0", "test.yaml" );
+  assert!( pipeline_result.is_err(), "Pipeline must reject 'math' namespace before full-name construction" );
+  let pipeline_err = pipeline_result.unwrap_err();
+
+  // Evidence 1: the error is the namespace-validation-stage message, not the
+  // full-name-validation-stage message that would fire if compute_full_name_core
+  // had already run and produced a still-dotless full name.
+  assert!(
+    pipeline_err.contains( "Invalid namespace" ),
+    "Error must originate from validate_namespace_core (namespace-stage), proving \
+    compute_full_name_core was never reached: {pipeline_err}"
+  );
+  assert!(
+    !pipeline_err.contains( "Invalid full command name" ),
+    "Error must NOT be the full-name-stage message; its presence would mean \
+    compute_full_name_core ran and validate_full_name_core rejected its output: {pipeline_err}"
+  );
+
+  // Evidence 2: the value compute_full_name_core WOULD have produced for this exact
+  // input ("math..add", per its pure concatenation logic) never appears in the
+  // pipeline's error output, confirming that value was never constructed/used on
+  // this rejected path.
+  let would_be_full_name = compute_full_name_core( "math", ".add" );
+  assert_eq!( would_be_full_name, "math..add" );
+  assert!(
+    !pipeline_err.contains( &would_be_full_name ),
+    "Error must not reference the full name compute_full_name_core would have built \
+    ('{would_be_full_name}'), proving it was never constructed for this rejected entry: {pipeline_err}"
+  );
 }
 
 // ============================================================================

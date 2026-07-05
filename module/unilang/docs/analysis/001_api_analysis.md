@@ -161,14 +161,6 @@ The include-at-compile-time pattern for consuming build.rs output is used intern
 |------|--------------|
 | [002_usability_improvements.md](002_usability_improvements.md) | Prioritized recommendations based on these findings |
 
-### Features
-
-| File | Relationship |
-|------|--------------|
-| [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 requirement analyzed in Part 5 |
-| [002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
-| [004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
-
 ### APIs
 
 | File | Relationship |
@@ -180,6 +172,14 @@ The include-at-compile-time pattern for consuming build.rs output is used intern
 | File | Relationship |
 |------|--------------|
 | [004_implementation_details.md](../architecture/004_implementation_details.md) | Static registry implementation referenced in Part 7 |
+
+### Features
+
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 requirement analyzed in Part 5 |
+| [002_argument_system.md](../feature/002_argument_system.md) | FR-ARG-* requirements analyzed in Parts 3, 5 |
+| [004_help_system.md](../feature/004_help_system.md) | Help request detection patterns in Part 7 |
 
 ### Sources
 

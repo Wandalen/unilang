@@ -39,7 +39,7 @@ When a mandatory argument with the `interactive: true` attribute is not provided
 
 The framework **must** support a web-based REPL modality that can operate entirely on the client-side without a backend server. This requires the core `unilang` library to be fully compilable to the `wasm32-unknown-unknown` target.
 
-**Implementation status:** ❌ Not yet implemented.
+**Implementation status:** ✅ Implemented — see `examples/wasm-repl/` (browser REPL) and `examples/wasm-repl/tests/wasm.rs` (wasm-bindgen-test suite).
 
 This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requires the core logic of the `unilang` and `unilang_parser` crates to be platform-agnostic and fully compatible with the `wasm32-unknown-unknown` target.
 
@@ -48,6 +48,12 @@ This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requ
 | File | Relationship |
 |------|--------------|
 | [002_usability_improvements.md](../analysis/002_usability_improvements.md) | Usability improvements for REPL and interactive patterns |
+
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [002_error_codes.md](../api/002_error_codes.md) | ArgumentInteractiveRequired error code surfaced by REPL |
 
 ### Architectures
 
@@ -67,12 +73,6 @@ This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requ
 |------|--------------|
 | [002_non_functional_requirements.md](../invariant/002_non_functional_requirements.md) | NFR-PLATFORM-1 WASM compatibility requirement |
 
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [002_error_codes.md](../api/002_error_codes.md) | ArgumentInteractiveRequired error code surfaced by REPL |
-
 ### Sources
 
 | File | Relationship |
@@ -86,4 +86,5 @@ This requirement is connected to NFR-PLATFORM-1 (WASM Compatibility), which requ
 |------|--------------|
 | `tests/pipeline/pipeline_core.rs` | FT-1 stateless REPL, FT-2 interactive arg absent, FT-3 arg provided, FT-5 empty input |
 | `tests/system/nfr_platform.rs` | FT-4 WASM build compiles without std-only APIs |
+| `examples/wasm-repl/tests/wasm.rs` | FT-7 WASM REPL glue executes commands and returns formatted output/error string |
 | `tests/manual/readme.md` | Manual REPL testing plan |

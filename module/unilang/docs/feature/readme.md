@@ -7,7 +7,7 @@ Behavioral feature requirements (FR-*) that define what the unilang framework mu
 - **Purpose:** Document functional requirements with FR-* identifiers that the system must satisfy
 - **Responsibility:** Answers: what behaviors must the system exhibit, what are the acceptance criteria
 - **In Scope:** Functional requirements, FR-* identifiers, behavior specifications, acceptance criteria
-- **Out of Scope:** NFRs, design philosophy, public API contracts, implementation guides
+- **Out of Scope:** NFRs (see invariant/), design philosophy (see architecture/), public API contracts (see api/), implementation guides (see architecture/)
 
 ### Overview Table
 

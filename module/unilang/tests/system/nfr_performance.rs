@@ -1,6 +1,6 @@
 //! NFR performance tests: static registry startup cost and lookup throughput.
 //!
-//! Implements IN-1 and IN-2 from `tests/docs/invariant/002_non_functional_requirements.md`.
+//! Implements IN-1 and IN-2 from `tests/docs/invariant/02_non_functional_requirements.md`.
 //!
 //! Both tests require `static_registry` feature (PHF-backed registries).
 //! They are skipped at compile time when the feature is absent.

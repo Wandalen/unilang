@@ -7,8 +7,8 @@
 //!
 //! | Spec File | Cases | Description |
 //! |-----------|-------|-------------|
-//! | `feature/03_pipeline` | FT-1..5 | Pipeline orchestration: single, batch, sequence, argv, error |
-//! | `feature/05_repl_interactive` | FT-1, FT-5 | Stateless REPL and empty input handling |
+//! | `feature/03_pipeline` | FT-1..8 | Pipeline orchestration: single, batch, sequence, argv, error, help interception |
+//! | `feature/05_repl_interactive` | FT-1, FT-2, FT-3, FT-5, FT-6 | Stateless REPL, interactive signal, retry round-trip, empty input |
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
 use unilang::types::Value;
@@ -474,4 +474,191 @@ fn test_ft5_empty_repl_input_no_panic()
     // Error path — also acceptable per spec
     assert!( result.error.is_some(), "FT-5: failed result must carry an error message" );
   }
+}
+
+/// FT-6: Help request is intercepted and converted to a successful output.
+///
+/// A bare `"."` input produces an empty `command_path_slices` in the parsed instruction.
+/// `SemanticAnalyzer::analyze()` detects this and calls `generate_help_listing()`, which
+/// returns `Err(Error::Execution(ErrorData::new(ErrorCode::HelpRequested, help_content)))`.
+/// `Pipeline::process_command` intercepts this specific error code and transparently
+/// converts it into a successful `CommandResult` — integrators do not need to handle the
+/// `HelpRequested` signal as a separate error case.
+// test_kind: ft_spec(FT-6)  [feature/03_pipeline]
+#[ test ]
+fn test_ft6_help_requested_interception()
+{
+  let registry = create_test_registry();
+  let pipeline = Pipeline::new( registry );
+
+  let result = pipeline.process_command( ".", ExecutionContext::default() );
+
+  assert!( result.success, "FT-6: HelpRequested must be converted to a successful result" );
+  assert!( result.error.is_none(), "FT-6: no error expected once HelpRequested is intercepted" );
+  assert_eq!( result.outputs.len(), 1, "FT-6: exactly one output carrying the help text" );
+  assert!(
+    result.outputs[ 0 ].content.contains( "Available commands" ) || result.outputs[ 0 ].content.contains( ".test" ),
+    "FT-6: output must contain formatted help text; got: {:?}",
+    result.outputs[ 0 ].content
+  );
+}
+
+/// FT-7: Argv-based execution with default context succeeds via the simple convenience wrapper.
+///
+/// `process_command_from_argv_simple` constructs `ExecutionContext::default()` internally
+/// and delegates to `process_command_from_argv`, so behavior must be identical to calling
+/// the explicit-context variant with a default context (see `test_ft4_argv_execution_joins_elements`).
+// test_kind: ft_spec(FT-7)  [feature/03_pipeline]
+#[ test ]
+fn test_ft7_argv_simple_wrapper_uses_default_context()
+{
+  let registry = create_test_registry();
+  let pipeline = Pipeline::new( registry );
+
+  let argv : Vec< String > = vec![
+    ".test".to_string(),
+    "message::world".to_string(),
+  ];
+  let result = pipeline.process_command_from_argv_simple( &argv );
+
+  assert!( result.success, "FT-7: argv simple wrapper must succeed; error: {:?}", result.error );
+  assert_eq!( result.outputs[ 0 ].content, "world", "FT-7: argv message must reach the routine via the simple wrapper" );
+}
+
+/// FT-8: Batch and sequence modes handle an empty command list without division-by-zero.
+///
+/// `process_batch(&[], ctx)` and `process_sequence(&[], ctx)` must both produce a
+/// `BatchResult` with `total_commands == 0`, all counts zero, `results.is_empty() == true`,
+/// and `success_rate() == 0.0` — the empty-list guard in `BatchResult::success_rate()`
+/// avoids a `0 / 0` division that would otherwise produce `NaN`. Both entry points must
+/// yield an identical result shape for the empty-slice boundary.
+// test_kind: ft_spec(FT-8)  [feature/03_pipeline]
+#[ test ]
+fn test_ft8_empty_batch_and_sequence_no_panic()
+{
+  let registry = create_test_registry();
+  let pipeline = Pipeline::new( registry );
+
+  let empty_commands : Vec< &str > = vec![];
+
+  let batch_result = pipeline.process_batch( &empty_commands, ExecutionContext::default() );
+  assert_eq!( batch_result.total_commands, 0, "FT-8: empty batch must report zero total commands" );
+  assert_eq!( batch_result.successful_commands, 0, "FT-8: empty batch must report zero successful commands" );
+  assert_eq!( batch_result.failed_commands, 0, "FT-8: empty batch must report zero failed commands" );
+  assert!( batch_result.results.is_empty(), "FT-8: empty batch must produce no results" );
+  assert!( ( batch_result.success_rate() - 0.0 ).abs() < f64::EPSILON, "FT-8: empty batch success_rate must be 0.0, not NaN" );
+  assert!( !batch_result.success_rate().is_nan(), "FT-8: empty batch success_rate must never be NaN" );
+
+  let sequence_result = pipeline.process_sequence( &empty_commands, ExecutionContext::default() );
+  assert_eq!( sequence_result.total_commands, 0, "FT-8: empty sequence must report zero total commands" );
+  assert_eq!( sequence_result.successful_commands, 0, "FT-8: empty sequence must report zero successful commands" );
+  assert_eq!( sequence_result.failed_commands, 0, "FT-8: empty sequence must report zero failed commands" );
+  assert!( sequence_result.results.is_empty(), "FT-8: empty sequence must produce no results" );
+  assert!( ( sequence_result.success_rate() - 0.0 ).abs() < f64::EPSILON, "FT-8: empty sequence success_rate must be 0.0, not NaN" );
+  assert!( !sequence_result.success_rate().is_nan(), "FT-8: empty sequence success_rate must never be NaN" );
+
+  // Identical shape for both empty-list entry points
+  assert_eq!( batch_result.total_commands, sequence_result.total_commands, "FT-8: batch and sequence must agree on total_commands for empty input" );
+  assert_eq!( batch_result.results.len(), sequence_result.results.len(), "FT-8: batch and sequence must agree on results length for empty input" );
+}
+
+/// FT-6 (repl/05): Interactive argument retry succeeds after value is supplied following the signal.
+///
+/// Direct continuation of `test_ft2_interactive_arg_absent_returns_interactive_required`:
+/// the first call to `.greet` (argument absent) already returns
+/// `requires_interactive_input() == true` and `interactive_argument() == Some("name")`.
+/// This test resubmits `.greet name::alice` on the SAME pipeline instance and asserts the
+/// full FR-INTERACTIVE-1 round trip completes — signal detection followed by successful
+/// resubmission, with no residual interactive-required state carried over from the first call.
+///
+/// Spec: feature/005_repl_interactive.md § FT-6
+// test_kind: ft_spec(FT-6)  [feature/05_repl_interactive]
+#[ test ]
+fn test_ft6_interactive_retry_round_trip()
+{
+  use unilang::types::Value;
+
+  let mut registry = CommandRegistry::new();
+
+  let greet_cmd = CommandDefinition::former()
+  .name( ".greet" )
+  .namespace( String::new() )
+  .description( "Greet by name".to_string() )
+  .hint( "Greet" )
+  .status( "stable" )
+  .version( "1.0.0" )
+  .aliases( vec![] )
+  .tags( vec![] )
+  .permissions( vec![] )
+  .idempotent( true )
+  .deprecation_message( String::new() )
+  .http_method_hint( "GET".to_string() )
+  .examples( vec![] )
+  .arguments( vec!
+  [
+    ArgumentDefinition::former()
+    .name( "name" )
+    .description( "Name to greet".to_string() )
+    .kind( Kind::String )
+    .hint( "Name" )
+    .attributes
+    (
+      ArgumentAttributes
+      {
+        optional: false,    // required — must be prompted when absent
+        multiple: false,
+        default: None,
+        sensitive: false,
+        interactive: true,  // triggers interactive-required signal
+      }
+    )
+    .validation_rules( vec![] )
+    .aliases( vec![] )
+    .tags( vec![] )
+    .end()
+  ])
+  .end();
+
+  let routine = Box::new( | cmd : VerifiedCommand, _ctx |
+  {
+    let name = cmd.arguments.get( "name" )
+    .and_then( | v | if let Value::String( s ) = v { Some( s.clone() ) } else { None } )
+    .unwrap_or_else( || "world".to_string() );
+    Ok( OutputData { content : format!( "Hello, {}!", name ), format : "text".to_string(), execution_time_ms : None } )
+  });
+
+  registry.register_with_routine( &greet_cmd, routine ).unwrap();
+
+  let pipeline = Pipeline::new( registry );
+
+  // First call — argument absent, must signal interactive required (mirrors FT-2)
+  let first_result = pipeline.process_command( ".greet", ExecutionContext::default() );
+  assert!(
+    first_result.requires_interactive_input(),
+    "FT-6: first call must signal interactive required before the retry can occur; error was: {:?}",
+    first_result.error
+  );
+  assert_eq!(
+    first_result.interactive_argument().as_deref(),
+    Some( "name" ),
+    "FT-6: first call must name the missing argument"
+  );
+
+  // Retry on the SAME pipeline instance — value now supplied
+  let retry_result = pipeline.process_command( ".greet name::alice", ExecutionContext::default() );
+
+  assert!(
+    retry_result.success,
+    "FT-6: retry with supplied value must succeed; error was: {:?}",
+    retry_result.error
+  );
+  assert!(
+    !retry_result.requires_interactive_input(),
+    "FT-6: retry must not carry over the interactive-required signal from the first call"
+  );
+  assert_eq!(
+    retry_result.outputs[ 0 ].content,
+    "Hello, alice!",
+    "FT-6: retry output must reflect the supplied name"
+  );
 }

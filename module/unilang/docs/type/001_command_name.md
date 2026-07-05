@@ -33,11 +33,11 @@ Invalid states are impossible to represent. If you hold a `CommandName`, it is v
 - `as_str() -> &str` — borrow inner string
 - `into_inner() -> String` — consume and unwrap
 
-### Invariants
+### APIs
 
 | File | Relationship |
 |------|--------------|
-| [005_command_naming.md](../invariant/005_command_naming.md) | Formalizes the naming contract this type enforces |
+| [001_public_types.md](../api/001_public_types.md) | Lists CommandName in public type surface |
 
 ### Features
 
@@ -45,11 +45,11 @@ Invalid states are impossible to represent. If you hold a `CommandName`, it is v
 |------|--------------|
 | [001_command_registry.md](../feature/001_command_registry.md) | FR-REG-6 specifies naming rules |
 
-### APIs
+### Invariants
 
 | File | Relationship |
 |------|--------------|
-| [001_public_types.md](../api/001_public_types.md) | Lists CommandName in public type surface |
+| [005_command_naming.md](../invariant/005_command_naming.md) | Formalizes the naming contract this type enforces |
 
 ### Sources
 

@@ -73,7 +73,7 @@ let registry = CommandRegistry::new();
 let registry = StaticCommandRegistry::from_commands(&STATIC_COMMANDS);
 ```
 
-See [migration.md](migration.md) for full migration guide.
+See [architecture/007_migration_guide.md](architecture/007_migration_guide.md) for full migration guide.
 
 ---
 

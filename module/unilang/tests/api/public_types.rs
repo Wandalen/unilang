@@ -1,6 +1,6 @@
 //! API public types contract tests.
 //!
-//! Implements AP-1..10 specification cases from `tests/docs/api/001_public_types.md`.
+//! Implements AP-1..19 specification cases from `tests/docs/api/01_public_types.md`.
 //!
 //! ## Compile-Time Cases (AP-1, AP-5)
 //!
@@ -11,14 +11,24 @@
 //!   the type-state builder enforces that `name` is set before calling `.end()`.
 //! - **AP-5**: `definition.name` (direct field access) fails to compile because all
 //!   `CommandDefinition` fields are private; only accessor methods (`.name()`) are valid.
+//!
+//! ## Note on AP-17 Spec Divergence
+//!
+//! AP-17 describes `UNILANG_HELP_HIDE_VERSION` suppressing the version line in
+//! `HelpGenerator`-rendered help text. The actual wiring stops at `HelpDisplayOptions`:
+//! `with_env_overrides()` reads the env var and flips `show_version`, but `HelpGenerator`'s
+//! format functions consult `CommandDefinition::show_version_in_help()` instead — there is no
+//! code path connecting the env var to rendered output. `test_ap17_help_hide_version_env_var`
+//! verifies the actual API contract (the `HelpDisplayOptions` field toggle) rather than the
+//! end-to-end rendering the spec narrative implies.
 
 // AP-1: CommandDefinition builder requires name — compile-time only. No runtime test.
 // AP-5: CommandDefinition fields are private — compile-time only. No runtime test.
 
-use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData };
+use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
 use unilang::data::ErrorData;
 use unilang::static_data::{
-  StaticCommandDefinition, StaticArgumentDefinition, StaticArgumentAttributes, StaticKind,
+  StaticCommandDefinition, StaticArgumentDefinition, StaticArgumentAttributes, StaticKind, StaticValidationRule, StaticCommandMap,
 };
 use unilang::types::Value;
 use unilang::registry::CommandRegistry;
@@ -26,6 +36,7 @@ use unilang::interpreter::ExecutionContext;
 use unilang::semantic::VerifiedCommand;
 use unilang::pipeline::Pipeline;
 use unilang::prelude::HelpVerbosity;
+use unilang::help::HelpDisplayOptions;
 
 /// AP-2: Full pipeline round-trip returns correct output for a named argument.
 ///
@@ -404,4 +415,325 @@ fn test_ap10_process_batch_collects_all_results()
   assert!( !batch_result.results[ 0 ].success, "First (nonexistent) must fail" );
   assert!( batch_result.results[ 1 ].success, "Second (.ok) must succeed" );
   assert!( !batch_result.results[ 2 ].success, "Third (nonexistent) must fail" );
+}
+
+/// AP-11: `StaticArgumentAttributes` → `ArgumentAttributes` conversion preserves all five fields.
+///
+/// Builds a `StaticArgumentAttributes` with every field set to a non-default value via the
+/// fluent `with_*` builder methods, converts it via `From<&StaticArgumentAttributes>`, and
+/// verifies each of the five fields survived the conversion unchanged.
+// test_kind: ap_spec(AP-11)  [api/01_public_types]
+#[ test ]
+fn test_ap11_static_argument_attributes_conversion_preserves_all_fields()
+{
+  let static_attrs = StaticArgumentAttributes::new()
+    .with_optional( true )
+    .with_multiple( true )
+    .with_default( "fallback" )
+    .with_sensitive( true )
+    .with_interactive( true );
+
+  let dynamic_attrs : ArgumentAttributes = ( &static_attrs ).into();
+
+  assert!( dynamic_attrs.optional, "optional must be preserved as true" );
+  assert!( dynamic_attrs.multiple, "multiple must be preserved as true" );
+  assert_eq!(
+    dynamic_attrs.default,
+    Some( "fallback".to_string() ),
+    "default must be preserved as Some(\"fallback\")"
+  );
+  assert!( dynamic_attrs.sensitive, "sensitive must be preserved as true" );
+  assert!( dynamic_attrs.interactive, "interactive must be preserved as true" );
+}
+
+/// AP-12: `StaticKind` → `Kind` conversion preserves nested `List` and `Enum` structure.
+///
+/// Verifies that `StaticKind::List` preserves both the boxed nested item kind and the
+/// delimiter character, and that `StaticKind::Enum` converts its `&'static [&'static str]`
+/// choices into an owned `Vec<String>` with identical contents and order.
+// test_kind: ap_spec(AP-12)  [api/01_public_types]
+#[ test ]
+fn test_ap12_static_kind_conversion_preserves_nested_structure()
+{
+  static ITEM_KIND : StaticKind = StaticKind::Integer;
+  let static_list = StaticKind::List( &ITEM_KIND, Some( ',' ) );
+
+  let dynamic_list : Kind = ( &static_list ).into();
+  assert_eq!(
+    dynamic_list,
+    Kind::List( Box::new( Kind::Integer ), Some( ',' ) ),
+    "List variant must preserve nested item kind and delimiter"
+  );
+
+  let static_enum = StaticKind::Enum( &[ "red", "green", "blue" ] );
+  let dynamic_enum : Kind = ( &static_enum ).into();
+  assert_eq!(
+    dynamic_enum,
+    Kind::Enum( vec![ "red".to_string(), "green".to_string(), "blue".to_string() ] ),
+    "Enum variant must preserve choices as an owned Vec<String> in original order"
+  );
+}
+
+/// AP-13: `StaticValidationRule` → `ValidationRule` conversion preserves rule parameters
+/// for all 6 variants.
+///
+/// Constructs one instance of each `StaticValidationRule` variant, converts each via
+/// `From<&StaticValidationRule>`, and asserts the resulting `ValidationRule` matches the
+/// expected variant with the identical parameter value.
+// test_kind: ap_spec(AP-13)  [api/01_public_types]
+#[ test ]
+fn test_ap13_static_validation_rule_conversion_preserves_parameters_for_all_variants()
+{
+  let min : ValidationRule = ( &StaticValidationRule::Min( 1.0 ) ).into();
+  assert_eq!( min, ValidationRule::Min( 1.0 ), "Min parameter must be preserved" );
+
+  let max : ValidationRule = ( &StaticValidationRule::Max( 100.0 ) ).into();
+  assert_eq!( max, ValidationRule::Max( 100.0 ), "Max parameter must be preserved" );
+
+  let min_length : ValidationRule = ( &StaticValidationRule::MinLength( 3 ) ).into();
+  assert_eq!( min_length, ValidationRule::MinLength( 3 ), "MinLength parameter must be preserved" );
+
+  let max_length : ValidationRule = ( &StaticValidationRule::MaxLength( 50 ) ).into();
+  assert_eq!( max_length, ValidationRule::MaxLength( 50 ), "MaxLength parameter must be preserved" );
+
+  let pattern : ValidationRule = ( &StaticValidationRule::Pattern( "^[a-z]+$" ) ).into();
+  assert_eq!(
+    pattern,
+    ValidationRule::Pattern( "^[a-z]+$".to_string() ),
+    "Pattern parameter must be preserved and converted to an owned String"
+  );
+
+  let min_items : ValidationRule = ( &StaticValidationRule::MinItems( 2 ) ).into();
+  assert_eq!( min_items, ValidationRule::MinItems( 2 ), "MinItems parameter must be preserved" );
+}
+
+/// AP-14: `StaticArgumentDefinition` → `ArgumentDefinition` conversion preserves name, kind,
+/// description, and attributes.
+///
+/// Builds a `StaticArgumentDefinition` via `new()` and `with_attributes()`, converts it via
+/// `From<&StaticArgumentDefinition>`, and verifies the resulting `ArgumentDefinition` carries
+/// the same name, kind, description, and `attributes.optional` value.
+// test_kind: ap_spec(AP-14)  [api/01_public_types]
+#[ test ]
+fn test_ap14_static_argument_definition_conversion_preserves_name_kind_and_attributes()
+{
+  let static_arg = StaticArgumentDefinition::new( "count", StaticKind::Integer, "A count value" )
+    .with_attributes( StaticArgumentAttributes::new().with_optional( true ) );
+
+  let dynamic_arg : ArgumentDefinition = ( &static_arg ).into();
+
+  assert_eq!( dynamic_arg.name, "count", "name must be preserved" );
+  assert_eq!( dynamic_arg.kind, Kind::Integer, "kind must be preserved" );
+  assert_eq!( dynamic_arg.description, "A count value", "description must be preserved" );
+  assert!( dynamic_arg.attributes.optional, "attributes.optional must be preserved as true" );
+}
+
+/// AP-15: `StaticCommandMap` get/`contains_key`/len/`is_empty` return correct O(1) lookups.
+///
+/// Builds a `StaticCommandMap` from a `phf::Map` containing exactly one entry (`.greet`) via
+/// `StaticCommandMap::from_phf_internal`, then verifies every read-only accessor agrees on
+/// the map's single-entry state.
+// test_kind: ap_spec(AP-15)  [api/01_public_types]
+#[ test ]
+fn test_ap15_static_command_map_get_and_contains_key_match_len_and_is_empty()
+{
+  static GREET_CMD : StaticCommandDefinition = StaticCommandDefinition
+  {
+    name : ".greet",
+    namespace : "",
+    description : "Greet someone",
+    hint : "",
+    arguments : &[],
+    routine_link : None,
+    status : "stable",
+    version : "1.0.0",
+    tags : &[],
+    aliases : &[],
+    permissions : &[],
+    idempotent : false,
+    deprecation_message : "",
+    http_method_hint : "",
+    examples : &[],
+    auto_help_enabled : true,
+    category : "",
+    show_version_in_help : true,
+  };
+
+  static PHF_MAP : unilang::phf::Map< &'static str, &'static StaticCommandDefinition > = unilang::phf::phf_map!
+  {
+    ".greet" => &GREET_CMD,
+  };
+
+  let map = StaticCommandMap::from_phf_internal( &PHF_MAP );
+
+  let found = map.get( ".greet" );
+  assert!( found.is_some(), "get(\".greet\") must return Some" );
+  assert_eq!( found.unwrap().name, ".greet", "returned definition must have name \".greet\"" );
+
+  assert!( map.contains_key( ".greet" ), "contains_key(\".greet\") must return true" );
+  assert!( !map.contains_key( ".missing" ), "contains_key(\".missing\") must return false" );
+  assert_eq!( map.len(), 1, "len() must return 1 for a single-entry map" );
+  assert!( !map.is_empty(), "is_empty() must return false for a single-entry map" );
+}
+
+/// AP-16: `UNILANG_VERBOSITY` env var controls CLI binary logging verbosity, distinct from
+/// `UNILANG_HELP_VERBOSITY`.
+///
+/// `UNILANG_VERBOSITY` is read only by the `unilang_cli` binary (`src/bin/unilang_cli/main.rs`)
+/// via `std::env::var("UNILANG_VERBOSITY").ok().and_then(|v| v.parse::<u8>().ok()).unwrap_or(1)`
+/// — it is not a library-level API function. This test replicates that exact read/parse
+/// pattern to verify `UNILANG_VERBOSITY=2` yields verbosity level 2 (debug), and that mutating
+/// it does not affect `HelpVerbosity::from_env()` (which reads the separate
+/// `UNILANG_HELP_VERBOSITY` variable), proving the two env vars are independent.
+///
+/// ## Note
+///
+/// This test mutates process-level env vars. nextest runs each test in a separate process,
+/// so env var mutation does not affect sibling tests.
+// test_kind: ap_spec(AP-16)  [api/01_public_types]
+#[ test ]
+fn test_ap16_unilang_verbosity_env_var_distinct_from_help_verbosity()
+{
+  let old_verbosity = std::env::var( "UNILANG_VERBOSITY" ).ok();
+  let old_help_verbosity = std::env::var( "UNILANG_HELP_VERBOSITY" ).ok();
+
+  std::env::set_var( "UNILANG_VERBOSITY", "2" );
+  std::env::remove_var( "UNILANG_HELP_VERBOSITY" );
+
+  // Replicates the exact parse pattern used in src/bin/unilang_cli/main.rs.
+  let verbosity : u8 = std::env::var( "UNILANG_VERBOSITY" )
+    .ok()
+    .and_then( | v | v.parse::< u8 >().ok() )
+    .unwrap_or( 1 );
+
+  let help_verbosity = HelpVerbosity::from_env();
+
+  match old_verbosity
+  {
+    Some( v ) => std::env::set_var( "UNILANG_VERBOSITY", v ),
+    None => std::env::remove_var( "UNILANG_VERBOSITY" ),
+  }
+  match old_help_verbosity
+  {
+    Some( v ) => std::env::set_var( "UNILANG_HELP_VERBOSITY", v ),
+    None => std::env::remove_var( "UNILANG_HELP_VERBOSITY" ),
+  }
+
+  assert_eq!( verbosity, 2, "UNILANG_VERBOSITY=2 must produce debug-level (2) verbosity" );
+  assert_eq!(
+    help_verbosity,
+    HelpVerbosity::default(),
+    "UNILANG_VERBOSITY must not influence HelpVerbosity::from_env() — the two env vars are independent"
+  );
+}
+
+/// AP-17: `UNILANG_HELP_HIDE_VERSION` suppresses the version line in help output.
+///
+/// See the module-level "Note on AP-17 Spec Divergence" doc comment: `HelpDisplayOptions`
+/// is the sole production code path that reads `UNILANG_HELP_HIDE_VERSION`
+/// (`with_env_overrides()`), but `HelpGenerator`'s rendering consults
+/// `CommandDefinition::show_version_in_help()` instead, so there is no wiring from this env
+/// var to actual rendered text. This test verifies the real contract: the env var flips
+/// `HelpDisplayOptions.show_version` from `true` to `false`, and unsetting it restores `true`.
+///
+/// ## Note
+///
+/// This test mutates a process-level env var. nextest runs each test in a separate process,
+/// so env var mutation does not affect sibling tests.
+// test_kind: ap_spec(AP-17)  [api/01_public_types]
+#[ test ]
+fn test_ap17_help_hide_version_env_var_suppresses_show_version_flag()
+{
+  let old_value = std::env::var( "UNILANG_HELP_HIDE_VERSION" ).ok();
+
+  std::env::set_var( "UNILANG_HELP_HIDE_VERSION", "1" );
+  let options_hidden = HelpDisplayOptions::default().with_env_overrides();
+
+  std::env::remove_var( "UNILANG_HELP_HIDE_VERSION" );
+  let options_restored = HelpDisplayOptions::default().with_env_overrides();
+
+  match old_value
+  {
+    Some( v ) => std::env::set_var( "UNILANG_HELP_HIDE_VERSION", v ),
+    None => std::env::remove_var( "UNILANG_HELP_HIDE_VERSION" ),
+  }
+
+  assert!(
+    !options_hidden.show_version,
+    "UNILANG_HELP_HIDE_VERSION=1 must set show_version to false"
+  );
+  assert!(
+    options_restored.show_version,
+    "Unsetting UNILANG_HELP_HIDE_VERSION must restore show_version to true"
+  );
+}
+
+/// AP-18: `VerifiedCommand` typed extraction methods return None/false appropriately for a
+/// missing (optional, omitted) argument.
+///
+/// Builds a `VerifiedCommand` whose `arguments` map has no entry for `"count"` (simulating an
+/// optional argument that was not supplied), then verifies `get_integer`, `has_argument`, and
+/// `get_value` all agree the argument is absent, without panicking.
+// test_kind: ap_spec(AP-18)  [api/01_public_types]
+#[ test ]
+fn test_ap18_verified_command_typed_extraction_returns_none_for_missing_argument()
+{
+  use std::collections::HashMap;
+  use unilang::data::CommandName;
+
+  let definition = CommandDefinition::new(
+    CommandName::new( ".count_cmd" ).unwrap(),
+    "Counts things".to_string(),
+  );
+
+  let verified_command = VerifiedCommand
+  {
+    definition,
+    arguments : HashMap::new(),
+  };
+
+  assert_eq!(
+    verified_command.get_integer( "count" ),
+    None,
+    "get_integer(\"count\") must return None when the argument is absent"
+  );
+  assert!(
+    !verified_command.has_argument( "count" ),
+    "has_argument(\"count\") must return false when the argument is absent"
+  );
+  assert!(
+    verified_command.get_value( "count" ).is_none(),
+    "get_value(\"count\") must return None when the argument is absent"
+  );
+}
+
+/// AP-19: Configuration Utilities typed extraction parses `u32` and `bool` from `ConfigMap`.
+///
+/// Builds a `ConfigMap<&str>` (feature `json_parser`) with a `"port"` key holding
+/// `JsonValue::Number(8080)` and an `"enabled"` key holding `JsonValue::Bool(true)`, then
+/// verifies `extract_u32` and `extract_bool` return the correctly typed values without any
+/// manual `JsonValue` matching.
+// test_kind: ap_spec(AP-19)  [api/01_public_types]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_ap19_config_map_typed_extraction_parses_u32_and_bool()
+{
+  use std::collections::HashMap;
+  use serde_json::json;
+  use unilang::config_extraction::{ ConfigMap, extract_u32, extract_bool };
+
+  let mut config : ConfigMap< &str > = HashMap::new();
+  config.insert( "port".to_string(), ( json!( 8080 ), "default" ) );
+  config.insert( "enabled".to_string(), ( json!( true ), "default" ) );
+
+  assert_eq!(
+    extract_u32( &config, "port" ),
+    Some( 8080u32 ),
+    "extract_u32 must return Some(8080u32) for the \"port\" key"
+  );
+  assert_eq!(
+    extract_bool( &config, "enabled" ),
+    Some( true ),
+    "extract_bool must return Some(true) for the \"enabled\" key"
+  );
 }

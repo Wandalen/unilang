@@ -89,9 +89,9 @@ See [docs/parameter_syntax.md](docs/parameter_syntax.md) for the full reference.
 | [docs/parameter_syntax.md](docs/parameter_syntax.md) | `::` operator, value context, file paths, quoting |
 | [docs/cli_definition_approaches.md](docs/cli_definition_approaches.md) | All 21 approaches (YAML/JSON/DSL, build/runtime) |
 | [docs/cli_aggregation.md](docs/cli_aggregation.md) | CLI aggregation with namespace isolation |
-| [docs/migration.md](docs/migration.md) | Runtime → build-time migration (50x speedup) |
+| [docs/architecture/007_migration_guide.md](docs/architecture/007_migration_guide.md) | Runtime → build-time migration (50x speedup) |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Common errors and solutions |
-| [docs/features.md](docs/features.md) | Full feature tracking table |
+| [docs/feature_scorecard.md](docs/feature_scorecard.md) | Full feature tracking table |
 | [docs/optimization_guide.md](docs/optimization_guide.md) | Performance tuning guidelines |
 | [docs/phf_reexport.md](docs/phf_reexport.md) | PHF re-export for `static_registry` users |
 | [docs/feature/](docs/feature/) | Feature requirements (FR-REG, FR-ARG, FR-PIPE, FR-HELP) |

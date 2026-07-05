@@ -565,3 +565,73 @@ fn test_load_from_yaml_str_multiple_commands()
   );
 }
 
+/// FT-15: YAML Format 1 and Format 2 produce identical resulting command name.
+///
+/// Format 1 (`name: ".session.list"`, `namespace: ""`) and Format 2 (`name: "list"`,
+/// `namespace: ".session"`) both describe the same logical command. When loaded via
+/// `CommandRegistry::load_from_yaml_str` into separate registries, both must expose the
+/// command under the identical full name `.session.list`, with equivalent definitions
+/// aside from the source YAML representation.
+// test_kind: ft_spec(FT-15)  [feature/01_command_registry]
+#[ test ]
+fn test_ft15_yaml_format1_and_format2_produce_identical_command_name()
+{
+  let yaml_format1 = r#"
+  - name: .session.list
+    description: List active sessions
+    arguments: []
+    namespace: ""
+    hint: List sessions
+    status: stable
+    version: 1.0.0
+    tags: []
+    aliases: []
+    permissions: []
+    idempotent: true
+    deprecation_message: ""
+    examples: []
+    http_method_hint: ""
+    auto_help_enabled: false
+  "#;
+
+  let yaml_format2 = r#"
+  - name: list
+    description: List active sessions
+    arguments: []
+    namespace: .session
+    hint: List sessions
+    status: stable
+    version: 1.0.0
+    tags: []
+    aliases: []
+    permissions: []
+    idempotent: true
+    deprecation_message: ""
+    examples: []
+    http_method_hint: ""
+    auto_help_enabled: false
+  "#;
+
+  let registry1 = CommandRegistry::builder().load_from_yaml_str( yaml_format1 ).unwrap().build();
+  let registry2 = CommandRegistry::builder().load_from_yaml_str( yaml_format2 ).unwrap().build();
+
+  assert!(
+    registry1.commands().contains_key( ".session.list" ),
+    "Format 1 registry should expose the command under '.session.list'"
+  );
+  assert!(
+    registry2.commands().contains_key( ".session.list" ),
+    "Format 2 registry should expose the command under '.session.list'"
+  );
+
+  let command1 = registry1.command( ".session.list" ).unwrap();
+  let command2 = registry2.command( ".session.list" ).unwrap();
+
+  assert_eq!( command1.full_name(), command2.full_name() );
+  assert_eq!( command1.description(), command2.description() );
+  assert_eq!( command1.namespace(), command2.namespace() );
+  assert_eq!( command1.hint(), command2.hint() );
+  assert_eq!( command1.version().as_str(), command2.version().as_str() );
+  assert_eq!( command1.idempotent(), command2.idempotent() );
+}
+

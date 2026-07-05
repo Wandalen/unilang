@@ -84,3 +84,69 @@
 - **Given:** A JSON string defining command `.calc` with one `I64` argument `"value"` and description `"Calculate"`
 - **When:** `CommandRegistry::load_from_json_str(&json)` is called
 - **Then:** The registry contains `.calc` with the correct description and one argument named `"value"` of `Kind::I64`
+
+### FT-14: Runtime API does not transform command names
+
+- **Given:** A `CommandDefinition` with explicit name `.chat` and empty namespace, registered via `CommandRegistry::register_with_routine`
+- **When:** The registry is queried for `.chat`
+- **Then:** The command is found under exactly `.chat` with no added, removed, or transformed segments; no alternate spelling (e.g., `.Chat`, `.chat.` ) is created
+
+### FT-15: YAML Format 1 and Format 2 produce identical resulting command name
+
+- **Given:** Two YAML command definitions describing the same logical command — one using Format 1 (`name: ".session.list"`, `namespace: ""`) and one using Format 2 (`name: "list"`, `namespace: ".session"`)
+- **When:** Both are loaded via `CommandRegistry::load_from_yaml_str` into separate registries
+- **Then:** Both registries expose the command under the identical full name `.session.list`; the two `CommandDefinition` values are equivalent aside from the source YAML representation
+
+### FT-16: Build-time validation rejects manifest with duplicate command names
+
+- **Given:** A YAML manifest file containing two command entries that both resolve to full name `.dup.command`
+- **When:** The `build.rs` validation logic processes this manifest
+- **Then:** A build error is produced showing both occurrences of `.dup.command`; the build does not silently keep only one definition
+
+### FT-17: Registration rejects `multiple:true` argument with non-List storage type
+
+- **Given:** A `CommandDefinition` with one argument having `attributes.multiple == true` and `kind == Kind::String` (not `Kind::List`)
+- **When:** `CommandRegistry::register` is called with this definition
+- **Then:** Returns `Err(Error::Registration(_))` with a message explaining that `multiple:true` requires `Kind::List` storage to prevent silent data loss; the command is not registered
+
+### FT-18: Build-time validation rejects empty version string
+
+- **Given:** A YAML manifest entry for a valid dot-prefixed command name but with `version: ""`
+- **When:** The `build.rs` validation logic processes this manifest
+- **Then:** A build error is produced stating the version string cannot be empty; the build does not succeed silently
+
+### FT-19: StaticCommandRegistry auto-generates help companion for registered command
+
+- **Given:** A `StaticCommandRegistry` with a command `.report` registered via `register_with_routine` with `auto_help_enabled` true
+- **When:** The registry (or its `CommandRegistry` conversion via `.into()`) is queried for `.report.help`
+- **Then:** Returns `Some(def)` for the generated help command, matching the auto-help behavior documented for `CommandRegistry::register()`
+
+### FT-20: Registering static commands also registers the global `.help` command
+
+- **Given:** A fresh `StaticCommandRegistry` converted into a `CommandRegistry` via `From<StaticCommandRegistry>`
+- **When:** The resulting `CommandRegistry` is queried for `.help`
+- **Then:** Returns `Some(def)` for the global help command, present even though no command explicitly registered `.help` itself
+
+### FT-21: Duplicate registration via `register()` and `register_with_routine()` return different error variants
+
+- **Given:** A `CommandRegistry` with `.dup` already registered
+- **When:** `register()` is called again with a `CommandDefinition` named `.dup`, and separately `register_with_routine()` is called again with a `CommandDefinition` named `.dup`
+- **Then:** `register()` returns `Err(Error::Registration(_))`; `register_with_routine()` returns `Err(Error::Execution(ErrorData))` carrying `ErrorCode::CommandAlreadyExists`; both reject the duplicate but surface it through distinct error variants
+
+### FT-22: `CommandRegistryBuilder::build()` silently ignores registration errors while `build_checked()` propagates them
+
+- **Given:** A `CommandRegistryBuilder` with two `command_with_routine` calls using the same command name (the second registration fails internally)
+- **When:** `.build()` is called on one copy of the builder state and `.build_checked()` is called on an equivalent copy
+- **Then:** `.build()` returns a `CommandRegistry` containing only the first command, with no error surfaced; `.build_checked()` returns `Err(Error::Registration(_))` whose message references the failed duplicate registration
+
+### FT-23: Generated help companion carries a short alias, is hidden from listings, and disables recursive auto-help
+
+- **Given:** A `CommandDefinition` named `.example` registered with `auto_help_enabled` true
+- **When:** The registry generates its `.example.help` companion during registration
+- **Then:** The generated companion has alias `.example.h`, `hidden_from_list() == true`, `priority() == 999`, and `auto_help_enabled() == false` (preventing a further `.example.help.help` from being generated)
+
+### FT-24: Builder `status("deprecated")` produces structured deprecation metadata distinct from the active default
+
+- **Given:** A `CommandDefinition` built via `CommandDefinition::former().name(".old").description("Old command").status("deprecated")` with a deprecation message set
+- **When:** The resulting command's `status()` is inspected
+- **Then:** Returns `CommandStatus::Deprecated { reason, .. }` where `reason` matches the supplied deprecation message, `is_deprecated() == true`, and `is_active() == false` — distinct from a command built without `.status(...)` which defaults to `CommandStatus::Active`

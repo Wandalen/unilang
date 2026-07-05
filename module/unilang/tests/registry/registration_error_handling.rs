@@ -192,3 +192,36 @@ fn test_registration_error_types()
     // Test documents expected behavior
   }
 }
+
+/// FT-14: Runtime API does not transform command names.
+///
+/// A `CommandDefinition` with explicit name `.chat` and empty namespace, registered via
+/// `CommandRegistry::register_with_routine`, must be found under exactly `.chat` when
+/// queried — no added, removed, or transformed segments, and no alternate spelling
+/// (e.g. `.Chat`, `.chat.`) is created.
+// test_kind: ft_spec(FT-14)  [feature/01_command_registry]
+#[ test ]
+fn test_ft14_register_with_routine_does_not_transform_command_name()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_test_command( ".chat" );
+  registry.register_with_routine( &cmd, create_test_routine() )
+    .expect( "Registering '.chat' should succeed" );
+
+  // Found under exactly '.chat'
+  assert!(
+    registry.command( ".chat" ).is_some(),
+    "Command should be found under exactly '.chat'"
+  );
+
+  let stored = registry.command( ".chat" ).unwrap();
+  assert_eq!( stored.full_name(), ".chat", "Full name must remain exactly '.chat' with no transformation" );
+  assert_eq!( stored.name().as_str(), ".chat" );
+  assert_eq!( stored.namespace(), "" );
+
+  // No alternate spelling created
+  assert!( registry.command( ".Chat" ).is_none(), "No case-transformed alternate '.Chat' should exist" );
+  assert!( registry.command( ".chat." ).is_none(), "No trailing-dot alternate '.chat.' should exist" );
+  assert!( registry.command( "chat" ).is_none(), "No dot-stripped alternate 'chat' should exist" );
+}

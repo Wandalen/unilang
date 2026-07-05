@@ -8,7 +8,7 @@ Governed by `test_surface.rulebook.md`.
 - **Purpose:** House test spec files derived from authoritative `docs/` source documents
 - **Responsibility:** Define Given/When/Then test cases for all documented behavioral elements
 - **In Scope:** Feature specs (`feature/`), invariant specs (`invariant/`), API specs (`api/`), type specs (`type/`)
-- **Out of Scope:** Actual Rust test implementations (those live in `tests/<domain>/`); CLI test specs (no `docs/cli/` exists — library crate); `docs/analysis/` instances (analysis docs contain findings and recommendations, not behavioral contracts — no executable test cases derive from them)
+- **Out of Scope:** Actual Rust test implementations (those live in `tests/<domain>/`); CLI test specs (no `docs/cli/` exists — library crate); `docs/analysis/` instances (analysis docs contain findings and recommendations, not behavioral contracts — no executable test cases derive from them); `docs/architecture/` instances (architecture docs record design rationale and decisions — same non-behavioral profile as `docs/analysis/` — no executable test cases derive from them)
 
 ### Subdirectories
 

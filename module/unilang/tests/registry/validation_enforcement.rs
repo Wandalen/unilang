@@ -362,3 +362,100 @@ fn test_error_messages_are_helpful()
     err2
   );
 }
+
+//
+// FT-17: multiple:true Requires Kind::List Storage
+//
+
+/// FT-17: Registration rejects `multiple:true` argument with non-List storage type.
+///
+/// A `CommandDefinition` with one argument having `attributes.multiple == true` and
+/// `kind == Kind::String` (not `Kind::List`) must be rejected by `CommandRegistry::register`
+/// with `Err(Error::Registration(_))`, explaining that `multiple:true` requires `Kind::List`
+/// storage to prevent silent data loss. The command must not be registered.
+// test_kind: ft_spec(FT-17)  [feature/01_command_registry]
+#[test]
+fn test_ft17_register_rejects_multiple_true_with_non_list_kind()
+{
+  use unilang::data::{ ArgumentAttributes, ArgumentDefinition, Kind };
+  use unilang::error::Error;
+
+  let mut registry = CommandRegistry::new();
+
+  let cmd = CommandDefinition::former()
+    .name( ".tags" )
+    .description( "Command with invalid multiple attribute" )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "tag".to_string(),
+        kind : Kind::String,
+        attributes : ArgumentAttributes
+        {
+          multiple : true,
+          ..Default::default()
+        },
+        hint : String::new(),
+        description : String::new(),
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  let result = registry.register( cmd );
+
+  match result
+  {
+    Err( Error::Registration( msg ) ) =>
+    {
+      assert!(
+        msg.contains( "multiple" ) && msg.contains( "List" ),
+        "Error should explain multiple:true requires Kind::List storage: {msg}"
+      );
+    }
+    other => panic!(
+      "register() should reject multiple:true with non-List Kind as Err(Error::Registration(_)), got: {other:?}"
+    ),
+  }
+
+  assert!(
+    registry.command( ".tags" ).is_none(),
+    "Command should not be registered after multiple:true/non-List rejection"
+  );
+}
+
+//
+// FT-18: Build-Time Validation Rejects Empty Version String
+//
+
+/// FT-18: Build-time validation rejects empty version string.
+///
+/// A YAML manifest entry for a valid dot-prefixed command name but with `version: ""`
+/// must be rejected by the build-time validation logic with an error stating the version
+/// string cannot be empty; the build must not succeed silently.
+// test_kind: ft_spec(FT-18)  [feature/01_command_registry]
+#[test]
+fn test_ft18_build_time_validation_rejects_empty_version()
+{
+  use unilang::validation_core::validate_command_definition_core;
+
+  let result = validate_command_definition_core(
+    ".valid.command",
+    "",
+    "",
+    "manifest/empty_version.yaml"
+  );
+
+  assert!(
+    result.is_err(),
+    "Build-time validation should reject a valid command name paired with an empty version string"
+  );
+
+  let err = result.unwrap_err();
+  assert!(
+    err.contains( "cannot be empty" ),
+    "Error should state the version string cannot be empty: {err}"
+  );
+}

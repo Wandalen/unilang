@@ -83,7 +83,7 @@ tests/
 
 - **`validation/`**: CI-level crate-wide property tests (clippy, ABI, feature gates, PHF re-export)
 - **`build/`**: Build-time code generation, PHF codegen, static registry creation
-- **`api/`**: Public API contract tests — AP-1..8 spec cases from `tests/docs/api/001_public_types.md`
+- **`api/`**: Public API contract tests — AP-1..8 spec cases from `tests/docs/api/01_public_types.md`
 
 ## Test Methodology
 

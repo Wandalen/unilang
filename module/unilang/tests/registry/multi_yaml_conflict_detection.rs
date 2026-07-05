@@ -415,3 +415,86 @@ fn test_real_wip_integration()
      wip: .prs, .prs.list, .orgs\n\
      pr_review_workflow: .pr.review, .pr.workflow.generate" );
 }
+
+/// FT-16: Build-time validation rejects manifest with duplicate command names.
+///
+/// A YAML manifest containing two command entries that both resolve to full name
+/// `.dup.command` must produce a build error showing both occurrences; the build must
+/// not silently keep only one definition. This is exercised at the registry level via
+/// `MultiYamlAggregator::detect_conflicts()`, the mechanism `build.rs` invokes to catch
+/// duplicate command names across aggregated YAML manifests before code generation.
+// test_kind: ft_spec(FT-16)  [feature/01_command_registry]
+#[ test ]
+fn test_ft16_build_time_validation_rejects_duplicate_manifest_command_names()
+{
+  let yaml_a = r#"
+- name: ".dup.command"
+  namespace: ""
+  description: "First occurrence of .dup.command"
+  arguments: []
+  examples: []
+"#;
+
+  let yaml_b = r#"
+- name: ".dup.command"
+  namespace: ""
+  description: "Second occurrence of .dup.command"
+  arguments: []
+  examples: []
+"#;
+
+  let config = AggregationConfig
+  {
+    base_dir: PathBuf::from( "." ),
+    modules: vec!
+    [
+      ModuleConfig
+      {
+        name: "manifest_a".to_string(),
+        yaml_path: "manifest_a.yaml".to_string(),
+        prefix: None,
+        enabled: true,
+      },
+      ModuleConfig
+      {
+        name: "manifest_b".to_string(),
+        yaml_path: "manifest_b.yaml".to_string(),
+        prefix: None,
+        enabled: true,
+      },
+    ],
+    global_prefix: None,
+    detect_conflicts: true,
+    env_overrides: HashMap::new(),
+    conflict_resolution: ConflictResolutionStrategy::Fail,
+    auto_discovery: false,
+    discovery_patterns: vec![],
+    namespace_isolation: NamespaceIsolation
+    {
+      enabled: false,
+      separator: ".".to_string(),
+      strict_mode: false,
+    },
+  };
+
+  let mut aggregator = MultiYamlAggregator::new( config );
+  aggregator.yaml_files_mut().insert( "manifest_a".to_string(), yaml_a.to_string() );
+  aggregator.yaml_files_mut().insert( "manifest_b".to_string(), yaml_b.to_string() );
+
+  aggregator.detect_conflicts();
+
+  // Build-time validation must surface the duplicate, not silently keep only one definition
+  assert_eq!(
+    aggregator.conflicts().len(), 1,
+    "Expected exactly one conflict for duplicate '.dup.command' across two manifests"
+  );
+
+  let conflict = &aggregator.conflicts()[0];
+  assert_eq!( conflict.command_name, ".dup.command" );
+  assert_eq!(
+    conflict.modules.len(), 2,
+    "Conflict must show both occurrences of '.dup.command', not silently deduplicate"
+  );
+  assert!( conflict.modules.contains( &"manifest_a".to_string() ) );
+  assert!( conflict.modules.contains( &"manifest_b".to_string() ) );
+}

@@ -38,17 +38,17 @@
 
 Simple variants serialize as lowercase strings (`"active"`, `"experimental"`, `"internal"`). The `Deprecated` variant serializes as a map with `status`, `reason`, `since`, `replacement` fields. Deserialization accepts both forms and is case-insensitive.
 
-### Features
-
-| File | Relationship |
-|------|--------------|
-| [001_command_registry.md](../feature/001_command_registry.md) | Registry uses status for command lifecycle |
-
 ### APIs
 
 | File | Relationship |
 |------|--------------|
 | [001_public_types.md](../api/001_public_types.md) | Lists CommandStatus in public type surface |
+
+### Features
+
+| File | Relationship |
+|------|--------------|
+| [001_command_registry.md](../feature/001_command_registry.md) | Registry uses status for command lifecycle |
 
 ### Sources
 

@@ -43,6 +43,12 @@ The framework **must** provide argv-based parsing and execution APIs (`Pipeline:
 
 **Implementation status:** ✅ Implemented in the parser engine (`parse_from_argv`) and pipeline (`process_command_from_argv`, `process_command_from_argv_simple`). Comprehensive test coverage in the argv API test suite. Resolves Task 080 CLI integration issues.
 
+### APIs
+
+| File | Relationship |
+|------|--------------|
+| [001_public_types.md](../api/001_public_types.md) | Types used in pipeline operations |
+
 ### Features
 
 | File | Relationship |
@@ -51,12 +57,6 @@ The framework **must** provide argv-based parsing and execution APIs (`Pipeline:
 | [002_argument_system.md](002_argument_system.md) | Argument binding performed by pipeline |
 | [004_help_system.md](004_help_system.md) | Help commands processed by pipeline |
 | [005_repl_interactive.md](005_repl_interactive.md) | REPL that reuses this pipeline |
-
-### APIs
-
-| File | Relationship |
-|------|--------------|
-| [001_public_types.md](../api/001_public_types.md) | Types used in pipeline operations |
 
 ### Sources
 
