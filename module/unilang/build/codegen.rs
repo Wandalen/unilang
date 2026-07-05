@@ -248,8 +248,12 @@ fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value 
   let deprecation_message = cmd_value[ "deprecation_message" ].as_str().unwrap_or( "" );
   let http_method_hint = cmd_value[ "http_method_hint" ].as_str().unwrap_or( "" );
   // Fix(BUG-088): Extract auto_help_enabled from YAML (defaults to true)
+  // Root cause: build.rs's PHF code generator was not updated when StaticCommandDefinition gained this field
+  // Pitfall: When adding fields to StaticCommandDefinition, ALL code generators must be updated — both this file and MultiYamlAggregator::generate_command_definition_body()
   let auto_help_enabled = cmd_value[ "auto_help_enabled" ].as_bool().unwrap_or( true );
   // Fix(BUG-089): Extract category from YAML (defaults to empty string)
+  // Root cause: build.rs's PHF code generator was not updated when StaticCommandDefinition gained the category field
+  // Pitfall: Same as BUG-088 — every code generator touching StaticCommandDefinition must stay in sync
   let category = cmd_value[ "category" ].as_str().unwrap_or( "" );
   // Extract show_version_in_help from YAML (defaults to true)
   let show_version_in_help = cmd_value[ "show_version_in_help" ].as_bool().unwrap_or( true );
@@ -315,8 +319,12 @@ fn generate_command_const( f : &mut BufWriter< File >, index : usize, cmd_value 
   writeln!( f, "  http_method_hint: \"{}\",", escape_string( http_method_hint ) ).unwrap();
   writeln!( f, "  examples: CMD_{index}_EXAMPLES," ).unwrap();
   // Fix(BUG-088): Include auto_help_enabled field in generated PHF const
+  // Root cause: build.rs's PHF code generator was not updated when StaticCommandDefinition gained this field
+  // Pitfall: Omitting this field here produces a PHF const that silently defaults auto_help_enabled, diverging from the source YAML
   writeln!( f, "  auto_help_enabled: {auto_help_enabled}," ).unwrap();
   // Fix(BUG-089): Include category field in generated PHF const
+  // Root cause: build.rs's PHF code generator was not updated when StaticCommandDefinition gained the category field
+  // Pitfall: Same as BUG-088 — omitting this field silently diverges the generated PHF const from the source YAML
   writeln!( f, "  category: \"{}\",", escape_string( category ) ).unwrap();
   // Include show_version_in_help field in generated PHF const
   writeln!( f, "  show_version_in_help: {show_version_in_help}," ).unwrap();

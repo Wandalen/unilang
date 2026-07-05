@@ -16,4 +16,4 @@ Archive of all completed task files. Authoritative index is in `../readme.md`.
 | `011_strs_tools_simd_ref.md` | String tools SIMD reference |
 | `013_phase5.md` | Phase 5 implementation tasks |
 | `014_wasm.md` | WebAssembly integration tasks |
-| `NNN_*.md` (remaining 80 files) | Completed task records; see `../readme.md` for full index |
+| `NNN_*.md` (remaining 83 files) | Completed task records; see `../readme.md` for full index |

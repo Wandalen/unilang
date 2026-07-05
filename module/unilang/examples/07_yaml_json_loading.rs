@@ -150,6 +150,9 @@ fn main() -> Result< (), unilang::error::Error >
       tags: ["verification", "integrity"]
 "#;
 
+  // Fix(BUG-095): Corrected validation rule keywords in this embedded JSON to match the parser's expected format
+  // Root cause: Used intuitive-but-wrong keywords (min_length, regex) instead of the parser's actual keywords (minlength, pattern)
+  // Pitfall: Validation rule keywords don't follow Rust snake_case convention (minlength not min_length) — the "Unknown validation rule" error doesn't suggest the correct format
   // Step 2: Define commands in JSON format
   let json_commands = r#"
 [

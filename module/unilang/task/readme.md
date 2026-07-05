@@ -17,6 +17,8 @@ last_sync: 2026-07-05T00:00:00Z
 | actors/ | Actor registry for task execution |
 | action_plan/ | Per-actor action plans |
 | decisions/ | Decision records |
+| readme.md | Task index and directory responsibility table |
+| procedure.md | Task lifecycle operational procedures |
 
 ## Tasks Index
 

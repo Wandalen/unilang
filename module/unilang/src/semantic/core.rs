@@ -315,6 +315,9 @@ impl< 'a > SemanticAnalyzer< 'a >
 
     for instruction in self.instructions
     {
+      // Fix(issue-003): Reject empty command path with attached named/positional arguments instead of silently falling back to the help listing
+      // Root cause: analyze_internal returned the help listing unconditionally whenever command_path_slices was empty, without checking for attached arguments
+      // Pitfall: Easy to reintroduce by "simplifying" this branch back to an unconditional help listing — the bare "." → help case looks like the whole story
       // Handle special case: single dot "." (no path, no arguments) should show help.
       // An empty path with attached named/positional arguments is NOT a help request —
       // it means the parser excluded a `name::value` token (or bare token) from the path
