@@ -15,8 +15,8 @@ Task tracking for the unilang crate.
 
 | Order | ID | Advisability | Value | Easiness | Safety | Priority | State | Executor | UnitType | Unit | Task | Purpose |
 |-------|----|--------------|-------|----------|--------|----------|-------|----------|----------|------|------|---------|
-| 1 | 005 | 882 | 7 | 6 | 7 | 3 | ❓ (Unverified) | any | module | lib/yrd_core/unilang/dev/module/unilang | [Fix YAML loader namespace+name combination validated before combining](005_fix_yaml_loader_namespace_name_combination_validated_before_combining.md) | Fix YAML command loader rejecting valid `namespace`+bare-`name` combination as if the bare name itself must be dot-prefixed |
-| 2 | 006 | 648 | 4 | 9 | 9 | 2 | ❓ (Unverified) | any | module | lib/yrd_core/unilang/dev/module/unilang | [Fix clippy lint violations blocking validation_v6](006_fix_clippy_lint_violations_blocking_validation_v6.md) | Fix 2 clippy lint violations in unrelated test files blocking the validation_v6_clippy_passes meta-test |
+| 1 | 005 | 0 | 7 | 6 | 7 | 0 | ✅ (Completed) | any | module | lib/yrd_core/unilang/dev/module/unilang | [Fix YAML loader namespace+name combination validated before combining](completed/005_fix_yaml_loader_namespace_name_combination_validated_before_combining.md) | Fix YAML command loader rejecting valid `namespace`+bare-`name` combination as if the bare name itself must be dot-prefixed |
+| 2 | 006 | 0 | 4 | 9 | 9 | 0 | ✅ (Completed) | any | module | lib/yrd_core/unilang/dev/module/unilang | [Fix clippy lint violations blocking validation_v6](completed/006_fix_clippy_lint_violations_blocking_validation_v6.md) | Fix 2 clippy lint violations in unrelated test files blocking the validation_v6_clippy_passes meta-test |
 | 3 | 004 | 560 | 8 | 5 | 7 | 2 | 🎯 (Verified) | any | module | lib/yrd_core/unilang/dev/module/unilang | [Implement test surface spec coverage gaps](004_implement_test_surface_spec_coverage_gaps.md) | Implement Rust tests for 64 spec cases added across 15 feature/invariant/api/type spec files since task 002 |
 | 4 | 002 | 0 | 8 | 5 | 7 | 0 | ✅ (Completed) | claude-sonnet-4-6 | module | lib/yrd_core/unilang/dev/module/unilang | [Implement test surface specs](completed/002_implement_test_surface_specs.md) | Implement Rust tests for all 121 spec cases across 17 feature/invariant/api/type spec files |
 | 5 | 001 | 0 | 6 | 4 | 7 | 0 | ✅ (Completed) | claude-sonnet-4-6 | module | lib/yrd_core/unilang/dev/module/unilang | [Fix phf_map! codegen absolute path expansion](completed/001_fix_phf_map_codegen_absolute_path_expansion.md) | Fix codegen so downstream crates don't need direct phf dependency |
@@ -40,16 +40,16 @@ Task tracking for the unilang crate.
 <!-- task_system_metadata
 type: local
 total_tasks: 6
-completed: 3
+completed: 5
 active: 0
-backlog: 2
-last_updated: 2026-07-05
+backlog: 0
+last_updated: 2026-07-06
 -->
 
 ## Task System Metadata
 
-- **Last Updated:** 2026-07-05
+- **Last Updated:** 2026-07-06
 - **Total Tasks:** 6
-- **Completed:** 3
+- **Completed:** 5
 - **Active:** 0
-- **Backlog:** 2
+- **Backlog:** 0
