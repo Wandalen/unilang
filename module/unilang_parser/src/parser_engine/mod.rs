@@ -152,7 +152,7 @@ impl Parser
   all_delimiters.extend( self.options.operators.iter().copied() );
 
   let splits_iter = strs_tools::string::split::split()
-    .delimeters( all_delimiters.iter().map(core::convert::AsRef::as_ref).collect::<Vec<_>>().as_slice() )
+    .delimiters( all_delimiters.iter().map(core::convert::AsRef::as_ref).collect::<Vec<_>>().as_slice() )
     .quoting( true )
     .preserving_empty( false )
     .src( input )
