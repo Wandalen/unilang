@@ -5,12 +5,17 @@
 //! ## Compile-Time Cases (AP-1, AP-5)
 //!
 //! AP-1 (CommandDefinition builder requires name) and AP-5 (CommandDefinition fields are private)
-//! are compile-time enforcement checks. They cannot be expressed as runtime `#[test]` functions.
+//! are compile-time enforcement checks. They are not expressed as runtime `#[test]` functions in
+//! this file — they are verified by the trybuild compile-fail test
+//! `test_tc_compile_fail_type_state_and_private_fields` in `tests/build/compile_fail_tests.rs`
+//! (tagged `ap_spec(AP-1)` and `ap_spec(AP-5)` respectively).
 //!
 //! - **AP-1**: `CommandDefinition::former().description("desc").end()` fails to compile because
 //!   the type-state builder enforces that `name` is set before calling `.end()`.
+//!   (`tests/compile_fail/t40_builder_missing_name.rs`)
 //! - **AP-5**: `definition.name` (direct field access) fails to compile because all
 //!   `CommandDefinition` fields are private; only accessor methods (`.name()`) are valid.
+//!   (`tests/compile_fail/t50_private_field_name.rs`)
 //!
 //! ## Note on AP-17 Spec Divergence
 //!
@@ -22,8 +27,8 @@
 //! verifies the actual API contract (the `HelpDisplayOptions` field toggle) rather than the
 //! end-to-end rendering the spec narrative implies.
 
-// AP-1: CommandDefinition builder requires name — compile-time only. No runtime test.
-// AP-5: CommandDefinition fields are private — compile-time only. No runtime test.
+// AP-1: CommandDefinition builder requires name — compile-time only, see tests/build/compile_fail_tests.rs
+// AP-5: CommandDefinition fields are private — compile-time only, see tests/build/compile_fail_tests.rs
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
 use unilang::data::ErrorData;
