@@ -476,9 +476,13 @@ fn test_tc11_equal_names_compare_equal()
   let name1 = CommandName::new( ".build" ).unwrap();
   let name2 = CommandName::new( ".build" ).unwrap();
 
-  assert_eq!(
+  // Fix(issue-006): assert_eq!(x, true) triggers clippy::bool_assert_comparison.
+  // Root cause: boolean equality was asserted via literal-bool comparison instead of
+  // asserting the boolean expression directly.
+  // Pitfall: assert_eq!(expr, true/false) is functionally correct but always flagged —
+  // use assert!(expr) / assert!(!expr) for boolean conditions.
+  assert!(
     name1 == name2,
-    true,
     "Two CommandName values constructed from the same string should compare equal"
   );
 }

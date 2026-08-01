@@ -1,6 +1,6 @@
 [package]
 name = "cargo_unilang"
-version = "0.4.1"
+version = "0.5.1"
 edition = "2021"
 description = "Scaffolding and health check tool for unilang CLI projects - prevents common mistakes"
 license = "MIT"

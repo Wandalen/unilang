@@ -97,7 +97,7 @@ impl< 'de > serde::Deserialize< 'de > for CommandDefinition
       where
         V : MapAccess< 'de >,
       {
-        let mut name : Option< CommandName > = None;
+        let mut name : Option< String > = None;
         let mut description : Option< String > = None;
         let mut arguments : Option< Vec< ArgumentDefinition > > = None;
         let mut routine_link : Option< Option< String > > = None;
@@ -304,11 +304,50 @@ impl< 'de > serde::Deserialize< 'de > for CommandDefinition
         }
 
         // Required fields
-        let name = name.ok_or_else( || de::Error::missing_field( "name" ) )?;
+        let name_str = name.ok_or_else( || de::Error::missing_field( "name" ) )?;
         let description = description.ok_or_else( || de::Error::missing_field( "description" ) )?;
 
         // Optional fields with defaults
-        let namespace = namespace.unwrap_or_default();
+        let mut namespace = namespace.unwrap_or_default();
+
+        // Fix(issue-005): `name` used to be declared `Option<CommandName>` above, so
+        // `map.next_value()?` validated the raw YAML `name` field as a `CommandName`
+        // (dot-prefix required) the instant it was parsed -- before `namespace` had
+        // necessarily been read, and with no way to combine the two. This rejected the
+        // documented `namespace` + bare-`name` authoring format (e.g. `name: list`,
+        // `namespace: .session`) even though the combined name (`.session.list`) is valid.
+        // Root cause: dot-prefix validation was coupled to per-field deserialization
+        // order instead of running once the full map (name + namespace) was known.
+        // Pitfall: a bare name is only valid when a namespace supplies the missing dot
+        // prefix -- a bare name with no namespace must still be rejected (unchanged).
+        let name = if let Some( stripped ) = name_str.strip_prefix( '.' )
+        {
+          if namespace.is_empty() && stripped.contains( '.' )
+          {
+            // Fully-qualified compact form (e.g. ".session.list") with no explicit
+            // namespace: derive the namespace by splitting off the last segment, so
+            // this format and the `namespace` + bare-`name` format normalize to the
+            // same (namespace, local name) representation.
+            let split_pos = stripped.rfind( '.' ).expect( "contains('.') checked above guarantees a match" );
+            namespace = format!( ".{}", &stripped[ ..split_pos ] );
+            CommandName::new( format!( ".{}", &stripped[ split_pos + 1.. ] ) ).map_err( de::Error::custom )?
+          }
+          else
+          {
+            CommandName::new( name_str ).map_err( de::Error::custom )?
+          }
+        }
+        else if !namespace.is_empty()
+        {
+          // Bare name (e.g. "list") with an explicit namespace: the namespace supplies
+          // the dot prefix that the bare name lacks.
+          CommandName::new( format!( ".{}", name_str ) ).map_err( de::Error::custom )?
+        }
+        else
+        {
+          // Bare name with no namespace to supply a prefix: still invalid.
+          CommandName::new( name_str ).map_err( de::Error::custom )?
+        };
 
         // Validate namespace using NamespaceType validation rules
         NamespaceType::new( &namespace ).map_err( de::Error::custom )?;

@@ -6,8 +6,8 @@
 //! `tests/compile_fail/` must fail to compile.
 //!
 //! ## Coverage
-//! - T40: Builder without `.name()` does not compile (type-state enforcement)
-//! - T50: Direct `name` field access does not compile (private field)
+//! - T40: Builder without `.name()` does not compile (type-state enforcement) — also satisfies AP-1 and IN-2
+//! - T50: Direct `name` field access does not compile (private field) — also satisfies AP-5
 //! - T50b: Direct `description` field access does not compile (private field)
 //!
 //! ## Related
@@ -18,7 +18,7 @@
 /// T40/T50: Type-state builder and private field compile-fail verification.
 ///
 /// Runs each fixture through trybuild to confirm it is rejected by rustc.
-// test_kind: tc_spec(T40), tc_spec(T50)
+// test_kind: tc_spec(T40), tc_spec(T50), ap_spec(AP-1), ap_spec(AP-5), in_spec(IN-2)
 #[ test ]
 fn test_tc_compile_fail_type_state_and_private_fields()
 {

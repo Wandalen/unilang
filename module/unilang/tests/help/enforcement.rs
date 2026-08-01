@@ -11,6 +11,7 @@
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, CommandName, Kind, OutputData };
 use unilang::registry::CommandRegistry;
 use unilang::interpreter::ExecutionContext;
+use unilang::pipeline::Pipeline;
 
 /// Test routine for mandatory help tests
 #[allow(clippy::unnecessary_wraps)]
@@ -394,13 +395,16 @@ fn test_help_content_comprehensive()
   println!( "✅ Help content is comprehensive and includes all mandatory sections" );
 }
 
-/// FT-8: `.help` command does not appear in its own listing.
-///
 /// Bug reproducer for BUG-102: `.help` visible in its own help listing.
+///
+/// Unit-level regression guard: calls `HelpGenerator::list_commands_filtered` directly
+/// rather than through `Pipeline`, per this bug's own governing task (103) Test Matrix T02.
+/// The FT-8 spec case itself (Pipeline-level dispatch) is owned by
+/// `test_ft8_help_not_self_referential_via_pipeline` below.
 ///
 /// ## Root Cause
 ///
-/// `register_mandatory_global_help_command()` in `src/registry/dynamic.rs:583` set
+/// `register_mandatory_global_help_command()` in `src/registry/help.rs:213` set
 /// `.with_hidden_from_list( false )` on the `.help` command definition. The interpreter
 /// special-cases `.help` and calls `HelpGenerator::list_commands_filtered(None)`,
 /// which filters by `!cmd.hidden_from_list()`. With the flag false, `.help` passed the
@@ -414,7 +418,7 @@ fn test_help_content_comprehensive()
 ///
 /// ## Fix Applied
 ///
-/// `dynamic.rs:583`: `.with_hidden_from_list( false )` → `.with_hidden_from_list( true )`.
+/// `help.rs:241`: `.with_hidden_from_list( false )` → `.with_hidden_from_list( true )`.
 /// Single-line change at the mandatory registration site — the ONLY effective place,
 /// because `register_with_routine(.help)` always returns `CommandAlreadyExists`.
 ///
@@ -431,7 +435,7 @@ fn test_help_content_comprehensive()
 /// registration in `register_mandatory_global_help_command()`; `register_with_routine`
 /// for `.help` always fails silently (suppressed at `lib.rs:150`).
 ///
-// test_kind: ft_spec(FT-8)  [feature/04_help_system], bug_reproducer(BUG-102)
+// test_kind: bug_reproducer(BUG-102)
 #[ test ]
 fn test_help_not_self_referential_bug_102()
 {
@@ -452,7 +456,7 @@ fn test_help_not_self_referential_bug_102()
     self_referential_lines.is_empty(),
     "BUG-102 regression: .help appears in its own listing.\n\
      Self-referential lines:\n{}\n\
-     Fix: set .with_hidden_from_list( true ) in dynamic.rs:583",
+     Fix: set .with_hidden_from_list( true ) in src/registry/help.rs:241",
     self_referential_lines.join( "\n" )
   );
 
@@ -463,4 +467,51 @@ fn test_help_not_self_referential_bug_102()
   );
 
   println!( "✅ BUG-102: .help is not self-referential in its own listing" );
+}
+
+/// FT-8: `.help` command does not appear in its own listing (Pipeline-level).
+///
+/// Drives `.help` through the real `Pipeline::process_command` dispatch — parsing,
+/// semantic analysis, and the `Interpreter`'s `.help` special case at `src/interpreter.rs:84-87`
+/// — instead of calling `HelpGenerator::list_commands_filtered` directly. This exercises the
+/// exact user-facing path FT-8 specifies and would catch a regression in the special-case
+/// dispatch itself, not only in the `hidden_from_list` flag that `test_help_not_self_referential_bug_102`
+/// above already guards at the unit level.
+// test_kind: ft_spec(FT-8)  [feature/04_help_system]
+#[ test ]
+fn test_ft8_help_not_self_referential_via_pipeline()
+{
+  let mut registry = CommandRegistry::new();
+
+  let greet_command = CommandDefinition::former()
+    .name( ".greet" )
+    .description( "Greet someone" )
+    .end();
+
+  registry.register_with_routine( &greet_command, Box::new( test_routine ) )
+    .expect( "Registration must succeed" );
+
+  let pipeline = Pipeline::new( registry );
+  let result = pipeline.process_command( ".help", ExecutionContext::default() );
+
+  assert!( result.success, "pipeline.process_command(\".help\") must succeed; error: {:?}", result.error );
+  let content = &result.outputs[ 0 ].content;
+
+  let self_referential_lines : Vec< &str > = content
+    .lines()
+    .filter( |line| line.trim_start().starts_with( ".help" ) )
+    .collect();
+
+  assert!(
+    self_referential_lines.is_empty(),
+    "FT-8 regression: .help appears in its own Pipeline-driven listing.\nSelf-referential lines:\n{}",
+    self_referential_lines.join( "\n" )
+  );
+
+  assert!(
+    content.contains( ".greet" ),
+    "FT-8: other registered commands must remain visible in the listing; got: {content:?}"
+  );
+
+  println!( "✅ FT-8: .help is not self-referential when invoked through Pipeline" );
 }

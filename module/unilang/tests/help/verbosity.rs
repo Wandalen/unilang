@@ -164,8 +164,8 @@ fn test_verbosity_level_3_detailed()
   assert!( help.contains( "Rules:" ) );
 }
 
-/// FT-5 (partial): UNILANG_HELP_VERBOSITY=4 produces Comprehensive output.
-// test_kind: ft_spec(FT-5)  [feature/04_help_system]
+/// FT-12: UNILANG_HELP_VERBOSITY=4 produces Comprehensive level output.
+// test_kind: ft_spec(FT-12)  [feature/04_help_system]
 #[test]
 fn test_verbosity_level_4_comprehensive()
 {
@@ -188,6 +188,12 @@ fn test_verbosity_level_4_comprehensive()
   assert!( help.contains( "TAGS:" ) );
   assert!( help.contains( "v1.0.0" ) );
   assert!( help.contains( "Aliases: cfg" ) );
+
+  // FT-12 Then-clause: "strictly more detailed than Level 3 output"
+  let help_level_3 = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Detailed )
+    .command( ".config" ).expect( "Command should exist" );
+  assert!( help.len() > help_level_3.len() );
+  assert!( !help_level_3.contains( "PARAMETERS:" ) ); // Level 3 uses "Arguments:", not the Level 4 "PARAMETERS:" section
 }
 
 /// FT-14: `HelpVerbosity::from_level` caps values above 4 at Comprehensive, without panicking.
@@ -210,6 +216,8 @@ fn test_verbosity_default()
   assert_eq!( HelpVerbosity::default(), HelpVerbosity::Standard );
 }
 
+/// FT-13: HelpGenerator::with_verbosity, set_verbosity, and verbosity round-trip correctly.
+// test_kind: ft_spec(FT-13)  [feature/04_help_system]
 #[test]
 fn test_verbosity_set_and_get()
 {
@@ -217,8 +225,8 @@ fn test_verbosity_set_and_get()
   let command = create_test_command();
   registry.register_with_routine( &command, test_command_routine() ).unwrap();
 
-  let mut help_gen = HelpGenerator::new( &registry );
-  assert_eq!( help_gen.verbosity(), HelpVerbosity::Standard );
+  let mut help_gen = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Detailed );
+  assert_eq!( help_gen.verbosity(), HelpVerbosity::Detailed );
 
   help_gen.set_verbosity( HelpVerbosity::Minimal );
   assert_eq!( help_gen.verbosity(), HelpVerbosity::Minimal );

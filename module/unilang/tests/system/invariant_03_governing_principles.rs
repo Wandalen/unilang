@@ -6,9 +6,12 @@
 //!
 //! IN-2 (Make Illegal States Unrepresentable) is a compile-time enforcement check.
 //! `CommandDefinition::former()` uses a type-state builder that requires `name` before `.end()`.
-//! This cannot be expressed as a runtime `#[test]` function.
+//! It is not expressed as a runtime `#[test]` in this file — it is verified by the trybuild
+//! compile-fail test `test_tc_compile_fail_type_state_and_private_fields` in
+//! `tests/build/compile_fail_tests.rs` (tagged `in_spec(IN-2)`), which confirms
+//! `tests/compile_fail/t40_builder_missing_name.rs` is rejected by rustc.
 
-// IN-2: Compile-time only — type-state builder enforces required fields at compile time.
+// IN-2: Compile-time only — see tests/build/compile_fail_tests.rs::test_tc_compile_fail_type_state_and_private_fields
 
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, ErrorCode, Kind, OutputData };

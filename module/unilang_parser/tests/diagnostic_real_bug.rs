@@ -163,7 +163,7 @@ fn diagnostic_strs_tools_is_correct()
   let input = r#"cmd::"value with \"inner\" quotes""#;
   let result: Vec<_> = split::split()
     .src( input )
-    .delimeters( &[ "::", " ", "\t", "\n", "\r", "#" ] )
+    .delimiters( &[ "::", " ", "\t", "\n", "\r", "#" ] )
     .quoting( true )
     .preserving_empty( false )
     .perform()
