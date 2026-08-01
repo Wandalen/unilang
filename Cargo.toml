@@ -1,12 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = [
-  "module/unilang",
-  "module/unilang_parser",
-  "module/unilang_meta",
-  "module/cargo_unilang",
-]
+members = ["module/unilang", "module/unilang_parser", "module/unilang_meta", "module/cargo_unilang"]
 
 [workspace.metadata]
 repo_url = "https://github.com/Wandalen/unilang"
