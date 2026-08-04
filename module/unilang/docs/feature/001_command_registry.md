@@ -65,9 +65,10 @@ The framework **must** enforce explicit command naming with the following rules:
   - If `namespace` is empty and `name` starts with `.`: uses `name` as-is
   - If `namespace` is empty and `name` lacks `.`: adds dot prefix to produce `.{name}`
   - If `namespace` is not empty: concatenates to produce `{namespace}.{name}` (requires namespace to have dot prefix)
+- Runtime declarative loading (`CommandRegistryBuilder::load_from_yaml_str()` / `load_from_json_str()`, FR-REG-3) applies the same compact-form convenience independently of `build.rs`, via `CommandDefinition`'s `Deserialize` impl — but the two supported ways of expressing "no namespace" are not equivalent: an *omitted* `namespace` field triggers the compact-form split on a compound dotted `name`, while an *explicit* `namespace: ""` does not and is honored verbatim. See `invariant/005_command_naming.md` for the runtime concatenation algorithm this depends on.
 - Documentation and examples **should** use Format 1 to show users the exact command syntax they will type
 
-**Implementation status:** ✅ Implemented with runtime validation and build.rs transformations. Two YAML formats documented and tested. All tests passing including test data files using both formats.
+**Implementation status:** ✅ Implemented with runtime validation and build.rs transformations. Two YAML formats documented and tested. All tests passing including test data files using both formats. The runtime deserializer's explicit-vs-omitted empty-namespace distinction was fixed in BUG-103 (previously, an explicit `namespace: ""` was silently overridden by the omitted-namespace compact-form split).
 
 ### FR-REG-7 (CLI Module Aggregation)
 
@@ -78,10 +79,11 @@ The framework **must** provide a `CliBuilder` API for aggregating multiple CLI m
 - **Namespace Isolation:** Each module's commands are isolated within its prefix namespace (e.g., `.db.` prefix for database module)
 - **Build Modes:** `build_static()` for compile-time registry (`StaticCommandMap` wrapper), `build_hybrid()` for mixed static/dynamic
 - **Prefix Application:** Automatic prefix prepending to all commands in a module (e.g., prefix `.db` + command `.migrate` → `.db.migrate`)
+- **Dynamic Module Re-registration Safety:** When aggregating dynamic YAML modules, the builder **must not** re-register a module's own auto-generated `.help`/`.h` companion commands a second time — each module's temporary load pass already auto-generates its own help companions, so re-processing them through the aggregation pipeline would collide with the help companion the final registration step generates for the real command
 
 This enables organizations to consolidate multiple CLI tools while maintaining clear separation of concerns and preventing naming conflicts.
 
-**Implementation status:** ✅ Implemented via `CliBuilder` in the multi-YAML aggregation module. Comprehensive test coverage covering module registration, prefix application, conflict detection, namespace isolation, and build modes.
+**Implementation status:** ✅ Implemented via `CliBuilder` in the multi-YAML aggregation module. Comprehensive test coverage covering module registration, prefix application, conflict detection, namespace isolation, and build modes. Dynamic module aggregation's own auto-generated `.help` companion filtering was fixed in BUG-104 (previously, `register_dynamic_modules` re-registered a loaded module's already-auto-generated `.help` entries a second time, colliding with the real command's own auto-help registration).
 
 ### FR-REG-8 (Static Registry Feature Parity)
 
@@ -164,6 +166,8 @@ The `build.rs` script **must** validate all command definitions at compile time 
 |------|--------------|
 | `src/registry/` | Registry module: static, dynamic, builder, bridge |
 | `src/data/command_definition/` | CommandDefinition type and builder |
+| `src/data/command_definition/serde_impl.rs` | Runtime YAML/JSON `Deserialize` impl — compact-form namespace split |
+| `src/multi_yaml/builder/private/prefixes.rs` | `CliBuilder` dynamic module aggregation and prefix application |
 
 ### Tests
 
@@ -171,6 +175,8 @@ The `build.rs` script **must** validate all command definitions at compile time 
 |------|--------------|
 | `tests/registry/` | Registry integration tests |
 | `tests/data/validated_command_name.rs` | CommandName validation coverage |
+| `tests/regression/namespace_split_and_help_qualification.rs` | Explicit-vs-omitted empty namespace regressions (BUG-103) |
+| `tests/regression/dynamic_module_double_help_registration.rs` | Dynamic module `.help` double-registration regression (BUG-104) |
 
 ### Guides
 

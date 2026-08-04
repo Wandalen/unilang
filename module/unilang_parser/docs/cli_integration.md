@@ -297,8 +297,7 @@ When integrating unilang_parser into a CLI application:
 
 ## Related Documentation
 
-- [Task 086: Prevent Argv Misuse Pitfall](../task/086_prevent_argv_misuse_pitfall.md) - Original task specification
-- [Parser Engine Source](../src/parser_engine.rs) - Implementation of parse_from_argv() and parse_repl_input()
+- [Parser Engine Source](../src/parser_engine/mod.rs) - Implementation of parse_from_argv() and parse_repl_input()
 - [Argv Multiword Bug Test](../tests/argv_multiword_bug_test.rs) - Regression test for this pitfall
 
 ---

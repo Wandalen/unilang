@@ -627,9 +627,12 @@ fn test_ft15_yaml_format1_and_format2_produce_identical_command_name()
   let command1 = registry1.command( ".session.list" ).unwrap();
   let command2 = registry2.command( ".session.list" ).unwrap();
 
+  // Note: the raw `namespace()` field is intentionally NOT compared here -- it is
+  // part of "the source YAML representation" the spec text explicitly sets aside
+  // (Format 1 supplies explicit namespace: "", Format 2 supplies namespace: .session;
+  // preserving that distinction verbatim is BUG-103's fix, not a regression).
   assert_eq!( command1.full_name(), command2.full_name() );
   assert_eq!( command1.description(), command2.description() );
-  assert_eq!( command1.namespace(), command2.namespace() );
   assert_eq!( command1.hint(), command2.hint() );
   assert_eq!( command1.version().as_str(), command2.version().as_str() );
   assert_eq!( command1.idempotent(), command2.idempotent() );

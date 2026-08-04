@@ -162,3 +162,9 @@
 - **Given:** A `VerifiedCommand` whose `arguments` map contains `Value::String("  Alice  ".to_string())` bound to `"name"`
 - **When:** Callers invoke `get_string_normalized("name")` and `require_string_normalized("name")`
 - **Then:** Both return the trimmed value `"Alice"` (no surrounding whitespace); a whitespace-only value normalizes to `Some("")` / `Ok("")` rather than `None`/error
+
+### FT-27: ValidationRule::Pattern with a syntactically-invalid regex fails closed, not open
+
+- **Given:** A command `.cmd` with argument `"code"` of type `String` with `ValidationRule::Pattern("[unclosed")` (a malformed regex — the pattern string is never eagerly compile-checked when the rule is attached to the argument definition), and input `[".cmd", "code::anything"]`
+- **When:** The semantic analyzer processes the input
+- **Then:** Returns an error with code `UNILANG_VALIDATION_RULE_FAILED` — the value is REJECTED (fail-closed), not silently accepted; no panic occurs. Distinct from FT-10 (well-formed pattern, non-matching value) and FT-17 (`Kind::Pattern` argument-value parse-time regex compilation) — this covers `ValidationRule::Pattern`'s own rule-string malformation, which reaches the same generic "does not match the required pattern" message as a true non-match, since the compile failure and match failure are not distinguished in the error text

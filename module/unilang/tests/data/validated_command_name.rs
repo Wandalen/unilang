@@ -486,3 +486,22 @@ fn test_tc11_equal_names_compare_equal()
     "Two CommandName values constructed from the same string should compare equal"
   );
 }
+
+/// TC-12: Trailing whitespace is preserved, not trimmed.
+// test_kind: tc_spec(TC-12)  [type/01_command_name]
+#[ test ]
+fn test_tc12_trailing_whitespace_is_preserved()
+{
+  let result = CommandName::new( ".build " );
+  assert!(
+    result.is_ok(),
+    "CommandName::new(\".build \") should succeed — validation does not trim whitespace"
+  );
+
+  let name = result.unwrap();
+  assert_eq!(
+    name.as_str(),
+    ".build ",
+    "Trailing whitespace should be embedded verbatim, not trimmed"
+  );
+}

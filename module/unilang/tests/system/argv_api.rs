@@ -25,11 +25,6 @@
 //! - [x] Stopping at parameter boundaries
 //! - [x] Full pipeline integration
 //!
-//! ## References
-//!
-//! - Task 080: Argv-Based API Request (`task/080_argv_based_api_request.md`)
-//! - MRE: `task/080_argv_api_mre.rs`
-
 use unilang::prelude::*;
 use unilang_parser::{Parser, UnilangParserOptions};
 

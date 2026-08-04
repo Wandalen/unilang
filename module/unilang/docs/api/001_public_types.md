@@ -15,7 +15,7 @@ The `unilang` public API surface provides integrators with `CommandDefinition`, 
 
 The public API exposes the following data structures to integrators:
 
-- **CommandDefinition**: Command metadata — name, description, arguments, aliases, status, examples, and auto-help flag.
+- **CommandDefinition**: Command metadata — name, description, arguments, aliases, status, examples, auto-help flag, and per-command version-in-help visibility.
 - **ArgumentDefinition**: Argument metadata — name, kind, validation rules, optional/required attributes.
 - **ArgumentAttributes**: Behavioral flags for arguments — optional, multiple, sensitive, interactive.
 - **Kind**: Data type enum for arguments — String, Integer, Float, Boolean, Path, File, Directory, Enum, Url, DateTime, Pattern, List, Map, JsonString, Object.
@@ -47,7 +47,7 @@ The public API exposes the following data structures to integrators:
 
 **Configuration Utilities** (requires `json_parser` feature): Typed extraction functions support configuration parsing from `ConfigMap<S>` — a `HashMap<String, (JsonValue, S)>` typed alias. Available for u8, u16, u32, u64, i32, i64, f64, bool, String, and string arrays.
 
-**Help Generation**: `HelpGenerator::with_verbosity()` creates a generator at a specific verbosity level. `set_verbosity()` updates the level dynamically. `verbosity()` queries the current level. Levels 0–4 range from Minimal to Comprehensive; default is Level 2 (Standard).
+**Help Generation**: `HelpGenerator::with_verbosity()` creates a generator at a specific verbosity level. `set_verbosity()` updates the level dynamically. `verbosity()` queries the current level. Levels 0–4 range from Minimal to Comprehensive; default is Level 2 (Standard). `CommandDefinition::with_show_version_in_help(false)` (or `show_version_in_help: false` on `StaticCommandDefinition`) hides a specific command's version line from both `HelpGenerator` and `.command.help` output; there is no registry-wide default toggle.
 
 ### Error Handling
 
@@ -59,7 +59,7 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 | :--- | :--- | :--- |
 | `UNILANG_VERBOSITY` | Sets logging verbosity for CLI binaries (0=quiet, 1=normal, 2=debug) | `2` |
 | `UNILANG_HELP_VERBOSITY` | Controls help output detail level (0=Minimal, 1=Basic, 2=Standard/DEFAULT, 3=Detailed, 4=Comprehensive) | `2` |
-| `UNILANG_HELP_HIDE_VERSION` | When set, suppresses the version line in command help output | `1` |
+| `UNILANG_HELP_HIDE_VERSION` | Sets `HelpDisplayOptions.show_version` to `false` when set; **not yet wired to any rendering path** — has no observable effect on help output today. To actually hide a command's version line, use `CommandDefinition::with_show_version_in_help(false)` on that command instead. | `1` |
 
 ### Compatibility Guarantees
 

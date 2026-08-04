@@ -308,6 +308,19 @@ impl< 'de > serde::Deserialize< 'de > for CommandDefinition
         let description = description.ok_or_else( || de::Error::missing_field( "description" ) )?;
 
         // Optional fields with defaults
+        //
+        // Fix(BUG-103): `namespace.unwrap_or_default()` used to run before the
+        // compact-form split check below, collapsing "namespace explicitly declared
+        // empty" (`Some(String::new())`) and "namespace omitted" (`None`) into the same
+        // `is_empty() == true` state. An explicit `namespace: ""` alongside a compound
+        // dotted `name` (e.g. `.session.delete`) was then silently re-split as if the
+        // namespace had never been provided, overriding the author's explicit
+        // declaration. Root cause: the split's guard condition tested the defaulted
+        // *value* (`is_empty()`) instead of the pre-default *presence* of the field.
+        // Pitfall: any future default-handling here must preserve presence information
+        // for fields whose "unset" and "explicitly-default" states are both valid and
+        // semantically distinct.
+        let namespace_was_omitted = namespace.is_none();
         let mut namespace = namespace.unwrap_or_default();
 
         // Fix(issue-005): `name` used to be declared `Option<CommandName>` above, so
@@ -322,7 +335,7 @@ impl< 'de > serde::Deserialize< 'de > for CommandDefinition
         // prefix -- a bare name with no namespace must still be rejected (unchanged).
         let name = if let Some( stripped ) = name_str.strip_prefix( '.' )
         {
-          if namespace.is_empty() && stripped.contains( '.' )
+          if namespace_was_omitted && stripped.contains( '.' )
           {
             // Fully-qualified compact form (e.g. ".session.list") with no explicit
             // namespace: derive the namespace by splitting off the last segment, so

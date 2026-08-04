@@ -23,7 +23,6 @@
 //!
 //! ## Related
 //!
-//! - `task/make_illegal_states_unrepresentable.md` - Error handling requirements
 //! - `tests/registry/duplicate_detection.rs` - Duplicate detection errors
 //! - `tests/help/help_divergence_prevention.rs` - Related validation
 //!

@@ -11,7 +11,7 @@
 
 The help system uses a decoupled `HelpGenerator` that operates exclusively on `CommandDefinition` metadata without any knowledge of the domain or application using the framework. This makes the generator reusable across any command set without modification.
 
-Three access methods exist for every registered command and are guaranteed to be consistent with each other: the `?` operator (appended as the final token to any command string), the `??` quoted parameter (passable as any argument value), and the `.command.help` auto-generated command. All three methods produce identical output for the same command and verbosity level. Help generation is mandatory — every registered command automatically receives a `.command.help` companion with no opt-out.
+Three access methods exist for every registered command: the `?` operator (appended as the final token to any command string), the `??` quoted parameter (passable as any argument value), and the `.command.help` auto-generated command. The `?` operator and `??` parameter share one code path (`HelpGenerator`, dispatching by verbosity level) and always produce identical output for the same command and verbosity level. The `.command.help` companion command uses a separate, fixed-format renderer (`format_command_help()`) that is not verbosity-aware — its output has a different section structure (`Command:`/`Description:`/`Hint:`/`Version:`/`Status:`/`Arguments:`/`Examples:`/`Aliases:`/`Usage:`) from `HelpGenerator`'s output and does not vary with `UNILANG_HELP_VERBOSITY`. All three access methods expose the same underlying command metadata, but only `?` and `??` are output-identical to each other. Help generation is mandatory — every registered command automatically receives a `.command.help` companion with no opt-out.
 
 The five verbosity levels (Minimal through Comprehensive) form a progressive disclosure ladder. Higher levels add more detail rather than replacing existing information, so a user who finds Level 2 output sufficient need not learn new output structure when switching to Level 3. The default is Level 2 (Standard), which is optimized for terminal use: concise, with a USAGE line, parameter list with descriptions, and example invocations. The verbosity level is configurable via environment variable `UNILANG_HELP_VERBOSITY`.
 
@@ -25,7 +25,9 @@ The `HelpGenerator` **must** be able to produce a formatted list of all register
 
 ### FR-HELP-2 (Detailed Command Help)
 
-The `HelpGenerator` **must** be able to produce detailed, formatted help for a specific command, including its description, arguments (with types, defaults, and validation rules), aliases, and examples.
+The `HelpGenerator` **must** be able to produce detailed, formatted help for a specific command via the `?`/`??` access methods, including its description, arguments (with types, defaults, and validation rules), aliases, and examples, scaled to the active verbosity level (see FR-HELP-7).
+
+**Implementation Note:** This requirement governs `HelpGenerator::command()` (`src/help/mod.rs`), the formatter behind the `?` operator and `??` parameter. The `.command.help` auto-generated command (FR-HELP-4) uses a separate, non-verbosity-aware renderer — see the Design section above for the distinction.
 
 **Implementation status:** ✅ Implemented with hierarchical help formatting including all metadata, validation rules, and usage examples.
 
@@ -39,7 +41,11 @@ The parser **must** recognize the `?` operator. When present, the `Semantic Anal
 
 For every registered command `.command`, the framework **must** provide automatic registration of a corresponding `.command.help` command that returns detailed help information for the parent command. This standardization ensures consistent help access across all commands.
 
-**Implementation status:** ✅ Implemented via `register_with_auto_help()` and `auto_help_enabled` field with automatic help command generation.
+For a command registered under a non-empty namespace, the generated help command's fully-qualified name **must** include that namespace (e.g. a command `.delete` under namespace `.session` generates `.session.delete.help`, not `.delete.help`) — the help companion's qualification always mirrors its parent's. See `invariant/005_command_naming.md` for the namespace-concatenation algorithm this depends on.
+
+**Implementation Note:** Rendered via `format_command_help()` (`src/registry/traits.rs`), called from the routine `create_help_routine()` builds for each generated `.command.help` command (`src/registry/help.rs`).
+
+**Implementation status:** ✅ Implemented via `register_with_auto_help()` and `auto_help_enabled` field with automatic help command generation. Namespace qualification of the generated help name was fixed in BUG-103 (previously, any embedded dot in the parent's local name — including the `.help` suffix itself — was misread as "already fully qualified," silently dropping the namespace).
 
 ### FR-HELP-5 (Double Question Mark Parameter)
 
@@ -82,7 +88,9 @@ The verbosity level **must** be parseable from integers 0-4 via `HelpVerbosity::
 
 **Configurable via environment variable:** `UNILANG_HELP_VERBOSITY` (0=Minimal, 1=Basic, 2=Standard/DEFAULT, 3=Detailed, 4=Comprehensive).
 
-**Implementation status:** ✅ Implemented with `HelpVerbosity` enum (Minimal, Basic, Standard, Detailed, Comprehensive), `HelpGenerator::with_verbosity()`, `set_verbosity()`, and `verbosity()` methods. Default is Standard (Level 2). Comprehensive test coverage with 9 tests verifying all verbosity levels and progressive information display.
+**Per-command version visibility:** Independent of verbosity level, the `show_version_in_help` field (set via `CommandDefinition::with_show_version_in_help()` in Rust, or `show_version_in_help` on `StaticCommandDefinition`/YAML) controls whether a specific command's version line appears in its help output — defaults to `true`. This applies to both `HelpGenerator` output and `.command.help` output (FR-HELP-4), since both renderers consult this field directly. It is a per-command setting; no registry-wide default toggle exists. `UNILANG_HELP_HIDE_VERSION` (see Environment Variables in `api/001_public_types.md`) reads into `HelpDisplayOptions` but is not wired to any rendering path today, so setting it has no observable effect — use `with_show_version_in_help(false)` on the specific command instead.
+
+**Implementation status:** ✅ Implemented with `HelpVerbosity` enum (Minimal, Basic, Standard, Detailed, Comprehensive), `HelpGenerator::with_verbosity()`, `set_verbosity()`, and `verbosity()` methods. Default is Standard (Level 2). Comprehensive test coverage with 9 tests verifying all verbosity levels and progressive information display. Per-command version visibility implemented and tested in `tests/help/show_version.rs`; `UNILANG_HELP_HIDE_VERSION` reads into `HelpDisplayOptions` but that struct is not consulted by any renderer (known gap).
 
 ### FR-HELP-8 (Help Command Self-Exclusion)
 
@@ -127,10 +135,14 @@ The `.help` system command **must not** appear in its own listing when the user 
 
 | File | Relationship |
 |------|--------------|
-| `src/help/` | Help text generation and formatting |
+| `src/help/` | Help text generation and formatting for `?`/`??` (`HelpGenerator`, verbosity-aware) |
+| `src/registry/traits.rs` | `format_command_help()` — fixed-format renderer backing `.command.help` |
+| `src/registry/help.rs` | `create_help_routine()`, `register_mandatory_global_help_command()` — help command registration and the literal `.help` command's own renderer |
+| `src/data/command_status.rs` | `construct_full_command_name()` — namespace qualification for generated help command names |
 
 ### Tests
 
 | File | Relationship |
 |------|--------------|
 | `tests/help/` | Help generation, formatting, conventions, verbosity tests |
+| `tests/regression/namespace_split_and_help_qualification.rs` | Namespaced help command qualification regression tests (BUG-103) |

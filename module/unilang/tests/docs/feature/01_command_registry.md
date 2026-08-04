@@ -91,11 +91,11 @@
 - **When:** The registry is queried for `.chat`
 - **Then:** The command is found under exactly `.chat` with no added, removed, or transformed segments; no alternate spelling (e.g., `.Chat`, `.chat.` ) is created
 
-### FT-15: YAML Format 1 and Format 2 produce identical resulting command name
+### FT-15: YAML Format 1, Format 2, and omitted-namespace form all produce the identical resulting full command name
 
-- **Given:** Two YAML command definitions describing the same logical command — one using Format 1 (`name: ".session.list"`, `namespace: ""`) and one using Format 2 (`name: "list"`, `namespace: ".session"`)
-- **When:** Both are loaded via `CommandRegistry::load_from_yaml_str` into separate registries
-- **Then:** Both registries expose the command under the identical full name `.session.list`; the two `CommandDefinition` values are equivalent aside from the source YAML representation
+- **Given:** Three YAML command definitions describing the same logical command: Format 1 (`name: ".session.list"`, `namespace: ""` — explicit empty), Format 2 (`name: "list"`, `namespace: ".session"`), and the omitted-namespace compact form (`name: ".session.list"` with no `namespace` field at all)
+- **When:** All three are loaded via `CommandRegistry::load_from_yaml_str` into separate registries
+- **Then:** All three registries expose the command under the identical full name `.session.list`; Format 2 and the omitted-namespace form additionally agree on `namespace() == ".session"` and `name() == ".list"`, but Format 1's explicit empty namespace does NOT re-derive those fields — `namespace()` remains `""` and `name()` remains `".session.list"` verbatim, differing internally from the other two even though `full_name()` agrees
 
 ### FT-16: Build-time validation rejects manifest with duplicate command names
 
@@ -150,3 +150,9 @@
 - **Given:** A `CommandDefinition` built via `CommandDefinition::former().name(".old").description("Old command").status("deprecated")` with a deprecation message set
 - **When:** The resulting command's `status()` is inspected
 - **Then:** Returns `CommandStatus::Deprecated { reason, .. }` where `reason` matches the supplied deprecation message, `is_deprecated() == true`, and `is_active() == false` — distinct from a command built without `.status(...)` which defaults to `CommandStatus::Active`
+
+### FT-25: Dynamic module aggregation does not double-register a module's auto-generated `.help` companion
+
+- **Given:** A `CliBuilder` with one dynamic YAML module (loaded via `dynamic_module_with_prefix`) containing a single authored command `.example` under prefix `.util`
+- **When:** `builder.build()` is called
+- **Then:** Build succeeds with no "already registered" error; `.util.example` and `.util.example.help` are both present, correctly prefixed; no unprefixed `.example.help` entry exists in the resulting registry

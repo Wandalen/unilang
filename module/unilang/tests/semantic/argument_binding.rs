@@ -624,6 +624,36 @@ fn test_pattern_validation_rejects_non_matching()
   assert!( result.is_err(), "Non-matching value should fail pattern validation" );
 }
 
+/// FT-27: ValidationRule::Pattern with a syntactically-invalid regex fails closed, not open.
+// test_kind: ft_spec(FT-27)  [feature/02_argument_system]
+#[test]
+fn test_pattern_validation_malformed_regex_fails_closed()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd = create_binding_test_command( ".test", vec![
+    ArgumentDefinition {
+      name : "code".to_string(),
+      description : "Code matching a pattern".to_string(),
+      kind : Kind::String,
+      hint : "Pattern-validated code".to_string(),
+      attributes : ArgumentAttributes { optional : false, ..Default::default() },
+      // "[unclosed" is not a valid regex — the rule string is never eagerly
+      // compile-checked when attached to the argument definition, only at
+      // validation time inside `apply_validation_rule`.
+      validation_rules : vec![ ValidationRule::Pattern( "[unclosed".to_string() ) ],
+      aliases : vec![], tags : vec![],
+    }
+  ]);
+
+  registry.register_with_routine( &cmd, Box::new( test_routine ) ).unwrap();
+
+  // A malformed rule regex must reject the value (fail-closed) rather than
+  // silently accept it (fail-open) or panic.
+  let result = parse_and_bind( &registry, r#".test code::"anything""# );
+  assert!( result.is_err(), "Malformed Pattern rule regex should reject the value, not silently accept it" );
+}
+
 /// FT-12: Type coercion — path token parsed into Kind::Path value.
 // test_kind: ft_spec(FT-12)  [feature/02_argument_system]
 #[test]

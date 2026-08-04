@@ -72,3 +72,9 @@
 - **Given:** Two `CommandName` values both constructed from `".build"`
 - **When:** They are compared with `==`
 - **Then:** The comparison returns `true` (derived `PartialEq`/`Eq`)
+
+### TC-12: Trailing whitespace is preserved, not trimmed
+
+- **Given:** Input string `".build "` (trailing space)
+- **When:** `CommandName::new(".build ")` is called
+- **Then:** Returns `Ok(name)` where `name.as_str() == ".build "` — the trailing space is embedded verbatim, since validation only checks non-empty and dot-prefix, never trims

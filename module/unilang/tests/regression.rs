@@ -13,4 +13,6 @@ mod regression {
   mod duplicate_command_registration;
   mod empty_args_handling;
   mod repeated_parameter_handling;
+  mod namespace_split_and_help_qualification;
+  mod dynamic_module_double_help_registration;
 }

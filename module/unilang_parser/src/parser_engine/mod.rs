@@ -1278,7 +1278,6 @@ impl Parser
         //   - Gather data on frequency before making breaking changes
         //
         // See:
-        //   - task/083_implement_preserved_quotes_stripping.md (full analysis)
         //   - tests/argv_multiword_bug_test.rs::test_argv_multiword_parameter_with_shell_quotes_preserved
         //     (ignored test with extensive documentation)
 

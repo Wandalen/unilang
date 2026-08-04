@@ -250,7 +250,6 @@ fn test_argv_multiword_parameter_no_shell_quotes()
 ///
 /// ### References
 ///
-/// - Full analysis: `task/083_implement_preserved_quotes_stripping.md`
 /// - 22 problems documented with severity levels
 /// - 7 real-world breaking scenarios
 /// - 3 alternative approaches with risk assessment

@@ -23,7 +23,6 @@
 //!
 //! ## Related
 //!
-//! - `task/make_illegal_states_unrepresentable.md` - Type safety requirements
 //! - `tests/regression/repeated_parameter_handling.rs` - Repeated parameter tests
 //! - `tests/semantic/multiple_parameters.rs` - Multiple parameter semantics
 //!

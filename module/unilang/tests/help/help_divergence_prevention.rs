@@ -24,7 +24,6 @@
 //!
 //! ## Related
 //!
-//! - `task/prevent_command_help_divergence.md` - Full problem description
 //! - `tests/help/generation.rs` - Help generation tests
 //! - `tests/registry/duplicate_detection.rs` - Registry validation tests
 //!

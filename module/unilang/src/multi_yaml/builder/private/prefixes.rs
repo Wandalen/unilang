@@ -115,6 +115,21 @@ impl CliBuilder
     Ok(())
   }
 
+  // Fix(BUG-104): register_dynamic_modules re-registered temp_registry's
+  // auto-generated `.help` entries a second time, colliding with the help
+  // companion that registry.register() below already generates for the real
+  // command.
+  // Root cause: `temp_registry.build()` runs full auto-registration -- including
+  // auto-help -- before this loop ever inspects it, so `temp_registry.commands()`
+  // holds both the authored command and its already-generated `.help` companion.
+  // Reprocessing both through apply_prefixes()+register() makes the `.help`
+  // entry's own full_name() land on the exact same prefixed key that
+  // register()'s internal auto-help step already produced for the real command.
+  // Pitfall: this collision was silently masked before BUG-103's fix, because
+  // the old construct_full_command_name heuristic produced two *different*
+  // (both wrong) keys for the same logical help command, so they never
+  // collided; correcting that heuristic made both computations agree and
+  // surfaced this as a loud "already registered" error.
   /// Register dynamic modules
   pub( super ) fn register_dynamic_modules( &self, registry: &mut CommandRegistry ) -> Result< (), Error >
   {
@@ -143,9 +158,16 @@ impl CliBuilder
               }
             };
 
-            // Register all commands from the YAML file with proper prefixes
-            for ( _name, cmd ) in temp_registry.commands()
+            // Register all commands from the YAML file with proper prefixes.
+            // Skip entries that are themselves auto-generated `.help` companions:
+            // registering the real command below regenerates its `.help`
+            // companion correctly-prefixed on its own (see Fix(BUG-104) above).
+            for ( name, cmd ) in temp_registry.commands()
             {
+              if crate::command_validation::is_help_command( &name )
+              {
+                continue;
+              }
               let processed_cmd = self.apply_prefixes( cmd, module.prefix.as_ref() );
               registry.register( processed_cmd )?;
             }

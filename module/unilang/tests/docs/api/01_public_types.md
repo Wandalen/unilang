@@ -103,11 +103,12 @@
 - **When:** The binary reads the verbosity setting at startup
 - **Then:** The debug-level (2) logging verbosity is applied; the env var name `UNILANG_VERBOSITY` is distinct from `UNILANG_HELP_VERBOSITY` and governs general CLI logging, not help output detail
 
-### AP-17: UNILANG_HELP_HIDE_VERSION suppresses the version line in help output
+### AP-17: UNILANG_HELP_HIDE_VERSION sets the HelpDisplayOptions.show_version field
 
-- **Given:** `UNILANG_HELP_HIDE_VERSION=1` set in the environment and a registered command with a non-empty `version` field
-- **When:** Help text is generated for that command
-- **Then:** The rendered help output does not contain the version line that would otherwise be shown; unsetting the variable restores the version line
+- **Given:** `UNILANG_HELP_HIDE_VERSION=1` set in the environment
+- **When:** `HelpDisplayOptions::default().with_env_overrides()` is called
+- **Then:** The resulting `show_version` field is `false`; unsetting the variable restores `show_version` to `true`
+- **Known gap:** no rendering call site consults `HelpDisplayOptions` today (both `HelpGenerator` and `.command.help` check `CommandDefinition::show_version_in_help()` instead), so this env var has no observable effect on rendered help output — use `CommandDefinition::with_show_version_in_help(false)` for that
 
 ### AP-18: VerifiedCommand typed extraction methods return None/Err appropriately for missing arguments
 

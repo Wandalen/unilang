@@ -9,5 +9,4 @@ error[E0599]: no method named `end` found for struct `CommandDefinitionBuilder<N
   | |___|
   |
   |
-  = note: the method was found for
-          - `CommandDefinitionBuilder<unilang::Set, unilang::Set, Namespace, Hint, Status, Version>`
+  = note: the method was found for `CommandDefinitionBuilder<unilang::Set, unilang::Set, Namespace, Hint, Status, Version>`

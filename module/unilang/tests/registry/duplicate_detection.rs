@@ -24,7 +24,6 @@
 //!
 //! ## Related
 //!
-//! - `task/make_illegal_states_unrepresentable.md` - Type safety requirements
 //! - `tests/registry/registration_error_handling.rs` - Error handling tests
 //! - `tests/help/help_divergence_prevention.rs` - Related registry issues
 //!

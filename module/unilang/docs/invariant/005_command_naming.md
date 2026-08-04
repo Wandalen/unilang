@@ -15,7 +15,8 @@ Every command name in the system MUST start with a dot prefix (e.g., `.command`,
 
 - Runtime registration: `CommandRegistry::register_with_routine` validates the dot prefix via `validate_command_for_registration()` and returns an error for any command name not starting with `.`
 - Build-time generation: `build.rs` applies dot-prefix normalization rules and rejects invalid manifests with actionable error messages before compilation completes
-- Namespace construction: the `compute_full_name()` function always produces a dot-prefixed result regardless of the two supported YAML formats (compound name or separate namespace field)
+- Namespace construction (build-time): the `compute_full_name()` function always produces a dot-prefixed result regardless of the two supported YAML formats (compound name or separate namespace field)
+- Namespace construction (runtime): `construct_full_command_name()` concatenates a non-empty `namespace` onto `name` unconditionally, for both authored commands and their auto-generated `.help`/`.h` companions; an *explicitly*-empty `namespace` (`namespace: ""`) is honored verbatim and never re-derived from a compound dotted `name` — the compact-form convenience split applies only when `namespace` is *omitted*, never when it is explicitly empty
 - Static registry: `From<StaticCommandDefinition> for CommandDefinition` conversion is guaranteed not to panic only when build-time validation has already confirmed naming compliance
 
 ### Violation Consequences
@@ -47,6 +48,7 @@ A command registered without a dot prefix: (1) fails registration with a clear e
 |------|--------------|
 | `src/data/command_name.rs` | CommandName dot-prefix validation |
 | `src/command_validation.rs` | Command name validation at registration |
+| `src/data/command_status.rs` | `construct_full_command_name()` — runtime namespace concatenation |
 
 ### Tests
 
@@ -54,3 +56,4 @@ A command registered without a dot prefix: (1) fails registration with a clear e
 |------|--------------|
 | `tests/data/validated_command_name.rs` | CommandName construction and validation |
 | `tests/data/validated_namespace.rs` | Namespace format validation |
+| `tests/regression/namespace_split_and_help_qualification.rs` | Explicit-vs-omitted empty namespace; runtime concatenation regressions (BUG-103) |

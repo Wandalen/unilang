@@ -14,6 +14,8 @@
 1. Either the inner value is empty (root-level commands like `.help`)
 2. Or the inner value starts with `.` (e.g., `.video`, `.session`)
 
+An empty value can arise from two distinct authoring shapes at the `CommandDefinition` level — an *omitted* `namespace` field, or an *explicit* `namespace: ""` — which `NamespaceType` itself does not distinguish (both validate identically here). The two shapes are NOT equivalent one level up at the deserializer: an omitted namespace on a compound dotted `name` triggers a convenience compact-form split, while an explicit empty namespace does not. See `invariant/005_command_naming.md` for the full algorithm.
+
 ### Validation
 
 | Rule | Check | Error |

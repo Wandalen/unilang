@@ -358,7 +358,6 @@ fn test_static_command_registry_with_dynamic_commands()
   let dynamic_cmd = CommandDefinition::former()
     .name( ".test.dynamic" )
     .description( "Dynamic test command".to_string() )
-    .namespace( ".test".to_string() )
     .end();
 
   registry.register( dynamic_cmd );

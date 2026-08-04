@@ -14,7 +14,7 @@ Case prefix: `TC-`. Minimum 4 cases per spec.
 
 | Name | Purpose | Status |
 |------|---------|--------|
-| `01_command_name.md` | `type` spec for CommandName validated newtype | ⏳ |
+| `01_command_name.md` | `type` spec for CommandName validated newtype | ✅ |
 | `02_namespace_type.md` | `type` spec for NamespaceType validated newtype | ✅ |
 | `03_version_type.md` | `type` spec for VersionType validated newtype | ✅ |
-| `04_command_status.md` | `type` spec for CommandStatus lifecycle enum | ⏳ |
+| `04_command_status.md` | `type` spec for CommandStatus lifecycle enum | ✅ |

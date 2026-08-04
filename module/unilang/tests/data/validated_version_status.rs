@@ -516,3 +516,78 @@ fn test_tc14_command_status_serde_plain_deprecated_string()
   assert!( since.is_none() );
   assert!( replacement.is_none() );
 }
+
+/// TC-15: Display formats Deprecated variant with reason only.
+// test_kind: tc_spec(TC-15)  [type/04_command_status]
+#[ test ]
+fn test_tc15_command_status_display_deprecated_reason_only()
+{
+  let deprecated = CommandStatus::Deprecated
+  {
+    reason : "use .new".to_string(),
+    since : None,
+    replacement : None,
+  };
+
+  assert_eq!( format!( "{}", deprecated ), "deprecated: use .new" );
+}
+
+/// TC-16: Display formats Deprecated variant with since only.
+// test_kind: tc_spec(TC-16)  [type/04_command_status]
+#[ test ]
+fn test_tc16_command_status_display_deprecated_since_only()
+{
+  let deprecated = CommandStatus::Deprecated
+  {
+    reason : String::new(),
+    since : Some( "2.0".to_string() ),
+    replacement : None,
+  };
+
+  assert_eq!( format!( "{}", deprecated ), "deprecated (since 2.0)" );
+}
+
+/// TC-17: Map-form "status" field is case-sensitive, unlike string form (TC-5).
+// test_kind: tc_spec(TC-17)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc17_command_status_map_form_status_is_case_sensitive()
+{
+  let deserialized : CommandStatus = serde_json::from_str( r#"{"status": "DEPRECATED", "reason": "obsolete"}"# )
+    .expect( "deserialization should not error on unrecognized map status" );
+
+  assert_eq!(
+    deserialized,
+    CommandStatus::Active,
+    "Uppercase \"DEPRECATED\" in map form should NOT match \"deprecated\" — visit_map performs no case normalization, unlike visit_str"
+  );
+}
+
+/// TC-18: Map form with missing "status" key defaults to Active.
+// test_kind: tc_spec(TC-18)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc18_command_status_map_form_missing_status_defaults_to_active()
+{
+  let deserialized : CommandStatus = serde_json::from_str( r#"{"reason": "obsolete"}"# )
+    .expect( "deserialization should not error when \"status\" key is absent" );
+
+  assert_eq!( deserialized, CommandStatus::Active );
+}
+
+/// TC-19: Map form accepts explicit null since/replacement.
+// test_kind: tc_spec(TC-19)  [type/04_command_status]
+#[ cfg( feature = "json_parser" ) ]
+#[ test ]
+fn test_tc19_command_status_map_form_explicit_null_fields()
+{
+  let json = r#"{"status": "deprecated", "reason": "obsolete", "since": null, "replacement": null}"#;
+  let deserialized : CommandStatus = serde_json::from_str( json )
+    .expect( "deserialization should succeed with explicit null since/replacement" );
+
+  assert!( deserialized.is_deprecated() );
+  let ( reason, since, replacement ) = deserialized.deprecation_info().unwrap();
+  assert_eq!( reason, "obsolete" );
+  assert!( since.is_none(), "explicit JSON null should flatten to None, same as an omitted field" );
+  assert!( replacement.is_none(), "explicit JSON null should flatten to None, same as an omitted field" );
+}

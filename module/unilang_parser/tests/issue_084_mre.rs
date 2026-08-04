@@ -81,7 +81,7 @@
 //!
 //! **Root Cause:** `strs_tools::string::split` doesn't correctly unescape strings with `\"` inside quoted sections.
 //!
-//! **Upstream Issue:** ISSUE-STRS-001 documented in `/home/user1/pro/lib/wTools/module/core/unilang_parser/task/readme.md`
+//! **Upstream Issue:** ISSUE-STRS-001 — `strs_tools::string::split` unescaping defect
 //!
 //! **Impact:** Cannot use `parse_single_instruction()` with pre-escaped input like:
 //! ```rust
@@ -102,8 +102,7 @@
 //!
 //! ## References
 //!
-//! - **Task:** `/home/user1/pro/lib/wTools/module/core/unilang_parser/task/084_escaped_quotes_handling.md`
-//! - **Upstream Bug:** ISSUE-STRS-001 in task/readme.md
+//! - **Upstream Bug:** ISSUE-STRS-001
 //! - **Fix Implementation:** `/home/user1/pro/lib/wTools/module/core/unilang_parser/src/parser_engine.rs:1287-1341`
 
 use unilang_parser::{ Parser, UnilangParserOptions };

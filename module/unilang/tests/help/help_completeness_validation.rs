@@ -22,7 +22,6 @@
 //!
 //! ## Related
 //!
-//! - `task/prevent_command_help_divergence.md` - Solution specification
 //! - `tests/help/help_divergence_prevention.rs` - Bug demonstration
 //! - `tests/registry/auto_help_integration.rs` - Automatic help generation
 

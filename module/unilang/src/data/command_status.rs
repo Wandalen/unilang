@@ -336,20 +336,40 @@
   ///
   /// # Algorithm
   /// 1. If name already starts with '.':
-  ///    - If namespace is empty OR name contains '.', return name as-is (already full format)
+  ///    - If namespace is empty, return name as-is (already full format)
   ///    - Otherwise, strip '.' from name and concatenate with namespace
   /// 2. If name doesn't start with '.':
   ///    - If namespace is empty, prepend '.' to name
   ///    - If namespace exists, concatenate with proper dot handling
+  ///
+  /// Fix(BUG-103): the previous "already fully qualified" check additionally treated ANY
+  /// embedded dot in the stripped name (`name_stripped.contains('.')`) as proof the name
+  /// was already namespace-qualified, skipping concatenation. That heuristic broke two
+  /// distinct ways: (a) it fired for a local leaf name that merely contains a dot for an
+  /// unrelated reason -- most notably every auto-generated ".help"/".h" companion (e.g.
+  /// local name ".delete" becomes ".delete.help"), silently dropping the namespace of
+  /// every namespaced command's help companion; (b) a later attempt to narrow it to "name
+  /// already starts with namespace" instead false-positived whenever a local name
+  /// happened to textually equal the namespace itself (e.g. namespace ".enabled" + local
+  /// name ".enabled" produced ".enabled" instead of ".enabled.enabled"). Both failure
+  /// modes stem from trying to infer "already combined" from `name`'s shape alone.
+  /// `namespace` and `name` are independently-tracked fields with no legitimate
+  /// call site that sets a non-empty `namespace` AND an already-namespace-prefixed
+  /// `name` redundantly -- so the only sound "already complete" signal left is an empty
+  /// namespace; a non-empty namespace now always concatenates. Pitfall: do not
+  /// reintroduce a string-shape-based "already qualified" guard here -- if a future
+  /// caller genuinely needs to skip concatenation despite a non-empty namespace, that
+  /// must be an explicit signal passed by the caller, not inferred from dots in `name`.
   pub fn construct_full_command_name( namespace : &str, name : &str ) -> String
   {
     if let Some( name_stripped ) = name.strip_prefix( '.' )
     {
       // Name already has dot prefix
-      if namespace.is_empty() || name.contains( ".." ) || name_stripped.contains( '.' )
+      if namespace.is_empty() || name.contains( ".." )
       {
-        // Name is already in full format (e.g., ".integration.test")
-        // OR has multiple dots (e.g., ".a.b") indicating it's already complete
+        // Name is already in full format (e.g., ".integration.test") because there is no
+        // namespace to prepend, OR has multiple dots (e.g., ".a.b") indicating a
+        // malformed already-complete path.
         name.to_string()
       }
       else

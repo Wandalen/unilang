@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify all FR-HELP behavioral requirements for help generation and access
 - **Responsibility:** Test cases covering command list generation, detailed help, `?` operator, `.cmd.help` commands, `??` parameter, automatic help API, and verbosity levels
-- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`, `HelpGenerator` verbosity API, `UNILANG_HELP_HIDE_VERSION`), FR-HELP-8 (`.help` self-exclusion from listing)
+- **In Scope:** FR-HELP-1 (command list), FR-HELP-2 (detailed command help), FR-HELP-3 (`?` operator), FR-HELP-4 (`.cmd.help` commands), FR-HELP-5 (`??` parameter), FR-HELP-6 (automatic help API), FR-HELP-7 (verbosity levels 0–4 via `UNILANG_HELP_VERBOSITY`, `HelpGenerator` verbosity API, `UNILANG_HELP_HIDE_VERSION`, `show_version_in_help`), FR-HELP-8 (`.help` self-exclusion from listing)
 - **Out of Scope:** Registry initialization (FR-REG); argument parsing (FR-ARG); REPL state (FR-REPL)
 
 ### FT-1: Command list returns all registered command names
@@ -91,8 +91,22 @@
 - **When:** `HelpVerbosity::from_level(level)` is called with `level` values `4`, `5`, and `100`
 - **Then:** All three calls return `HelpVerbosity::Comprehensive`; no panic or error for out-of-range input
 
-### FT-15: UNILANG_HELP_HIDE_VERSION suppresses version metadata from help output
+### FT-15: UNILANG_HELP_HIDE_VERSION sets the HelpDisplayOptions.show_version field
 
-- **Given:** A command `.greet` registered with a version set (e.g., `"2.5.0"`) and verbosity at a level that would otherwise display version (Level 2 or higher); `UNILANG_HELP_HIDE_VERSION=1` set in the environment
-- **When:** Help output is generated for `.greet` (e.g., via `pipeline.run(".greet ??")`)
-- **Then:** The output does NOT contain the version string; with `UNILANG_HELP_HIDE_VERSION` unset, the same output DOES contain the version string
+- **Given:** `UNILANG_HELP_HIDE_VERSION=1` set in the environment
+- **When:** `HelpDisplayOptions::default().with_env_overrides()` is called
+- **Then:** The resulting `show_version` field is `false`; with `UNILANG_HELP_HIDE_VERSION` unset, `show_version` is `true`
+- **Known gap:** `HelpDisplayOptions` is not consulted by any rendering call site (`HelpGenerator`'s `format_fns.rs` and `format_command_help()` both check `CommandDefinition::show_version_in_help()` instead) — so this env var currently has no observable effect on rendered help output. See FT-17 for the mechanism that actually controls rendered version visibility.
+
+### FT-16: Namespaced command's `.help` companion includes the parent's namespace
+
+- **Given:** A command `delete` registered under namespace `.session` (e.g. via `CommandDefinition::with_namespace` or YAML `namespace: ".session"` + `name: "delete"`)
+- **When:** `generate_help_command()` is called on the command definition, and separately `pipeline.run(".session.delete.help")` is called
+- **Then:** The generated help command's `full_name()` is `.session.delete.help`, not `.delete.help`; the pipeline call succeeds with no "not found" error
+
+### FT-17: show_version_in_help suppresses a command's version line in .command.help output
+
+- **Given:** A command registered with a non-empty version (e.g., `"3.0.0"`) and `show_version_in_help` set to `false` (via `CommandDefinition::with_show_version_in_help(false)`)
+- **When:** `registry.help_for_command()` is called for that command (the text backing `.command.help`)
+- **Then:** The rendered output does NOT contain the version string; a command with `show_version_in_help` at its default (`true`) DOES show the version string
+- **Coverage note:** `HelpGenerator`'s renderer (`src/help/private/format_fns.rs`, backing `?`/`??`) also reads `show_version_in_help` at each verbosity level per code inspection, but no test currently exercises that path directly — only the `.command.help` path above is verified end-to-end.

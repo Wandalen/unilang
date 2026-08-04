@@ -90,3 +90,33 @@
 - **Given:** JSON string `"\"deprecated\""` (plain string form, no map)
 - **When:** `serde_json::from_str::<CommandStatus>(json)` is called
 - **Then:** Produces `CommandStatus::Deprecated` with `reason == ""`, `since == None`, `replacement == None`
+
+### TC-15: Display formats Deprecated variant with reason only
+
+- **Given:** A `CommandStatus::Deprecated` with `reason: "use .new"`, `since: None`, `replacement: None`
+- **When:** The value is formatted with `format!("{}", status)`
+- **Then:** Produces `"deprecated: use .new"` (no `(since ...)` segment, no `→` segment)
+
+### TC-16: Display formats Deprecated variant with since only
+
+- **Given:** A `CommandStatus::Deprecated` with `reason: ""`, `since: Some("2.0")`, `replacement: None`
+- **When:** The value is formatted with `format!("{}", status)`
+- **Then:** Produces `"deprecated (since 2.0)"` (empty reason segment is omitted entirely, no `→` segment)
+
+### TC-17: Map-form "status" field is case-sensitive, unlike string form
+
+- **Given:** JSON `{"status": "DEPRECATED", "reason": "obsolete"}` (uppercase status in map form)
+- **When:** `serde_json::from_str::<CommandStatus>(json)` is called
+- **Then:** Produces `CommandStatus::Active` — the map-form `visit_map` path matches `status` verbatim with no `.to_lowercase()` normalization, unlike the string-form `visit_str` path (TC-5); an uppercase map `status` value silently falls through to the default rather than matching `"deprecated"`
+
+### TC-18: Map form with missing "status" key defaults to Active
+
+- **Given:** JSON `{"reason": "obsolete"}` (map form, no `"status"` key present at all)
+- **When:** `serde_json::from_str::<CommandStatus>(json)` is called
+- **Then:** Produces `CommandStatus::Active` (absent `status` key does not error; it defaults, same as an unrecognized value)
+
+### TC-19: Map form accepts explicit null since/replacement
+
+- **Given:** JSON `{"status": "deprecated", "reason": "obsolete", "since": null, "replacement": null}`
+- **When:** `serde_json::from_str::<CommandStatus>(json)` is called
+- **Then:** Produces `CommandStatus::Deprecated` with `since == None`, `replacement == None` — explicit JSON `null` deserializes identically to the field being omitted (`Option<Option<String>>` flattened via `.flatten()`)
