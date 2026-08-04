@@ -358,7 +358,8 @@ impl StaticCommandRegistry {
 
   /// Format help text for a command definition (internal helper).
   fn format_help_text(&self, cmd_def: &crate::data::CommandDefinition) -> String {
-    format_command_help( cmd_def )
+    let display_options = crate::help::HelpDisplayOptions::default().with_env_overrides();
+    format_command_help( cmd_def, &display_options )
   }
 
   /// Get number of static commands available.

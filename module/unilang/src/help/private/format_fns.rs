@@ -40,7 +40,7 @@ impl< 'a > HelpGenerator< 'a >
     let mut help = String::new();
 
     // Command header with optional version
-    if command.show_version_in_help()
+    if command.show_version_in_help() && self.display_options.show_version
     {
       writeln!( &mut help, "Usage: {} (v{})", command.name().as_str(), command.version().as_str() ).unwrap();
     }
@@ -51,8 +51,11 @@ impl< 'a > HelpGenerator< 'a >
     writeln!( &mut help, "{}\n", command.description() ).unwrap();
 
     // Status information
-    writeln!( &mut help, "Status: {}", command.status() ).unwrap();
-    if !command.aliases().is_empty()
+    if self.display_options.show_status
+    {
+      writeln!( &mut help, "Status: {}", command.status() ).unwrap();
+    }
+    if !command.aliases().is_empty() && self.display_options.show_aliases
     {
       writeln!( &mut help, "Aliases: {}", command.aliases().join( ", " ) ).unwrap();
     }
@@ -121,7 +124,7 @@ impl< 'a > HelpGenerator< 'a >
   pub( super ) fn format_detailed( &self, command : &crate::CommandDefinition ) -> String
   {
     let mut help = String::new();
-    if command.show_version_in_help()
+    if command.show_version_in_help() && self.display_options.show_version
     {
       writeln!
       (
@@ -136,17 +139,20 @@ impl< 'a > HelpGenerator< 'a >
     {
       writeln!( &mut help, "Usage: {}", command.name().as_str() ).unwrap();
     }
-    if !command.aliases().is_empty()
+    if !command.aliases().is_empty() && self.display_options.show_aliases
     {
       writeln!( &mut help, "Aliases: {}", command.aliases().join( ", " ) ).unwrap();
     }
-    if !command.tags().is_empty()
+    if !command.tags().is_empty() && self.display_options.show_tags
     {
       writeln!( &mut help, "Tags: {}", command.tags().join( ", " ) ).unwrap();
     }
     writeln!( &mut help, "\n  Hint: {}", command.hint() ).unwrap();
     writeln!( &mut help, "  {}\n", command.description() ).unwrap();
-    writeln!( &mut help, "Status: {}", command.status() ).unwrap();
+    if self.display_options.show_status
+    {
+      writeln!( &mut help, "Status: {}", command.status() ).unwrap();
+    }
 
     if !command.arguments().is_empty()
     {
@@ -223,15 +229,18 @@ impl< 'a > HelpGenerator< 'a >
     {
       writeln!( &mut help, "  {}", command.hint() ).unwrap();
     }
-    if command.show_version_in_help()
+    if self.display_options.show_status
     {
-      writeln!( &mut help, "\n  Status: {} (v{})", command.status(), command.version().as_str() ).unwrap();
+      if command.show_version_in_help() && self.display_options.show_version
+      {
+        writeln!( &mut help, "\n  Status: {} (v{})", command.status(), command.version().as_str() ).unwrap();
+      }
+      else
+      {
+        writeln!( &mut help, "\n  Status: {}", command.status() ).unwrap();
+      }
     }
-    else
-    {
-      writeln!( &mut help, "\n  Status: {}", command.status() ).unwrap();
-    }
-    if !command.aliases().is_empty()
+    if !command.aliases().is_empty() && self.display_options.show_aliases
     {
       writeln!( &mut help, "  Aliases: {}", command.aliases().join( ", " ) ).unwrap();
     }
@@ -292,7 +301,7 @@ impl< 'a > HelpGenerator< 'a >
     }
 
     // TAGS section if present
-    if !command.tags().is_empty()
+    if !command.tags().is_empty() && self.display_options.show_tags
     {
       writeln!( &mut help, "TAGS: {}", command.tags().join( ", " ) ).unwrap();
     }

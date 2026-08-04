@@ -17,15 +17,6 @@
 //!   `CommandDefinition` fields are private; only accessor methods (`.name()`) are valid.
 //!   (`tests/compile_fail/t50_private_field_name.rs`)
 //!
-//! ## Note on AP-17 Spec Divergence
-//!
-//! AP-17 describes `UNILANG_HELP_HIDE_VERSION` suppressing the version line in
-//! `HelpGenerator`-rendered help text. The actual wiring stops at `HelpDisplayOptions`:
-//! `with_env_overrides()` reads the env var and flips `show_version`, but `HelpGenerator`'s
-//! format functions consult `CommandDefinition::show_version_in_help()` instead — there is no
-//! code path connecting the env var to rendered output. `test_ap17_help_hide_version_env_var`
-//! verifies the actual API contract (the `HelpDisplayOptions` field toggle) rather than the
-//! end-to-end rendering the spec narrative implies.
 
 // AP-1: CommandDefinition builder requires name — compile-time only, see tests/build/compile_fail_tests.rs
 // AP-5: CommandDefinition fields are private — compile-time only, see tests/build/compile_fail_tests.rs
@@ -634,12 +625,8 @@ fn test_ap16_unilang_verbosity_env_var_distinct_from_help_verbosity()
 
 /// AP-17: `UNILANG_HELP_HIDE_VERSION` suppresses the version line in help output.
 ///
-/// See the module-level "Note on AP-17 Spec Divergence" doc comment: `HelpDisplayOptions`
-/// is the sole production code path that reads `UNILANG_HELP_HIDE_VERSION`
-/// (`with_env_overrides()`), but `HelpGenerator`'s rendering consults
-/// `CommandDefinition::show_version_in_help()` instead, so there is no wiring from this env
-/// var to actual rendered text. This test verifies the real contract: the env var flips
-/// `HelpDisplayOptions.show_version` from `true` to `false`, and unsetting it restores `true`.
+/// Verifies both the `HelpDisplayOptions.show_version` field toggle and the end-to-end
+/// rendered-output effect via `HelpGenerator` (the `?`/`??` access path).
 ///
 /// ## Note
 ///
@@ -649,13 +636,30 @@ fn test_ap16_unilang_verbosity_env_var_distinct_from_help_verbosity()
 #[ test ]
 fn test_ap17_help_hide_version_env_var_suppresses_show_version_flag()
 {
+  use unilang::help::HelpGenerator;
+
   let old_value = std::env::var( "UNILANG_HELP_HIDE_VERSION" ).ok();
+
+  let cmd = CommandDefinition::former()
+    .name( ".test_ap17" )
+    .description( "Test command".to_string() )
+    .version( "8.8.8".to_string() )
+    .end();
+
+  let mut registry = CommandRegistry::new();
+  let _ = registry.register( cmd );
 
   std::env::set_var( "UNILANG_HELP_HIDE_VERSION", "1" );
   let options_hidden = HelpDisplayOptions::default().with_env_overrides();
+  let help_text_hidden = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Standard )
+    .command( ".test_ap17" )
+    .expect( "Command should exist" );
 
   std::env::remove_var( "UNILANG_HELP_HIDE_VERSION" );
   let options_restored = HelpDisplayOptions::default().with_env_overrides();
+  let help_text_restored = HelpGenerator::with_verbosity( &registry, HelpVerbosity::Standard )
+    .command( ".test_ap17" )
+    .expect( "Command should exist" );
 
   match old_value
   {
@@ -670,6 +674,14 @@ fn test_ap17_help_hide_version_env_var_suppresses_show_version_flag()
   assert!(
     options_restored.show_version,
     "Unsetting UNILANG_HELP_HIDE_VERSION must restore show_version to true"
+  );
+  assert!(
+    !help_text_hidden.contains( "8.8.8" ),
+    "UNILANG_HELP_HIDE_VERSION=1 must suppress the version string in HelpGenerator-rendered output"
+  );
+  assert!(
+    help_text_restored.contains( "8.8.8" ),
+    "Unsetting UNILANG_HELP_HIDE_VERSION must restore the version string in HelpGenerator-rendered output"
   );
 }
 

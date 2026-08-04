@@ -29,7 +29,7 @@ pub enum RegistryMode {
 /// - Usage patterns
 ///
 /// Used by both `CommandRegistry` and `StaticCommandRegistry` to ensure consistent help formatting.
-pub(super) fn format_command_help( cmd_def : &CommandDefinition ) -> String
+pub(super) fn format_command_help( cmd_def : &CommandDefinition, display_options : &crate::help::HelpDisplayOptions ) -> String
 {
   let mut help = String::new();
 
@@ -42,7 +42,7 @@ pub(super) fn format_command_help( cmd_def : &CommandDefinition ) -> String
     help.push_str( &format!( "Hint: {}\n", cmd_def.hint() ) );
   }
 
-  if cmd_def.show_version_in_help() && !cmd_def.version().as_str().is_empty()
+  if cmd_def.show_version_in_help() && display_options.show_version && !cmd_def.version().as_str().is_empty()
   {
     help.push_str( &format!( "Version: {}\n", cmd_def.version().as_str() ) );
   }

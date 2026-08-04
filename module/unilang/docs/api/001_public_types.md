@@ -47,7 +47,7 @@ The public API exposes the following data structures to integrators:
 
 **Configuration Utilities** (requires `json_parser` feature): Typed extraction functions support configuration parsing from `ConfigMap<S>` — a `HashMap<String, (JsonValue, S)>` typed alias. Available for u8, u16, u32, u64, i32, i64, f64, bool, String, and string arrays.
 
-**Help Generation**: `HelpGenerator::with_verbosity()` creates a generator at a specific verbosity level. `set_verbosity()` updates the level dynamically. `verbosity()` queries the current level. Levels 0–4 range from Minimal to Comprehensive; default is Level 2 (Standard). `CommandDefinition::with_show_version_in_help(false)` (or `show_version_in_help: false` on `StaticCommandDefinition`) hides a specific command's version line from both `HelpGenerator` and `.command.help` output; there is no registry-wide default toggle.
+**Help Generation**: `HelpGenerator::with_verbosity()` creates a generator at a specific verbosity level. `set_verbosity()` updates the level dynamically. `verbosity()` queries the current level. Levels 0–4 range from Minimal to Comprehensive; default is Level 2 (Standard). `CommandDefinition::with_show_version_in_help(false)` (or `show_version_in_help: false` on `StaticCommandDefinition`) hides a specific command's version line from both `HelpGenerator` and `.command.help` output. `HelpGenerator::with_display_options()` (or the `UNILANG_HELP_HIDE_VERSION` environment variable, via `HelpDisplayOptions::with_env_overrides()`) provides the registry-wide default toggle for version, status, aliases, and tags; a command's own `show_version_in_help` and the registry-wide `HelpDisplayOptions.show_version` are AND-composed — either one suppressing the version line is enough to hide it.
 
 ### Error Handling
 
@@ -59,7 +59,7 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 | :--- | :--- | :--- |
 | `UNILANG_VERBOSITY` | Sets logging verbosity for CLI binaries (0=quiet, 1=normal, 2=debug) | `2` |
 | `UNILANG_HELP_VERBOSITY` | Controls help output detail level (0=Minimal, 1=Basic, 2=Standard/DEFAULT, 3=Detailed, 4=Comprehensive) | `2` |
-| `UNILANG_HELP_HIDE_VERSION` | Sets `HelpDisplayOptions.show_version` to `false` when set; **not yet wired to any rendering path** — has no observable effect on help output today. To actually hide a command's version line, use `CommandDefinition::with_show_version_in_help(false)` on that command instead. | `1` |
+| `UNILANG_HELP_HIDE_VERSION` | Sets `HelpDisplayOptions.show_version` to `false` when set, suppressing the version line from `HelpGenerator` (`?`/`??`) and `.command.help` output alike — the registry-wide default, AND-composed with the per-command `show_version_in_help` flag. | `1` |
 
 ### Compatibility Guarantees
 

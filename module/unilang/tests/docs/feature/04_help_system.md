@@ -91,12 +91,11 @@
 - **When:** `HelpVerbosity::from_level(level)` is called with `level` values `4`, `5`, and `100`
 - **Then:** All three calls return `HelpVerbosity::Comprehensive`; no panic or error for out-of-range input
 
-### FT-15: UNILANG_HELP_HIDE_VERSION sets the HelpDisplayOptions.show_version field
+### FT-15: UNILANG_HELP_HIDE_VERSION suppresses the version line in rendered help output
 
 - **Given:** `UNILANG_HELP_HIDE_VERSION=1` set in the environment
-- **When:** `HelpDisplayOptions::default().with_env_overrides()` is called
-- **Then:** The resulting `show_version` field is `false`; with `UNILANG_HELP_HIDE_VERSION` unset, `show_version` is `true`
-- **Known gap:** `HelpDisplayOptions` is not consulted by any rendering call site (`HelpGenerator`'s `format_fns.rs` and `format_command_help()` both check `CommandDefinition::show_version_in_help()` instead) — so this env var currently has no observable effect on rendered help output. See FT-17 for the mechanism that actually controls rendered version visibility.
+- **When:** `HelpGenerator::from_env()` (or any `HelpGenerator` defaulting its `HelpDisplayOptions` via `with_env_overrides()`) renders a command's help at Level 2+ via `?`/`??`, or `registry.help_for_command()` renders the same command's `.command.help` output
+- **Then:** The version line is absent from both rendered outputs; with `UNILANG_HELP_HIDE_VERSION` unset, the version line is present in both. The underlying `HelpDisplayOptions.show_version` field flips `false`/`true` accordingly, AND-composed with the command's own `show_version_in_help` (see FT-17).
 
 ### FT-16: Namespaced command's `.help` companion includes the parent's namespace
 
@@ -109,4 +108,4 @@
 - **Given:** A command registered with a non-empty version (e.g., `"3.0.0"`) and `show_version_in_help` set to `false` (via `CommandDefinition::with_show_version_in_help(false)`)
 - **When:** `registry.help_for_command()` is called for that command (the text backing `.command.help`)
 - **Then:** The rendered output does NOT contain the version string; a command with `show_version_in_help` at its default (`true`) DOES show the version string
-- **Coverage note:** `HelpGenerator`'s renderer (`src/help/private/format_fns.rs`, backing `?`/`??`) also reads `show_version_in_help` at each verbosity level per code inspection, but no test currently exercises that path directly — only the `.command.help` path above is verified end-to-end.
+- **Coverage note:** `HelpGenerator`'s renderer (`src/help/private/format_fns.rs`, backing `?`/`??`) also reads `show_version_in_help` at each verbosity level, AND-composed with the registry-wide `HelpDisplayOptions.show_version` — exercised end-to-end by T05 in `tests/help/show_version.rs` (task 113), alongside the `.command.help` path above.

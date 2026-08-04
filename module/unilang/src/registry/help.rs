@@ -307,7 +307,8 @@ impl CommandRegistry
   /// * `String` - Formatted help text
   fn format_help_text( &self, cmd_def : &CommandDefinition ) -> String
   {
-    format_command_help( cmd_def )
+    let display_options = crate::help::HelpDisplayOptions::default().with_env_overrides();
+    format_command_help( cmd_def, &display_options )
   }
 
   ///

@@ -87,6 +87,7 @@ pub struct HelpGenerator< 'a >
 {
   registry : & 'a CommandRegistry,
   verbosity : HelpVerbosity,
+  display_options : HelpDisplayOptions,
 }
 
 impl< 'a > HelpGenerator< 'a >
@@ -101,6 +102,7 @@ impl< 'a > HelpGenerator< 'a >
     {
       registry,
       verbosity : HelpVerbosity::default(),
+      display_options : HelpDisplayOptions::default().with_env_overrides(),
     }
   }
 
@@ -115,6 +117,7 @@ impl< 'a > HelpGenerator< 'a >
     {
       registry,
       verbosity : HelpVerbosity::from_env(),
+      display_options : HelpDisplayOptions::default().with_env_overrides(),
     }
   }
 
@@ -124,7 +127,17 @@ impl< 'a > HelpGenerator< 'a >
   #[ must_use ]
   pub fn with_verbosity( registry : & 'a CommandRegistry, verbosity : HelpVerbosity ) -> Self
   {
-    Self { registry, verbosity }
+    Self { registry, verbosity, display_options : HelpDisplayOptions::default().with_env_overrides() }
+  }
+
+  ///
+  /// Sets explicit display options, overriding the environment-derived defaults.
+  ///
+  #[ must_use ]
+  pub fn with_display_options( mut self, display_options : HelpDisplayOptions ) -> Self
+  {
+    self.display_options = display_options;
+    self
   }
 
   ///
