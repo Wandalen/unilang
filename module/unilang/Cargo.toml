@@ -133,7 +133,7 @@ enabled = [
   "dep:serde", "dep:url", "dep:chrono", "dep:regex",
   "dep:error_tools", "dep:mod_interface", "dep:former",
   "dep:unilang_parser", "unilang_parser/enabled",
-  "dep:log", "dep:indexmap", "dep:lru",
+  "dep:log", "dep:indexmap", "dep:lru", "dep:cli_fmt",
 ]
 advanced_cli_tests = [ ]
 
@@ -180,6 +180,7 @@ log = { workspace = true, optional = true }
 rustyline = { workspace = true, optional = true } # Enhanced REPL with history and arrow keys
 indexmap = { workspace = true, optional = true }
 lru = { workspace = true, optional = true } # LRU cache for hot command optimization
+cli_fmt = { workspace = true, optional = true } # Category-grouped/column-aligned CLI help rendering
 
 # Performance optimization dependencies
 simd-json = { workspace = true, optional = true } # SIMD-optimized JSON parsing

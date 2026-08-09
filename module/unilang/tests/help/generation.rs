@@ -362,3 +362,250 @@ fn test_command_help_with_complex_arguments()
   assert!( help_content.contains( "multiple" ) || help_content.contains( "Multi" ), "Help should indicate multiple values capability" );
   assert!( help_content.contains( 'm' ), "Help should show aliases" );
 }
+
+/// T01: Flat-list rendering (no explicit categories) preserved through the `cli_fmt` swap.
+// test_kind: tm_spec(T01)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t01_flat_list_no_category()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd1 = CommandDefinition::former().name( ".alpha" ).description( "Alpha command" ).end();
+  let cmd2 = CommandDefinition::former().name( ".beta" ).description( "Beta command" ).end();
+  let cmd3 = CommandDefinition::former().name( ".gamma" ).description( "Gamma command" ).end();
+
+  let routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine3 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+
+  registry.register_with_routine( &cmd1, routine1 ).unwrap();
+  registry.register_with_routine( &cmd2, routine2 ).unwrap();
+  registry.register_with_routine( &cmd3, routine3 ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let output = help_generator.list_commands_filtered( None );
+
+  assert!( output.contains( ".alpha" ), "Output should contain .alpha" );
+  assert!( output.contains( "Alpha command" ), "Output should contain alpha's description" );
+  assert!( output.contains( ".beta" ), "Output should contain .beta" );
+  assert!( output.contains( "Beta command" ), "Output should contain beta's description" );
+  assert!( output.contains( ".gamma" ), "Output should contain .gamma" );
+  assert!( output.contains( "Gamma command" ), "Output should contain gamma's description" );
+}
+
+/// T02: Multi-group category rendering via `CliHelpData.groups` preserved through the swap.
+// test_kind: tm_spec(T02)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t02_multi_category_grouping()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd_a1 = CommandDefinition::former()
+    .name( ".cmd_a1" )
+    .description( "First alpha command" )
+    .category( "alpha_ops" )
+    .end();
+  let cmd_b1 = CommandDefinition::former()
+    .name( ".cmd_b1" )
+    .description( "First beta command" )
+    .category( "beta_ops" )
+    .end();
+
+  let routine_a = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine_b = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+
+  registry.register_with_routine( &cmd_a1, routine_a ).unwrap();
+  registry.register_with_routine( &cmd_b1, routine_b ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let output = help_generator.list_commands_filtered( None );
+
+  assert!( output.contains( "Alpha Ops" ), "Output should show 'Alpha Ops' group header" );
+  assert!( output.contains( "Beta Ops" ), "Output should show 'Beta Ops' group header" );
+  assert!( output.contains( ".cmd_a1" ), "Output should contain alpha command" );
+  assert!( output.contains( ".cmd_b1" ), "Output should contain beta command" );
+
+  // Each category's command appears only under its own group header (not merely present anywhere).
+  let alpha_header_pos = output.find( "Alpha Ops" ).expect( "Alpha Ops header must be present" );
+  let beta_header_pos = output.find( "Beta Ops" ).expect( "Beta Ops header must be present" );
+  let cmd_a1_pos = output.find( ".cmd_a1" ).expect( ".cmd_a1 must be present" );
+  let cmd_b1_pos = output.find( ".cmd_b1" ).expect( ".cmd_b1 must be present" );
+
+  assert!( alpha_header_pos < cmd_a1_pos, ".cmd_a1 should appear after the Alpha Ops header" );
+  assert!( cmd_a1_pos < beta_header_pos, ".cmd_a1 should appear before the Beta Ops header (scoped to its own group)" );
+  assert!( beta_header_pos < cmd_b1_pos, ".cmd_b1 should appear after the Beta Ops header" );
+}
+
+/// T03: Prefix filtering preserved through the swap.
+// test_kind: tm_spec(T03)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t03_prefix_filtering_preserved()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd_push = CommandDefinition::former().name( ".git.push" ).description( "Push commits" ).end();
+  let cmd_pull = CommandDefinition::former().name( ".git.pull" ).description( "Pull commits" ).end();
+  let cmd_remove = CommandDefinition::former().name( ".remove" ).description( "Remove item" ).end();
+
+  let routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine3 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+
+  registry.register_with_routine( &cmd_push, routine1 ).unwrap();
+  registry.register_with_routine( &cmd_pull, routine2 ).unwrap();
+  registry.register_with_routine( &cmd_remove, routine3 ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let output = help_generator.list_commands_filtered( Some( ".git" ) );
+
+  assert!( output.contains( ".git.push" ), "Output should contain .git.push" );
+  assert!( output.contains( ".git.pull" ), "Output should contain .git.pull" );
+  assert!( !output.contains( ".remove" ), "Output should NOT contain .remove" );
+}
+
+/// T04: Hidden-from-list visibility filtering preserved through the swap.
+// test_kind: tm_spec(T04)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t04_hidden_from_list_preserved()
+{
+  let mut registry = CommandRegistry::new();
+
+  let cmd_visible = CommandDefinition::former().name( ".visible" ).description( "Visible command" ).end();
+  let cmd_hidden = CommandDefinition::former()
+    .name( ".hidden" )
+    .description( "Hidden command" )
+    .hidden_from_list( true )
+    .end();
+
+  let routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+
+  registry.register_with_routine( &cmd_visible, routine1 ).unwrap();
+  registry.register_with_routine( &cmd_hidden, routine2 ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let output = help_generator.list_commands_filtered( None );
+
+  assert!( output.contains( ".visible" ), "Output should contain the visible command" );
+  assert!( !output.contains( ".hidden" ), "Output should NOT contain the hidden command" );
+}
+
+/// T05: Priority-then-name sort order preserved through the swap.
+// test_kind: tm_spec(T05)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t05_sort_order_preserved()
+{
+  let mut registry = CommandRegistry::new();
+
+  // Names are deliberately alphabetically *opposite* to their priority order: if the output
+  // ordering matched alphabetical order instead of priority, this test would fail — proving
+  // priority (not name) drives the sort.
+  let cmd_low_priority = CommandDefinition::former()
+    .name( ".aaa_low_priority" )
+    .description( "Lower-priority command" )
+    .category( "same_category" )
+    .priority( 9 )
+    .end();
+  let cmd_high_priority = CommandDefinition::former()
+    .name( ".zzz_high_priority" )
+    .description( "Higher-priority command" )
+    .category( "same_category" )
+    .priority( 1 )
+    .end();
+
+  let routine1 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  let routine2 = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+
+  registry.register_with_routine( &cmd_low_priority, routine1 ).unwrap();
+  registry.register_with_routine( &cmd_high_priority, routine2 ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let output = help_generator.list_commands_filtered( None );
+
+  let high_pos = output.find( ".zzz_high_priority" ).expect( ".zzz_high_priority must be present" );
+  let low_pos = output.find( ".aaa_low_priority" ).expect( ".aaa_low_priority must be present" );
+
+  assert!(
+    high_pos < low_pos,
+    "Higher-priority (priority=1) command should appear before lower-priority (priority=9) command, despite an alphabetically later name"
+  );
+}
+
+/// T06: Empty-registry and no-prefix-match messaging preserved through the swap.
+// test_kind: tm_spec(T06)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t06_empty_and_no_match_messaging_preserved()
+{
+  let empty_registry = CommandRegistry::new();
+  let empty_help_generator = HelpGenerator::new( &empty_registry );
+  let empty_output = empty_help_generator.list_commands_filtered( None );
+
+  assert!( empty_output.contains( "No commands available." ), "Empty registry should show the no-commands message" );
+
+  let mut registry = CommandRegistry::new();
+  let cmd = CommandDefinition::former().name( ".exists" ).description( "Exists command" ).end();
+  let routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  registry.register_with_routine( &cmd, routine ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+  let no_match_output = help_generator.list_commands_filtered( Some( ".nomatch" ) );
+
+  assert!(
+    no_match_output.contains( "No commands found matching prefix: .nomatch" ),
+    "Non-matching prefix should show the no-match message"
+  );
+}
+
+/// T07: Footer usage-hint text preserved through the swap, gated on prefix presence.
+// test_kind: tm_spec(T07)  [task/unilang/114_adopt_cli_fmt_for_global_help_listing.md]
+#[test]
+fn test_t07_footer_hint_gated_on_prefix()
+{
+  let mut registry = CommandRegistry::new();
+  let cmd = CommandDefinition::former().name( ".only" ).description( "Only command" ).end();
+  let routine = Box::new( |_cmd: VerifiedCommand, _ctx: ExecutionContext| -> Result<OutputData, unilang::data::ErrorData> {
+    Ok(OutputData::new("test", "text"))
+  });
+  registry.register_with_routine( &cmd, routine ).unwrap();
+
+  let help_generator = HelpGenerator::new( &registry );
+
+  let no_prefix_output = help_generator.list_commands_filtered( None );
+  assert!(
+    no_prefix_output.contains( "Use '<command> help' to get detailed help for a specific command." ),
+    "No-prefix output should contain the footer usage-hint text"
+  );
+  assert!( no_prefix_output.contains( "Example:" ), "No-prefix output should contain the example line" );
+
+  let prefixed_output = help_generator.list_commands_filtered( Some( ".only" ) );
+  assert!(
+    !prefixed_output.contains( "Use '<command> help' to get detailed help for a specific command." ),
+    "Prefixed output should NOT contain the footer usage-hint text"
+  );
+}

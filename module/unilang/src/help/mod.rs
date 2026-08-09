@@ -218,6 +218,7 @@ impl< 'a > HelpGenerator< 'a >
   pub fn list_commands_filtered( &self, prefix : Option< &str > ) -> String
   {
     use std::collections::BTreeMap;
+    use cli_fmt::help::{ CliHelpData, CliHelpStyle, CliHelpTemplate, CommandGroup, CommandEntry };
 
     let mut summary = String::new();
 
@@ -268,40 +269,45 @@ impl< 'a > HelpGenerator< 'a >
       by_category.entry( category ).or_default().push( ( name, cmd ) );
     }
 
-    // If only one category and it's empty, show flat list
-    if by_category.len() == 1 && by_category.contains_key( "" )
+    // Delegate category-grouped, column-aligned rendering to cli_fmt.
+    let mut data = CliHelpData::default();
+
+    for ( category, mut cmds ) in by_category
     {
-      writeln!( &mut summary, "Available commands:\n" ).unwrap();
-      let mut cmds : Vec< _ > = by_category.get( "" ).unwrap().iter().collect();
+      // Sort by priority then name
       cmds.sort_by_key( |( name, cmd )| ( cmd.priority(), name.as_str() ) );
 
-      for ( name, cmd ) in cmds
-      {
-        writeln!( &mut summary, "  {:<20} {}", name, Self::cmd_effective_description( cmd ) ).unwrap();
-      }
+      let group_name = if category.is_empty() { String::new() } else { self.format_category_name( &category ) };
+
+      let entries = cmds
+        .into_iter()
+        .map( |( name, cmd )| CommandEntry
+        {
+          name : name.clone(),
+          desc : Self::cmd_effective_description( cmd ).to_string(),
+        })
+        .collect();
+
+      data.groups.push( CommandGroup { name : group_name, entries } );
     }
-    else
+
+    // Match the column layout the hand-rolled renderer used ( `"  {:<20} {}"`, zero-indent
+    // category headers, no color ) so pre-existing tests asserting exact spacing keep passing.
+    let style = CliHelpStyle
     {
-      // Show categorized output
-      writeln!( &mut summary, "Available commands:\n" ).unwrap();
-
-      for ( category, mut cmds ) in by_category
-      {
-        if !category.is_empty()
-        {
-          writeln!( &mut summary, "{}:", self.format_category_name( &category ) ).unwrap();
-        }
-
-        // Sort by priority then name
-        cmds.sort_by_key( |( name, cmd )| ( cmd.priority(), name.as_str() ) );
-
-        for ( name, cmd ) in cmds
-        {
-          writeln!( &mut summary, "  {:<20} {}", name, Self::cmd_effective_description( cmd ) ).unwrap();
-        }
-        writeln!( &mut summary ).unwrap();
-      }
-    }
+      cmd_indent : 2,
+      col_gap : 1,
+      grp_indent : 0,
+      tty_detect : false,
+      ..CliHelpStyle::default()
+    };
+    let rendered = CliHelpTemplate::new( style, data ).render();
+    // `render()` unconditionally prefixes a "Usage: {binary} <command>" + tagline preamble that
+    // `HelpGenerator` has no binary-name concept to fill in; strip through the fixed "Commands:\n"
+    // marker and keep unilang's own existing lead-in text instead.
+    let body = rendered.split_once( "Commands:\n" ).map_or( rendered.as_str(), |( _, rest )| rest );
+    writeln!( &mut summary, "Available commands:" ).unwrap();
+    summary.push_str( body );
 
     // Add footer with usage hints
     if prefix.is_none()
