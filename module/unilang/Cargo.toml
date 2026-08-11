@@ -1,6 +1,6 @@
 [package]
 name = "unilang"
-version = "0.58.2"
+version = "0.59.1"
 edition = "2021"
 rust-version = "1.70"
 authors = [
