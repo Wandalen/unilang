@@ -15,7 +15,7 @@ Error propagation is short-circuit: each stage produces either a success value p
 
 The pipeline exposes two execution modes beyond single-command invocation. Batch mode executes all commands in a list independently, collecting all results regardless of individual failures. Sequence mode executes commands in order and stops immediately on the first failure. Both modes reuse the same stateless pipeline components, making REPL-style repeated invocation efficient with no state accumulation between calls.
 
-Help request interception is transparent: when the semantic analyzer detects a help operator (`?`) or double-question-mark parameter (`??`), it returns a `HelpRequested` signal that the pipeline converts to a successful `OutputData` containing formatted help text before returning to the caller. Integrators do not need to handle this case separately.
+Help request interception is transparent: when the semantic analyzer detects an unquoted `??` help token (bare, positional, or `name::??`), it returns a `HelpRequested` signal that the pipeline converts to a successful `OutputData` containing formatted help text before returning to the caller. Integrators do not need to handle this case separately; those who need `??` as data disable interception with `with_help_detection( false )`.
 
 The argv-based API accepts a `&[String]` array directly from the operating system, intelligently recombining consecutive elements to preserve argument boundaries before passing to the parser. This eliminates the information loss that occurs when shell-provided argument arrays are naively joined into a single string.
 

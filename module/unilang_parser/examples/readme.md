@@ -26,7 +26,7 @@ cargo run --example unilang_parser_basic
 | **2. Named Arguments** | [`02_named_arguments_quoting.rs`](02_named_arguments_quoting.rs) | Named arguments with quotes | `key::value` syntax, single/double quotes |
 | **3. Complex Patterns** | [`03_complex_argument_patterns.rs`](03_complex_argument_patterns.rs) | Mixed argument types | Positional + named args, flag-like arguments |
 | **4. Multiple Instructions** | [`04_multiple_instructions.rs`](04_multiple_instructions.rs) | Command sequences | `;;` separator, workflow patterns |
-| **5. Help Operator** | [`05_help_operator_usage.rs`](05_help_operator_usage.rs) | Help requests | `?` operator, contextual help |
+| **5. Help Token** | [`05_help_token_usage.rs`](05_help_token_usage.rs) | Help requests | `??` help token, quoted-literal escape, contextual help |
 
 ### Advanced Examples
 
@@ -61,7 +61,7 @@ cargo run --example 03_complex_argument_patterns
 cargo run --example 04_multiple_instructions
 
 # Understand help system
-cargo run --example 05_help_operator_usage
+cargo run --example 05_help_token_usage
 ```
 
 ### 3. Advanced Topics
@@ -97,7 +97,7 @@ cargo run --example 10_performance_optimization_patterns
 **🟡 Intermediate**
 - `03_complex_argument_patterns.rs`
 - `04_multiple_instructions.rs`
-- `05_help_operator_usage.rs`
+- `05_help_token_usage.rs`
 - `07_error_handling_diagnostics.rs`
 
 **🔴 Advanced**
@@ -111,7 +111,7 @@ cargo run --example 10_performance_optimization_patterns
 **📝 CLI Development**
 - `01_basic_command_parsing.rs` - Command structure
 - `03_complex_argument_patterns.rs` - Argument handling
-- `05_help_operator_usage.rs` - Help system
+- `05_help_token_usage.rs` - Help system
 - `07_error_handling_diagnostics.rs` - User-friendly errors
 
 **🔧 Framework Integration**

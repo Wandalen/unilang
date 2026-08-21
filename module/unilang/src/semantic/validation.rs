@@ -208,18 +208,18 @@ impl SemanticAnalyzer< '_ >
       if let Some( suggested_name ) = suggestion
       {
         format!(
-          "Argument Error: Unknown parameter '{}'. Did you mean '{}'? Use '.{} ??' for help.",
+          "Argument Error: Unknown parameter '{}'. Did you mean '{}'? Use '{} ??' for help.",
           unknown,
           suggested_name,
-          command_def.name().as_str()
+          command_def.full_name()
         )
       }
       else
       {
         format!(
-          "Argument Error: Unknown parameter '{}'. Use '.{} ??' to see valid parameters.",
+          "Argument Error: Unknown parameter '{}'. Use '{} ??' to see valid parameters.",
           unknown,
-          command_def.name().as_str()
+          command_def.full_name()
         )
       }
     }
@@ -232,9 +232,9 @@ impl SemanticAnalyzer< '_ >
         .join( ", " );
 
       format!(
-        "Argument Error: Unknown parameters: {}. Use '.{} ??' to see valid parameters.",
+        "Argument Error: Unknown parameters: {}. Use '{} ??' to see valid parameters.",
         params_list,
-        command_def.name().as_str()
+        command_def.full_name()
       )
     };
 

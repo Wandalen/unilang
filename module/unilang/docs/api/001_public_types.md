@@ -59,7 +59,7 @@ All API errors are returned as `unilang::Error` wrapping an `ErrorData` struct w
 | :--- | :--- | :--- |
 | `UNILANG_VERBOSITY` | Sets logging verbosity for CLI binaries (0=quiet, 1=normal, 2=debug) | `2` |
 | `UNILANG_HELP_VERBOSITY` | Controls help output detail level (0=Minimal, 1=Basic, 2=Standard/DEFAULT, 3=Detailed, 4=Comprehensive) | `2` |
-| `UNILANG_HELP_HIDE_VERSION` | Sets `HelpDisplayOptions.show_version` to `false` when set, suppressing the version line from `HelpGenerator` (`?`/`??`) and `.command.help` output alike — the registry-wide default, AND-composed with the per-command `show_version_in_help` flag. | `1` |
+| `UNILANG_HELP_HIDE_VERSION` | Sets `HelpDisplayOptions.show_version` to `false` when set, suppressing the version line from `??` and `.command.help` output alike — the registry-wide default, AND-composed with the per-command `show_version_in_help` flag. | `1` |
 
 ### Compatibility Guarantees
 

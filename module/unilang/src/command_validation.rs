@@ -10,6 +10,9 @@
 //! - Command names must start with '.' prefix
 //! - Non-empty namespaces must start with '.' prefix
 //! - Empty namespaces are allowed for root-level commands
+//! - An `Enum` parameter's default must be one of its own choices (hard error)
+//! - A `String` parameter whose description embeds an `a|b|c` choice list
+//!   should be declared `Kind::Enum` instead (non-fatal warning)
 //!
 //! # Examples
 //!
@@ -149,12 +152,124 @@ pub fn validate_parameter_storage_types( cmd : &CommandDefinition ) -> Result< (
   Ok(())
 }
 
+/// Returns true when `text` reads as a bare `a|b|c` choice list.
+///
+/// Whole-text match needs >= 2 pipe-separated bare words; an embedded token
+/// needs >= 3 so prose that merely contains one pipe (e.g. "name|size" inside
+/// a sentence) does not trigger the help-convention warning.
+fn looks_like_choice_list( text : &str ) -> bool
+{
+  fn is_bare_choice_segment( segment : &str ) -> bool
+  {
+    !segment.is_empty()
+      && segment.len() <= 20
+      && segment.chars().all( | c | c.is_ascii_alphanumeric() || c == '_' || c == '-' )
+  }
+
+  let is_list = | candidate : &str, min_segments : usize |
+  {
+    let segments : Vec< &str > = candidate.split( '|' ).collect();
+    segments.len() >= min_segments && segments.iter().all( | s | is_bare_choice_segment( s ) )
+  };
+
+  let trimmed = text.trim().trim_end_matches( [ '.', ',' ] );
+  if is_list( trimmed, 2 )
+  {
+    return true;
+  }
+  trimmed.split_whitespace().any( | token | is_list( token.trim_end_matches( [ '.', ',' ] ), 3 ) )
+}
+
+/// Lints help-affecting parameter conventions.
+///
+/// Hard errors for definitions that can never work (an `Enum` default outside
+/// its own choices — the default could never pass coercion); non-fatal
+/// warnings for definitions that degrade `??` help quality (a `String`
+/// parameter whose description embeds an `a|b|c` choice list instead of
+/// declaring `Kind::Enum`, which would let help list the choices and coercion
+/// reject invalid values).
+///
+/// # Errors
+///
+/// Returns `Error::Registration` if any `Enum` parameter's default value is
+/// not one of its own choices.
+///
+/// # Examples
+///
+/// ```rust
+/// use unilang::prelude::*;
+/// use unilang::command_validation::validate_help_conventions;
+///
+/// let cmd = CommandDefinition::former()
+///   .name( ".render" )
+///   .description( "Render output" )
+///   .arguments( vec![
+///     ArgumentDefinition {
+///       name: "format".to_string(),
+///       description: "Output format: json|yaml|table".to_string(),
+///       kind: Kind::String,
+///       hint: String::new(),
+///       attributes: ArgumentAttributes { optional: true, ..Default::default() },
+///       validation_rules: vec![],
+///       aliases: vec![],
+///       tags: vec![],
+///     }
+///   ])
+///   .end();
+///
+/// let warnings = validate_help_conventions( &cmd ).unwrap();
+/// assert_eq!( warnings.len(), 1 ); // String kind with embedded choice list
+/// ```
+pub fn validate_help_conventions( cmd : &CommandDefinition ) -> Result< Vec< String >, Error >
+{
+  use crate::data::Kind;
+
+  let mut warnings = Vec::new();
+  for arg in cmd.arguments()
+  {
+    if let Kind::Enum( choices ) = &arg.kind
+    {
+      if let Some( default ) = &arg.attributes.default
+      {
+        if !choices.iter().any( | c | c == default )
+        {
+          return Err( Error::Registration( format!(
+            "Parameter '{}' in command '{}' declares default '{}' which is not among its enum choices {:?}. \
+            The default could never pass coercion. Add it to the choices or change the default.",
+            arg.name,
+            cmd.full_name(),
+            default,
+            choices
+          )));
+        }
+      }
+    }
+
+    if arg.kind == Kind::String && looks_like_choice_list( &arg.description )
+    {
+      warnings.push( format!(
+        "Parameter '{}' in command '{}' is Kind::String but its description looks like a choice list ('{}'). \
+        Declare it as Kind::Enum so '{} {}::??' help can list the choices and invalid values are rejected.",
+        arg.name,
+        cmd.full_name(),
+        arg.description,
+        cmd.full_name(),
+        arg.name
+      ));
+    }
+  }
+  Ok( warnings )
+}
+
 /// Validates entire command definition for registration.
 ///
 /// Checks:
 /// - Command name has dot prefix
 /// - Namespace has dot prefix (if non-empty)
 /// - Parameter storage types match multiple attribute
+/// - Help conventions (enum default within choices — error; `String`
+///   parameter with an `a|b|c` choice-list description — warning printed to
+///   stderr, suppressible via `UNILANG_NO_LINT_WARNINGS`)
 ///
 /// This is the primary validation function used by all registration paths.
 ///
@@ -189,6 +304,13 @@ pub fn validate_command_for_registration( cmd : &CommandDefinition ) -> Result< 
 
   validate_namespace( cmd.namespace() )?;
   validate_parameter_storage_types( cmd )?;
+  for warning in validate_help_conventions( cmd )?
+  {
+    if std::env::var_os( "UNILANG_NO_LINT_WARNINGS" ).is_none()
+    {
+      eprintln!( "unilang: warning: {warning}" );
+    }
+  }
   Ok(())
 }
 
@@ -234,6 +356,7 @@ mod_interface::mod_interface!
   exposed use private::validate_command_name;
   exposed use private::validate_namespace;
   exposed use private::validate_parameter_storage_types;
+  exposed use private::validate_help_conventions;
   exposed use private::validate_command_for_registration;
   exposed use private::is_help_command;
   exposed use private::make_help_command_name;
@@ -241,6 +364,7 @@ mod_interface::mod_interface!
   prelude use private::validate_command_name;
   prelude use private::validate_namespace;
   prelude use private::validate_parameter_storage_types;
+  prelude use private::validate_help_conventions;
   prelude use private::validate_command_for_registration;
   prelude use private::is_help_command;
   prelude use private::make_help_command_name;

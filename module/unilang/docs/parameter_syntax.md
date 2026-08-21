@@ -147,70 +147,71 @@ Whether a command supports positional arguments depends on its definition. Check
 help to see which parameters are positional:
 
 ```bash
-.greet ??         # Show parameter list with types
-.plan.phases ??   # Show all accepted parameters
+.greet ??         # Full help page: usage, arguments, examples
+.plan.phases ??   # Same for a namespaced command
 ```
 
 ---
 
 ## Discovering Valid Parameters
 
-Use the `??` parameter on any command to list all accepted parameters:
+Append an unquoted `??` to any command to see its full help page, or ask for one
+parameter's detail page with `name::??`:
 
 ```bash
-.greet ??
-# name (String, optional, default: "World")
-# lang (String, optional, default: "en")
+.greet ??            # command page: usage, all arguments with types and defaults
+.greet name::??      # parameter detail page: kind, default, aliases, validation, examples
+.greet bogus::??     # unknown name → listing of valid parameters (never a dead end)
 ```
 
-Use the `.command.help` counterpart for full descriptions:
+The spelled `.command.help` counterpart renders the identical pages:
 
 ```bash
-.greet.help
-.plan.phases.help
+.greet.help          # same page as `.greet ??`
+.greet.help name     # same page as `.greet name::??`
 ```
 
 ---
 
-## Help Forms: `?`, `??`, and `.command.help`
+## Help Forms: `??` and `.command.help`
 
-Three distinct mechanisms trigger help display. They operate at different layers
-and return different levels of detail:
+A single token — an unquoted `??` — covers every help surface; its position
+selects the scope. The spelled `.command.help` routes render the identical pages:
 
-| Form | Layer | How it works | Output |
-|------|-------|--------------|--------|
-| `?` | Parser | Sets `help_requested = true` in `ParsedInstruction` | Brief inline help |
-| `??` | Framework | Positional argument value `"??"` detected by the framework | Parameter list with types and defaults |
-| `.command.help` | Command registry | Separate command auto-registered alongside every `.command` | Full command documentation |
+| Form | Scope | Output |
+|------|-------|--------|
+| `??` (alone) | Global | Command listing — same as bare `.` |
+| `.command ??` | Command | Full help page: usage, arguments, examples |
+| `.command name::??` | Parameter | Detail page: kind, default, aliases, validation, examples |
+| `.command.help` / `.command.help name` | Command / parameter | Byte-identical to the `??` forms above |
 
 ### Usage examples
 
 ```bash
-# ? — parser-level help flag
-.greet ?
-
-# ?? — framework-level parameter listing
-.greet ??
-
-# .command.help — dedicated help command
-.greet.help
+??                   # list all commands
+.greet ??            # command help page (any position works)
+.greet name::??      # parameter detail page (aliases resolve too)
+.greet.help          # spelled route — same page as `.greet ??`
+.greet.help name     # spelled route — same page as `.greet name::??`
 ```
 
-### When to use which
+### Key rules
 
-- **`?`** — quick reminder that you need help with a command; lightest weight
-- **`??`** — see parameter names, types, and defaults before constructing a call
-- **`.command.help`** — full reference: description, examples, constraints
-
-### Key differences
-
-- `?` is tokenized by the parser (same layer as `::` and `!`); the application
-  receives `instruction.help_requested = true` and decides what to show.
-- `??` is NOT a parser operator — it is the literal string value `"??"` passed
-  as a positional argument; the framework intercepts it before dispatch.
+- `??` is NOT a parser operator — the parser passes it through as an ordinary
+  token, and the **semantic analyzer** intercepts the unquoted form *before*
+  argument binding. A broken sibling argument never masks a help request, and
+  command routines never observe the token.
+- A **named** `name::??` beats a positional `??`; with several named `??`, the
+  first parameter in command-definition order wins; `alias::??` resolves to the
+  canonical parameter; an unknown `name::??` lists the valid parameters.
+- **Quoting opts out:** `name::"??"` binds the literal string `??` as a value.
+- **Embedders can opt out entirely:** `Pipeline::with_help_detection( false )`
+  (also on `SemanticAnalyzer`) turns every `??` back into an ordinary value.
+- There is no `?` help form. `?` is an ordinary value; if it fails coercion, the
+  error nudges: `Did you mean 'name::??' for parameter help?`
 - `.command.help` is a **separate registered command** with its own dispatch
-  path. It is automatically generated for every command when `auto_help_enabled`
-  is set (the default).
+  path, automatically generated for every command — it renders through the same
+  code path as `??`, which is what keeps the pages byte-identical.
 
 ---
 

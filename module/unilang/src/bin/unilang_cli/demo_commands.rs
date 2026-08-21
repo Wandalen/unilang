@@ -2,6 +2,10 @@
 //!
 //! Provides the set of example commands registered in the demo registry,
 //! illustrating math, system, file, and search command patterns.
+//!
+//! Printing contract: routines only RETURN their output via `OutputData.content`;
+//! `main.rs` is the single printer of returned outputs. Routines must not
+//! `println!` themselves, or every command double-prints.
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, OutputData };
 use unilang::data::Kind as ArgumentKind;
@@ -46,10 +50,9 @@ fn cmd_math_add() -> ( CommandDefinition, CommandRoutine )
     if let ( Value::Integer( val_a ), Value::Integer( val_b ) ) = ( a, b )
     {
       let result = val_a + val_b;
-      println!( "Result: {result}" );
       return Ok( OutputData
       {
-        content : result.to_string(),
+        content : format!( "Result: {result}" ),
         format : "text".to_string(),
         execution_time_ms : None,
       });
@@ -97,10 +100,9 @@ fn cmd_math_sub() -> ( CommandDefinition, CommandRoutine )
     if let ( Value::Integer( val_x ), Value::Integer( val_y ) ) = ( x, y )
     {
       let result = val_x - val_y;
-      println!( "Result: {result}" );
       return Ok( OutputData
       {
-        content : result.to_string(),
+        content : format!( "Result: {result}" ),
         format : "text".to_string(),
         execution_time_ms : None,
       });
@@ -152,7 +154,6 @@ fn cmd_greet() -> ( CommandDefinition, CommandRoutine )
       _ => "World".to_string(),
     };
     let result = format!( "Hello, {name}!" );
-    println!( "{result}" );
     Ok( OutputData
     {
       content : result,
@@ -207,7 +208,6 @@ fn cmd_config_set() -> ( CommandDefinition, CommandRoutine )
     let key = cmd.arguments.get( "key" ).unwrap();
     let value = cmd.arguments.get( "value" ).unwrap();
     let result = format!( "Setting config: {key} = {value}" );
-    println!( "{result}" );
     Ok( OutputData
     {
       content : result,
@@ -256,10 +256,9 @@ fn cmd_echo() -> ( CommandDefinition, CommandRoutine )
 
   let routine : CommandRoutine = Box::new( | _cmd, _ctx |
   {
-    println!( "Echo command executed!" );
     Ok( OutputData
     {
-      content : "Echo command executed!\n".to_string(),
+      content : "Echo command executed!".to_string(),
       format : "text".to_string(),
       execution_time_ms : None,
     })
@@ -313,7 +312,6 @@ fn cmd_cat() -> ( CommandDefinition, CommandRoutine )
     {
       if let Ok( contents ) = std::fs::read_to_string( path_str )
       {
-        println!( "{contents}" );
         Ok( OutputData
         {
           content : contents,
@@ -412,7 +410,6 @@ fn cmd_video_search() -> ( CommandDefinition, CommandRoutine )
         use core::fmt::Write;
         write!( &mut result, "\nTitle: {title_str}" ).unwrap();
       }
-      println!( "{result}" );
       Ok( OutputData
       {
         content : result,

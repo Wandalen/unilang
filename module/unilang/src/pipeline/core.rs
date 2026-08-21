@@ -17,12 +17,13 @@ pub struct Pipeline
 {
   pub( in super ) parser : Parser,
   pub( in super ) registry : CommandRegistry,
+  pub( in super ) help_detection : bool,
 }
 
 impl Pipeline
 {
   ///
-  /// Creates a new pipeline with the given command registry.
+  /// Creates a new pipeline with the given command registry and help detection enabled.
   ///
   #[ must_use ]
   pub fn new( registry : CommandRegistry ) -> Self
@@ -31,7 +32,22 @@ impl Pipeline
     {
       parser : Parser::new( UnilangParserOptions::default() ),
       registry,
+      help_detection : true,
     }
+  }
+
+  ///
+  /// Sets whether unquoted `??` tokens are intercepted as help requests
+  /// (default: `true`).
+  ///
+  /// With detection disabled, `??` reaches argument binding as an ordinary
+  /// literal value. Quoting a single value (`param::"??"`) is the per-value
+  /// opt-out that works without disabling detection globally.
+  #[ must_use ]
+  pub fn with_help_detection( mut self, help_detection : bool ) -> Self
+  {
+    self.help_detection = help_detection;
+    self
   }
 
   ///
@@ -82,6 +98,7 @@ impl Pipeline
     {
       parser : Parser::new( parser_options ),
       registry,
+      help_detection : true,
     }
   }
 
@@ -149,7 +166,8 @@ impl Pipeline
 
     // Step 2: Semantic Analysis
     let instructions = [ instruction ];
-    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry );
+    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry )
+      .with_help_detection( self.help_detection );
     let verified_commands = match analyzer.analyze()
     {
       Ok( commands ) => commands,
@@ -234,7 +252,8 @@ impl Pipeline
 
     // Step 2: Semantic Analysis
     let instructions = [ instruction ];
-    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry );
+    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry )
+      .with_help_detection( self.help_detection );
     analyzer.analyze()?;
 
     Ok(())
@@ -356,6 +375,27 @@ CommandResult
     Ok( commands ) => commands,
     Err( error ) =>
     {
+      // Help requests are detected by ErrorCode, not message text, and become
+      // successful output — same contract as `Pipeline::process_command`.
+      if let crate::error::Error::Execution( error_data ) = &error
+      {
+        if error_data.code == crate::data::ErrorCode::HelpRequested
+        {
+          return CommandResult
+          {
+            command,
+            outputs : vec![ crate::data::OutputData
+            {
+              content : error_data.message.clone(),
+              format : "text".to_string(),
+              execution_time_ms : None,
+            }],
+            success : true,
+            error : None,
+          };
+        }
+      }
+
       return CommandResult
       {
         command,

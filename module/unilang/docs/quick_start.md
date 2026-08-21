@@ -221,10 +221,10 @@ Error: Missing required argument: name
 $ cargo run -- .gret name::Alice
 Error: Unknown command '.gret'. Did you mean '.greet'?
 
-# Help
-$ cargo run -- .greet ?
-Command: .greet
-Description: Greet someone
+# Help — the ?? token renders the command's help page
+$ cargo run -- .greet ??
+Usage: .greet
+  Greet someone
 ...
 ```
 

@@ -324,7 +324,26 @@ impl CommandDefinition
       hint : format!( "Help for {}", self.name.as_str() ),
       status : CommandStatus::Active,
       version : self.version.clone(),
-      arguments : vec![], // Help commands typically take no arguments
+      arguments : vec!
+      [
+        // Optional parameter name: `.cmd.help param` renders that parameter's
+        // detail page instead of the command page.
+        ArgumentDefinition
+        {
+          name : "param".to_string(),
+          kind : crate::data::Kind::String,
+          attributes : crate::data::ArgumentAttributes
+          {
+            optional : true,
+            ..Default::default()
+          },
+          hint : "Parameter name for a parameter detail page".to_string(),
+          description : "Optional parameter name; when given, shows that parameter's detail page instead of the command page.".to_string(),
+          validation_rules : vec![],
+          aliases : vec![],
+          tags : vec![],
+        }
+      ],
       routine_link : None, // Will be set during registration
       tags : vec![ "help".to_string(), "documentation".to_string() ],
       aliases : vec![ format!( "{}.h", self.name.as_str() ) ],

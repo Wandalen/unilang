@@ -105,7 +105,7 @@ CommandDefinition {
 }
 ```
 
-**Note:** `auto_help_enabled` defaults to `true`, creating `.command.help` commands automatically. Set to `false` to prevent auto-generation while keeping `?` and `??` help operators.
+**Note:** `auto_help_enabled` defaults to `true`, creating `.command.help` commands automatically. Set to `false` to prevent auto-generation while keeping the `??` help token.
 
 ---
 
@@ -270,24 +270,25 @@ Error includes:
 
 ## Help System
 
-### Three Ways to Access Help
+### Accessing Help
 
-**Method 1: Traditional `?` Operator**
+**The `??` token** — position selects scope:
 ```bash
-.command ?
+??                       # global command listing
+.command ??              # command help page
+.command arg::value ??   # help still wins with other arguments present
+.command name::??        # one parameter's detail page
 ```
 
-**Method 2: Modern `??` Parameter**
+**Auto-generated `.help` commands** — spelled routes rendering the identical pages:
 ```bash
-.command ??
-.command arg::value ??
-```
-
-**Method 3: Auto-Generated `.help` Command**
-```bash
-.command.help
+.command.help            # same page as `.command ??`
+.command.help name       # same page as `.command name::??`
 .namespace.command.help
 ```
+
+Quoting opts out (`name::"??"` is a literal value); embedders can disable detection
+entirely with `Pipeline::with_help_detection( false )`.
 
 ### Verbosity Levels (0-4)
 
@@ -531,6 +532,6 @@ See `examples/` directory:
 
 **Key rule:** All command names MUST start with dot (`.`). This is enforced at runtime.
 
-**Help generation:** Commands with `auto_help_enabled: true` (default) automatically get `.command.help` commands. All commands support `?` and `??` help operators regardless.
+**Help generation:** Commands with `auto_help_enabled: true` (default) automatically get `.command.help` commands. All commands support the `??` help token regardless — `.command ??` for the command page, `name::??` for a parameter's detail page.
 
 **Use argv API:** For CLI applications, always use `process_command_from_argv()` to preserve argument boundaries.

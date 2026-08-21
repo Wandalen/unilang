@@ -1435,3 +1435,102 @@ fn test_ft26_normalized_string_extraction_trims_whitespace()
   assert_eq!( whitespace_cmd.get_string_normalized( "name" ), Some( "" ) );
   assert_eq!( whitespace_cmd.require_string_normalized( "name" ).unwrap(), "" );
 }
+/// Coercion failure of an empty value nudges toward `param::??` help.
+///
+/// An empty or `?` value that fails coercion usually signals a user probing
+/// for help, not supplying data — the error must point at the real syntax.
+#[test]
+fn test_coercion_failure_empty_value_nudges_parameter_help()
+{
+  let mut registry = CommandRegistry::new();
+  let cmd = create_binding_test_command( ".nudge_probe", vec![
+    ArgumentDefinition
+    {
+      name : "count".to_string(),
+      description : "Numeric count".to_string(),
+      kind : Kind::Integer,
+      hint : String::new(),
+      attributes : ArgumentAttributes { optional : true, ..Default::default() },
+      validation_rules : vec![],
+      aliases : vec![],
+      tags : vec![],
+    }
+  ]);
+  registry.register( cmd ).expect( "Registration should succeed" );
+
+  let result = parse_and_bind_raw( &registry, r#".nudge_probe count::"""# );
+  let error = result.expect_err( "Empty value must fail Integer coercion" );
+  match error
+  {
+    Error::Execution( error_data ) =>
+    {
+      assert_eq!( error_data.code, ErrorCode::ArgumentTypeMismatch );
+      assert!(
+        error_data.message.contains( "Did you mean 'count::??' for parameter help?" ),
+        "Empty-value coercion failure must nudge to param help; got: {}", error_data.message
+      );
+    }
+    other => panic!( "Expected execution error, got: {other:?}" ),
+  }
+}
+
+/// An ordinary failing value gets a plain coercion error — no help nudge.
+#[test]
+fn test_coercion_failure_ordinary_value_has_no_nudge()
+{
+  let mut registry = CommandRegistry::new();
+  let cmd = create_binding_test_command( ".nudge_plain", vec![
+    ArgumentDefinition
+    {
+      name : "count".to_string(),
+      description : "Numeric count".to_string(),
+      kind : Kind::Integer,
+      hint : String::new(),
+      attributes : ArgumentAttributes { optional : true, ..Default::default() },
+      validation_rules : vec![],
+      aliases : vec![],
+      tags : vec![],
+    }
+  ]);
+  registry.register( cmd ).expect( "Registration should succeed" );
+
+  let result = parse_and_bind( &registry, ".nudge_plain count::abc" );
+  let error_msg = result.expect_err( "Non-numeric value must fail Integer coercion" );
+  assert!(
+    !error_msg.contains( "Did you mean 'count::??'" ),
+    "Ordinary coercion failures must not carry the help nudge; got: {error_msg}"
+  );
+}
+
+/// Sensitive arguments never leak value information — including the nudge,
+/// which would reveal that the attempted value was `?` or empty.
+#[test]
+fn test_sensitive_argument_coercion_failure_never_nudges()
+{
+  let mut registry = CommandRegistry::new();
+  let cmd = create_binding_test_command( ".nudge_secret", vec![
+    ArgumentDefinition
+    {
+      name : "pin".to_string(),
+      description : "Numeric PIN".to_string(),
+      kind : Kind::Integer,
+      hint : String::new(),
+      attributes : ArgumentAttributes { optional : true, sensitive : true, ..Default::default() },
+      validation_rules : vec![],
+      aliases : vec![],
+      tags : vec![],
+    }
+  ]);
+  registry.register( cmd ).expect( "Registration should succeed" );
+
+  let result = parse_and_bind( &registry, r#".nudge_secret pin::"?""# );
+  let error_msg = result.expect_err( "Quoted ? must fail Integer coercion as a plain value" );
+  assert!(
+    error_msg.contains( "redacted" ),
+    "Sensitive coercion failure must redact the value; got: {error_msg}"
+  );
+  assert!(
+    !error_msg.contains( "Did you mean" ),
+    "Sensitive coercion failure must not carry the nudge; got: {error_msg}"
+  );
+}

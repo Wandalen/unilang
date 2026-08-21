@@ -33,7 +33,7 @@ fn main()
   let strict_options = UnilangParserOptions
   {
   main_delimiters: vec![ " ", "." ],
-  operators: vec![ " :: ", "?", "!" ],
+  operators: vec![ "::", " :: ", "!" ],
   whitespace_is_separator: true,
   error_on_positional_after_named: true,
   error_on_duplicate_named_arguments: true,
@@ -112,7 +112,7 @@ fn main()
   let partial_strict = UnilangParserOptions
   {
   main_delimiters: vec![ " ", "." ],
-  operators: vec![ " :: ", "?", "!" ],
+  operators: vec![ "::", " :: ", "!" ],
   whitespace_is_separator: true,
   error_on_duplicate_named_arguments: true,
   error_on_positional_after_named: false, // Allow mixed order

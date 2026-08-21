@@ -10,6 +10,7 @@ Unilang provides a unified syntax for command-line interfaces across multiple la
 
 - **unilang** - Core library with command registry and execution framework
 - **unilang_parser** - Parser for Unilang command syntax
+- **unilang_help** - Reusable help-page domain model, verbosity levels, and renderers
 - **unilang_meta** - Procedural macros for deriving Unilang traits
 - **cargo_unilang** - Cargo integration tool
 
@@ -19,8 +20,8 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-unilang = "0.46.0"
-unilang_parser = "0.30.0"
+unilang = "0.60.0"
+unilang_parser = "0.40.0"
 ```
 
 ## Quick Start

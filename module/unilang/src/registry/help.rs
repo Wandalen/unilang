@@ -3,7 +3,7 @@
 use super::dynamic::CommandRegistry;
 use crate::data::{ CommandDefinition, OutputData };
 use crate::error::Error;
-use super::traits::{ CommandRoutine, format_command_help };
+use super::traits::CommandRoutine;
 
 impl CommandRegistry
 {
@@ -247,7 +247,7 @@ impl CommandRegistry
       // Generate global help content listing all commands
       let mut help_content = String::new();
       help_content.push_str( "Available Commands:\n\n" );
-      help_content.push_str( "Use '.command.help' to get detailed help for any specific command.\n" );
+      help_content.push_str( "Use '<command> ??' or '.command.help' to get detailed help for any specific command.\n" );
       help_content.push_str( "Examples: '.cmd1.process.help', '.cmd2.list.help'\n\n" );
       help_content.push_str( "Global Commands:\n" );
       help_content.push_str( "  .help    Display this help information\n" );
@@ -278,15 +278,25 @@ impl CommandRegistry
   ///
   /// # Returns
   /// * `CommandRoutine` - An executable routine that returns help information
+  ///
+  /// The routine renders at call time (not registration time) so it can honor
+  /// the optional `param` argument — `.cmd.help param` yields that parameter's
+  /// detail page — and pick up `UNILANG_HELP_VERBOSITY` changes between calls.
   pub( super ) fn create_help_routine( &self, parent_command : &CommandDefinition ) -> CommandRoutine
   {
-    let help_text = self.format_help_text( parent_command );
+    let parent = parent_command.clone();
 
-    Box::new( move | _cmd, _ctx |
+    Box::new( move | cmd, _ctx |
     {
+      let content = match cmd.get_string( "param" )
+      {
+        Some( param_name ) => crate::help::parameter_help_or_listing( &parent, param_name ),
+        None => crate::help::command_help_text( &parent ),
+      };
+
       Ok( OutputData
       {
-        content : help_text.clone(),
+        content,
         format : "text".to_string(),
         execution_time_ms : None,
       })
@@ -307,8 +317,7 @@ impl CommandRegistry
   /// * `String` - Formatted help text
   fn format_help_text( &self, cmd_def : &CommandDefinition ) -> String
   {
-    let display_options = crate::help::HelpDisplayOptions::default().with_env_overrides();
-    format_command_help( cmd_def, &display_options )
+    crate::help::command_help_text( cmd_def )
   }
 
   ///

@@ -214,11 +214,22 @@ fn coerce_arg_value( input : &str, arg_def : &ArgumentDefinition ) -> Result< Va
     {
       type_err.reason.clone()
     };
+    // A failing "?" or empty value usually means the user wanted help, not a
+    // value — point at the real help syntax. Suppressed for sensitive
+    // arguments so the message reveals nothing about the attempted value.
+    let nudge = if !arg_def.attributes.sensitive && ( input == "?" || input.is_empty() )
+    {
+      format!( " Did you mean '{}::??' for parameter help?", arg_def.name )
+    }
+    else
+    {
+      String::new()
+    };
     Error::Execution( ErrorData::new(
       ErrorCode::ArgumentTypeMismatch,
       format!(
-        "Argument Error: Cannot coerce value for argument '{}' to {:?}. {}",
-        arg_def.name, arg_def.kind, detail
+        "Argument Error: Cannot coerce value for argument '{}' to {:?}. {}{}",
+        arg_def.name, arg_def.kind, detail, nudge
       ),
     ))
   })

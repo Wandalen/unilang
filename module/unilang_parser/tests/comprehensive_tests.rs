@@ -21,7 +21,7 @@
 //! |---|---|---|---|---|---|---|---|---|---|---|
 //! | CT1.1 | Single instruction, unquoted positional arg | `cmd val` | Single | Simple (`cmd`) | Positional | Unquoted | Absent | `(false, false)` | None | Command `cmd`, Positional `val` |
 //! | CT1.2 | Single instruction, multi-path, named arg | `path1 path2 name1 ::val1` | Single | Simple (`path1`) | Mixed | Unquoted | Absent | `(false, false)` | None | Command `path1`, Positional `path2`, Named `name1 ::val1` |
-//! | CT1.3 | Single instruction, help operator | `cmd ?` | Single | Simple (`cmd`) | None | N/A | Present | `(false, false)` | None | Command `cmd`, Help requested |
+//! | CT1.3 | Single instruction, help token | `cmd ??` | Single | Simple (`cmd`) | Positional | N/A | Present | `(false, false)` | None | Command `cmd`, Positional `??` (unquoted) |
 //! | CT1.4 | Single instruction, quoted positional arg | `cmd "quoted val"` | Single | Simple (`cmd`) | Positional | Quoted | Absent | `(false, false)` | None | Command `cmd`, Positional `"quoted val"` |
 //! | CT1.5 | Single instruction, named arg, escaped val | `cmd name1 :: "esc\nval"` | Single | Simple (`cmd`) | Named | Escaped | Absent | `(false, false)` | None | Command `cmd`, Named `name1 ::esc\nval` |
 //! | CT1.6 | Single instruction, named arg, invalid escape | `cmd name1 :: "bad\xval"` | Single | Simple (`cmd`) | Named | Invalid Escape | Absent | `(false, false)` | None | Command `cmd`, Named `name1 ::bad\xval` (literal `\x`) |
@@ -67,7 +67,6 @@ fn ct1_1_single_str_single_path_unquoted_pos_arg()
   "CT1.1 Positional arg value"
  );
   assert!( instruction.named_arguments.is_empty(), "CT1.1 Named args" );
-  // assert!(!instruction.help_requested, "CT1.1 Help requested");
 }
 
 /// Tests a single instruction with a multi-segment command path and an unquoted named argument.
@@ -90,23 +89,23 @@ fn ct1_2_single_str_multi_path_unquoted_named_arg()
   assert_eq!( instruction.named_arguments.len(), 1, "CT1.2 Named args count" );
   let arg1 = instruction.named_arguments.get( "name1" ).expect( "CT1.2 Missing name1" );
   assert_eq!( arg1[0].value, "val1", "CT1.2 name1 value" ); // Changed to &str
-      // assert!(!instruction.help_requested, "CT1.2 Help requested");
 }
 
-/// Tests a single instruction with a single command path and a help operator, no arguments.
+/// Tests a single instruction with a single command path and the help token, no other arguments.
 /// Test Combination: CT1.3
 #[ test ]
 fn ct1_3_single_str_single_path_help_no_args()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd ?";
+  let input = "cmd ??";
   let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "CT1.3 Parse error: {:?}", result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ], "CT1.3 Path" );
-  assert!( instruction.positional_arguments.is_empty(), "CT1.3 Positional args" );
+  assert_eq!( instruction.positional_arguments.len(), 1, "CT1.3 '??' arrives as one positional" );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??", "CT1.3 help token value" );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted, "CT1.3 help token unquoted" );
   assert!( instruction.named_arguments.is_empty(), "CT1.3 Named args" );
-  assert!( instruction.help_requested, "CT1.3 Help requested should be true" ); // Re-enabled
 }
 
 /// Tests a single instruction with a single command path and a quoted positional argument.
@@ -127,7 +126,6 @@ fn ct1_4_single_str_single_path_quoted_pos_arg()
   "CT1.4 Positional arg value"
  );
   assert!( instruction.named_arguments.is_empty(), "CT1.4 Named args" );
-  // assert!(!instruction.help_requested, "CT1.4 Help requested");
 }
 
 /// Tests a single instruction with a single command path and a named argument with an escaped value.
@@ -145,7 +143,6 @@ fn ct1_5_single_str_single_path_named_arg_escaped_val()
   assert_eq!( instruction.named_arguments.len(), 1, "CT1.5 Named args count" );
   let arg1 = instruction.named_arguments.get( "name1" ).expect( "CT1.5 Missing name1" );
   assert_eq!( arg1[0].value, "esc\nval", "CT1.5 name1 value with newline" ); // Changed to &str
-               // assert!(!instruction.help_requested, "CT1.5 Help requested");
 }
 
 /// Tests a single instruction with a single command path and a named argument with an invalid escape sequence.
@@ -191,7 +188,6 @@ fn ct3_1_single_str_separator_basic()
   "CT3.1 Positional arg value"
  ); // Corrected expectation
   assert!( instr1.named_arguments.is_empty(), "CT3.1 Instr1 Named" );
-  // assert!(!instr1.help_requested);
 
   // Instruction 2 : "cmd2 name ::val"
   let instr2 = &instructions[ 1 ];
@@ -203,7 +199,6 @@ fn ct3_1_single_str_separator_basic()
   "val",
   "CT3.1 Instr2 name value"
  ); // Changed to &str
-              // assert!(!instr2.help_requested);
 }
 
 /// Tests that a duplicate named argument results in an error when the option is set.
@@ -304,7 +299,6 @@ fn ct6_1_command_path_with_dots_and_slashes()
   "val",
   "CT6.1 name value"
  ); // Changed to &str
-              // assert!(!instruction.help_requested, "CT6.1 Help requested");
 }
 
 /// Tests parsing of a root namespace list instruction (input '.').
@@ -332,27 +326,27 @@ fn sa1_1_root_namespace_list()
   assert_eq!( instruction.overall_location, SourceLocation ::StrSpan { start: 0, end: 1 } );
 }
 
-/// Tests parsing of a root namespace help instruction (input '. ?').
+/// Tests parsing of a root namespace help instruction (input '. ??').
 /// Test Combination: SA1.2
 #[ test ]
 fn sa1_2_root_namespace_help()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = ". ?";
+  let input = ". ??";
   let result = parser.parse_repl_input( input );
-  assert!( result.is_ok(), "SA1.2 Parse error for '. ?' : {:?}", result.err() );
+  assert!( result.is_ok(), "SA1.2 Parse error for '. ??' : {:?}", result.err() );
   let instruction = result.unwrap();
-  // Expecting path to be empty, no positional args, and help requested.
-  assert!(
-  instruction.command_path_slices.is_empty(),
-  "SA1.2 Path for '. ?' should be empty"
+  // With no command segment before it, '??' itself occupies the path slot —
+  // the semantic layer maps a ["??"] path to the global help listing.
+  assert_eq!(
+  instruction.command_path_slices,
+  vec![ "??".to_string() ],
+  "SA1.2 '. ??' should parse '??' into the path slot"
  );
   assert!(
   instruction.positional_arguments.is_empty(),
-  "SA1.2 Positional args for '. ?' should be empty"
+  "SA1.2 Positional args for '. ??' should be empty"
  );
-  assert!( instruction.help_requested, "SA1.2 Help requested for '. ?' should be true" );
-  // Re-enabled
 }
 
 /// Tests that a whole line comment results in an error.

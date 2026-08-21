@@ -266,17 +266,33 @@ pub struct SemanticAnalyzer< 'a >
 {
   pub( in super ) instructions : & 'a [ GenericInstruction ],
   pub( in super ) registry : & 'a CommandRegistry,
+  pub( in super ) help_detection : bool,
 }
 
 impl< 'a > SemanticAnalyzer< 'a >
 {
   ///
-  /// Creates a new `SemanticAnalyzer`.
+  /// Creates a new `SemanticAnalyzer` with help detection enabled.
   ///
   #[ must_use ]
   pub fn new( instructions : & 'a [ GenericInstruction ], registry : & 'a CommandRegistry ) -> Self
   {
-    Self { instructions, registry }
+    Self { instructions, registry, help_detection : true }
+  }
+
+  ///
+  /// Sets whether unquoted `??` tokens are intercepted as help requests
+  /// (default: `true`).
+  ///
+  /// With detection disabled, `??` flows through argument binding as an
+  /// ordinary literal value and the bare `??` listing shortcut is off. Quoting
+  /// a value (`param::"??"`) is the per-value opt-out that works without
+  /// disabling detection globally.
+  #[ must_use ]
+  pub fn with_help_detection( mut self, help_detection : bool ) -> Self
+  {
+    self.help_detection = help_detection;
+    self
   }
 
   ///
@@ -334,6 +350,19 @@ impl< 'a > SemanticAnalyzer< 'a >
         return Err( Error::Execution( Self::unknown_parameter_error_for_empty_path( instruction ) ) );
       }
 
+      // Bare `??` mirrors bare `.`: global command listing. Only the exact,
+      // argument-free form qualifies — `??` with arguments falls through to the
+      // ordinary lookup (and fails as an unknown command) so arguments are never
+      // silently discarded.
+      if self.help_detection
+        && instruction.command_path_slices.len() == 1
+        && instruction.command_path_slices[ 0 ] == "??"
+        && instruction.named_arguments.is_empty()
+        && instruction.positional_arguments.is_empty()
+      {
+        return self.generate_help_listing();
+      }
+
       let command_path_refs : Vec< &str > = instruction.command_path_slices.iter().map( std::string::String::as_str ).collect();
       let command_name = crate::interner::intern_command_name( &command_path_refs );
 
@@ -342,25 +371,39 @@ impl< 'a > SemanticAnalyzer< 'a >
         format!( "Command Error: The command '{command_name}' was not found. Use '.' to see all available commands or check for typos." ),
       ))?;
 
-      // Check for double question mark parameter (alternative help access)
-      let has_double_question_mark = instruction.positional_arguments.iter()
-        .any( | arg | arg.value == "??" ) ||
-        instruction.named_arguments.values()
-        .flatten()
-        .any( | arg | arg.value == "??" );
-
-      // Check if help was requested for this command (via ? operator or ?? parameter)
-      if instruction.help_requested || has_double_question_mark
+      // Variant B help detection: an unquoted `??` value is a help request.
+      // Named `param::??` (parameter help) takes precedence over positional `??`
+      // (command help, any position). Quoted `"??"` passes through as a literal,
+      // and `help_detection: false` disables interception entirely — both checks
+      // run before `bind_arguments`, so routines can never observe an unquoted `??`.
+      if self.help_detection
       {
-        // Generate help for this specific command (respects UNILANG_HELP_VERBOSITY env var)
-        let help_generator = crate::help::HelpGenerator::from_env( self.registry );
-        let help_content = help_generator.command( command_name )
-          .unwrap_or( format!( "No help available for command '{command_name}'" ) );
+        if let Some( param_name ) = Self::first_help_requested_parameter( instruction, &command_def )
+        {
+          let help_generator = crate::help::HelpGenerator::from_env( self.registry );
+          let help_content = help_generator.parameter( command_name, param_name )
+            .unwrap_or_else( || format!( "No help available for command '{command_name}'" ) );
 
-        return Err( Error::Execution( ErrorData::new(
-          ErrorCode::HelpRequested,
-          help_content,
-        )));
+          return Err( Error::Execution( ErrorData::new(
+            ErrorCode::HelpRequested,
+            help_content,
+          )));
+        }
+
+        let positional_help_requested = instruction.positional_arguments.iter()
+          .any( | arg | arg.value == "??" && !arg.was_quoted );
+        if positional_help_requested
+        {
+          // Generate help for this specific command (respects UNILANG_HELP_VERBOSITY env var)
+          let help_generator = crate::help::HelpGenerator::from_env( self.registry );
+          let help_content = help_generator.command( command_name )
+            .unwrap_or_else( || format!( "No help available for command '{command_name}'" ) );
+
+          return Err( Error::Execution( ErrorData::new(
+            ErrorCode::HelpRequested,
+            help_content,
+          )));
+        }
       }
 
       let arguments = Self::bind_arguments( instruction, &command_def )?;
@@ -412,6 +455,48 @@ impl< 'a > SemanticAnalyzer< 'a >
     };
 
     ErrorData::new( ErrorCode::UnknownParameter, message )
+  }
+
+  ///
+  /// Returns the target parameter name of the first named help request — any
+  /// named argument carrying an unquoted `??` value.
+  ///
+  /// When several named arguments carry `??`, the winner is the first one in the
+  /// command definition's argument order (matched by name or alias), keeping the
+  /// result deterministic despite the named-argument map's arbitrary iteration
+  /// order. A `??` on a name unknown to the definition is picked last (smallest
+  /// lexicographically) and yields the parameter-not-found listing downstream.
+  ///
+  fn first_help_requested_parameter< 'i >
+  (
+    instruction : & 'i GenericInstruction,
+    command_def : &crate::data::CommandDefinition,
+  )
+  ->
+  Option< & 'i str >
+  {
+    let mut requested : Vec< & 'i str > = instruction.named_arguments.iter()
+      .filter( |( _, args )| args.iter().any( | arg | arg.value == "??" && !arg.was_quoted ) )
+      .map( |( name, _ )| name.as_str() )
+      .collect();
+
+    if requested.is_empty()
+    {
+      return None;
+    }
+
+    for arg_def in command_def.arguments()
+    {
+      let matched = requested.iter()
+        .find( | name | **name == arg_def.name || arg_def.aliases.iter().any( | alias | alias == *name ) );
+      if let Some( found ) = matched
+      {
+        return Some( found );
+      }
+    }
+
+    requested.sort_unstable();
+    Some( requested[ 0 ] )
   }
 
   ///

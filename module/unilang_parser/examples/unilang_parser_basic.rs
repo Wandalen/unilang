@@ -29,7 +29,6 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   println!( "   Command path: {:?}", instruction.command_path_slices );
   println!( "   Positional args: {:?}", instruction.positional_arguments );
   println!( "   Named arguments: {:?}", instruction.named_arguments );
-  println!( "   Help requested: {:?}", instruction.help_requested );
 
   // Example 2 : Accessing specific argument values
   println!( "\n2. Accessing Specific Arguments: " );
@@ -44,7 +43,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
 
   // Example 3 : Multiple instructions (command sequence)
   println!( "\n3. Multiple Instructions (Command Sequence) : " );
-  let input_multiple = "system.info ? ;; file.read path :: \"/etc/hosts\" binary :: true ;; user.add 'John Doe' email ::john.doe@example.com";
+  let input_multiple = "system.info ?? ;; file.read path :: \"/etc/hosts\" binary :: true ;; user.add 'John Doe' email ::john.doe@example.com";
   println!( "   Input: {input_multiple}" );
 
   let instructions = parser.parse_multiple_instructions( input_multiple )?;
@@ -57,7 +56,11 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   // Show specific details for each instruction
   match i
   {
-   0 => println!( "     -> Help request for system.info: {:?}", instruction.help_requested ),
+   0 => println!
+   (
+  "     -> Help request for system.info: {}",
+  instruction.positional_arguments.iter().any( | arg | arg.value == "??" && !arg.was_quoted )
+ ),
    1 =>
    {
   println!
@@ -97,12 +100,13 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   println!( "   Command name: {}", complex_path.command_path_slices.last().unwrap_or( & String ::new() ) );
   println!( "   Joined path: {}", complex_path.command_path_slices.join( "." ) );
 
-  // Example 5 : Help operator demonstration
-  println!( "\n5. Help Operator Usage: " );
+  // Example 5 : Help token demonstration — an unquoted `??` positional marks a
+  // help request; the semantic layer (not the parser) acts on it.
+  println!( "\n5. Help Token Usage: " );
   let help_examples = vec!
   [
-  "file.copy ?", // Basic help
-  "database.query sql :: \"SELECT * FROM users\" ?", // Contextual help
+  "file.copy ??", // Basic help
+  "database.query sql :: \"SELECT * FROM users\" ??", // Contextual help
  ];
 
   for help_cmd in help_examples
@@ -111,7 +115,11 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   let help_instruction = parser.parse_repl_input( help_cmd )?;
 
   println!( "     Command: {:?}", help_instruction.command_path_slices );
-  println!( "     Help requested: {:?}", help_instruction.help_requested );
+  println!
+  (
+   "     Help requested: {}",
+   help_instruction.positional_arguments.iter().any( | arg | arg.value == "??" && !arg.was_quoted )
+ );
   if !help_instruction.named_arguments.is_empty()
   {
    println!( "     Context args: {:?}", help_instruction.named_arguments );
@@ -124,7 +132,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   println!( "  - 02_named_arguments_quoting.rs" );
   println!( "  - 03_complex_argument_patterns.rs" );
   println!( "  - 04_multiple_instructions.rs" );
-  println!( "  - 05_help_operator_usage.rs" );
+  println!( "  - 05_help_token_usage.rs" );
   println!( "  - 06_advanced_escaping_quoting.rs" );
   println!( "  - 07_error_handling_diagnostics.rs" );
   println!( "  - 08_custom_parser_configuration.rs" );

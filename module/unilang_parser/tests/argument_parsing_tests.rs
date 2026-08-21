@@ -23,7 +23,7 @@
 //! | T1.4 | Positional after named (error) | `cmd name1 ::val1 pos1` | Mixed | Named first | `(true, false)` | Normal | Correct | No | Error: Positional after named |
 //! | T1.5 | Positional after named (ok) | `cmd name1 ::val1 pos1` | Mixed | Named first | `(false, false)` | Normal | Correct | No | Command `cmd`, Positional `pos1`, Named `name1 ::val1` |
 //! | T1.6 | Named arg empty value (no quotes) | `cmd name :: ` | Named | N/A | `(false, false)` | Empty | Malformed (missing value) | No | Error: Expected value for named arg |
-//! | T1.7 | Malformed named arg (delimiter as value) | `cmd name :: ?` | Named | N/A | `(false, false)` | Operator | Malformed (delimiter as value) | No | Error: Expected value for named arg |
+//! | T1.7 | Literal `?` as named value | `cmd name :: ?` | Named | N/A | `(false, false)` | Identifier | Well-formed | No | Named `name` = `?` (unquoted literal) |
 //! | T1.8 | Named arg missing name | ` ::value` | Named | N/A | `(false, false)` | Normal | Malformed (missing name) | No | Error: Unexpected token ' :: ' |
 //! | T1.9 | Unescaping named arg value | `cmd name :: "a\\\\b\\\"c'd"` | Named | N/A | `(false, false)` | Escaped | Correct | No | Value unescaped: `a\b"c'd` |
 //! | T1.10 | Unescaping positional arg value | `cmd "a\\\\b\\\"c'd\\ne\\tf"` | Positional | N/A | `(false, false)` | Escaped | Correct | No | Value unescaped: `a\b"c'd\ne\tf` |
@@ -195,22 +195,21 @@ fn named_arg_with_empty_value_no_quotes_error()
  }
 }
 
-/// Tests that a malformed named argument (delimiter as value) results in an error.
+/// Tests that `?` after `::` is an ordinary literal value under the `??` design.
+/// The removed help operator used to make this input an error; the missing-value
+/// error itself remains covered by T1.8 and the error-reporting matrix (T3.6-T3.8).
 /// Test Combination: T1.7
 #[ test ]
-fn malformed_named_arg_name_delimiter_operator()
+fn question_mark_as_named_value_is_literal()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
   let input = "cmd name :: ?";
   let result = parser.parse_repl_input( input );
-  assert!( result.is_err() );
-  if let Err( e ) = result
-  {
-  assert_eq!(
-   e.kind,
-   ErrorKind ::Syntax( "Expected value for named argument 'name'".to_string() )
- );
- }
+  assert!( result.is_ok(), "'?' must parse as a literal named value: {:?}", result.err() );
+  let instruction = result.unwrap();
+  let arg = &instruction.named_arguments.get( "name" ).unwrap()[ 0 ];
+  assert_eq!( arg.value, "?" );
+  assert!( !arg.was_quoted );
 }
 
 /// Tests that a named argument missing its name results in an error.

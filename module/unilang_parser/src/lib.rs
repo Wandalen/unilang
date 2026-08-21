@@ -25,7 +25,9 @@ extern crate alloc;
 /// - Handles named arguments in the format `name ::value`.
 /// - Supports quoted arguments (e.g., `"value with spaces"`, `'another value'`) with basic escape sequence handling
 ///   (`\\`, `\"`, `\'`, `\n`, `\t`).
-/// - Parses the help operator `?` (if it's the last token after a command path).
+/// - Treats `?` and `??` as ordinary value tokens; each [`Argument`] records `was_quoted`
+///   so semantic layers can distinguish an unquoted `??` (help request) from a quoted
+///   `"??"` (literal value). The parser itself carries no help state.
 /// - Splits multiple instructions separated by `;;`.
 /// - Provides detailed, location-aware error reporting using `ParseError` and `SourceLocation`
 ///   to pinpoint issues in the input string or slice segments.

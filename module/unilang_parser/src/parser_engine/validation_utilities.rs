@@ -11,7 +11,7 @@ use crate ::
   item_adapter :: { RichItem, ZeroCopyTokenKind },
   instruction ::Argument,
 };
-use alloc ::vec :: { Vec, IntoIter };
+use alloc ::vec ::Vec;
 use alloc ::collections ::BTreeMap;
 use alloc ::string :: { String, ToString };
 use alloc ::format;
@@ -198,20 +198,6 @@ pub( super ) fn error_missing_named_value_at_end( arg_name: &str, location: Sour
   )
 }
 
-/// Validates that the help operator '?' is the last token in the instruction.
-pub( super ) fn validate_help_operator( item: &RichItem< '_ >, items_iter: &mut core ::iter ::Peekable< IntoIter< RichItem< '_ > > > ) -> Result< (), ParseError >
-{
-  if items_iter.peek().is_some()
-  {
-    return Err( ParseError ::new
-    (
-      ErrorKind ::Syntax( "Help operator '?' must be the last token".to_string() ),
-      item.adjusted_source_location.clone(),
-    ));
-  }
-  Ok( () )
-}
-
 /// Processes a positional argument, validating it against parser options and adding it to the collection.
 pub( super ) fn process_positional_argument(
   options: &UnilangParserOptions,
@@ -234,6 +220,7 @@ pub( super ) fn process_positional_argument(
     value: value.to_string(),
     name_location: None,
     value_location: item.source_location(),
+    was_quoted: item.inner.was_quoted,
   });
 
   Ok( () )

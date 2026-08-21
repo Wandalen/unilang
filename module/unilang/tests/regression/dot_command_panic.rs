@@ -158,7 +158,6 @@ fn test_empty_command_path_edge_case()
     command_path_slices: vec![], // This was causing the panic
     named_arguments: std::collections::BTreeMap::new(),
     positional_arguments: vec![],
-    help_requested: false,
     overall_location: unilang_parser::SourceLocation::StrSpan { start: 0, end: 1 },
   };
   

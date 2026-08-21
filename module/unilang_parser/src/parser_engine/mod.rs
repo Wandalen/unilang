@@ -283,6 +283,7 @@ impl Parser
         let mut value_parts = Vec::new();
         let mut value_start: Option< usize > = None;
         let mut value_end: usize = 0;
+        let mut any_part_quoted = false;
 
         while let Some( next_item ) = iter.peek()
         {
@@ -299,6 +300,10 @@ impl Parser
 
           // Take the token and add to value parts
           let token = iter.next().unwrap();
+
+          // Quoting anywhere in the merged value signals literal intent
+          // (distinguishes `param::??` help from `param::"??"` literal)
+          any_part_quoted |= token.inner.was_quoted;
 
           // Track source location bounds
           if let SourceLocation::StrSpan { start, end } = token.adjusted_source_location
@@ -341,7 +346,7 @@ impl Parser
             start: value_start.unwrap_or( 0 ),
             end: value_end,
             typ: crate::item_adapter::SplitType::NonDelimiter,
-            was_quoted: false,
+            was_quoted: any_part_quoted,
           };
 
           let merged_token = RichItem::new(
@@ -464,7 +469,6 @@ impl Parser
   command_path_slices: Vec ::new(),
   positional_arguments: Vec ::new(),
   named_arguments: BTreeMap ::new(),
-  help_requested: false,
   overall_location: SourceLocation ::None, // No specific location for empty input
  });
  }
@@ -489,14 +493,13 @@ impl Parser
 
   let command_path_slices = Self ::parse_command_path( &mut items_iter, instruction_end_location )?;
 
-  let ( positional_arguments, named_arguments, help_operator_found ) = self.parse_arguments( &mut items_iter )?;
+  let ( positional_arguments, named_arguments ) = self.parse_arguments( &mut items_iter )?;
 
   Ok( GenericInstruction
   {
    command_path_slices,
    positional_arguments,
    named_arguments,
-   help_requested: help_operator_found,
    overall_location: SourceLocation ::StrSpan
    {
   start: instruction_start_location,
@@ -803,6 +806,7 @@ impl Parser
               },
               end: current_value_end_location,
             },
+            was_quoted: value_item.inner.was_quoted,
           };
 
           // Check for duplicate named arguments if the option is set
@@ -945,6 +949,7 @@ impl Parser
               },
               end: current_value_end_location,
             },
+            was_quoted: false, // path values are assembled from unquoted dot/segment tokens
           };
 
           // Check for duplicate named arguments if the option is set
@@ -980,11 +985,10 @@ impl Parser
   &self,
   items_iter: &mut core ::iter ::Peekable< IntoIter< RichItem< '_ > > >,
  )
-  -> Result< ( Vec< Argument >, BTreeMap< String, Vec< Argument > >, bool ), ParseError >
+  -> Result< ( Vec< Argument >, BTreeMap< String, Vec< Argument > > ), ParseError >
   {
   let mut positional_arguments = Vec ::new();
   let mut named_arguments = BTreeMap ::new();
-  let mut help_operator_found = false;
 
   while let Some( item ) = items_iter.next()
   {
@@ -1069,14 +1073,6 @@ impl Parser
    // Positional argument
    validation_utilities::process_positional_argument( &self.options, s.as_ref(), &item, &mut positional_arguments, &named_arguments )?;
  }
-  ZeroCopyTokenKind ::Operator( "?" ) =>
-  {
-   validation_utilities::validate_help_operator( &item, items_iter )?;
-   help_operator_found = true;
-   // When help is requested, clear any previously collected positional arguments
-   // as they are not relevant for help display
-   positional_arguments.clear();
- }
   ZeroCopyTokenKind::Operator("::" | " :: ") =>
   {
    return Err( validation_utilities::error_orphaned_operator( item.adjusted_source_location.clone() ) );
@@ -1102,7 +1098,7 @@ impl Parser
  }
  }
 
-  Ok( ( positional_arguments, named_arguments, help_operator_found ) )
+  Ok( ( positional_arguments, named_arguments ) )
  }
 
   /// Detects potential argv misuse patterns that suggest re-tokenization.
@@ -1157,7 +1153,6 @@ impl Parser
         command_path_slices: Vec ::new(),
         positional_arguments: Vec ::new(),
         named_arguments: BTreeMap ::new(),
-        help_requested: false,
         overall_location: SourceLocation ::None,
       });
     }
@@ -1227,6 +1222,20 @@ impl Parser
 
           // Stop if next arg starts with . (it's a command or path separator)
           if next_arg.starts_with( '.' )
+          {
+            break;
+          }
+
+          // Fix(manual-test-2026-08-20): A standalone `??` argv element is the positional
+          // help token — never absorb it into a preceding named value.
+          // Root cause: the multiword absorption loop only broke on `::`, dot-prefixed, and
+          //   path-bearing tokens, so `app .cmd a::1 ??` glued into a::"1 ??" and the help
+          //   request surfaced as a coercion error instead of the command help page.
+          // Pitfall: the equivalent in-process string form `.cmd a::1 ??` already yields a
+          //   separate positional `??` token; argv parsing must match, or CLI binaries and
+          //   in-process pipelines disagree on help behavior. A quoted literal (`'"??"'`)
+          //   arrives with its own inner quotes, never equals bare `??`, and still absorbs.
+          if next_arg == "??"
           {
             break;
           }
@@ -1332,10 +1341,14 @@ impl Parser
           && !arg.ends_with( '-' )
           && arg.chars().all( | c | c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-' );
         let is_number = arg.parse :: < i64 >().is_ok();
-        // '?' is the unilang help operator — must not be quoted even though it is not an identifier.
         let is_operator = self.options.operators.contains( &arg.as_str() );
+        // `?`/`??` are value-capable tokens the string parser accepts unquoted; re-quoting
+        // them here would flip `was_quoted` to true and turn a CLI help request (`app .cmd ??`)
+        // into the literal string — the shell-literal form (`'"??"'`) arrives with its own
+        // inner quotes and stays on the quoted path naturally.
+        let is_question_token = matches!( arg.as_str(), "?" | "??" );
         let needs_quoting = arg.chars().any( char::is_whitespace )
-          || ( !arg.starts_with( '.' ) && !is_unilang_identifier && !is_number && !is_operator );
+          || ( !arg.starts_with( '.' ) && !is_unilang_identifier && !is_number && !is_operator && !is_question_token );
         if needs_quoting
         {
           // Escape any existing quotes by replacing " with \"

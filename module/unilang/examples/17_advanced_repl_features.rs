@@ -42,7 +42,7 @@ fn register_comprehensive_commands( registry : &mut CommandRegistry ) -> Result<
   // Generic listing commands
   let ls_cmd = CommandDefinition::former()
   .name( ".list" )
-  .namespace( ".cmd2" )
+  .namespace( ".fs" )
   .description( "List files and directories".to_string() )
   .hint( "Generic listing operation" )
   .status( "stable" )
@@ -295,9 +295,14 @@ fn run_advanced_repl( pipeline : &Pipeline ) -> Result< (), Box< dyn core::error
         let input = input.trim().to_string();
         
         // Handle REPL meta-commands
-        if handle_meta_commands( &input, &mut session_state )?
+        match handle_meta_commands( &input, &mut session_state )
         {
-          continue;
+          Ok( true ) => continue,
+          Ok( false ) => {},
+          // `handle_meta_commands` signals quit/exit via Err("quit") — a graceful
+          // shutdown, not a failure: break so the session summary still prints
+          // and the process exits 0.
+          Err( _ ) => break,
         }
 
         // Skip empty input
@@ -310,8 +315,10 @@ fn run_advanced_repl( pipeline : &Pipeline ) -> Result< (), Box< dyn core::error
         session_state.add_command( input.clone() );
         session_state.session_count += 1;
 
-        // Handle auto-completion suggestions
-        if input.ends_with( '?' )
+        // Handle auto-completion suggestions — a single trailing `?` on a partial
+        // command name. Never intercept the `??` help token: `??`, `.cmd ??`, and
+        // `name::??` must reach the pipeline so unilang renders its help pages.
+        if input.ends_with( '?' ) && !input.ends_with( "??" )
         {
           let partial_command = input.trim_end_matches( '?' );
           suggest_completions( partial_command );
@@ -571,6 +578,7 @@ fn display_advanced_help()
 
   println!( "\n✨ Advanced Features:" );
   println!( "  • Auto-completion: type partial command + '?' for suggestions" );
+  println!( "  • Help token: '??' alone lists commands; '.cmd ??' / 'name::??' show help pages" );
   println!( "  • Command history: automatically tracked and searchable" );
   println!( "  • Error recovery: intelligent suggestions for failed commands" );
   println!( "  • Session statistics: track usage patterns and success rates" );

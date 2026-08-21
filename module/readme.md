@@ -8,5 +8,6 @@ Workspace crates for the unilang project.
 |-------|---------------|
 | `unilang/` | Core framework: command registry, execution, multi-modality interface |
 | `unilang_parser/` | Parser for Unilang CLI instruction syntax |
+| `unilang_help/` | Reusable help-page domain model, verbosity levels, and renderers |
 | `unilang_meta/` | Procedural macros for compile-time command registration |
 | `cargo_unilang/` | Scaffolding and health check tool for unilang CLI projects |

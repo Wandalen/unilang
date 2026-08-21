@@ -5,5 +5,4 @@ fn main() {
     println!("command_path_slices: {:?}", instr.command_path_slices);
     println!("named_arguments keys: {:?}", instr.named_arguments.keys().collect::<Vec<_>>());
     println!("positional_arguments: {:?}", instr.positional_arguments);
-    println!("help_requested: {:?}", instr.help_requested);
 }

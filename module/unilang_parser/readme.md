@@ -23,7 +23,7 @@ Building robust CLI parsers from scratch is complex and error-prone. The `unilan
 - **Command Paths**: Single and multi-segment paths (`cmd`, `namespace.command`, `deep.nested.path`)  
 - **Arguments**: Both positional (`arg1 arg2`) and named (`key::value`) arguments
 - **Quoting & Escaping**: Handles quoted strings (`"value"`, `'value'`) with escape sequences (`\"`, `\\`, `\n`, etc.)
-- **Help Operator**: Built-in support for `?` help requests
+- **Help Token**: `??` parses as an ordinary argument with `was_quoted` recorded, so semantic layers can detect help requests while a quoted `"??"` stays literal
 - **Multiple Instructions**: Parse command sequences separated by `;;`
 
 ### Advanced Features
@@ -83,7 +83,7 @@ cargo run --example 01_basic_command_parsing
 cargo run --example 02_named_arguments_quoting
 cargo run --example 03_complex_argument_patterns
 cargo run --example 04_multiple_instructions
-cargo run --example 05_help_operator_usage
+cargo run --example 05_help_token_usage
 cargo run --example 06_advanced_escaping_quoting
 cargo run --example 07_error_handling_diagnostics
 cargo run --example 08_custom_parser_configuration
@@ -167,21 +167,25 @@ assert_eq!(instructions[1].command_path_slices, ["cloud", "upload"]);
 assert_eq!(instructions[2].command_path_slices, ["notify", "send"]);
 ```
 
-### 5. Help Operator Usage
+### 5. Help Token Usage
 
 ```rust
 use unilang_parser::{Parser, UnilangParserOptions};
 
 let parser = Parser::new(UnilangParserOptions::default());
 
-// Command help
-let cmd = parser.parse_repl_input("file.copy ?")?;
-assert!(cmd.help_invoked);
+// Command help — an unquoted `??` arrives as an ordinary positional argument
+let cmd = parser.parse_repl_input("file.copy ??")?;
+assert!(cmd.positional_arguments.iter().any(|arg| arg.value == "??" && !arg.was_quoted));
 
-// Contextual help with arguments
-let cmd = parser.parse_repl_input("database.migrate version::1.2.0 ?")?;
-assert!(cmd.help_invoked);
-assert_eq!(cmd.named_arguments.get("version").unwrap(), "1.2.0");
+// Contextual help alongside named arguments
+let cmd = parser.parse_repl_input("database.migrate version::1.2.0 ??")?;
+assert!(cmd.positional_arguments.iter().any(|arg| arg.value == "??" && !arg.was_quoted));
+assert_eq!(cmd.named_arguments.get("version").unwrap()[0].value, "1.2.0");
+
+// Quoted "??" is a literal value, not a help request
+let cmd = parser.parse_repl_input("search.find pattern::\"??\"")?;
+assert!(cmd.named_arguments.get("pattern").unwrap()[0].was_quoted);
 ```
 
 ### 6. Advanced Escaping and Quoting
@@ -352,7 +356,7 @@ All code examples shown in this README are available as complete, runnable progr
 | [`02_named_arguments_quoting.rs`](examples/02_named_arguments_quoting.rs) | Named arguments | Named args with `::`, single/double quotes |
 | [`03_complex_argument_patterns.rs`](examples/03_complex_argument_patterns.rs) | Mixed argument types | Positional + named args, flag-like arguments |
 | [`04_multiple_instructions.rs`](examples/04_multiple_instructions.rs) | Command sequences | `;;` separated commands, workflow patterns |
-| [`05_help_operator_usage.rs`](examples/05_help_operator_usage.rs) | Help requests | `?` operator, contextual help |
+| [`05_help_token_usage.rs`](examples/05_help_token_usage.rs) | Help requests | `??` help token, quoted-literal escape, contextual help |
 | [`06_advanced_escaping_quoting.rs`](examples/06_advanced_escaping_quoting.rs) | Complex strings | Escape sequences, regex patterns, JSON content |
 | [`07_error_handling_diagnostics.rs`](examples/07_error_handling_diagnostics.rs) | Error handling | Error types, location info, diagnostics |
 | [`08_custom_parser_configuration.rs`](examples/08_custom_parser_configuration.rs) | Parser configuration | Strict vs permissive parsing options |

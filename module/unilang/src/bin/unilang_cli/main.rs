@@ -164,7 +164,20 @@ fn run() -> Result< (), unilang::error::Error >
 
   let interpreter = Interpreter::new( &commands, &registry );
   let mut context = ExecutionContext::default();
-  interpreter.run( &mut context )?;
+  // Fix(manual-test-2026-08-20): print returned outputs instead of discarding them.
+  // Root cause: routines self-printed and `interpreter.run`'s Vec<OutputData> was dropped,
+  //   so framework-generated routines that only RETURN content — `.command.help` above all —
+  //   produced exit 0 with zero bytes of output.
+  // Pitfall: printing here requires routines NOT to println! themselves, or every command
+  //   double-prints; demo routines return their content and this loop is the single printer.
+  let outputs = interpreter.run( &mut context )?;
+  for output in &outputs
+  {
+    if !output.content.is_empty()
+    {
+      println!( "{}", output.content );
+    }
+  }
 
   Ok( () )
 }

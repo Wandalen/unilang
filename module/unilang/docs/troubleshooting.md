@@ -83,7 +83,7 @@ See [architecture/007_migration_guide.md](architecture/007_migration_guide.md) f
 
 The error message includes a suggestion: `Did you mean 'name'?`
 
-Parameter names are validated strictly. Use `??` operator to see valid parameters:
+Parameter names are validated strictly. Use the `??` token to see valid parameters:
 
 ```bash
 .greet ??

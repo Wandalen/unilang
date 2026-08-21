@@ -14,6 +14,9 @@
 //! | T04 | path value + two bare positionals | `[".add", "repo::Wandalen/willbe", "extra1", "extra2"]` | repo="Wandalen/willbe", 2 positionals |
 //! | T05 | SSH URL as single token (regression) | `[".add", "repo::git@github.com:user/repo.git"]` | repo="git@github.com:user/repo.git" |
 //! | T06 | no params (regression guard) | `[".status"]` | command="status", no args |
+//! | T07 | help token after named value | `[".add", "a::1", "??"]` | a="1", 1 positional `??` unquoted |
+//! | T08 | help token after `name::??` | `[".add", "a::??", "??"]` | a="??", 1 positional `??` unquoted |
+//! | T09 | `?`-bearing multiword + `??` near-miss | `[".cmd", "message::what", "time?", "??x"]` | message="what time? ??x" |
 //!
 //! ## Corner Cases Covered
 //!
@@ -62,6 +65,42 @@
 //! surgical: only stop absorption when the accumulated value signals it is
 //! already complete (e.g., contains `/`). Removing the absorption loop entirely
 //! would break `message::hello world` style params.
+//!
+//! ---
+//!
+//! ## Second Defect: `??` help token absorbed into named value (manual-test-2026-08-20)
+//!
+//! ### Root Cause
+//!
+//! The absorption loop broke on `::`, dot-prefixed tokens, and path-bearing values,
+//! but a standalone `??` argv element — the positional help token — matched none of
+//! those, so `app .cmd a::1 ??` glued into `a::"1 ??"` and the help request surfaced
+//! as a coercion error on `a` instead of the command help page.
+//!
+//! ### Why Not Caught
+//!
+//! All `??`-routing tests exercised the in-process string path (`pipeline.run(".cmd a::1 ??")`),
+//! where the tokenizer naturally yields `??` as its own token. The argv path has its own
+//! absorption heuristic that the string path lacks, and no argv test combined a named
+//! value with a trailing `??` — only CLI binary probes hit the divergence.
+//!
+//! ### Fix Applied
+//!
+//! Added a stop condition in the absorption loop: an argv element that is exactly `??`
+//! always breaks absorption and becomes its own (positional, unquoted) token.
+//! Location: `src/parser_engine/mod.rs` absorption loop (after `starts_with('.')` check).
+//!
+//! ### Prevention
+//!
+//! Every semantic-layer token with positional meaning (`??`) must have an argv-path
+//! parity test, not just string-path coverage — the two tokenizations are separate code.
+//!
+//! ### Pitfall
+//!
+//! Only the exact `??` breaks. A `?` inside multiword text (`message::what time?`) and
+//! near-misses (`??x`) must continue absorbing — they are ordinary value fragments.
+//! A shell-quoted literal (`'"??"'`) arrives with inner quote characters, never equals
+//! bare `??`, and also continues absorbing.
 
 use unilang_parser::{ Parser, UnilangParserOptions };
 
@@ -217,4 +256,96 @@ fn test_parse_from_argv_no_params()
   assert_eq!( instruction.named_arguments.len(), 0, "no named args expected" );
   assert_eq!( instruction.positional_arguments.len(), 0, "no positionals expected" );
   assert!( instruction.command_path_slices.contains( &"status".to_string() ) );
+}
+
+// test_kind: bug_reproducer(manual-test-2026-08-20)
+#[test]
+fn test_parse_from_argv_help_token_after_named_value()
+{
+  // T07: standalone `??` after a named value must not be absorbed —
+  // it is the positional help token and must survive as its own unquoted positional.
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let result = parser.parse_from_argv( &[
+    ".add".to_string(),
+    "a::1".to_string(),
+    "??".to_string(),
+  ]);
+
+  assert!( result.is_ok(), "parse_from_argv must succeed: {:?}", result.err() );
+  let instruction = result.unwrap();
+
+  let a = instruction.named_arguments.get( "a" )
+    .expect( "a param must exist" );
+  assert_eq!(
+    a[ 0 ].value, "1",
+    "a must be exactly '1' — the trailing `??` help token must not be absorbed"
+  );
+
+  assert_eq!(
+    instruction.positional_arguments.len(), 1,
+    "`??` must become its own positional argument (the help token)"
+  );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??" );
+  assert!(
+    !instruction.positional_arguments[ 0 ].was_quoted,
+    "the `??` positional must stay unquoted so help detection recognizes it"
+  );
+}
+
+// test_kind: bug_reproducer(manual-test-2026-08-20)
+#[test]
+fn test_parse_from_argv_help_token_after_named_help_value()
+{
+  // T08: `a::??` followed by standalone `??` — the named `??` value stays intact
+  // and the trailing `??` still becomes its own positional help token.
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let result = parser.parse_from_argv( &[
+    ".add".to_string(),
+    "a::??".to_string(),
+    "??".to_string(),
+  ]);
+
+  assert!( result.is_ok(), "parse_from_argv must succeed: {:?}", result.err() );
+  let instruction = result.unwrap();
+
+  let a = instruction.named_arguments.get( "a" )
+    .expect( "a param must exist" );
+  assert_eq!( a[ 0 ].value, "??", "a must keep its `??` help value" );
+  assert!(
+    !a[ 0 ].was_quoted,
+    "the named `??` value must stay unquoted so parameter-help detection recognizes it"
+  );
+
+  assert_eq!(
+    instruction.positional_arguments.len(), 1,
+    "the trailing `??` must become its own positional argument"
+  );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??" );
+}
+
+// test_kind: regression_prevention(manual-test-2026-08-20)
+#[test]
+fn test_parse_from_argv_question_fragments_still_absorb()
+{
+  // T09: only the exact `??` breaks absorption — a `?`-suffixed word and a `??x`
+  // near-miss are ordinary value fragments and must continue multi-word absorption.
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let result = parser.parse_from_argv( &[
+    ".cmd".to_string(),
+    "message::what".to_string(),
+    "time?".to_string(),
+    "??x".to_string(),
+  ]);
+
+  assert!( result.is_ok(), "parse_from_argv must succeed: {:?}", result.err() );
+  let instruction = result.unwrap();
+
+  let message = instruction.named_arguments.get( "message" )
+    .expect( "message param must exist" );
+  assert_eq!(
+    message[ 0 ].value, "what time? ??x",
+    "`?`-bearing fragments that are not exactly `??` must keep absorbing"
+  );
+
+  assert_eq!( instruction.positional_arguments.len(), 0, "no positionals expected" );
 }

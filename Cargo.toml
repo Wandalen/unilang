@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["module/unilang", "module/unilang_parser", "module/unilang_meta", "module/cargo_unilang"]
+members = ["module/unilang", "module/unilang_parser", "module/unilang_help", "module/unilang_meta", "module/cargo_unilang"]
 
 [workspace.metadata]
 repo_url = "https://github.com/Wandalen/unilang"
@@ -11,8 +11,9 @@ discord_url = "https://discord.gg/m3yKnHRAGr"
 # ========================================
 # Workspace Member Crates
 # ========================================
-unilang = { version = "=0.59.1", path = "module/unilang", default-features = false }
-unilang_parser = { version = "=0.39.2", path = "module/unilang_parser", default-features = false }
+unilang = { version = "=0.60.0", path = "module/unilang", default-features = false }
+unilang_parser = { version = "=0.40.0", path = "module/unilang_parser", default-features = false }
+unilang_help = { version = "=0.1.0", path = "module/unilang_help", default-features = false }
 unilang_meta = { version = "=0.6.1", path = "module/unilang_meta", default-features = false }
 cargo_unilang = { version = "=0.6.1", path = "module/cargo_unilang", default-features = false }
 
@@ -82,3 +83,8 @@ lto = true
 opt-level = 3
 codegen-units = 1
 strip = true
+
+# Local override until cli_fmt 0.13.3 (DetailPageTemplate) is published; the
+# published 0.13.x lacks the detail-page types unilang_help renders with.
+[patch.crates-io]
+cli_fmt = { path = "../../wtools/dev/module/core/cli_fmt" }

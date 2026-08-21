@@ -1,8 +1,18 @@
 //!
 //! The help generation components for the Unilang framework.
 //!
-//! This module provides flexible help text generation with configurable verbosity levels,
-//! allowing applications to tailor help output to different user preferences and use cases.
+//! This module is a thin adapter over the `unilang_help` crate: it maps
+//! `CommandDefinition` into the renderer-agnostic help model and delegates
+//! rendering to `unilang_help`'s `PlainRenderer` (command pages) and
+//! `CliFmtRenderer` (parameter detail pages). Verbosity levels and display
+//! options are re-exports of the `unilang_help` types.
+//!
+//! # Help Invocation Surfaces
+//!
+//! - `??` alone — global command listing (mirror of bare `.`)
+//! - `.cmd ??` — command help page (any position, unquoted)
+//! - `.cmd param::??` — parameter detail page (unquoted; quote as `"??"` for the literal)
+//! - `.cmd.help` / `.cmd.help param` — spelled equivalents of the two above
 //!
 //! # Verbosity Levels
 //!
@@ -70,12 +80,182 @@
 mod private
 {
   use crate::registry::CommandRegistry;
+  use crate::data::{ ArgumentDefinition, CommandDefinition, Kind };
   use core::fmt::Write;
 
-  mod format_fns;
+  pub use unilang_help::{ HelpVerbosity, HelpDisplayOptions };
+  use unilang_help::{ CliFmtRenderer, HelpCommandData, HelpParamData, PlainRenderer };
 
-  mod verbosity;
-  pub use verbosity::{ HelpVerbosity, HelpDisplayOptions };
+  /// Maps a command definition into the renderer-agnostic `unilang_help` model.
+  ///
+  /// `name` is the full dotted name including namespace — every rendered usage
+  /// line must be directly typeable; `status` uses the lowercase `Display`
+  /// form, and per-parameter data comes from `help_param_data`.
+  #[ must_use ]
+  pub fn help_command_data( command : &CommandDefinition ) -> HelpCommandData
+  {
+    let mut data = HelpCommandData::default();
+    data.name = command.full_name();
+    data.description = command.description().to_string();
+    data.hint = command.hint().to_string();
+    data.version = command.version().as_str().to_string();
+    data.status = command.status().to_string();
+    data.show_version = command.show_version_in_help();
+    data.aliases = command.aliases().to_vec();
+    data.tags = command.tags().to_vec();
+    data.examples = command.examples().to_vec();
+    data.params = command.arguments().iter().map( | arg | help_param_data( command, arg ) ).collect();
+    data
+  }
+
+  /// Maps one argument definition into the `unilang_help` parameter model.
+  ///
+  /// `kind` keeps the full `Display` form (`List(String)`); `kind_compact` is the
+  /// lowercased `Debug` form truncated at the first `(` so parameterized kinds
+  /// render as a short token (`list`, `enum`, `map`) in usage lines. Enum choices
+  /// become `choices`; validation rules are pre-rendered via `Debug`. Examples
+  /// are derived: a synthesized canonical invocation first, then any command
+  /// examples mentioning the parameter by `name::` or `alias::`.
+  #[ must_use ]
+  pub fn help_param_data( command : &CommandDefinition, arg : &ArgumentDefinition ) -> HelpParamData
+  {
+    let mut data = HelpParamData::default();
+    data.name = arg.name.clone();
+    data.kind = arg.kind.to_string();
+    data.kind_compact = compact_kind( &arg.kind );
+    data.description = arg.description.clone();
+    data.hint = arg.hint.clone();
+    data.optional = arg.attributes.optional;
+    data.multiple = arg.attributes.multiple;
+    data.default = arg.attributes.default.clone();
+    data.choices = match &arg.kind
+    {
+      Kind::Enum( choices ) => choices.clone(),
+      _ => vec![],
+    };
+    data.validation_rules = arg.validation_rules.iter().map( | rule | format!( "{rule:?}" ) ).collect();
+    data.aliases = arg.aliases.clone();
+    data.examples = derive_param_examples( command, arg );
+    data
+  }
+
+  /// Lowercased `Debug` kind truncated at the first `(`: `List(String, None)` → `list`.
+  fn compact_kind( kind : &Kind ) -> String
+  {
+    let debug = format!( "{kind:?}" ).to_lowercase();
+    match debug.find( '(' )
+    {
+      Some( idx ) => debug[ ..idx ].to_string(),
+      None => debug,
+    }
+  }
+
+  /// Placeholder shown in a synthesized `cmd param::<placeholder>` example.
+  ///
+  /// Enum kinds use their first choice verbatim so the canonical example is
+  /// directly runnable; every other kind gets an angle-bracket token.
+  fn kind_placeholder( kind : &Kind ) -> String
+  {
+    match kind
+    {
+      Kind::Enum( choices ) => choices.first().cloned().unwrap_or_else( || "<value>".to_string() ),
+      Kind::Integer => "<n>".to_string(),
+      Kind::Float => "<x>".to_string(),
+      Kind::String => "<string>".to_string(),
+      Kind::Boolean => "<true|false>".to_string(),
+      Kind::Path => "<path>".to_string(),
+      Kind::File => "<file>".to_string(),
+      Kind::Directory => "<directory>".to_string(),
+      Kind::Url => "<url>".to_string(),
+      Kind::DateTime => "<datetime>".to_string(),
+      Kind::Pattern => "<pattern>".to_string(),
+      Kind::List( .. ) => "<list>".to_string(),
+      Kind::Map( .. ) => "<map>".to_string(),
+      Kind::JsonString => "<json>".to_string(),
+      Kind::Object => "<object>".to_string(),
+    }
+  }
+
+  /// Derives parameter-page examples: the synthesized canonical invocation, then
+  /// command examples mentioning the parameter by `name::` or any `alias::`.
+  fn derive_param_examples( command : &CommandDefinition, arg : &ArgumentDefinition ) -> Vec< String >
+  {
+    let mut examples = vec![ format!( "{} {}::{}", command.full_name(), arg.name, kind_placeholder( &arg.kind ) ) ];
+
+    let mut mentions = vec![ format!( "{}::", arg.name ) ];
+    for alias in &arg.aliases
+    {
+      mentions.push( format!( "{alias}::" ) );
+    }
+    for example in command.examples()
+    {
+      if mentions.iter().any( | mention | example.contains( mention.as_str() ) )
+      {
+        examples.push( example.clone() );
+      }
+    }
+    examples
+  }
+
+  /// Finds a parameter by canonical name or alias.
+  fn find_parameter< 'd >( command : & 'd CommandDefinition, param_name : &str ) -> Option< & 'd ArgumentDefinition >
+  {
+    command.arguments().iter()
+      .find( | arg | arg.name == param_name || arg.aliases.iter().any( | alias | alias == param_name ) )
+  }
+
+  /// Renders the standard help page for a command definition, honoring
+  /// `UNILANG_HELP_VERBOSITY` and display-option environment overrides.
+  ///
+  /// Registry-free counterpart of `HelpGenerator::command` — used by help
+  /// routines that capture a command definition instead of a registry.
+  #[ must_use ]
+  pub fn command_help_text( command : &CommandDefinition ) -> String
+  {
+    PlainRenderer::default()
+      .with_verbosity( HelpVerbosity::from_env() )
+      .with_options( HelpDisplayOptions::default().with_env_overrides() )
+      .render( &help_command_data( command ) )
+  }
+
+  /// Renders the parameter detail page for one parameter, honoring display-option
+  /// environment overrides. Accepts the canonical name or any alias; `None` when
+  /// the command has no such parameter.
+  #[ must_use ]
+  pub fn parameter_help_text( command : &CommandDefinition, param_name : &str ) -> Option< String >
+  {
+    let arg = find_parameter( command, param_name )?;
+    let renderer = CliFmtRenderer::default().with_options( HelpDisplayOptions::default().with_env_overrides() );
+    Some( renderer.render_param( &help_command_data( command ), &help_param_data( command, arg ) ) )
+  }
+
+  /// Like `parameter_help_text`, but a request for an unknown parameter yields a
+  /// listing of the command's valid parameters instead of `None` — a mistyped
+  /// `param::??` is never a dead end.
+  #[ must_use ]
+  pub fn parameter_help_or_listing( command : &CommandDefinition, param_name : &str ) -> String
+  {
+    if let Some( page ) = parameter_help_text( command, param_name )
+    {
+      return page;
+    }
+
+    let valid : Vec< &str > = command.arguments().iter().map( | arg | arg.name.as_str() ).collect();
+    if valid.is_empty()
+    {
+      format!(
+        "Parameter '{}' not found: command '{}' takes no parameters.",
+        param_name, command.full_name()
+      )
+    }
+    else
+    {
+      format!(
+        "Parameter '{}' not found for command '{}'. Valid parameters: {}.\nUse '{} ??' for command help.",
+        param_name, command.full_name(), valid.join( ", " ), command.full_name()
+      )
+    }
+  }
 
 ///
 /// Generates help information for commands.
@@ -158,22 +338,16 @@ impl< 'a > HelpGenerator< 'a >
   }
 
   ///
-  /// Generates a help string for a single command using current verbosity level.
-  ///
-  /// The output format depends on the verbosity level (0-4).
-  #[ must_use ]
-  pub fn command( &self, command_name : &str ) -> Option< String >
+  /// Resolves a command name to its definition using the help lookup chain:
+  /// exact match, then dot-prefixed, then the legacy `echo` → `.system.echo` mapping.
+  fn lookup( &self, command_name : &str ) -> Option< crate::CommandDefinition >
   {
-    // Try exact match first, then try with dot prefix
-    let command = self.registry.command( command_name )
+    self.registry.command( command_name )
     .or_else( || self.registry.command( &format!( ".{command_name}" ) ) )
     .or_else( ||
     {
-      // If command_name is "echo", try ".system.echo"
-      // If command_name is "cmd1.add", it should already be found.
-      // This handles cases where the user provides just the command name without namespace,
-      // or a partial namespace.
-      // For now, a simple check for "echo" to ".system.echo"
+      // Handles the case where the user provides just the command name without
+      // namespace; currently a single legacy mapping.
       if command_name == "echo"
       {
         self.registry.command( ".system.echo" )
@@ -182,16 +356,42 @@ impl< 'a > HelpGenerator< 'a >
       {
         None
       }
-    })?;
+    })
+  }
 
-    match self.verbosity
+  ///
+  /// Generates a help string for a single command using current verbosity level.
+  ///
+  /// The output format depends on the verbosity level (0-4).
+  #[ must_use ]
+  pub fn command( &self, command_name : &str ) -> Option< String >
+  {
+    let command = self.lookup( command_name )?;
+    let renderer = PlainRenderer::default()
+      .with_verbosity( self.verbosity )
+      .with_options( self.display_options.clone() );
+    Some( renderer.render( &help_command_data( &command ) ) )
+  }
+
+  ///
+  /// Generates a parameter detail page for one parameter of a command.
+  ///
+  /// Uses the same lookup chain as `command()` and accepts the parameter's
+  /// canonical name or any alias. When the command exists but the parameter does
+  /// not, returns a listing of the command's valid parameters so a mistyped
+  /// `param::??` request is never a dead end. Returns `None` only when the
+  /// command itself is unknown.
+  #[ must_use ]
+  pub fn parameter( &self, command_name : &str, param_name : &str ) -> Option< String >
+  {
+    let command = self.lookup( command_name )?;
+    if let Some( arg ) = find_parameter( &command, param_name )
     {
-      HelpVerbosity::Minimal => Some( self.format_minimal( &command ) ),
-      HelpVerbosity::Basic => Some( self.format_basic( &command ) ),
-      HelpVerbosity::Standard => Some( self.format_standard( &command ) ),
-      HelpVerbosity::Detailed => Some( self.format_detailed( &command ) ),
-      HelpVerbosity::Comprehensive => Some( self.format_comprehensive( &command ) ),
+      let renderer = CliFmtRenderer::default().with_options( self.display_options.clone() );
+      return Some( renderer.render_param( &help_command_data( &command ), &help_param_data( &command, arg ) ) );
     }
+
+    Some( parameter_help_or_listing( &command, param_name ) )
   }
 
 
@@ -312,8 +512,8 @@ impl< 'a > HelpGenerator< 'a >
     // Add footer with usage hints
     if prefix.is_none()
     {
-      writeln!( &mut summary, "Use '<command> help' to get detailed help for a specific command." ).unwrap();
-      writeln!( &mut summary, "Example: . .list help" ).unwrap();
+      writeln!( &mut summary, "Use '<command> ??' or '<command>.help' to get detailed help for a specific command." ).unwrap();
+      writeln!( &mut summary, "Example: .list ??" ).unwrap();
     }
 
     summary
@@ -359,6 +559,11 @@ mod_interface::mod_interface!
   exposed use private::HelpGenerator;
   exposed use private::HelpVerbosity;
   exposed use private::HelpDisplayOptions;
+  exposed use private::help_command_data;
+  exposed use private::help_param_data;
+  exposed use private::command_help_text;
+  exposed use private::parameter_help_text;
+  exposed use private::parameter_help_or_listing;
 
   prelude use private::HelpGenerator;
   prelude use private::HelpVerbosity;

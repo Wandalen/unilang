@@ -63,7 +63,7 @@ Manual validation under extreme conditions:
 2. Execute `.` command to see help
 3. Try a few basic commands like `.greet`
 4. Test error conditions with invalid commands
-5. Use help system (`?` operator) for command details
+5. Use the help system (`.command ??`, `name::??`, `.command.help`) for command details
 6. Verify error messages are clear and actionable
 
 ### Procedure 2: Multiple Parameter Testing

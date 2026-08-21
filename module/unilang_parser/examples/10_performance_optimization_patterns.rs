@@ -205,7 +205,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   let strict_parser = Parser ::new( UnilangParserOptions
   {
   main_delimiters: vec![ " ", "." ],
-  operators: vec![ " :: ", "?", "!" ],
+  operators: vec![ "::", " :: ", "!" ],
   whitespace_is_separator: true,
   error_on_positional_after_named: true,
   error_on_duplicate_named_arguments: true,

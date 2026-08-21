@@ -48,7 +48,7 @@
 //! | Empty value | `query::` | Value = `""` | EOF after operator |
 //! | Nested delimiters | `path::dir/file#123.txt` | Value = `"dir/file#123.txt"` | Multiple delimiters |
 //! | Whitespace terminates | `query::val1 val2` | value=`"val1"`, `"val2"` separate | Spec Rule 0 |
-//! | Help operator preserved | `query::Bug #003 ?` | Help still works | Mixed operators |
+//! | Help token preserved | `query::Bug #003 ??` | `??` positional survives | Mixed value + help token |
 //! | Hash outside value errors | `query::test #` | Parse error (existing behavior) | Context sensitivity |
 //! | Both API paths | `parse_from_argv([...])` | Same as `parse_single_instruction` | API consistency |
 //! | Dot in value | `query::path.to.file` | Value = `"path.to.file"` | Dot delimiter |
@@ -62,7 +62,7 @@
 //! - [x] Empty value
 //! - [x] Whitespace terminates value
 //! - [x] Multiple named arguments
-//! - [x] Help operator after value
+//! - [x] Help token after value
 //! - [x] Hash outside value causes error (preserves existing behavior)
 //! - [x] Nested delimiters (., /, #)
 //! - [x] Both `::` operator variants
@@ -125,8 +125,11 @@ fn test_question_mark_in_value()
   let value = get_arg_value( &instruction, "arg" );
   assert_eq!( value, "test?", "Question mark should be part of value" );
 
-  // Should NOT be interpreted as help request
-  assert!( !instruction.help_requested, "? in value should not trigger help" );
+  // A merged value containing '?' is an ordinary unquoted literal
+  assert!(
+    !instruction.named_arguments[ "arg" ][ 0 ].was_quoted,
+    "merged unquoted value must report was_quoted == false"
+  );
 }
 
 #[ test ]
@@ -214,13 +217,13 @@ fn test_whitespace_terminates_value()
 }
 
 #[ test ]
-fn test_help_operator_after_value()
+fn test_help_token_after_value()
 {
-  // Test Case: Help operator works after value context
-  // Input: .cmd query::"Bug #003" ?
-  // Expected: Value protected, help requested
+  // Test Case: Help token works after value context
+  // Input: .cmd query::"Bug #003" ??
+  // Expected: Value protected, '??' arrives as an unquoted positional (help token)
 
-  let input = ".cmd query::\"Bug #003\" ?";
+  let input = ".cmd query::\"Bug #003\" ??";
   let parser = Parser::new( UnilangParserOptions::default() );
   let result = parser.parse_repl_input( input );
 
@@ -230,8 +233,10 @@ fn test_help_operator_after_value()
   // Value should be protected
   assert_eq!( get_arg_value( &instruction, "query" ), "Bug #003" );
 
-  // Help should be requested
-  assert!( instruction.help_requested, "? operator should trigger help" );
+  // '??' arrives as an unquoted positional value for semantic help detection
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??" );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
 }
 
 #[ test ]
@@ -395,21 +400,23 @@ fn test_regression_hash_outside_value_still_errors()
 }
 
 #[ test ]
-fn test_regression_help_operator_alone_still_works()
+fn test_regression_help_token_alone_still_works()
 {
-  // Test Case: Help operator alone still works
-  // Input: .cmd ?
-  // Expected: Help requested, no errors
+  // Test Case: Help token alone still works
+  // Input: .cmd ??
+  // Expected: '??' parses as an unquoted positional value, no errors
 
-  let input = ".cmd ?";
+  let input = ".cmd ??";
   let parser = Parser::new( UnilangParserOptions::default() );
   let result = parser.parse_repl_input( input );
 
   assert!( result.is_ok(), "Failed to parse: {:?}", result.err() );
   let instruction = result.unwrap();
 
-  // Help should be requested
-  assert!( instruction.help_requested, "? alone should trigger help" );
+  // '??' arrives as an unquoted positional value for semantic help detection
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??" );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
 }
 
 #[ test ]

@@ -134,7 +134,7 @@ pub enum ZeroCopyTokenKind< 'a >
   /// A number literal.
   Number( alloc ::borrow ::Cow< 'a, str > ),
 
-  /// An operator (e.g., ` :: `, `?`).
+  /// An operator (e.g., `::`, ` :: `).
   Operator( &'static str ),
   /// A delimiter (e.g., space, dot, newline).
   Delimiter( &'static str ),
@@ -151,7 +151,7 @@ pub enum UnilangTokenKind< 'a >
   /// A number literal.
   Number( Cow< 'a, str > ),
 
-  /// An operator (e.g., ` :: `, `?`).
+  /// An operator (e.g., `::`, ` :: `).
   Operator( &'static str ),
   /// A delimiter (e.g., space, dot, newline).
   Delimiter( &'static str ),
@@ -241,7 +241,6 @@ pub fn classify_split_zero_copy< 'a >( s: &Split< 'a > ) -> Result< ( ZeroCopyTo
   {
   Cow ::Borrowed( " :: " ) => Ok( ( ZeroCopyTokenKind ::Operator( " :: " ), original_location ) ),
   Cow ::Borrowed( "::" ) => Ok( ( ZeroCopyTokenKind ::Operator( "::" ), original_location ) ),
-  Cow ::Borrowed( "?" ) => Ok( ( ZeroCopyTokenKind ::Operator( "?" ), original_location ) ),
   Cow ::Borrowed( " : " ) => Ok( ( ZeroCopyTokenKind ::Operator( " : " ), original_location ) ),
   Cow ::Borrowed( "." ) => Ok( ( ZeroCopyTokenKind ::Delimiter( "." ), original_location ) ),
   Cow ::Borrowed( " " ) => Ok( ( ZeroCopyTokenKind ::Delimiter( " " ), original_location ) ),
@@ -263,7 +262,10 @@ pub fn classify_split_zero_copy< 'a >( s: &Split< 'a > ) -> Result< ( ZeroCopyTo
    Ok( ( ZeroCopyTokenKind ::Number( s.string.clone() ), original_location ) )
  }
   else if is_valid_identifier( s.string.as_ref() )
+    || matches!( s.string.as_ref(), "?" | "??" )
   {
+   // `?` and `??` are ordinary value-capable tokens (not operators): `??` is the
+   // semantic-layer help token when unquoted; a lone `?` is a plain literal value.
    Ok( ( ZeroCopyTokenKind ::Identifier( s.string.clone() ), original_location ) )
  }
   else

@@ -19,7 +19,7 @@
 //! All three type-safe entry points are thin wrappers; behaviour tests live in
 //! the existing parser test suite.  These tests verify:
 //!   (a) the delegation wire is connected correctly (result equality checks),
-//!   (b) semantic content survives the wrapper (named args, help flag),
+//!   (b) semantic content survives the wrapper (named args, help token),
 //!   (c) errors propagate correctly through both wrappers, and
 //!   (d) constructor and Clone behaviour of the newtypes themselves.
 //!
@@ -38,8 +38,8 @@
 //! | deprecated shim == parse_repl_input | `&str` | deprecated | identical result |
 //! | Named arg key/value via parse_cli | `ShellArgv` | `parse_cli` | named_args["key"]=="value" |
 //! | Named arg key/value via parse_repl | `ReplInput` | `parse_repl` | named_args["key"]=="value" |
-//! | Help flag via parse_repl | `ReplInput("cmd ?")` | `parse_repl` | help_requested==true |
-//! | Help flag via parse_cli | `ShellArgv(["prog",".cmd","?"])` | `parse_cli` | help_requested==true |
+//! | Help token via parse_repl | `ReplInput("cmd ??")` | `parse_repl` | positional "??", was_quoted==false |
+//! | Help token via parse_cli | `ShellArgv(["prog",".cmd","??"])` | `parse_cli` | positional "??", was_quoted==false |
 //! | Empty ReplInput | `ReplInput::new("")` | `parse_repl` | Ok (empty instruction) |
 //! | Whitespace-only ReplInput | `ReplInput::new("   ")` | `parse_repl` | Ok (empty instruction) |
 //! | Unclosed quote via parse_repl | `ReplInput(unclosed)` | `parse_repl` | Err |
@@ -159,7 +159,7 @@ fn deprecated_shim_matches_parse_repl_input()
 }
 
 // ---------------------------------------------------------------------------
-// Semantic correctness — named args and help flag survive the wrappers
+// Semantic correctness — named args and help token survive the wrappers
 // ---------------------------------------------------------------------------
 
 /// Named argument key and value must be correctly parsed through `parse_cli`.
@@ -198,31 +198,37 @@ fn parse_repl_extracts_named_argument()
   );
 }
 
-/// `help_requested` must be set when `?` follows the command through `parse_repl`.
+/// An unquoted positional `??` must survive `parse_repl` as a value with `was_quoted == false`
+/// (semantic layers read this pair to detect a help request).
 #[ test ]
-fn parse_repl_sets_help_requested_flag()
+fn parse_repl_carries_unquoted_help_token()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let input = ReplInput::new( "cmd ?" );
+  let input = ReplInput::new( "cmd ??" );
   let instr = parser.parse_repl( &input ).expect( "parse_repl must succeed" );
+  assert_eq!( instr.positional_arguments.len(), 1, "'??' must arrive as one positional argument" );
+  assert_eq!( instr.positional_arguments[ 0 ].value, "??" );
   assert!(
-    instr.help_requested,
-    "parse_repl must set help_requested for '?' operator"
+    !instr.positional_arguments[ 0 ].was_quoted,
+    "parse_repl must keep an unquoted '??' unquoted"
   );
 }
 
-/// `help_requested` must be set when `?` is present in argv through `parse_cli`.
+/// An unquoted `??` argv element must survive `parse_cli` with `was_quoted == false` —
+/// pins the argv reconstruction exemption that keeps `??` off the re-quoting path.
 #[ test ]
-fn parse_cli_sets_help_requested_flag()
+fn parse_cli_carries_unquoted_help_token()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
   let argv = ShellArgv::from_vec(
-    vec![ "prog".into(), ".cmd".into(), "?".into() ]
+    vec![ "prog".into(), ".cmd".into(), "??".into() ]
   );
   let instr = parser.parse_cli( &argv ).expect( "parse_cli must succeed" );
+  assert_eq!( instr.positional_arguments.len(), 1, "'??' must arrive as one positional argument" );
+  assert_eq!( instr.positional_arguments[ 0 ].value, "??" );
   assert!(
-    instr.help_requested,
-    "parse_cli must set help_requested for '?' operator"
+    !instr.positional_arguments[ 0 ].was_quoted,
+    "parse_cli must not re-quote the '??' help token during argv reconstruction"
   );
 }
 

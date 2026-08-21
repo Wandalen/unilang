@@ -3,7 +3,7 @@ use crate::error::Error;
 use std::collections::HashMap;
 use super::map::DynamicCommandMap;
 use super::metrics::PerformanceMetrics;
-use super::traits::{ CommandRoutine, RegistryMode, format_command_help };
+use super::traits::{ CommandRoutine, RegistryMode };
 
 ///
 /// Static command registry with hybrid lookup functionality.
@@ -358,8 +358,7 @@ impl StaticCommandRegistry {
 
   /// Format help text for a command definition (internal helper).
   fn format_help_text(&self, cmd_def: &crate::data::CommandDefinition) -> String {
-    let display_options = crate::help::HelpDisplayOptions::default().with_env_overrides();
-    format_command_help( cmd_def, &display_options )
+    crate::help::command_help_text( cmd_def )
   }
 
   /// Get number of static commands available.

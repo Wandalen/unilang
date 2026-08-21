@@ -4,7 +4,7 @@
 //! capabilities, including the correct identification of error kinds and source locations.
 //!
 //! **Test Factors: **
-//! - Error Type: Invalid Escape, Unexpected Delimiter, Empty Segment, Missing Value, Unexpected Token, Positional After Named, Unexpected Help Operator
+//! - Error Type: Invalid Escape, Unexpected Delimiter, Empty Segment, Missing Value, Unexpected Token, Positional After Named, No Error (literal `?`)
 //! - Input Format: Correct, Malformed
 //! - Location: Start, Middle, End of instruction
 //! - Parser Options: `error_on_positional_after_named` (true/false)
@@ -24,7 +24,7 @@
 //! | T3.7 | Unexpected ` :: ` (no name) | `cmd ::value` | Unexpected Token | Middle | `(false)` | `Syntax` | `(4, 6)` | `Named argument operator '::' cannot appear by itself` |
 //! | T3.8 | Unexpected ` :: ` (after value) | `cmd name ::val1 ::val2` | Unexpected Token | Middle | `(false)` | `Syntax` | `(15, 17)` | `Named argument operator '::' cannot appear by itself` |
 //! | T3.9 | Positional after named (error) | `cmd name ::val pos1` | Positional After Named | Middle | `(true)` | `Syntax` | `(14, 18)` | `Positional argument after named argument` |
-//! | T3.10 | Unexpected help operator in middle | `cmd ? arg1` | Unexpected Help Operator | Middle | `(false)` | `Syntax` | `(4, 5)` | `Help operator '?' must be the last token` |
+//! | T3.10 | Former help operator now literal | `cmd ? arg1` | No Error | Middle | `(false)` | N/A | N/A | Parses OK: positionals `?`, `arg1` |
 //! | T3.11 | Unexpected token `!` in args | `cmd arg1 ! badchar` | Unexpected Token | Middle | `(false)` | `Syntax` | `(9, 10)` | `Unexpected token '!' in arguments` |
 use unilang_parser :: *;
 use unilang_parser ::error :: { ErrorKind, SourceLocation };
@@ -233,23 +233,20 @@ fn positional_after_named_error()
   assert_eq!(err.location, Some(SourceLocation ::StrSpan { start: 15, end: 19 }));
 }
 
-/// Tests error reporting when the help operator `?` appears in the middle of an instruction.
+/// Tests that a mid-instruction `?` reports no error — it is an ordinary literal value
+/// under the `??` design. The removed help operator used to make this input a syntax error.
 /// Test Combination: T3.10
 #[ test ]
-fn unexpected_help_operator_middle() 
+fn question_mark_middle_is_literal()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
   let input = "cmd ? arg1";
   let result = parser.parse_repl_input(input);
-  assert!(result.is_err(), "Expected error for '?' in middle, input: '{input}'");
-  let err = result.unwrap_err();
-  assert_eq!(
-  err.kind,
-  ErrorKind ::Syntax("Help operator '?' must be the last token".to_string()),
-  "ErrorKind mismatch: {:?}",
-  err.kind
- );
-  assert_eq!(err.location, Some(SourceLocation ::StrSpan { start: 4, end: 5 })); // Adjusted location
+  assert!(result.is_ok(), "'?' in the middle must parse as a literal positional: {:?}", result.err());
+  let instruction = result.unwrap();
+  assert_eq!(instruction.positional_arguments.len(), 2);
+  assert_eq!(instruction.positional_arguments[0].value, "?".to_string());
+  assert_eq!(instruction.positional_arguments[1].value, "arg1".to_string());
 }
 
 /// Tests error reporting for an unexpected token `!` in arguments.

@@ -1,4 +1,4 @@
-use crate::data::{ CommandDefinition, ErrorData, OutputData };
+use crate::data::{ ErrorData, OutputData };
 use crate::interpreter::ExecutionContext;
 
 /// Type alias for a command routine.
@@ -17,89 +17,6 @@ pub enum RegistryMode {
   Hybrid,
   /// Automatic mode selection based on usage patterns
   Auto,
-}
-
-/// Helper function to format help text for a command definition.
-///
-/// This function generates a standardized help text format that includes:
-/// - Command header (name, description, hint, version, status)
-/// - Arguments section with details about each parameter
-/// - Examples section
-/// - Aliases section
-/// - Usage patterns
-///
-/// Used by both `CommandRegistry` and `StaticCommandRegistry` to ensure consistent help formatting.
-pub(super) fn format_command_help( cmd_def : &CommandDefinition, display_options : &crate::help::HelpDisplayOptions ) -> String
-{
-  let mut help = String::new();
-
-  // Command header
-  help.push_str( &format!( "Command: {}\n", cmd_def.name().as_str() ) );
-  help.push_str( &format!( "Description: {}\n", cmd_def.description() ) );
-
-  if !cmd_def.hint().is_empty()
-  {
-    help.push_str( &format!( "Hint: {}\n", cmd_def.hint() ) );
-  }
-
-  if cmd_def.show_version_in_help() && display_options.show_version && !cmd_def.version().as_str().is_empty()
-  {
-    help.push_str( &format!( "Version: {}\n", cmd_def.version().as_str() ) );
-  }
-
-  // Status is now an enum, show if not Active
-  match cmd_def.status()
-  {
-    crate::data::CommandStatus::Active => {},
-    status => help.push_str( &format!( "Status: {:?}\n", status ) ),
-  }
-
-  // Arguments section
-  if !cmd_def.arguments().is_empty()
-  {
-    help.push_str( "\nArguments:\n" );
-    for arg in cmd_def.arguments()
-    {
-      let required = if arg.attributes.optional { "optional" } else { "required" };
-      help.push_str( &format!( "  {} ({}, {})", arg.name, arg.kind, required ) );
-
-      if let Some( default ) = &arg.attributes.default
-      {
-        help.push_str( &format!( " [default: {}]", default ) );
-      }
-
-      help.push_str( &format!( "\n    {}\n", arg.description ) );
-
-      if !arg.aliases.is_empty()
-      {
-        help.push_str( &format!( "    Aliases: {}\n", arg.aliases.join( ", " ) ) );
-      }
-    }
-  }
-
-  // Examples section
-  if !cmd_def.examples().is_empty()
-  {
-    help.push_str( "\nExamples:\n" );
-    for example in cmd_def.examples()
-    {
-      help.push_str( &format!( "  {}\n", example ) );
-    }
-  }
-
-  // Aliases section
-  if !cmd_def.aliases().is_empty()
-  {
-    help.push_str( &format!( "\nAliases: {}\n", cmd_def.aliases().join( ", " ) ) );
-  }
-
-  // Usage patterns
-  help.push_str( "\nUsage:\n" );
-  help.push_str( &format!( "  {}  # Execute command\n", cmd_def.name().as_str() ) );
-  help.push_str( &format!( "  {}.help  # Show this help\n", cmd_def.name().as_str() ) );
-  help.push_str( &format!( "  {} ??  # Alternative help access\n", cmd_def.name().as_str() ) );
-
-  help
 }
 
 /// Common trait for command registries to enable interoperability.

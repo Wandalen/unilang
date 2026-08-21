@@ -73,7 +73,7 @@ All recoverable errors **must** be propagated as `unilang::Error`, which wraps a
 | `ErrorCode::CommandAlreadyExists` | `UNILANG_COMMAND_ALREADY_EXISTS` | Duplicate command registration attempt |
 | `ErrorCode::CommandNotImplemented` | `UNILANG_COMMAND_NOT_IMPLEMENTED` | Command registered but not implemented |
 | `ErrorCode::TypeMismatch` | `UNILANG_TYPE_MISMATCH` | Type conversion or mismatch error |
-| `ErrorCode::HelpRequested` | `HELP_REQUESTED` | User requested help via `?` operator or `??` parameter |
+| `ErrorCode::HelpRequested` | `HELP_REQUESTED` | User requested help via the unquoted `??` token |
 | `ErrorCode::InternalError` | `UNILANG_INTERNAL_ERROR` | Unexpected system error |
 
 The `ErrorCode` enum provides compile-time type safety and prevents typos in error code strings. The `ErrorData::new()` method requires an `ErrorCode` enum variant instead of a string.

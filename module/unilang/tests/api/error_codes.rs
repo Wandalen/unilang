@@ -493,7 +493,7 @@ fn test_ap10_command_not_implemented_for_stub_routine()
 
 /// AP-11: `HelpRequested` is converted to successful `OutputData` by the pipeline.
 ///
-/// When `.greet ?` is processed, the semantic analyzer returns `HelpRequested`.
+/// When `.greet ??` is processed, the semantic analyzer returns `HelpRequested`.
 /// The pipeline intercepts this and converts it to `Ok(CommandResult { success: true, ... })`
 /// containing the help text as output content.
 // test_kind: ap_spec(AP-11)  [api/02_error_codes]
@@ -513,7 +513,7 @@ fn test_ap11_help_requested_converted_to_successful_output()
   registry.register_with_routine( &greet_command, noop ).expect( "Registration must succeed" );
 
   let pipeline = Pipeline::new( registry );
-  let result = pipeline.process_command( ".greet ?", ExecutionContext::default() );
+  let result = pipeline.process_command( ".greet ??", ExecutionContext::default() );
 
   assert!(
     result.success,

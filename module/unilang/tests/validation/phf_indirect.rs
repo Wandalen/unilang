@@ -24,7 +24,7 @@ edition = "2021"
 [dependencies]
 unilang = {{ path = "{}", features = ["static_registry"] }}
 # Explicitly NO phf dependency
-"#, env!("CARGO_MANIFEST_DIR"));
+"#, env!("CARGO_MANIFEST_DIR")) + &super::fixture::local_dep_patch();
 
   fs::write(crate_path.join("Cargo.toml"), cargo_toml)
     .expect("Failed to write Cargo.toml");

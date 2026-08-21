@@ -256,3 +256,45 @@ fn test_no_suggestion_for_distant_typo()
     "Should not suggest when typo is too different, got: {error_msg}"
   );
 }
+
+/// The help hint in unknown-parameter errors uses the full invocable command
+/// name with a single leading dot — never the historical `..cmd` double-dot.
+#[test]
+fn test_help_hint_uses_full_command_name()
+{
+  let mut registry = CommandRegistry::new();
+  let cmd = CommandDefinition::former()
+    .name( ".fetch" )
+    .namespace( ".net" )
+    .description( "Fetch a resource" )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "url".to_string(),
+        description : "Resource URL".to_string(),
+        kind : Kind::String,
+        hint : String::new(),
+        attributes : ArgumentAttributes { optional : true, ..Default::default() },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+  registry.register( cmd ).expect( "Registration should succeed" );
+
+  let parser = Parser::new( UnilangParserOptions::default() );
+  let instruction = parser.parse_repl_input( ".net.fetch bogus::x" ).unwrap();
+  let instructions = vec![ instruction ];
+  let analyzer = SemanticAnalyzer::new( &instructions, &registry );
+  let error_msg = format!( "{:?}", analyzer.analyze().unwrap_err() );
+
+  assert!(
+    error_msg.contains( "'.net.fetch ??'" ),
+    "Hint must use the full invocable name; got: {error_msg}"
+  );
+  assert!(
+    !error_msg.contains( "..net" ) && !error_msg.contains( "..fetch" ),
+    "Hint must not render a double dot; got: {error_msg}"
+  );
+}

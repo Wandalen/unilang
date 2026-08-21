@@ -1,0 +1,32 @@
+[package]
+name = "unilang_help"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+readme = "readme.md"
+authors = [ "Kostiantyn Mysnyk <wandalen@obox.systems>" ]
+categories = [ "command-line-interface" ]
+keywords = [ "help", "cli", "unilang", "renderer" ]
+description = """
+Reusable help-page domain model, verbosity levels, and renderers for unilang-style CLIs.
+"""
+documentation = "https://docs.rs/unilang_help"
+repository = "https://github.com/Wandalen/unilang/tree/master/module/unilang_help"
+homepage = "https://github.com/Wandalen/unilang/tree/master/module/unilang_help/readme.md"
+
+[features]
+default = [
+  "enabled",
+  "cli_fmt_backend",
+]
+enabled = []
+# Column-aligned, color-aware rendering via cli_fmt's detail-page template.
+# Disable for a plain-text-only build with no external rendering dependency.
+cli_fmt_backend = [ "enabled", "dep:cli_fmt" ]
+full = [
+  "enabled",
+  "cli_fmt_backend",
+]
+
+[dependencies]
+cli_fmt = { workspace = true, optional = true }

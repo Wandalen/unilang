@@ -1,6 +1,6 @@
 [package]
 name = "unilang"
-version = "0.59.1"
+version = "0.60.0"
 edition = "2021"
 rust-version = "1.70"
 authors = [
@@ -134,6 +134,7 @@ enabled = [
   "dep:error_tools", "dep:mod_interface", "dep:former",
   "dep:unilang_parser", "unilang_parser/enabled",
   "dep:log", "dep:indexmap", "dep:lru", "dep:cli_fmt",
+  "dep:unilang_help",
 ]
 advanced_cli_tests = [ ]
 
@@ -174,6 +175,7 @@ error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_
 mod_interface = { workspace = true, features = [ "enabled" ], optional = true }
 former = { workspace = true, features = [ "enabled", "derive_former" ], optional = true }
 unilang_parser = { workspace = true, optional = true } # SIMD features controlled by main unilang features
+unilang_help = { workspace = true, features = [ "cli_fmt_backend" ], optional = true } # Renderer-agnostic help model + plain/cli_fmt renderers
 
 ## external
 log = { workspace = true, optional = true }

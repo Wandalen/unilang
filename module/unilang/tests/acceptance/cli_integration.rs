@@ -140,7 +140,7 @@ fn test_task_022_edge_cases_shell() {
 fn test_task_022_help_system_shell() {
     // Test help for specific command (uses Level 2 Standard verbosity by default)
     let mut cmd = assert_cmd::cargo::cargo_bin_cmd!("unilang_cli");
-    cmd.args(vec![".video.search", "?"]);
+    cmd.args(vec![".video.search", "??"]);
 
     cmd.assert()
         .success()

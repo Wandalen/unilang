@@ -116,28 +116,40 @@ fn test_double_question_mark_parameter()
   let pipeline = Pipeline::new( registry );
   let context = ExecutionContext::default();
 
-  // Test 1: ?? as positional parameter
-  let result1 = pipeline.process_command( ".test_command \"??\"", context.clone() );
-  assert!( result1.success, "Command with ?? parameter should trigger help" );
+  // Test 1: unquoted positional ?? triggers command help
+  let result1 = pipeline.process_command( ".test_command ??", context.clone() );
+  assert!( result1.success, "Command with ?? should trigger help" );
   assert!( !result1.outputs.is_empty(), "Help should produce output" );
   assert!( result1.outputs[0].content.contains( "test_command" ), "Help should mention command name" );
   assert!( result1.outputs[0].content.contains( "First test argument" ), "Help should include argument descriptions" );
 
-  // Test 2: ?? as named parameter
-  let result2 = pipeline.process_command( ".test_command help::\"??\"", context.clone() );
-  assert!( result2.success, "Command with ?? as named parameter should trigger help" );
+  // Test 2: param::?? renders that parameter's detail page
+  let result2 = pipeline.process_command( ".test_command arg2::??", context.clone() );
+  assert!( result2.success, "param::?? should trigger parameter help" );
+  assert!( result2.outputs[0].content.contains( "Parameter: arg2" ), "Parameter page should name the parameter" );
+  assert!( result2.outputs[0].content.contains( "42" ), "Parameter page should show the default value" );
+
+  // Test 2b: unknown_param::?? falls back to a valid-parameter listing
+  let result2b = pipeline.process_command( ".test_command help::??", context.clone() );
+  assert!( result2b.success, "unknown param ?? should still produce help output" );
+  assert!( result2b.outputs[0].content.contains( "arg1" ), "Listing should name valid parameters" );
+  assert!( result2b.outputs[0].content.contains( "arg2" ), "Listing should name valid parameters" );
 
   // Test 3: ?? mixed with other arguments (should still trigger help)
-  let result3 = pipeline.process_command( ".test_command arg1::test \"??\"", context.clone() );
+  let result3 = pipeline.process_command( ".test_command arg1::test ??", context.clone() );
   assert!( result3.success, "Command with ?? and other args should trigger help" );
 
-  // Test 4: Compare with traditional ? operator
-  let result4 = pipeline.process_command( ".test_command ?", context.clone() );
-  assert!( result4.success, "Traditional ? operator should still work" );
+  // Test 4: quoted "??" is a literal value, not a help request
+  let result4 = pipeline.process_command( ".test_command \"??\"", context.clone() );
+  assert!( result4.success, "Quoted ?? should bind as a plain value and execute" );
+  assert_eq!( result4.outputs[0].content, "Test command executed successfully",
+             "Quoted ?? must reach the routine as a literal value" );
 
-  // Both ?? and ? should produce identical help content
-  assert_eq!( result1.outputs[0].content, result4.outputs[0].content,
-             "?? parameter and ? operator should produce identical help" );
+  // Test 5: bare ? is a plain value now (the old help operator is retired)
+  let result5 = pipeline.process_command( ".test_command ?", context.clone() );
+  assert!( result5.success, "Bare ? should bind as a plain value and execute" );
+  assert_eq!( result5.outputs[0].content, "Test command executed successfully",
+             "Bare ? must reach the routine as a literal value" );
 
   println!( "✅ Double question mark parameter works correctly in all scenarios" );
 }
@@ -169,14 +181,19 @@ fn test_help_command_execution()
 
   let help_content = &help_result.outputs[0].content;
 
-  // Verify help content contains all expected sections
-  assert!( help_content.contains( "Command: .test_help_exec" ), "Help should show command name" );
-  assert!( help_content.contains( "Description: Test command for help execution validation" ), "Help should show description" );
-  assert!( help_content.contains( "Version: 1.0.0" ), "Help should show version" );
-  // Active/stable status is intentionally omitted from help output
-  assert!( help_content.contains( "Usage:" ), "Help should include usage section" );
-  assert!( help_content.contains( ".test_help_exec.help" ), "Help should mention help command itself" );
-  assert!( help_content.contains( ".test_help_exec ??" ), "Help should mention ?? alternative" );
+  // Verify help content contains all expected sections (Standard verbosity)
+  assert!( help_content.contains( "Usage: .test_help_exec" ), "Help should show command name in usage line" );
+  assert!( help_content.contains( "(v1.0.0)" ), "Help should show version" );
+  assert!( help_content.contains( "Test command for help execution validation" ), "Help should show description" );
+  assert!( help_content.contains( "Status: active" ), "Help should show status" );
+  assert!( help_content.contains( "Examples:" ), "Help should include examples section" );
+
+  // The `.help` counterpart and `??` render the identical page
+  let context2 = ExecutionContext::default();
+  let qq_result = pipeline.process_command( ".test_help_exec ??", context2 );
+  assert!( qq_result.success, "?? route should succeed" );
+  assert_eq!( &qq_result.outputs[0].content, help_content,
+             ".help command and ?? must render the identical page" );
 
   println!( "✅ Help command execution produces comprehensive help content" );
 }
@@ -216,7 +233,7 @@ fn test_help_conventions_api()
   // Test 3: help_for_command API
   let help_text = registry.help_for_command( ".test_force_help" );
   assert!( help_text.is_some(), "help_for_command should return help text" );
-  assert!( help_text.unwrap().contains( "Command: .test_force_help" ), "Help text should be properly formatted" );
+  assert!( help_text.unwrap().contains( "Usage: .test_force_help" ), "Help text should be properly formatted" );
 
   // Test 4: Pipeline help request processing
   let pipeline = Pipeline::new( registry );
@@ -321,19 +338,18 @@ fn test_help_content_formatting()
 
   let help_text = registry.help_for_command( ".testing.test_format" ).unwrap();
 
-  // Verify all sections are present and properly formatted
-  assert!( help_text.contains( "Command: .test_format" ), "Command name section" );
-  assert!( help_text.contains( "Description: Comprehensive test command" ), "Description section" );
-  assert!( help_text.contains( "Hint: Format test" ), "Hint section" );
-  assert!( help_text.contains( "Version: 2.1.0" ), "Version section" );
-  // Active/stable status is intentionally omitted from help output
+  // Verify all sections are present and properly formatted (Standard verbosity)
+  assert!( help_text.contains( "Usage: .testing.test_format" ), "Command name section uses the full invocable name" );
+  assert!( help_text.contains( "(v2.1.0)" ), "Version section" );
+  assert!( help_text.contains( "Comprehensive test command" ), "Description section" );
+  assert!( help_text.contains( "Status: active" ), "Status section" );
 
   // Arguments section
   assert!( help_text.contains( "Arguments:" ), "Arguments section header" );
-  assert!( help_text.contains( "required_arg (String, required)" ), "Required argument info" );
-  assert!( help_text.contains( "optional_arg (Integer, optional) [default: 100]" ), "Optional argument with default" );
+  assert!( help_text.contains( "required_arg (Type: string)" ), "Required argument info" );
+  assert!( help_text.contains( "optional_arg (Type: integer) - Optional" ), "Optional argument info" );
   assert!( help_text.contains( "A required string argument" ), "Argument descriptions" );
-  assert!( help_text.contains( "Aliases: req, r" ), "Argument aliases" );
+  assert!( help_text.contains( "Rules: [MinLength(3), MaxLength(50)]" ), "Validation rules" );
 
   // Examples section
   assert!( help_text.contains( "Examples:" ), "Examples section header" );
@@ -342,11 +358,18 @@ fn test_help_content_formatting()
   // Aliases section
   assert!( help_text.contains( "Aliases: .tf, .test_fmt" ), "Command aliases" );
 
-  // Usage section
-  assert!( help_text.contains( "Usage:" ), "Usage section header" );
-  assert!( help_text.contains( ".test_format  # Execute command" ), "Execute usage" );
-  assert!( help_text.contains( ".test_format.help  # Show this help" ), "Help command usage" );
-  assert!( help_text.contains( ".test_format ??  # Alternative help access" ), "?? parameter usage" );
+  // Per-parameter detail page carries aliases, default, and validation facts
+  let cmd_def = registry.command( ".testing.test_format" ).unwrap();
+  let param_page = unilang::help::parameter_help_text( &cmd_def, "optional_arg" ).unwrap();
+  assert!( param_page.contains( "Parameter: optional_arg" ), "Parameter page names the parameter" );
+  assert!( param_page.contains( ".testing.test_format optional_arg::<integer>" ), "Parameter page shows usage syntax" );
+  assert!( param_page.contains( "100" ), "Parameter page shows the default value" );
+  assert!( param_page.contains( "opt" ), "Parameter page shows aliases" );
+  assert!( param_page.contains( "Min(1.0)" ), "Parameter page shows validation rules" );
+
+  // Alias lookup resolves to the same parameter page
+  let alias_page = unilang::help::parameter_help_text( &cmd_def, "opt" ).unwrap();
+  assert_eq!( param_page, alias_page, "Alias lookup must render the identical parameter page" );
 
   println!( "✅ Help content formatting includes all required sections with proper structure" );
 }

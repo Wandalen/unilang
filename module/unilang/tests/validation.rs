@@ -11,5 +11,6 @@ mod validation {
   mod direct_import;
   mod doc_examples;
   mod feature_gate;
+  mod fixture;
   mod phf_indirect;
 }

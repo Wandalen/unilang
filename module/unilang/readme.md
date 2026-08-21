@@ -24,7 +24,7 @@ unilang processes command definitions at compile-time, generating optimized stat
 
 ```toml
 [dependencies]
-unilang = "0.51"
+unilang = "0.60"
 ```
 
 The default configuration enables multi-YAML build-time static registration (Approach #2 — recommended for 95% of users).
@@ -80,6 +80,23 @@ whitespace:
 
 Single colon (`name:value`) is not valid syntax and produces a parse error.
 See [docs/parameter_syntax.md](docs/parameter_syntax.md) for the full reference.
+
+## Getting Help
+
+A single token — `??` — covers every help surface; its position selects the scope:
+
+```bash
+??                # list all commands (same as bare .)
+.greet ??         # command help page
+.greet name::??   # parameter detail page (aliases work too)
+.greet.help       # spelled route — identical page to `.greet ??`
+.greet.help name  # spelled route to the parameter detail page
+```
+
+A mistyped `unknown::??` lists the command's valid parameters instead of failing.
+Quoting opts out: `name::"??"` passes the literal string `??` as a value. Embedders
+can disable detection entirely with `Pipeline::with_help_detection( false )` (also
+available on `SemanticAnalyzer`); every `??` then flows through as an ordinary value.
 
 ## Documentation
 

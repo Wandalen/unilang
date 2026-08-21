@@ -377,20 +377,18 @@ fn test_help_content_comprehensive()
   // Get comprehensive help text
   let help_text = registry.help_for_command( ".test.comprehensive" ).unwrap();
 
-  // Verify all mandatory sections are present
-  assert!( help_text.contains( "Command:" ), "Help must include command section" );
-  assert!( help_text.contains( "Description:" ), "Help must include description section" );
-  assert!( help_text.contains( "Hint:" ), "Help must include hint section" );
-  assert!( help_text.contains( "Version:" ), "Help must include version section" );
-  // Active/stable status is intentionally omitted from help output
+  // Verify all mandatory sections are present (Standard verbosity)
+  assert!( help_text.contains( "Usage: .test.comprehensive" ), "Help must include usage line with full name" );
+  assert!( help_text.contains( "(v3.0.0)" ), "Help must include version" );
+  assert!( help_text.contains( "Comprehensive command for testing help content completeness" ), "Help must include description" );
+  assert!( help_text.contains( "Status: active" ), "Help must include status" );
   assert!( help_text.contains( "Arguments:" ), "Help must include arguments section" );
+  assert!( help_text.contains( "required_param (Type: string)" ), "Help must describe the argument" );
   assert!( help_text.contains( "Examples:" ), "Help must include examples section" );
-  assert!( help_text.contains( "Aliases:" ), "Help must include aliases section" );
-  assert!( help_text.contains( "Usage:" ), "Help must include usage section" );
+  assert!( help_text.contains( "Aliases: .comp" ), "Help must include aliases section" );
 
-  // Verify help mentions both direct help and ?? parameter access
-  assert!( help_text.contains( ".comprehensive.help" ), "Help must mention direct help command" );
-  assert!( help_text.contains( ".comprehensive ??" ), "Help must mention ?? parameter alternative" );
+  // The direct `.help` counterpart exists and renders the same page
+  assert!( registry.command( ".test.comprehensive.help" ).is_some(), "Direct help command must exist" );
 
   println!( "✅ Help content is comprehensive and includes all mandatory sections" );
 }

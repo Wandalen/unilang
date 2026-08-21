@@ -9,13 +9,13 @@
 #![ allow( clippy::too_many_lines ) ]
 #![ allow( clippy::unnecessary_map_or ) ]
 //! 1. Automatic `.command.help` generation for every registered command
-//! 2. Universal `??` parameter support for alternative help access
+//! 2. The universal `??` help token — command pages, parameter pages, listings
 //! 3. Developer-friendly APIs for help configuration
 //!
 //! ## Key Features Demonstrated:
 //! - Mandatory automatic help command generation
 //! - Per-command help configuration
-//! - Multiple help access methods (?, ??, .command.help)
+//! - Both access routes (`??` and `.command.help`) rendering identical pages
 //! - Comprehensive help content formatting
 
 use unilang::data::{ ArgumentAttributes, ArgumentDefinition, CommandDefinition, Kind, OutputData, ValidationRule };
@@ -48,7 +48,7 @@ fn main() -> Result< (), Box< dyn core::error::Error > >
   println!( "\n🎉 Help conventions demo completed successfully!" );
   println!( "Key takeaways:" );
   println!( "  • Every command automatically gets a .command.help counterpart (mandatory)" );
-  println!( "  • Users can access help via: ?, ??, or .command.help" );
+  println!( "  • Users can access help via the ?? token or .command.help — identical pages" );
   println!( "  • Help content is comprehensive and consistently formatted" );
   println!( "  • Help generation is now mandatory - no opt-out mechanism" );
 
@@ -60,7 +60,7 @@ fn register_demo_commands( registry : &mut CommandRegistry ) -> Result< (), Erro
 {
   // Command 1: Generic command with comprehensive help
   let fs_list_cmd = CommandDefinition::former()
-    .name( ".cmd2.list" )
+    .name( ".list" )
     .namespace( ".cmd2" )
     .description( "List files and directories with advanced filtering options" )
     .hint( "Advanced file listing" )
@@ -153,7 +153,7 @@ fn register_demo_commands( registry : &mut CommandRegistry ) -> Result< (), Erro
 
   // Command 2: Network utility command
   let net_ping_cmd = CommandDefinition::former()
-    .name( ".net.ping" )
+    .name( ".ping" )
     .namespace( ".net" )
     .description( "Ping a host to test network connectivity" )
     .hint( "Network ping utility" )
@@ -225,7 +225,7 @@ fn register_demo_commands( registry : &mut CommandRegistry ) -> Result< (), Erro
 
   // Command 3: System info command (minimal help example)
   let sys_info_cmd = CommandDefinition::former()
-    .name( ".sys.info" )
+    .name( ".info" )
     .namespace( ".sys" )
     .description( "Display system information" )
     .hint( "System info" )
@@ -266,57 +266,53 @@ fn demonstrate_help_access_methods( pipeline : &Pipeline ) -> Result< (), Box< d
 
   let context = ExecutionContext::default();
 
-  // Method 1: Traditional ? operator
-  println!( "=== Method 1: Traditional ? Operator ===" );
-  println!( "Command: .cmd2.list ?" );
-  let result1 = pipeline.process_command( ".cmd2.list ?", context.clone() );
-  display_result( &result1, "Traditional ? operator" );
-
-  println!( "\n" );
-
-  // Method 2: New ?? parameter
-  println!( "=== Method 2: New ?? Parameter ===" );
+  // Method 1: positional ?? token — command help page
+  println!( "=== Method 1: Positional ?? Token ===" );
   println!( "Command: .cmd2.list ??" );
-  let result2 = pipeline.process_command( ".cmd2.list \"??\"", context.clone() );
-  display_result( &result2, "?? parameter" );
+  let result1 = pipeline.process_command( ".cmd2.list ??", context.clone() );
+  display_result( &result1, "Positional ?? token" );
 
   println!( "\n" );
 
-  // Method 3: Automatic .command.help
-  println!( "=== Method 3: Automatic .command.help ===" );
+  // Method 2: automatic .command.help — same page as Method 1
+  println!( "=== Method 2: Automatic .command.help ===" );
   println!( "Command: .cmd2.list.help" );
-  let result3 = pipeline.process_command( ".cmd2.list.help", context.clone() );
-  display_result( &result3, ".command.help" );
+  let result2 = pipeline.process_command( ".cmd2.list.help", context.clone() );
+  display_result( &result2, ".command.help" );
 
   println!( "\n" );
 
-  // Method 4: ?? mixed with other arguments
+  // Method 3: parameter detail page
+  println!( "=== Method 3: Parameter Detail Page ===" );
+  println!( "Command: .net.ping host::??" );
+  let result3 = pipeline.process_command( ".net.ping host::??", context.clone() );
+  display_result( &result3, "param::?? detail page" );
+
+  println!( "\n" );
+
+  // Method 4: ?? mixed with other arguments — help still wins
   println!( "=== Method 4: ?? Mixed with Arguments ===" );
   println!( "Command: .net.ping host::example.com ??" );
-  let result4 = pipeline.process_command( ".net.ping host::example.com \"??\"", context.clone() );
+  let result4 = pipeline.process_command( ".net.ping host::example.com ??", context.clone() );
   display_result( &result4, "?? with other arguments" );
 
   println!( "\n" );
 
-  // Method 5: ?? as named parameter
-  println!( "=== Method 5: ?? as Named Parameter ===" );
-  println!( "Command: .sys.info help::??" );
-  let result5 = pipeline.process_command( ".sys.info help::\"??\"", context.clone() );
-  display_result( &result5, "?? as named parameter" );
+  // Method 5: unknown parameter is never a dead end
+  println!( "=== Method 5: Unknown Parameter Listing ===" );
+  println!( "Command: .net.ping bogus::??" );
+  let result5 = pipeline.process_command( ".net.ping bogus::??", context.clone() );
+  display_result( &result5, "unknown::?? listing" );
 
   println!( "\n" );
 
-  // Verification: All methods produce equivalent help
+  // Verification: both access routes render the identical page
   println!( "=== Verification: Content Equivalence ===" );
-  if result1.success && result2.success && result3.success {
-    let content1 = &result1.outputs[0].content;
-    let content2 = &result2.outputs[0].content;
-    let content3 = &result3.outputs[0].content;
-
-    if content1 == content2 && content2 == content3 {
-      println!( "✅ All help access methods produce identical content" );
+  if result1.success && result2.success {
+    if result1.outputs[0].content == result2.outputs[0].content {
+      println!( "✅ .cmd2.list ?? and .cmd2.list.help render the identical page" );
     } else {
-      println!( "⚠️  Help content differs between methods" );
+      println!( "⚠️  Help content differs between routes" );
     }
   }
 
@@ -325,7 +321,7 @@ fn demonstrate_help_access_methods( pipeline : &Pipeline ) -> Result< (), Box< d
   println!( "Try these commands to explore help functionality:" );
   println!( "  .cmd2.list path::/tmp ??          # Get help with partial arguments" );
   println!( "  .net.ping.help                   # Direct help command access" );
-  println!( "  .sys.info ?                      # Traditional help operator" );
+  println!( "  .net.ping host::??               # One parameter's detail page" );
   println!( "  .                                # List all available commands" );
 
   Ok( () )

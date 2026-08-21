@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify that the seven governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time
 - **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, Consistent Help Access, Explicit Dependencies, and Explicit Command Naming
-- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`?`/`.cmd.help` equivalence), Single Source of Truth (no duplicate definitions), Explicit Dependencies (required argument rejection), Explicit Command Naming (dot-prefix enforcement)
+- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`??`/`.cmd.help` identity), Single Source of Truth (no duplicate definitions), Explicit Dependencies (required argument rejection), Explicit Command Naming (dot-prefix enforcement)
 - **Out of Scope:** NFR thresholds (invariant 002); specific FR behaviors (feature specs)
 
 ### IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage
@@ -25,12 +25,12 @@
 - **When:** `registry.get(".help")` or any implicit system command is called
 - **Then:** Returns `None` unless the user explicitly registered `.help`; no hidden system commands exist in the default registry
 
-### IN-4: Consistent Help Access — `?` and `.cmd.help` produce equivalent content
+### IN-4: Consistent Help Access — `??` and `.cmd.help` render the identical page
 
 - **Given:** A `Pipeline` with `.greet` registered (auto_help_enabled = true by default)
-- **When:** Help is requested via `.greet ?` (parser-level operator) and `.greet.help` (auto-registered sub-command)
-- **Then:** Both outputs contain the same command name and argument descriptions; formatting may differ but no information is exclusive to one route
-- **Note:** `??` as a bare token is rejected by the parser ("Help operator '?' must be the last token"); the two verified working routes are `?` and `.cmd.help`
+- **When:** Help is requested via `.greet ??` (semantic-level help token) and `.greet.help` (auto-registered sub-command)
+- **Then:** Both routes succeed, both outputs contain the command name and argument descriptions, and the two pages are byte-identical — both routes render through the same `unilang_help`-backed path
+- **Note:** There is no parser-level help operator; `?` is an ordinary value token, and a quoted `"??"` stays a literal value
 
 ### IN-5: Single Source of Truth — duplicate command registration is rejected
 

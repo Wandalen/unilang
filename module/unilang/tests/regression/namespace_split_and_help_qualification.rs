@@ -212,7 +212,7 @@ fn test_three_level_namespace_help_resolves_via_pipeline()
     .build();
   let pipeline = Pipeline::new( registry );
 
-  let base = pipeline.process_command_from_argv_simple( &[ ".cloud.deploy.service".to_string(), "?".to_string() ] );
+  let base = pipeline.process_command_from_argv_simple( &[ ".cloud.deploy.service".to_string(), "??".to_string() ] );
   assert!(
     base.success,
     "base 3-level-namespaced command should resolve, got error: {:?}",

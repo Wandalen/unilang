@@ -598,14 +598,14 @@ fn test_t07_footer_hint_gated_on_prefix()
 
   let no_prefix_output = help_generator.list_commands_filtered( None );
   assert!(
-    no_prefix_output.contains( "Use '<command> help' to get detailed help for a specific command." ),
+    no_prefix_output.contains( "Use '<command> ??' or '<command>.help' to get detailed help for a specific command." ),
     "No-prefix output should contain the footer usage-hint text"
   );
   assert!( no_prefix_output.contains( "Example:" ), "No-prefix output should contain the example line" );
 
   let prefixed_output = help_generator.list_commands_filtered( Some( ".only" ) );
   assert!(
-    !prefixed_output.contains( "Use '<command> help' to get detailed help for a specific command." ),
+    !prefixed_output.contains( "Use '<command> ??' or '<command>.help' to get detailed help for a specific command." ),
     "Prefixed output should NOT contain the footer usage-hint text"
   );
 }

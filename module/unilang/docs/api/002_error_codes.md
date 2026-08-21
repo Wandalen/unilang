@@ -17,7 +17,7 @@ Integrators interact with error codes in two ways:
 
 **Matching on pipeline results:** When `Pipeline::process_command` returns an `Err`, the `ErrorData` value exposes its `ErrorCode` variant via `error_data.code`. Integrators match this variant to distinguish recoverable conditions (such as `ArgumentInteractiveRequired`) from hard failures (such as `CommandNotFound`).
 
-**Detecting special conditions:** Two error codes represent non-failure conditions that require special handling. `HelpRequested` signals that the user invoked the help operator (`?` or `??`) rather than executing a command — the pipeline converts this to a successful output before returning, so integrators using `Pipeline` normally never see it directly. `ArgumentInteractiveRequired` signals that a mandatory interactive argument was not supplied; REPL implementations intercept this to prompt the user before retrying execution.
+**Detecting special conditions:** Two error codes represent non-failure conditions that require special handling. `HelpRequested` signals that the user invoked the `??` help token rather than executing a command — the pipeline converts this to a successful output before returning, so integrators using `Pipeline` normally never see it directly. `ArgumentInteractiveRequired` signals that a mandatory interactive argument was not supplied; REPL implementations intercept this to prompt the user before retrying execution.
 
 **Error code reference:**
 
@@ -33,7 +33,7 @@ Integrators interact with error codes in two ways:
 | `CommandAlreadyExists` | `UNILANG_COMMAND_ALREADY_EXISTS` | A duplicate command name was registered (including auto-generated `.command.help` entries) |
 | `CommandNotImplemented` | `UNILANG_COMMAND_NOT_IMPLEMENTED` | A command is registered in the registry but has no bound routine |
 | `TypeMismatch` | `UNILANG_TYPE_MISMATCH` | A type conversion or internal type mismatch error not covered by `ArgumentTypeMismatch` |
-| `HelpRequested` | `HELP_REQUESTED` | The `?` operator or `??` parameter triggered help display; the `Pipeline` converts this to a successful `OutputData` before returning to integrators |
+| `HelpRequested` | `HELP_REQUESTED` | The unquoted `??` help token triggered help display; the `Pipeline` converts this to a successful `OutputData` before returning to integrators |
 | `InternalError` | `UNILANG_INTERNAL_ERROR` | An unexpected system error with no user-actionable recovery path |
 
 ### Error Handling

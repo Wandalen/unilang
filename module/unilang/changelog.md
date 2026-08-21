@@ -1,5 +1,35 @@
 # Changelog
 
+### 2026-08-20 - Unified `??` Help System (v0.60.0)
+
+**Breaking:** the parser-level `?` help operator is removed — `?` is now an ordinary value.
+A single semantic-level token `??` covers every help surface; position selects scope:
+
+- `??` — global command listing (mirror of bare `.`); `??` with any other argument is NOT help — it fails command lookup instead of silently discarding arguments
+- `.cmd ??` — command help page (unquoted, any position)
+- `.cmd param::??` — parameter detail page (canonical name or alias; named beats positional; with several named `??`, the first parameter in definition order wins)
+- `.cmd unknown::??` — valid-parameter listing, never a dead end
+- `.cmd.help` / `.cmd.help <param>` — spelled routes rendering the identical pages
+- Quoting opts out: `"??"` is a literal value. `Pipeline::with_help_detection( false )` / `SemanticAnalyzer::with_help_detection( false )` disables detection entirely
+- Help interception runs before argument binding: routines never observe an unquoted `??`, and a broken sibling argument cannot mask a help request
+
+**Rendering** delegates to the new `unilang_help` crate (`PlainRenderer` for command pages and listings, `cli_fmt`-backed `CliFmtRenderer` for parameter detail pages). `unilang::help` re-exports `HelpVerbosity`/`HelpDisplayOptions` and exposes `help_command_data`, `help_param_data`, `command_help_text`, `parameter_help_text`, `parameter_help_or_listing`; `HelpGenerator` gains `parameter()`. Command pages now use the full invocable name (`Usage: .ns.cmd`) — fixing un-typeable leaf-name usage lines and the `..cmd` double-dot in unknown-parameter hints.
+
+**Registration lints:** an `Enum` parameter whose default is outside its own choices is rejected at registration (`validate_help_conventions`); a `String` parameter whose description embeds an `a|b|c` choice list prints a non-fatal warning steering to `Kind::Enum` (suppress with `UNILANG_NO_LINT_WARNINGS=1`).
+
+**Help-on-error:** a coercion failure of an empty or `?` value appends "Did you mean 'param::??' for parameter help?" (suppressed for sensitive parameters).
+
+**Manual-testing fixes:**
+- `unilang_cli` prints the interpreter's returned `OutputData` (demo routines follow a single-printer contract) — the auto-generated `.command.help` routines previously produced no output from the binary; demo command stdout is unchanged
+- Global listing footers advertise `'<command> ??' or '<command>.help'` instead of the removed `'<command> help'` wording
+- Examples: `help_conventions_demo` registrations un-double-qualified (namespace was embedded in `name` AND set as `namespace`, registering `.cmd2.cmd2.list`); the advanced REPL example no longer swallows `??` with its trailing-`?` completion, exits 0 on quit, and registers `.fs.list` to match its own guidance text
+
+**Migration:**
+- `.cmd ?` → `.cmd ??`
+- Quoted `"??"` as a help trigger → unquoted `??` (quoted is now a literal value)
+- `GenericInstruction.help_requested` (parser field) is gone — detect help by `ErrorCode::HelpRequested`, or rely on the pipeline converting help to a successful result
+- Free function `process_single_command` now converts `HelpRequested` to a successful result, matching `Pipeline::process_command`
+
 ### 2026-03-31 - Normalized String Getters + wTools Dep Upgrades (v0.49.0)
 
 **New API:** `VerifiedCommand::get_string_normalized()` and `require_string_normalized()`

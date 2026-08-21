@@ -119,15 +119,17 @@ fn test_command_path_parsing()
 }
 
 #[test]
-fn test_help_operator_parsing()
+fn test_help_token_parsing()
 {
   let parser = Parser::new( UnilangParserOptions::default() );
-  let input = ".test ?";
+  let input = ".test ??";
 
   let instruction = parser.parse_repl_input( input ).expect( "Should parse successfully" );
 
   assert_eq!( instruction.command_path_slices, vec![ "test" ] );
-  assert!( instruction.help_requested, "Help should be requested" );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??" );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted, "Unquoted ?? must record was_quoted = false" );
 }
 
 #[test]

@@ -98,7 +98,8 @@ impl Pipeline
 
     // Step 2: Semantic Analysis
     let instructions = [ instruction ];
-    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry );
+    let analyzer = SemanticAnalyzer::new( &instructions, &self.registry )
+      .with_help_detection( self.help_detection );
     let verified_commands = match analyzer.analyze()
     {
       Ok( commands ) => commands,

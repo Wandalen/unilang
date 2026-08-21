@@ -37,7 +37,6 @@ fn parse_single_str_empty_input()
   assert!( instruction.command_path_slices.is_empty() );
   assert!( instruction.positional_arguments.is_empty() );
   assert!( instruction.named_arguments.is_empty() );
-  assert!( !instruction.help_requested );
 }
 
 /// Tests parsing an input string consisting only of whitespace.
@@ -57,7 +56,6 @@ fn parse_single_str_whitespace_input()
   assert!( instruction.command_path_slices.is_empty() );
   assert!( instruction.positional_arguments.is_empty() );
   assert!( instruction.named_arguments.is_empty() );
-  assert!( !instruction.help_requested );
 }
 
 /// Tests parsing an input string that starts with a comment character.

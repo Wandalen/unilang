@@ -111,15 +111,19 @@ impl CommandRegistry
  }
 }
 
-// Conversion function from GenericInstruction to AppCommand
+// Conversion function from GenericInstruction to AppCommand.
+// Help detection lives in this layer: an unquoted `??` positional marks a help
+// request and is consumed here instead of being passed through as data.
 fn convert_instruction( instruction: GenericInstruction ) -> AppCommand
 {
+  let is_help_token = | arg: &unilang_parser ::Argument | arg.value == "??" && !arg.was_quoted;
+  let help_requested = instruction.positional_arguments.iter().any( &is_help_token );
   AppCommand
   {
   name: instruction.command_path_slices.join( "." ),
   args: instruction.named_arguments.into_iter().map( | ( k, v ) | ( k, v.last().unwrap().value.clone() ) ).collect(),
-  positional_args: instruction.positional_arguments.into_iter().map( | arg | arg.value ).collect(),
-  help_requested: instruction.help_requested,
+  positional_args: instruction.positional_arguments.into_iter().filter( | arg | !is_help_token( arg ) ).map( | arg | arg.value ).collect(),
+  help_requested,
  }
 }
 
@@ -135,7 +139,7 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   "echo \"Direct positional message\"",
   "user.create name ::john email ::john@example.com",
   "user.list active ::true",
-  "user.create ?",
+  "user.create ??",
   "unknown.command test ::value"];
 
   println!( "Processing commands through the framework: \n" );

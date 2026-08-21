@@ -7,7 +7,7 @@ fn main()
 {
   println!( "=== unilang_parser Zero-Copy Benchmark ===" );
   
-  let test_input = "command.sub_command arg1 ::value1 arg2 \"quoted value\" 123 end?";
+  let test_input = "command.sub_command arg1 ::value1 arg2 \"quoted value\" 123 ??";
   let parser = Parser ::new( UnilangParserOptions ::default() );
   
   // Warmup
@@ -41,5 +41,4 @@ fn main()
   println!( "  Command path: {:?}", result.command_path_slices );
   println!( "  Named args: {}", result.named_arguments.len() );
   println!( "  Positional args: {}", result.positional_arguments.len() );
-  println!( "  Help requested: {}", result.help_requested );
 }

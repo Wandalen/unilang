@@ -62,7 +62,7 @@ All dependencies and relationships **must** be made explicit:
 The framework **must** provide standardized, predictable help access for all commands:
 
 - **Universal Help Commands**: Every command `.command` automatically generates a `.command.help` counterpart
-- **Uniform Help Parameter**: The `??` parameter provides consistent help access across all commands
+- **Uniform Help Token**: The single `??` token provides consistent help access across all commands — command pages via `.command ??`, parameter pages via `name::??`, byte-identical to the `.command.help` routes
 - **Help Convention APIs**: Developer-friendly APIs make following help conventions effortless
 - **Discoverability**: Users can always find help through predictable patterns
 

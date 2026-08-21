@@ -93,8 +93,8 @@ Result: 🎯 Unified CLI v1.0...
 ```bash
 # All help methods work with prefixes
 > .cmd1.process.help          # Auto-generated help
-> .cmd2.copy "??"             # Help parameter
-> .svc1.connect ?             # Traditional help operator
+> .cmd2.copy ??               # Help token — command page
+> .svc1.connect host::??      # Help token — parameter detail page
 > .                           # List all commands
 ```
 

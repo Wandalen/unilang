@@ -14,4 +14,4 @@ Behavioral requirements defining what the `unilang_parser` crate must do.
 | ID | Name | Purpose | Status |
 |----|------|---------|--------|
 | 001 | [Parser Public API](001_parsing_api.md) | Entry-point method signatures and semantic ignorance contract | ✅ |
-| 002 | [Command Path and Argument Parsing Rules](002_command_path_parsing_rules.md) | Space handling, path delimitation, argument transition, dot edge cases, `?` operator | ✅ |
+| 002 | [Command Path and Argument Parsing Rules](002_command_path_parsing_rules.md) | Space handling, path delimitation, argument transition, dot edge cases, `??` help token | ✅ |

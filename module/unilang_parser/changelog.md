@@ -1,4 +1,6 @@
 # Changelog
+* [0.40.0 | 2026-08-20] fix(parser): `parse_from_argv`'s multiword absorption never swallows a standalone `??` argv element — it always breaks absorption and becomes its own unquoted positional (the help token), matching the string path (`app .cmd a::1 ??` now renders help instead of failing coercion). `?` fragments and `??x` near-misses still absorb.
+* [0.40.0 | 2026-08-20] feat(parser)!: Replace the `?` help operator with the `??` help token. `?` and `??` now classify as ordinary value-capable tokens; `GenericInstruction.help_requested` is removed and each `Argument` gains `was_quoted` (for merged values: true when any merged part was quoted). Bare `??` lands in the command path slot (`["??"]`); argv reconstruction never re-quotes `?`/`??`. Semantic layers detect help via an unquoted `??` argument; a quoted `"??"` stays a literal value.
 * [2025-07-26] fix(parser): Reject unrecognized tokens (e.g., `!`) in argument lists.
 * [2025-07-26] feat(parser): Add support for kebab-case in argument names as per spec.
 

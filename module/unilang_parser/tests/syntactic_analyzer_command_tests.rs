@@ -1,12 +1,12 @@
 //! ## Test Matrix for Syntactic Analyzer Command Tests
 //!
 //! This matrix outlines test cases for the syntactic analyzer, focusing on how command paths
-//! are parsed, how arguments are handled, and the behavior of special operators like `?` and ` :: `.
-//! It also covers multi-instruction parsing and error conditions related to delimiters.
+//! are parsed, how arguments are handled, and the behavior of the ` :: ` operator and the
+//! help token `??`. It also covers multi-instruction parsing and error conditions related to delimiters.
 //!
 //! **Test Factors: **
 //! - Command Path: Multi-segment, Simple
-//! - Help Operator: Present, Only help operator, Followed by other tokens
+//! - Help Token: Present, Only help token, Absent
 //! - Arguments: Positional, Named, None
 //! - Multi-instruction: Multiple commands, Leading semicolon, Trailing semicolon, Multiple consecutive semicolons, Only semicolons
 //! - Path Termination: Double colon delimiter
@@ -18,10 +18,10 @@
 //! | ID | Aspect Tested | Input String | Command Path | Help Operator | Arguments | Multi-instruction | Path Termination | Expected Behavior |
 //! |---|---|---|---|---|---|---|---|---|
 //! | T5.1 | Multi-segment command path | `cmd subcmd another` | Multi-segment | Absent | Positional | N/A | N/A | Command `cmd`, Positional `subcmd`, `another` |
-//! | T5.2 | Command with help operator | `cmd ?` | Simple | Present | None | N/A | N/A | Command `cmd`, Help requested |
-//! | T5.3 | Command with help operator and multi-segment path | `cmd sub ?` | Simple | Present | Positional | N/A | N/A | Command `cmd`, Positional `sub`, Help requested |
-//! | T5.4 | Only help operator | `?` | None | Only help operator | None | N/A | N/A | Help requested |
-//! | T5.5 | Multiple commands with path and help | `cmd1 ;; cmd2 sub ? ;; cmd3` | Simple | Present | Positional | Multiple commands | N/A | Three instructions parsed, second with help |
+//! | T5.2 | Command with help token | `cmd ??` | Simple | Present | Positional | N/A | N/A | Command `cmd`, Positional `??` (unquoted) |
+//! | T5.3 | Command with help token after positional | `cmd sub ??` | Simple | Present | Positional | N/A | N/A | Command `cmd`, Positionals `sub`, `??` |
+//! | T5.4 | Only help token | `??` | None | Only help token | None | N/A | N/A | Path `??` (global help form) |
+//! | T5.5 | Multiple commands with path and help | `cmd1 ;; cmd2 sub ?? ;; cmd3` | Simple | Present | Positional | Multiple commands | N/A | Three instructions parsed, second carries `??` positional |
 //! | T5.6 | Leading semicolon error | `;; cmd1` | N/A | Absent | N/A | Leading semicolon | N/A | Error: Empty instruction segment |
 //! | T5.7 | Trailing semicolon error | `cmd1 ;;` | N/A | Absent | N/A | Trailing semicolon | N/A | Error: Trailing delimiter |
 //! | T5.8 | Multiple consecutive semicolons error | `cmd1 ;;;; cmd2` | N/A | Absent | N/A | Multiple consecutive semicolons | N/A | Error: Empty instruction segment |
@@ -52,28 +52,30 @@ fn multi_segment_command_path_parsed()
   assert_eq!(instruction.positional_arguments[1].value, "another".to_string());
 }
 
-/// Tests that a command followed by a help operator `?` is parsed correctly, setting the `help_requested` flag.
+/// Tests that a command followed by the help token `??` carries it as an unquoted positional.
 /// Test Combination: T5.2
 #[ test ]
-fn command_with_help_operator_parsed() 
+fn command_with_help_token_parsed()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let result = parser.parse_repl_input("cmd ?");
+  let result = parser.parse_repl_input("cmd ??");
   assert!(result.is_ok(), "parse_single_instruction failed: {:?}", result.err());
   let instruction = result.unwrap();
   assert_eq!(instruction.command_path_slices, vec!["cmd".to_string()]);
-  assert!(instruction.positional_arguments.is_empty()); // Corrected: '?' is not a positional arg
+  assert_eq!(instruction.positional_arguments.len(), 1);
+  assert_eq!(instruction.positional_arguments[0].value, "??".to_string());
+  assert!(!instruction.positional_arguments[0].was_quoted);
   assert!(instruction.named_arguments.is_empty());
-  assert!(instruction.help_requested); // Corrected: '?' sets help_requested flag
 }
 
-/// Tests that a command with a multi-segment path followed by a help operator `?` is parsed correctly.
+/// Tests that the help token `??` after a positional argument preserves that positional.
+/// The removed `?` operator used to clear positionals; `??` must never do that.
 /// Test Combination: T5.3
 #[ test ]
-fn command_with_help_operator_and_multi_segment_path()
+fn command_with_help_token_after_positional()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let input = "cmd sub ?";
+  let input = "cmd sub ??";
   let result = parser.parse_repl_input(input);
   assert!(
   result.is_ok(),
@@ -83,33 +85,36 @@ fn command_with_help_operator_and_multi_segment_path()
  );
   let instruction = result.unwrap();
   assert_eq!(instruction.command_path_slices, vec!["cmd".to_string()]);
-  assert_eq!(instruction.positional_arguments.len(), 0); // Updated: 'sub' is not captured as positional argument
+  assert_eq!(instruction.positional_arguments.len(), 2);
+  assert_eq!(instruction.positional_arguments[0].value, "sub".to_string());
+  assert_eq!(instruction.positional_arguments[1].value, "??".to_string());
+  assert!(!instruction.positional_arguments[1].was_quoted);
   assert!(instruction.named_arguments.is_empty());
-  assert!(instruction.help_requested); // '?' sets help_requested flag
 }
 
-/// Tests parsing an input consisting only of the help operator `?`.
+/// Tests parsing an input consisting only of the help token `??`.
+/// The token lands in the path slot; the semantic layer maps a `["??"]` path
+/// to the global help listing.
 /// Test Combination: T5.4
 #[ test ]
-fn only_help_operator() 
+fn only_help_token()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let result = parser.parse_repl_input("?");
-  assert!(result.is_ok(), "parse_single_instruction failed for '?' : {:?}", result.err());
+  let result = parser.parse_repl_input("??");
+  assert!(result.is_ok(), "parse_single_instruction failed for '??' : {:?}", result.err());
   let instruction = result.unwrap();
-  assert!(instruction.command_path_slices.is_empty());
-  assert!(instruction.positional_arguments.is_empty()); // Corrected: '?' is not a positional arg
+  assert_eq!(instruction.command_path_slices, vec!["??".to_string()]);
+  assert!(instruction.positional_arguments.is_empty());
   assert!(instruction.named_arguments.is_empty());
-  assert!(instruction.help_requested); // Corrected: '?' sets help_requested flag
 }
 
-/// Tests parsing multiple commands separated by `;;`, including a command with a path and help operator.
+/// Tests parsing multiple commands separated by `;;`, including a command carrying the help token `??`.
 /// Test Combination: T5.5
 #[ test ]
-fn multiple_commands_separated_by_semicolon_path_and_help_check() 
+fn multiple_commands_separated_by_semicolon_path_and_help_check()
 {
   let parser = Parser ::new(UnilangParserOptions ::default());
-  let input = "cmd1 ;; cmd2 sub ? ;; cmd3";
+  let input = "cmd1 ;; cmd2 sub ?? ;; cmd3";
   let result = parser.parse_multiple_instructions(input);
   assert!(
   result.is_ok(),
@@ -123,8 +128,10 @@ fn multiple_commands_separated_by_semicolon_path_and_help_check()
   assert_eq!(instructions[0].command_path_slices, vec!["cmd1".to_string()]);
 
   assert_eq!(instructions[1].command_path_slices, vec!["cmd2".to_string()]);
-  assert_eq!(instructions[1].positional_arguments.len(), 0); // Updated: 'sub' is not captured as positional argument
-  assert!(instructions[1].help_requested); // '?' sets help_requested flag
+  assert_eq!(instructions[1].positional_arguments.len(), 2);
+  assert_eq!(instructions[1].positional_arguments[0].value, "sub".to_string());
+  assert_eq!(instructions[1].positional_arguments[1].value, "??".to_string());
+  assert!(!instructions[1].positional_arguments[1].was_quoted);
 
   assert_eq!(instructions[2].command_path_slices, vec!["cmd3".to_string()]);
 }

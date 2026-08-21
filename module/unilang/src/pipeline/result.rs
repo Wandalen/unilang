@@ -52,7 +52,7 @@ pub enum UnilangError
     /// Error message describing the execution failure
     message: String
   },
-  /// Help request (e.g., user typed '.' or command with '?').
+  /// Help request (e.g., user typed '.', '??', or a command with '??').
   HelpRequest
   {
     /// List of available commands to show in help
@@ -250,10 +250,14 @@ impl CommandResult
     }
   }
 
-  /// Returns true if error contains help information.
+  /// Returns true if the error message contains help information.
   ///
-  /// This is useful for detecting when the user requested help (e.g., typed '.')
-  /// versus when a genuine error occurred.
+  /// Note: the framework pipelines detect help requests by `ErrorCode` before
+  /// the error is flattened to text, returning help as a *successful* result
+  /// with the page in `outputs` — for those, check `is_success()` and read
+  /// `outputs` instead. This method parses error text and applies to
+  /// `CommandResult` values whose `error` carries a help listing (e.g. built by
+  /// custom integrations).
   ///
   /// # REPL Integration Example
   /// ```
@@ -275,9 +279,9 @@ impl CommandResult
   /// ```
   ///
   /// # Common Help Triggers
-  /// - Typing `.` alone lists all commands
-  /// - Typing `.command ?` shows help for specific command
-  /// - Empty namespaces (e.g., `.nonexistent.`) may trigger help
+  /// - Typing `.` or `??` alone lists all commands
+  /// - Typing `.command ??` shows help for a specific command
+  /// - Typing `.command param::??` shows help for a specific parameter
   #[ must_use ]
   pub fn is_help_response( &self ) -> bool
   {

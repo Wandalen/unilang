@@ -1,4 +1,4 @@
-//!  and  — help detail level control.
+//! Help verbosity levels and global display options.
 
 ///
 /// Help verbosity levels controlling output detail.
@@ -39,7 +39,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use unilang::help::HelpVerbosity;
+/// use unilang_help::HelpVerbosity;
 ///
 /// // Parse from integer
 /// let level = HelpVerbosity::from_level( 2 );
@@ -70,6 +70,7 @@ pub enum HelpVerbosity
 impl HelpVerbosity
 {
   /// Parse verbosity level from integer (0-4)
+  #[ must_use ]
   pub fn from_level( level : u8 ) -> Self
   {
     match level
@@ -84,6 +85,7 @@ impl HelpVerbosity
 
   /// Read verbosity level from environment variable UNILANG_HELP_VERBOSITY.
   /// Falls back to default (Level 2: Standard) if not set or invalid.
+  #[ must_use ]
   pub fn from_env() -> Self
   {
     std::env::var( "UNILANG_HELP_VERBOSITY" )
@@ -97,7 +99,7 @@ impl HelpVerbosity
 /// Global configuration for help output display.
 ///
 /// This struct controls which metadata fields appear in help output
-/// across all commands. Per-command settings (like `show_version_in_help`)
+/// across all commands. Per-command settings (like `HelpCommandData::show_version`)
 /// can override these defaults.
 ///
 /// # Environment Variable Support
@@ -107,7 +109,7 @@ impl HelpVerbosity
 /// # Examples
 ///
 /// ```rust
-/// use unilang::help::HelpDisplayOptions;
+/// use unilang_help::HelpDisplayOptions;
 ///
 /// // Default: show everything
 /// let options = HelpDisplayOptions::default();

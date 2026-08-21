@@ -76,14 +76,11 @@ fn test_in3_no_implicit_magic_no_hidden_commands()
   );
 }
 
-/// IN-4: Consistent Help Access — `?` and `.cmd.help` produce equivalent content.
+/// IN-4: Consistent Help Access — `??` and `.cmd.help` produce equivalent content.
 ///
 /// Both help routes must contain the same command name and argument descriptions.
-/// Formatting may differ but no information is exclusive to one route.
-///
-/// Note: `??` as a bare token is a parser-level restriction (the `?` help operator must
-/// be the last token, so `??` is rejected by the parser before reaching semantics).
-/// The two working routes are `?` (parser-level operator) and `.cmd.help` (auto-registered).
+/// Since both render through the same `unilang_help` renderer, the pages must be
+/// byte-identical — no information is exclusive to one route.
 // test_kind: in_spec(IN-4)  [invariant/03_governing_principles]
 #[ test ]
 fn test_in4_consistent_help_access_three_routes_equivalent()
@@ -127,9 +124,9 @@ fn test_in4_consistent_help_access_three_routes_equivalent()
 
   let pipeline = Pipeline::new( registry );
 
-  // Route 1: .greet ? (parser-level help operator — must be last token)
-  let result_q = pipeline.process_command( ".greet ?", ExecutionContext::default() );
-  assert!( result_q.success, "Route '?' must succeed; error: {:?}", result_q.error );
+  // Route 1: .greet ?? (semantic-level help token)
+  let result_q = pipeline.process_command( ".greet ??", ExecutionContext::default() );
+  assert!( result_q.success, "Route '??' must succeed; error: {:?}", result_q.error );
   let help_q = &result_q.outputs[ 0 ].content;
 
   // Route 2: .greet.help (auto-registered when auto_help_enabled = true)
@@ -140,20 +137,15 @@ fn test_in4_consistent_help_access_three_routes_equivalent()
   // Both must mention the command name and argument
   assert!(
     help_q.contains( "greet" ),
-    "? output must mention command; got: {help_q:?}"
-  );
-  assert!(
-    help_dot.contains( "greet" ),
-    ".help output must mention command; got: {help_dot:?}"
+    "?? output must mention command; got: {help_q:?}"
   );
   assert!(
     help_q.contains( "name" ),
-    "? output must mention argument; got: {help_q:?}"
+    "?? output must mention argument; got: {help_q:?}"
   );
-  assert!(
-    help_dot.contains( "name" ),
-    ".help output must mention argument; got: {help_dot:?}"
-  );
+
+  // Both routes render through the same renderer — pages must be identical
+  assert_eq!( help_q, help_dot, "?? and .cmd.help must render the identical page" );
 }
 
 /// IN-5: Single Source of Truth — duplicate command registration is rejected.

@@ -6,6 +6,7 @@
 mod help {
   mod cli_invocation;
   mod conventions;
+  mod detection_matrix;
   mod enforcement;
   mod features_comprehensive;
   mod formatting;

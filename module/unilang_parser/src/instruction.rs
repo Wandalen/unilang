@@ -26,14 +26,25 @@ pub struct Argument
   /// The location (span) of the argument's raw value token in the original input.
   /// For quoted values, this refers to the span including the quotes.
   pub value_location: SourceLocation,
+  /// Whether the value was quoted in the original input (`"value"` or `'value'`).
+  ///
+  /// Semantic layers use this to distinguish an unquoted `??` (a help request)
+  /// from a quoted `"??"` (the literal two-character string). For a value merged
+  /// from several tokens (value context after `::`), this is `true` when ANY
+  /// merged part was quoted — explicit quoting anywhere signals literal intent.
+  pub was_quoted: bool,
 }
 
 /// Represents a generic instruction parsed from the input string or slice.
 ///
 /// An instruction consists of a command path (which can be multi-segment),
-/// a collection of named arguments, a list of positional arguments, a flag indicating
-/// if help was requested, and the overall location of the instruction in the source.
+/// a collection of named arguments, a list of positional arguments,
+/// and the overall location of the instruction in the source.
 /// All string data (paths, argument names, argument values) is owned.
+///
+/// The parser carries no help-request state: `??` is an ordinary value token,
+/// and help detection is a semantic-layer concern driven by each [`Argument`]'s
+/// `value` and `was_quoted` fields.
 #[ derive( Debug, PartialEq, Clone, Eq ) ]
 pub struct GenericInstruction
 {
@@ -50,9 +61,6 @@ pub struct GenericInstruction
   /// These are maintained in the order they appeared in the input.
   /// The `name` field within these `Argument` structs will be `None`.
   pub positional_arguments: Vec< Argument >,
-  /// Indicates if help was requested for this command, typically via a trailing `?`
-  /// immediately after the command path and before any arguments.
-  pub help_requested: bool,
   /// The [`SourceLocation`] span covering the entire instruction from its first token
   /// to its last token in the original input.
   pub overall_location: SourceLocation,

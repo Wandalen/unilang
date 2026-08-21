@@ -1,9 +1,9 @@
-//! Tests for the help operator (?) functionality
+//! Tests for the `??` help token functionality
 //!
-//! This module tests that the ? operator shows help instead of
-//! generating missing argument errors.
+//! This module tests that an unquoted positional `??` shows command help
+//! instead of generating missing argument or validation errors.
 
-/// FT-3 / FT-4: `?` and `??` operators produce help output, not errors.
+/// FT-3 / FT-4: positional `??` produces help output, not errors.
 // test_kind: ft_spec(FT-3, FT-4)  [feature/04_help_system]
 #[test]
 fn test_help_operator_shows_help_not_error()
@@ -39,21 +39,24 @@ fn test_help_operator_shows_help_not_error()
     .end()
   ).expect( "Registration should succeed" );
 
-  // Parse command with help operator
+  // Parse command with help token
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_repl_input( ".run_file ?" ).unwrap();
-  
-  // Verify help was requested
-  assert!( instruction.help_requested, "Help operator should be detected" );
-  
+  let instruction = parser.parse_repl_input( ".run_file ??" ).unwrap();
+
+  // Verify the help token arrived as an unquoted positional argument
+  assert!(
+    instruction.positional_arguments.iter().any( | arg | arg.value == "??" && !arg.was_quoted ),
+    "Help token should be an unquoted positional argument"
+  );
+
   // Run semantic analysis
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let result = analyzer.analyze();
-  
+
   // Should return a HELP_REQUESTED error, not MISSING_ARGUMENT
   assert!( result.is_err(), "Should return an error for help" );
-  
+
   let error = result.unwrap_err();
   match error
   {
@@ -118,18 +121,18 @@ fn test_help_operator_with_multiple_required_args()
     .end()
   ).expect( "Registration should succeed" );
 
-  // Parse command with help operator
+  // Parse command with help token
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_repl_input( ".files.copy ?" ).unwrap();
-  
+  let instruction = parser.parse_repl_input( ".files.copy ??" ).unwrap();
+
   // Run semantic analysis
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let result = analyzer.analyze();
-  
+
   // Should return help, not complain about missing arguments
   assert!( result.is_err() );
-  
+
   let error = result.unwrap_err();
   match error
   {
@@ -182,15 +185,15 @@ fn test_help_operator_takes_precedence_over_validation()
 
   // Parse command with help - no arguments provided
   let parser = Parser::new( UnilangParserOptions::default() );
-  let instruction = parser.parse_repl_input( ".set_port ?" ).unwrap();
-  
+  let instruction = parser.parse_repl_input( ".set_port ??" ).unwrap();
+
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let result = analyzer.analyze();
-  
+
   // Should show help, not validation errors
   assert!( result.is_err() );
-  
+
   let error = result.unwrap_err();
   match error
   {
@@ -237,20 +240,20 @@ fn test_normal_command_without_help_operator_still_validates()
     .end()
   ).expect( "Registration should succeed" );
 
-  // Parse command WITHOUT help operator
+  // Parse command WITHOUT help token
   let parser = Parser::new( UnilangParserOptions::default() );
   let instruction = parser.parse_repl_input( ".run_file" ).unwrap();
-  
-  assert!( !instruction.help_requested, "Help should not be requested" );
-  
+
+  assert!( instruction.positional_arguments.is_empty(), "No positional arguments expected" );
+
   // Run semantic analysis
   let instructions = vec![instruction];
   let analyzer = SemanticAnalyzer::new( &instructions, &registry );
   let result = analyzer.analyze();
-  
+
   // Should fail with missing argument error
   assert!( result.is_err() );
-  
+
   let error = result.unwrap_err();
   match error
   {

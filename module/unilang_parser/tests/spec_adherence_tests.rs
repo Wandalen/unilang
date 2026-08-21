@@ -2,12 +2,12 @@
 //!
 //! This matrix details test cases specifically designed to verify the parser's adherence to the
 //! Unilang specification (`spec.md`), covering various command path formats, argument types,
-//! and help operator usage.
+//! and help token (`??`) usage.
 //!
 //! **Test Factors: **
 //! - Command Path: Multi-segment, Ends with named arg, Ends with quoted string, Ends with comment operator, Trailing dot
 //! - Arguments: Positional, Named, None
-//! - Help Operator: Present, Followed by other tokens
+//! - Help Token: Present as unquoted positional `??` (any position), Absent
 //! - Named Argument Value: Simple quoted, Quoted with ` :: `, Comma-separated, Key-value pair string
 //!
 //! ---
@@ -21,8 +21,8 @@
 //! | T4.3 | Command path ends with quoted string | `cmd "quoted_arg"` | Ends with quoted string | Positional | Absent | N/A | Command `cmd`, Positional `"quoted_arg"` |
 //! | T4.4 | Command path ends with comment operator | `cmd #comment` | Ends with comment operator | N/A | Absent | N/A | Error: Unexpected token '#' |
 //! | T4.5 | Trailing dot after command path | `cmd.` | Trailing dot | N/A | Absent | N/A | Error: Command path cannot end with a '.' |
-//! | T4.6 | Named arg followed by help operator | `cmd name ::val ?` | N/A | Named | Present | Simple | Command `cmd`, Named `name ::val`, Help requested |
-//! | T4.7 | Help operator followed by other tokens | `cmd ? arg` | N/A | Positional | Followed by other tokens | N/A | Error: Help operator '?' must be the last token |
+//! | T4.6 | Named arg followed by help token | `cmd name ::val ??` | N/A | Mixed | Present | Simple | Command `cmd`, Named `name ::val`, Positional `??` (unquoted) |
+//! | T4.7 | Help token followed by other tokens | `cmd ?? arg` | N/A | Positional | Present (any position) | N/A | Command `cmd`, Positionals `??`, `arg` |
 //! | T4.8 | Named arg with simple quoted value | `cmd name :: "value with spaces"` | N/A | Named | Absent | Simple Quoted | Command `cmd`, Named `name ::value with spaces` |
 //! | T4.9 | Named arg with quoted value containing ` :: ` | `cmd msg :: "DEPRECATED ::message"` | N/A | Named | Absent | Quoted with ` :: ` | Command `cmd`, Named `msg ::DEPRECATED ::message` |
 //! | T4.10 | Multiple named args with simple quoted values | `cmd name1 :: "val1" name2 :: "val2"` | N/A | Named | Absent | Simple Quoted | Command `cmd`, Named `name1 ::val1`, `name2 ::val2` |
@@ -35,9 +35,9 @@
 //! | S6.5 | R3.1 | `.cmd arg` | Single | Leading Dot | Positional | Identifier | None | Correct | None | None | `(false, false)` | `cmd`, `arg` (leading dot consumed) |
 //! | S6.6 | R3.3 | `cmd.` | Single | Trailing Dot | None | N/A | None | Incorrect | None | Syntax Error | `(false, false)` | Error: Trailing dot |
 //! | S6.7 | R3.4 | `cmd..sub` | Single | Consecutive Dots | None | N/A | None | Incorrect | None | Syntax Error | `(false, false)` | Error: Consecutive dots |
-//! | S6.8 | R4 | `cmd ?` | Single | Simple | None | N/A | `?` | Correct (last) | None | None | `(false, false)` | `cmd`, Help requested |
-//! | S6.9 | R4, R5.2 | `cmd name ::val ?` | Single | Simple | Named | Identifier | `?` | Correct (last) | None | None | `(false, false)` | `cmd`, `name ::val`, Help requested |
-//! | S6.10 | R4 | `cmd ? arg` | Single | Simple | Positional | Identifier | `?` | Incorrect (not last) | None | Syntax Error | `(false, false)` | Error: `?` not last |
+//! | S6.8 | R4 | `cmd ??` | Single | Simple | Positional | N/A | `??` | Correct (any) | None | None | `(false, false)` | `cmd`, Positional `??` (unquoted) |
+//! | S6.9 | R4, R5.2 | `cmd name ::val ??` | Single | Simple | Mixed | Identifier | `??` | Correct (any) | None | None | `(false, false)` | `cmd`, `name ::val`, Positional `??` |
+//! | S6.10 | R4 | `cmd ?? name ::val` | Single | Simple | Mixed | Identifier | `??` | Correct (before named) | None | None | `(false, false)` | `cmd`, Positional `??`, `name ::val` |
 //! | S6.11 | R5.1 | `cmd pos1 pos2` | Single | Simple | Positional | Identifier | None | Correct | None | None | `(false, false)` | `cmd`, `pos1`, `pos2` |
 //! | S6.12 | R5.2 | `cmd key ::val` | Single | Simple | Named | Identifier | ` :: ` | Correct | None | None | `(false, false)` | `cmd`, `key ::val` |
 //! | S6.13 | R5.2 | `cmd key :: "val with spaces"` | Single | Simple | Named | Quoted String | ` :: ` | Correct | In quotes | None | `(false, false)` | `cmd`, `key :: "val with spaces"` |
@@ -50,7 +50,7 @@
 //! | S6.20 | Multi-Instruction (Trailing Delimiter) | `cmd1 ;;` | Multi-Instruction | N/A | N/A | N/A | `;;` | Incorrect | None | Trailing Delimiter | `(false, false)` | Error: Trailing delimiter |
 //! | S6.21 | R2 (Transition by non-identifier) | `cmd !arg` | Single | Simple | Positional | N/A | `!` | Correct | None | Syntax Error | `(false, false)` | Error: Unexpected token `!` |
 //! | S6.22 | R2 (Transition by quoted string) | `cmd "arg"` | Single | Simple | Positional | Quoted String | None | Correct | None | None | `(false, false)` | `cmd`, `"arg"` |
-//! | S6.23 | R2 (Transition by help operator) | `cmd ?` | Single | Simple | None | N/A | `?` | Correct | None | None | `(false, false)` | `cmd`, Help requested |
+//! | S6.23 | R2 (Transition by help token) | `cmd ??` | Single | Simple | Positional | N/A | `??` | Correct | None | None | `(false, false)` | `cmd`, Positional `??` |
 //! | S6.24 | R5.2 (Value with ` :: `) | `cmd msg :: "DEPRECATED ::message"` | Single | Simple | Named | Quoted String | ` :: ` | Correct | In quotes | None | `(false, false)` | `cmd`, `msg ::DEPRECATED ::message` |
 //! | S6.25 | R5.2 (Value with commas) | `cmd tags ::dev,rust,unilang` | Single | Simple | Named | Identifier | ` :: ` | Correct | None | None | `(false, false)` | `cmd`, `tags ::dev,rust,unilang` |
 //! | S6.26 | R5.2 (Value with key-value pair) | `cmd headers ::Content-Type=application/json,Auth-Token=xyz` | Single | Simple | Named | Identifier | ` :: ` | Correct | None | None | `(false, false)` | `cmd`, `headers ::Content-Type=application/json,Auth-Token=xyz` |
@@ -79,7 +79,6 @@ fn tm2_1_multi_segment_path_with_positional_arg()
   assert_eq!( instruction.positional_arguments.len(), 1 );
   assert_eq!( instruction.positional_arguments[ 0 ].value, "arg".to_string() );
   assert!( instruction.named_arguments.is_empty() );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.2
@@ -96,7 +95,6 @@ fn tm2_2_command_path_ends_with_named_arg()
   assert!( instruction.positional_arguments.is_empty() );
   assert_eq!( instruction.named_arguments.len(), 1 );
   assert_eq!( instruction.named_arguments.get( "arg" ).unwrap()[0].value, "val".to_string() );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.3
@@ -113,7 +111,6 @@ fn tm2_3_command_path_ends_with_quoted_string()
   assert_eq!( instruction.positional_arguments.len(), 1 );
   assert_eq!( instruction.positional_arguments[ 0 ].value, "quoted_arg".to_string() );
   assert!( instruction.named_arguments.is_empty() );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.4
@@ -157,43 +154,38 @@ fn tm2_5_trailing_dot_after_command_path()
 }
 
 /// Test Combination: T4.6
-/// Named argument followed by `?`.
+/// Named argument followed by the help token `??`.
 #[ test ]
-fn tm2_6_named_arg_followed_by_help_operator()
+fn tm2_6_named_arg_followed_by_help_token()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd name ::val ?";
+  let input = "cmd name ::val ??";
   let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
-  assert!( instruction.positional_arguments.is_empty() );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
   assert_eq!( instruction.named_arguments.len(), 1 );
   assert_eq!( instruction.named_arguments.get( "name" ).unwrap()[0].value, "val".to_string() );
-  assert!( instruction.help_requested );
 }
 
 /// Test Combination: T4.7
-/// Help operator followed by other tokens.
+/// Help token followed by other tokens — `??` is legal at any position.
 #[ test ]
-fn tm2_7_help_operator_followed_by_other_tokens()
+fn tm2_7_help_token_followed_by_other_tokens()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd ? arg";
+  let input = "cmd ?? arg";
   let result = parser.parse_repl_input( input );
-  assert!(
-  result.is_err(),
-  "Expected error for input '{}', but got Ok: {:?}",
-  input,
-  result.ok()
- );
-  if let Err( e ) = result
-  {
-  assert_eq!(
-   e.kind,
-   ErrorKind ::Syntax( "Help operator '?' must be the last token".to_string() )
- );
- }
+  assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
+  let instruction = result.unwrap();
+  assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
+  assert_eq!( instruction.positional_arguments.len(), 2 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
+  assert_eq!( instruction.positional_arguments[ 1 ].value, "arg".to_string() );
 }
 
 /// Test Combination: T4.8
@@ -213,7 +205,6 @@ fn tm2_8_named_arg_with_simple_quoted_value()
   instruction.named_arguments.get( "name" ).unwrap()[0].value,
   "value with spaces".to_string()
  );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.9
@@ -233,7 +224,6 @@ fn tm2_9_named_arg_with_quoted_value_containing_double_colon()
   instruction.named_arguments.get( "msg" ).unwrap()[0].value,
   "DEPRECATED ::message".to_string()
  );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.10
@@ -251,7 +241,6 @@ fn tm2_10_multiple_named_args_with_simple_quoted_values()
   assert_eq!( instruction.named_arguments.len(), 2 );
   assert_eq!( instruction.named_arguments.get( "name1" ).unwrap()[0].value, "val1".to_string() );
   assert_eq!( instruction.named_arguments.get( "name2" ).unwrap()[0].value, "val2".to_string() );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.11
@@ -271,7 +260,6 @@ fn tm2_11_named_arg_with_comma_separated_value()
   instruction.named_arguments.get( "tags" ).unwrap()[0].value,
   "dev,rust,unilang".to_string()
  );
-  assert!( !instruction.help_requested );
 }
 
 /// Test Combination: T4.12
@@ -291,7 +279,6 @@ fn tm2_12_named_arg_with_key_value_pair_string()
   instruction.named_arguments.get( "headers" ).unwrap()[0].value,
   "Content-Type=application/json,Auth-Token=xyz".to_string()
  );
-  assert!( !instruction.help_requested );
 }
 
 /// Tests Rule 0 (Whitespace Separation) and Rule 1 (Command Path Identification) with leading/trailing and internal whitespace.
@@ -412,57 +399,55 @@ fn s6_7_consecutive_dots_syntax_error()
  }
 }
 
-/// Tests Rule 4 (Help Operator) with a command and `?` as the final token.
+/// Tests Rule 4 (Help Token) with a command and `??` as the final token.
 /// Test Combination: S6.8
 #[ test ]
-fn s6_8_help_operator_correct_placement()
+fn s6_8_help_token_as_positional()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd ?";
+  let input = "cmd ??";
   let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
-  assert!( instruction.help_requested );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
 }
 
-/// Tests Rule 4 (Help Operator) and Rule 5.2 (Named Arguments) with a named argument followed by `?`.
+/// Tests Rule 4 (Help Token) and Rule 5.2 (Named Arguments) with a named argument followed by `??`.
 /// Test Combination: S6.9
 #[ test ]
-fn s6_9_named_arg_followed_by_help_operator()
+fn s6_9_named_arg_followed_by_help_token()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd name ::val ?";
+  let input = "cmd name ::val ??";
   let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
   assert_eq!( instruction.named_arguments.len(), 1 );
   assert_eq!( instruction.named_arguments.get( "name" ).unwrap()[0].value, "val".to_string() );
-  assert!( instruction.help_requested );
 }
 
-/// Tests Rule 4 (Help Operator) with `?` followed by other tokens (syntax error).
+/// Tests Rule 4 (Help Token): `??` may appear before named arguments.
 /// Test Combination: S6.10
 #[ test ]
-fn s6_10_help_operator_followed_by_other_tokens_error()
+fn s6_10_help_token_before_named_arg()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd ? arg";
+  let input = "cmd ?? name ::val";
   let result = parser.parse_repl_input( input );
-  assert!(
-  result.is_err(),
-  "Expected error for input '{}', but got Ok: {:?}",
-  input,
-  result.ok()
- );
-  if let Err( e ) = result
-  {
-  assert_eq!(
-   e.kind,
-   ErrorKind ::Syntax( "Help operator '?' must be the last token".to_string() )
- );
- }
+  assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
+  let instruction = result.unwrap();
+  assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
+  assert!( !instruction.positional_arguments[ 0 ].was_quoted );
+  assert_eq!( instruction.named_arguments.get( "name" ).unwrap()[0].value, "val".to_string() );
 }
 
 /// Tests Rule 5.1 (Positional Arguments) with multiple positional arguments.
@@ -694,18 +679,19 @@ fn s6_22_transition_by_quoted_string()
   assert_eq!( instruction.positional_arguments[ 0 ].value, "arg".to_string() );
 }
 
-/// Tests Rule 2 (Transition to Arguments) with a help operator.
+/// Tests Rule 2 (Transition to Arguments) with the help token `??`.
 /// Test Combination: S6.23
 #[ test ]
-fn s6_23_transition_by_help_operator()
+fn s6_23_transition_by_help_token()
 {
   let parser = Parser ::new( UnilangParserOptions ::default() );
-  let input = "cmd ?";
+  let input = "cmd ??";
   let result = parser.parse_repl_input( input );
   assert!( result.is_ok(), "Parse failed for input '{}' : {:?}", input, result.err() );
   let instruction = result.unwrap();
   assert_eq!( instruction.command_path_slices, vec![ "cmd".to_string() ] );
-  assert!( instruction.help_requested );
+  assert_eq!( instruction.positional_arguments.len(), 1 );
+  assert_eq!( instruction.positional_arguments[ 0 ].value, "??".to_string() );
 }
 
 /// Tests Rule 5.2 (Named Arguments) with a value containing ` :: `.

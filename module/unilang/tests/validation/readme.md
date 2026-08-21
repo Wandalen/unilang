@@ -12,4 +12,5 @@ CI-level validation tests that verify crate-wide properties: clippy cleanliness,
 | `direct_import.rs` | Direct import works without feature-gate ceremony |
 | `doc_examples.rs` | Documentation examples compile and produce expected output |
 | `feature_gate.rs` | `enabled`/`full` feature gates enable/disable correctly |
+| `fixture.rs` | Downstream-fixture manifest local-path patch support |
 | `phf_indirect.rs` | PHF usable via `unilang` re-export without direct dep |

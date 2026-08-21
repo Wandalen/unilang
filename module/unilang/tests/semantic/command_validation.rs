@@ -131,3 +131,131 @@ fn test_principle_minimum_implicit_magic_rejects_invalid()
     .description( "Testing name: chat" )
     .end();
 }
+/// An `Enum` parameter whose default is not among its own choices could never
+/// pass coercion — registration must reject it outright.
+#[test]
+fn test_enum_default_outside_choices_rejected_at_registration()
+{
+  use unilang::data::{ ArgumentAttributes, ArgumentDefinition, Kind };
+
+  let mut registry = CommandRegistry::new();
+  let cmd = CommandDefinition::former()
+    .name( ".lint_enum_bad" )
+    .description( "Enum default outside choices" )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "mode".to_string(),
+        description : "Mode selector".to_string(),
+        kind : Kind::Enum( vec![ "fast".to_string(), "slow".to_string() ] ),
+        hint : String::new(),
+        attributes : ArgumentAttributes
+        {
+          optional : true,
+          default : Some( "turbo".to_string() ),
+          ..Default::default()
+        },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  let result = registry.register( cmd );
+  assert!( result.is_err(), "Enum default outside choices must be rejected" );
+  let error_msg = format!( "{:?}", result.unwrap_err() );
+  assert!(
+    error_msg.contains( "not among its enum choices" ),
+    "Rejection must explain the enum-default mismatch; got: {error_msg}"
+  );
+}
+
+/// The same definition with a default drawn from the choices registers fine.
+#[test]
+fn test_enum_default_within_choices_accepted()
+{
+  use unilang::data::{ ArgumentAttributes, ArgumentDefinition, Kind };
+
+  let mut registry = CommandRegistry::new();
+  let cmd = CommandDefinition::former()
+    .name( ".lint_enum_ok" )
+    .description( "Enum default within choices" )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "mode".to_string(),
+        description : "Mode selector".to_string(),
+        kind : Kind::Enum( vec![ "fast".to_string(), "slow".to_string() ] ),
+        hint : String::new(),
+        attributes : ArgumentAttributes
+        {
+          optional : true,
+          default : Some( "slow".to_string() ),
+          ..Default::default()
+        },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  assert!( registry.register( cmd ).is_ok(), "Enum default within choices must register" );
+}
+
+/// A `String` parameter whose description embeds an `a|b|c` choice list gets a
+/// non-fatal warning steering toward `Kind::Enum` — registration still succeeds.
+#[test]
+fn test_string_choice_list_description_warns_but_registers()
+{
+  use unilang::data::{ ArgumentAttributes, ArgumentDefinition, Kind };
+  use unilang::command_validation::validate_help_conventions;
+
+  // Suppress the stderr side of the warning in test output
+  std::env::set_var( "UNILANG_NO_LINT_WARNINGS", "1" );
+
+  let build = | description : &str |
+  {
+    CommandDefinition::former()
+      .name( ".lint_string_choices" )
+      .description( "String with choice-list description" )
+      .arguments( vec![
+        ArgumentDefinition
+        {
+          name : "format".to_string(),
+          description : description.to_string(),
+          kind : Kind::String,
+          hint : String::new(),
+          attributes : ArgumentAttributes { optional : true, ..Default::default() },
+          validation_rules : vec![],
+          aliases : vec![],
+          tags : vec![],
+        }
+      ])
+      .end()
+  };
+
+  // Whole-description choice list (2 segments) warns
+  let warnings = validate_help_conventions( &build( "json|yaml" ) ).unwrap();
+  assert_eq!( warnings.len(), 1, "Whole-description choice list must warn" );
+  assert!( warnings[ 0 ].contains( "Kind::Enum" ), "Warning must steer toward Kind::Enum" );
+  assert!( warnings[ 0 ].contains( "format::??" ), "Warning must mention the help syntax" );
+
+  // Embedded token with >= 3 segments warns
+  let warnings = validate_help_conventions( &build( "Output format: json|yaml|table" ) ).unwrap();
+  assert_eq!( warnings.len(), 1, "Embedded 3-segment choice list must warn" );
+
+  // Embedded 2-segment token inside prose does NOT warn (avoids false positives)
+  let warnings = validate_help_conventions( &build( "Filter expression, e.g. name|size" ) ).unwrap();
+  assert!( warnings.is_empty(), "Prose with a single embedded pipe pair must not warn" );
+
+  // Plain prose does not warn
+  let warnings = validate_help_conventions( &build( "Free-form output format string" ) ).unwrap();
+  assert!( warnings.is_empty(), "Plain prose must not warn" );
+
+  // The warning is non-fatal: registration succeeds
+  let mut registry = CommandRegistry::new();
+  assert!( registry.register( build( "json|yaml|table" ) ).is_ok(),
+    "Choice-list description warning must not block registration" );
+}
