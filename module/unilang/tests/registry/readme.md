@@ -25,3 +25,4 @@ Tests for command registration, lookup, static/dynamic modes, and validation.
 | `multi_yaml_conflict_detection.rs` | Conflict detection when merging multiple YAML sources |
 | `static_registry_routines.rs` | `into_routines()` and `From<StaticCommandRegistry>` routine transfer |
 | `command_naming_invariant.rs` | IN-1..3 spec cases — dot-prefix enforcement and full-name construction |
+| `default_command.rs` | FR-REG-10: default-command getter/setter/builder validation |

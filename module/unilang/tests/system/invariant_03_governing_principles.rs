@@ -22,6 +22,7 @@ use unilang::registry::CommandRegistry;
 use unilang::interpreter::ExecutionContext;
 use unilang::semantic::{ SemanticAnalyzer, VerifiedCommand };
 use unilang::pipeline::Pipeline;
+use unilang::types::Value;
 use unilang_parser::{ Parser, UnilangParserOptions };
 
 /// IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage.
@@ -295,4 +296,82 @@ fn test_in7_explicit_command_naming_no_dot_prefix_rejected()
     ".build",
     "CommandName must never transform the caller-supplied value beyond validation"
   );
+}
+
+/// IN-8: Opt-In Default Command — empty-path routing only activates when explicitly
+/// configured, never overrides an explicit command path, and never bypasses argument
+/// validation.
+///
+/// A registry that never calls `set_default_command` sees unchanged empty-path-with-
+/// arguments behavior (the pre-existing `UnknownParameter` rejection, IN-3/`issue-003`).
+/// A registry that does configure one routes an empty path carrying arguments to that
+/// command, but an explicit command path is never redirected, and unknown-parameter
+/// validation (FR-ARG-8) still runs against the resolved command.
+// test_kind: in_spec(IN-8)  [invariant/03_governing_principles]
+#[ test ]
+fn test_in8_default_command_opt_in_bounded_exception()
+{
+  let report_command = || CommandDefinition::former()
+    .name( ".report" )
+    .description( "Command used as a default-command routing target".to_string() )
+    .arguments( vec![
+      ArgumentDefinition
+      {
+        name : "dry".to_string(),
+        kind : Kind::Boolean,
+        description : "Dry-run flag".to_string(),
+        hint : String::new(),
+        attributes : ArgumentAttributes { optional : true, ..Default::default() },
+        validation_rules : vec![],
+        aliases : vec![],
+        tags : vec![],
+      }
+    ])
+    .end();
+
+  let parse_and_analyze = | registry : &CommandRegistry, input : &str |
+  {
+    let parser = Parser::new( UnilangParserOptions::default() );
+    let instruction = parser.parse_repl_input( input ).expect( "Parse should succeed" );
+    let instructions = vec![ instruction ];
+    SemanticAnalyzer::new( &instructions, registry ).analyze()
+  };
+
+  // Scenario 1: unconfigured registry — empty path with arguments is rejected unchanged.
+  let mut unconfigured_registry = CommandRegistry::new();
+  unconfigured_registry.register( report_command() ).expect( "Registration must succeed" );
+  let unconfigured_result = parse_and_analyze( &unconfigured_registry, "dry::true" );
+  assert!( unconfigured_result.is_err(), "Unconfigured registry must reject empty path with arguments" );
+  match unconfigured_result.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!(
+      error_data.code, ErrorCode::UnknownParameter,
+      "Unconfigured registry must produce the pre-existing UnknownParameter rejection; got: {:?}", error_data.code
+    ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // Scenario 2: configured registry — empty path with an argument the default doesn't
+  // declare still routes to the default, but FR-ARG-8 validation still rejects it.
+  let mut configured_registry = CommandRegistry::new();
+  configured_registry.register( report_command() ).expect( "Registration must succeed" );
+  configured_registry.set_default_command( ".report" ).expect( "Valid default command name must be accepted" );
+
+  let unknown_arg_result = parse_and_analyze( &configured_registry, "typo::1" );
+  assert!( unknown_arg_result.is_err(), "Routing to the default must not bypass unknown-parameter validation" );
+  match unknown_arg_result.unwrap_err()
+  {
+    Error::Execution( error_data ) => assert_eq!(
+      error_data.code, ErrorCode::UnknownParameter,
+      "Argument unknown to the routed default must still be rejected; got: {:?}", error_data.code
+    ),
+    other => panic!( "Expected Error::Execution, got: {other:?}" ),
+  }
+
+  // Scenario 3: same configured registry — an explicit command path is never redirected.
+  let explicit_result = parse_and_analyze( &configured_registry, ".report dry::true" )
+    .expect( "Explicit path must resolve normally" );
+  assert_eq!( explicit_result.len(), 1 );
+  assert_eq!( explicit_result[ 0 ].definition.full_name(), ".report" );
+  assert_eq!( explicit_result[ 0 ].arguments.get( "dry" ), Some( &Value::Boolean( true ) ) );
 }

@@ -31,6 +31,7 @@ The framework **must** minimize implicit behavior and transformations to maximiz
 - **Predictable Behavior**: What you specify is exactly what you get — no hidden transformations
 - **Clear APIs**: Function behavior should be obvious from signatures and documentation
 - **No Surprising Side Effects**: Commands and functions should behave exactly as documented
+- **Opt-In Default Command Exception**: A registry **may** explicitly configure a `default_command` (`CommandRegistry::set_default_command()` or `CommandRegistryBuilder::default_command()`). When configured, an invocation with an empty command path but at least one argument routes to that command instead of failing with an unknown-parameter error. This is a bounded, documented exception, not a violation: the routing is opt-in (a registry that never configures it sees no behavior change), introspectable (`CommandRegistry::default_command()` reports the active configuration), and non-overriding (an invocation that resolves any explicit command path is never redirected). All existing validation, including unknown-parameter detection (FR-ARG-8), still runs against the resolved default command — the exception changes command *routing*, never argument *validation*. See `feature/001_command_registry.md` FR-REG-10.
 
 #### Single Source of Truth
 
@@ -126,7 +127,7 @@ The framework **must** adhere to the principle of explicit command naming with m
 
 | File | Relationship |
 |------|--------------|
-| [001_command_registry.md](../feature/001_command_registry.md) | Registry implements fail-fast validation principle |
+| [001_command_registry.md](../feature/001_command_registry.md) | Registry implements fail-fast validation principle; FR-REG-10 is the bounded opt-in exception to Minimum Implicit Magic |
 | [004_help_system.md](../feature/004_help_system.md) | Help system embodies consistent help access principle |
 
 ### Invariants
@@ -149,4 +150,4 @@ The framework **must** adhere to the principle of explicit command naming with m
 
 | File | Relationship |
 |------|--------------|
-| `tests/system/invariant_03_governing_principles.rs` | Minimum implicit magic, fail-fast, illegal-state, help-access principles |
+| `tests/system/invariant_03_governing_principles.rs` | Minimum implicit magic, fail-fast, illegal-state, help-access principles; IN-8 covers the opt-in default-command exception |

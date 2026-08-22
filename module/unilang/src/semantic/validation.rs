@@ -166,8 +166,9 @@ impl SemanticAnalyzer< '_ >
   /// * `Err` with UNILANG_UNKNOWN_PARAMETER if invalid parameters are found
   ///
   /// # Error Format
-  /// - Single unknown: "Unknown parameter 'drry'. Did you mean 'dry'?"
-  /// - Multiple unknown: "Unknown parameters: 'drry', 'foo'. Check command help for valid parameters."
+  /// - Single unknown (suggestion found): "Argument Error: Unknown parameter 'drry'. Did you mean 'dry'? Use '.cmd ??' for help."
+  /// - Single unknown (no suggestion): "Argument Error: Unknown parameter 'foo'. Use '.cmd ??' to see valid parameters."
+  /// - Multiple unknown: "Argument Error: Unknown parameters: 'drry', 'foo'. Use '.cmd ??' to see valid parameters."
   pub( in super ) fn check_unknown_named_arguments( instruction : &GenericInstruction, command_def : &CommandDefinition ) -> Result< (), Error >
   {
     // Collect all valid parameter names (canonical names + aliases)

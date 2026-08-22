@@ -175,7 +175,7 @@ error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_
 mod_interface = { workspace = true, features = [ "enabled" ], optional = true }
 former = { workspace = true, features = [ "enabled", "derive_former" ], optional = true }
 unilang_parser = { workspace = true, optional = true } # SIMD features controlled by main unilang features
-unilang_help = { workspace = true, features = [ "cli_fmt_backend" ], optional = true } # Renderer-agnostic help model + plain/cli_fmt renderers
+unilang_help = { workspace = true, features = [ "enabled" ], optional = true } # Renderer-agnostic help model + plain/cli_fmt renderers ( cli_fmt backend is mandatory, folded into "enabled" )
 
 ## external
 log = { workspace = true, optional = true }

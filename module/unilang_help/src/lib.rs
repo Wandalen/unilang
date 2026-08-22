@@ -16,9 +16,9 @@
 //! - [`PlainRenderer`] — plain-text command pages at all five verbosity
 //!   levels (line-faithful port of the original `unilang` formats) plus a
 //!   parameter detail page.
-//! - [`CliFmtRenderer`] (feature `cli_fmt_backend`, default) — column-aligned,
-//!   colour-aware command and parameter pages via `cli_fmt`'s detail-page
-//!   template.
+//! - [`CliFmtRenderer`] — column-aligned, colour-aware command and parameter
+//!   pages via `cli_fmt`'s detail-page template; mandatory whenever this
+//!   crate is enabled, not a separately-optional feature.
 //!
 //! ## Example
 //!
@@ -56,7 +56,7 @@ pub mod verbosity;
 #[ cfg( feature = "enabled" ) ]
 pub mod plain;
 /// `cli_fmt`-backed column-aligned renderer.
-#[ cfg( feature = "cli_fmt_backend" ) ]
+#[ cfg( feature = "enabled" ) ]
 pub mod cli_fmt_renderer;
 
 /// Prelude for commonly used items.
@@ -66,7 +66,6 @@ pub mod prelude
   pub use super::model::{ HelpCommandData, HelpParamData };
   pub use super::verbosity::{ HelpVerbosity, HelpDisplayOptions };
   pub use super::plain::PlainRenderer;
-  #[ cfg( feature = "cli_fmt_backend" ) ]
   pub use super::cli_fmt_renderer::CliFmtRenderer;
 }
 

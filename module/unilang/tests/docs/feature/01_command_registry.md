@@ -4,7 +4,7 @@
 
 - **Purpose:** Verify all FR-REG behavioral requirements for the command registry feature
 - **Responsibility:** Test cases covering static registration, dynamic registration, namespace resolution, alias resolution, explicit naming enforcement, and feature parity
-- **In Scope:** FR-REG-1 (static PHF registration), FR-REG-2 (dynamic runtime registration), FR-REG-3 (declarative YAML/JSON loading), FR-REG-4 (namespace support), FR-REG-5 (alias resolution), FR-REG-6 (explicit naming enforcement), FR-REG-7 (CLI module aggregation), FR-REG-8 (static/dynamic parity), FR-REG-9 (build-time validation)
+- **In Scope:** FR-REG-1 (static PHF registration), FR-REG-2 (dynamic runtime registration), FR-REG-3 (declarative YAML/JSON loading), FR-REG-4 (namespace support), FR-REG-5 (alias resolution), FR-REG-6 (explicit naming enforcement), FR-REG-7 (CLI module aggregation), FR-REG-8 (static/dynamic parity), FR-REG-9 (build-time validation), FR-REG-10 (opt-in default-command routing)
 - **Out of Scope:** Argument binding (FR-ARG); pipeline orchestration (FR-PIPE); help output formatting (FR-HELP)
 
 ### FT-1: Static PHF registry lookup returns registered command
@@ -156,3 +156,9 @@
 - **Given:** A `CliBuilder` with one dynamic YAML module (loaded via `dynamic_module_with_prefix`) containing a single authored command `.example` under prefix `.util`
 - **When:** `builder.build()` is called
 - **Then:** Build succeeds with no "already registered" error; `.util.example` and `.util.example.help` are both present, correctly prefixed; no unprefixed `.example.help` entry exists in the resulting registry
+
+### FT-26: Configured default command receives empty-path invocations with arguments; unconfigured registries and explicit paths are unaffected
+
+- **Given:** A `CommandRegistry` with `.report` registered (accepting an optional `dry` boolean argument) and `default_command` set to `.report` via `CommandRegistryBuilder::default_command(".report")`
+- **When:** Three invocations are analyzed: an empty-path invocation carrying `dry::true` (no dot-prefixed token in the path), an explicit `.report dry::true` invocation, and the same empty-path invocation replayed against a second registry that never configured a default
+- **Then:** The first resolves to `.report` with `dry` bound to `true`; the second resolves identically via its explicit path, completely unaffected by the configured default; the third returns the unchanged `ErrorCode::UnknownParameter` rejection for empty-path invocations (`issue-003` behavior), proving the feature has zero effect on registries that don't opt in

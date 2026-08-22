@@ -9,7 +9,7 @@ use unilang::
 pub extern "C" fn dummy_command_routine( _verified_command : VerifiedCommand, _context : ExecutionContext ) -> Result< OutputData, ErrorData >
 {
   println!( "Dummy dynamic routine executed!" );
-  Ok( OutputData { content : "Dummy dynamic routine executed!".to_string(), format : "text".to_string() } )
+  Ok( OutputData { content : "Dummy dynamic routine executed!".to_string(), format : "text".to_string(), execution_time_ms : None } )
 }
 
 #[ no_mangle ]
@@ -25,7 +25,7 @@ pub extern "C" fn dummy_add_routine( verified_command : VerifiedCommand, _contex
   .as_integer()
   .ok_or_else( || ErrorData::new( ErrorCode::TypeMismatch, "Argument 'b' is not an integer".to_string() ) )?;
   println!( "Dummy add routine result: {}", a + b );
-  Ok( OutputData { content : format!( "Dummy add routine result: {}", a + b ), format : "text".to_string() } )
+  Ok( OutputData { content : format!( "Dummy add routine result: {}", a + b ), format : "text".to_string(), execution_time_ms : None } )
 }
 
 #[ no_mangle ]

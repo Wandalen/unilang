@@ -3,7 +3,7 @@
 ### Scope
 
 - **Purpose:** Define behavioral requirements for command registration and lookup
-- **Responsibility:** FR-REG-1 through FR-REG-9: registration, naming, validation, parity
+- **Responsibility:** FR-REG-1 through FR-REG-10: registration, naming, validation, parity, opt-in default-command routing
 - **In Scope:** Static/runtime registration requirements, naming rules, validation behavior, feature parity
 - **Out of Scope:** Implementation details, data structure internals, performance benchmarks
 
@@ -115,6 +115,19 @@ The `build.rs` script **must** validate all command definitions at compile time 
 
 **Implementation status:** ✅ Implemented with `validate_command()`, `validate_version()`, `compute_full_name()`, duplicate detection, parameter storage validation, shared validation logic, and build-time validation with actionable error messages.
 
+### FR-REG-10 (Opt-In Default Command)
+
+The framework **must** provide an opt-in mechanism for a registry to route an empty command path carrying arguments to a configured fallback command, instead of unconditionally rejecting it:
+
+- **Configuration:** `CommandRegistry::set_default_command(name)` and the equivalent `CommandRegistryBuilder::default_command(name)` fluent method **must** accept a command name and validate it using the same rules as `CommandName::new` (dot prefix, non-empty). `CommandRegistry::default_command()` **must** report the currently configured name, or `None` if unconfigured.
+- **Activation Condition:** The fallback **must** activate only when an instruction's command path is empty (no dot-prefixed token resolved into `command_path_slices`) AND at least one named or positional argument is present. An empty path with no arguments **must** continue to produce the help listing, unaffected by this feature.
+- **No Override of Explicit Paths:** An instruction that resolves any explicit, non-empty command path **must never** be redirected to the default command, regardless of configuration.
+- **Strictly Opt-In:** A registry that never calls `set_default_command` (directly or via the builder) **must** exhibit unchanged behavior — the pre-existing unknown-parameter rejection for empty-path-with-arguments invocations (`issue-003`) — with zero observable difference.
+- **Full Validation Preserved:** Once routed, the default command **must** undergo identical lookup, help-token, and argument-binding logic as an explicitly-named command, including unknown-parameter detection (FR-ARG-8). The feature changes command *routing* only; it never bypasses or weakens argument *validation*.
+- **Deferred Existence Check:** `set_default_command` **must not** require `name` to already be registered — misconfiguration (a default naming a command that is never registered) **must** surface as the ordinary `CommandNotFound` error at analysis time, not at configuration time.
+
+**Implementation status:** ✅ Implemented via `CommandRegistry::default_command()` / `set_default_command()` and `CommandRegistryBuilder::default_command()`. The empty-path branch in `SemanticAnalyzer::analyze_internal` routes to the configured default only when the path is empty and arguments are present, reusing all downstream command lookup, help-detection, and argument-binding logic unchanged. See `invariant/003_governing_principles.md` (Minimum Implicit Magic — Opt-In Default Command Exception) for the bounded-exception rationale.
+
 ### Analyses
 
 | File | Relationship |
@@ -174,6 +187,8 @@ The `build.rs` script **must** validate all command definitions at compile time 
 | File | Relationship |
 |------|--------------|
 | `tests/registry/` | Registry integration tests |
+| `tests/registry/default_command.rs` | FR-REG-10: default-command getter/setter/builder validation |
+| `tests/semantic/default_command_routing.rs` | FR-REG-10: empty-path routing, FR-ARG-8 preservation, explicit-path precedence |
 | `tests/data/validated_command_name.rs` | CommandName validation coverage |
 | `tests/regression/namespace_split_and_help_qualification.rs` | Explicit-vs-omitted empty namespace regressions (BUG-103) |
 | `tests/regression/dynamic_module_double_help_registration.rs` | Dynamic module `.help` double-registration regression (BUG-104) |

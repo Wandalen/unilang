@@ -14,7 +14,7 @@ Help rendering has no reason to depend on a command framework's type system. Thi
 | `HelpVerbosity` | Five detail levels, Minimal (0) to Comprehensive (4); default Standard (2); reads `UNILANG_HELP_VERBOSITY` |
 | `HelpDisplayOptions` | Global visibility toggles (version, status, aliases, tags); reads `UNILANG_HELP_HIDE_VERSION` |
 | `PlainRenderer` | Plain-text command pages at all five verbosity levels, plus a parameter detail page |
-| `CliFmtRenderer` | Column-aligned, colour-aware command and parameter pages via `cli_fmt` (feature `cli_fmt_backend`, on by default) |
+| `CliFmtRenderer` | Column-aligned, colour-aware command and parameter pages via `cli_fmt`; mandatory whenever the crate is enabled |
 
 The `PlainRenderer` command-page formats are a line-faithful port of the original `unilang` `HelpGenerator` output — consumers migrating from that implementation get byte-identical text for the same data.
 
@@ -65,15 +65,13 @@ assert!( page.contains( "Choices: local, global" ) );
 
 | Feature | Default | Purpose |
 |---------|---------|---------|
-| `enabled` | yes | Core model, verbosity, and `PlainRenderer` |
-| `cli_fmt_backend` | yes | `CliFmtRenderer` backed by `cli_fmt`'s detail-page template |
-| `full` | — | All of the above |
+| `enabled` | yes | Core model, verbosity, `PlainRenderer`, and `CliFmtRenderer` (backed by `cli_fmt`'s detail-page template) — a single master switch, no partial configuration |
+| `full` | — | Alias for `enabled`, kept for cross-crate consistency |
 
-Disable default features for a dependency-free plain-text-only build:
-
-```toml
-unilang_help = { version = "0.1", default-features = false, features = [ "enabled" ] }
-```
+`cli_fmt` is a mandatory dependency of this crate: there is no plain-text-only
+configuration that excludes `CliFmtRenderer`. `PlainRenderer` remains available
+alongside it as a lighter-weight rendering choice, not as a way to opt out of
+the `cli_fmt` dependency itself.
 
 ## Environment variables
 

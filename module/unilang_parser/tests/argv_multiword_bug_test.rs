@@ -1226,3 +1226,125 @@ fn test_argv_misuse_detection_short_argv()
     "Short argv should parse successfully without warnings"
   );
 }
+
+/// Test that `suppress_argv_misuse_warning` defaults to `false`, preserving prior
+/// behavior for every existing caller that hasn't opted in.
+#[test]
+fn test_argv_misuse_suppression_option_defaults_to_false()
+{
+  let options = UnilangParserOptions::default();
+  assert!(
+    !options.suppress_argv_misuse_warning,
+    "suppress_argv_misuse_warning must default to false for backward compatibility"
+  );
+}
+
+/// Test that a legitimate multi-word positional (the exact shape that triggers
+/// Heuristic 2's false positive) still parses successfully when the misuse warning
+/// is suppressed via `UnilangParserOptions`.
+#[test]
+fn test_argv_misuse_warning_suppressed_still_parses_successfully()
+{
+  let options = UnilangParserOptions
+  {
+    suppress_argv_misuse_warning: true,
+    ..UnilangParserOptions::default()
+  };
+  let parser = Parser::new( options );
+
+  // Same shape as test_argv_misuse_detection_consecutive_short_tokens: a native
+  // std::env::args()-style argv for a multi-word List(String) positional.
+  let argv = vec![
+    ".deploy".to_string(),
+    "to".to_string(),
+    "production".to_string(),
+    "server".to_string(),
+  ];
+
+  let result = parser.parse_from_argv( &argv );
+
+  assert!(
+    result.is_ok(),
+    "Suppressing the misuse warning must not change parsing behavior"
+  );
+}
+
+/// Test that the suppression check is the first statement in `detect_argv_misuse`,
+/// structurally guaranteeing neither heuristic executes (and therefore neither
+/// `eprintln!` fires) once suppressed. This is a source-level structural check rather
+/// than an stderr capture, matching this crate's existing content-inspection test style.
+#[test]
+fn test_argv_misuse_suppression_check_precedes_heuristics()
+{
+  let source_path = format!(
+    "{}/src/parser_engine/validation_utilities.rs",
+    env!( "CARGO_MANIFEST_DIR" )
+  );
+  let source = std::fs::read_to_string( &source_path )
+    .unwrap_or_else( |e| panic!( "failed to read {source_path}: {e}" ) );
+
+  let fn_start = source.find( "fn detect_argv_misuse(" )
+    .expect( "detect_argv_misuse function not found in source" );
+  let suppress_pos = source[ fn_start.. ].find( "options.suppress_argv_misuse_warning" )
+    .expect( "suppression check not found inside detect_argv_misuse" );
+  let heuristic_1_pos = source[ fn_start.. ].find( "Heuristic 1" )
+    .expect( "Heuristic 1 marker not found inside detect_argv_misuse" );
+
+  assert!(
+    suppress_pos < heuristic_1_pos,
+    "suppress_argv_misuse_warning check must precede Heuristic 1 so suppression \
+     short-circuits before any warning text can be reached"
+  );
+}
+
+/// Test that both warning sites point to a URL resolvable from any working directory
+/// (docs.rs), not the crate-relative `docs/cli_integration.md` path that is invisible
+/// to downstream consumers at their own runtime CWD.
+#[test]
+fn test_argv_misuse_doc_pointer_is_resolvable_url()
+{
+  let source_path = format!(
+    "{}/src/parser_engine/validation_utilities.rs",
+    env!( "CARGO_MANIFEST_DIR" )
+  );
+  let source = std::fs::read_to_string( &source_path )
+    .unwrap_or_else( |e| panic!( "failed to read {source_path}: {e}" ) );
+
+  assert!(
+    !source.contains( "docs/cli_integration.md" ),
+    "warning text must not reference the crate-relative, consumer-unresolvable doc path"
+  );
+  assert_eq!(
+    source.matches( "https://docs.rs/unilang_parser" ).count(),
+    2,
+    "both Heuristic 1 and Heuristic 2 warning sites must point at the docs.rs URL"
+  );
+}
+
+/// Test that Heuristic 2's warning text acknowledges the known false-positive trigger
+/// (a legitimate multi-word positional) instead of asserting misuse as settled fact,
+/// and points the user at the new suppression option.
+#[test]
+fn test_argv_misuse_warning_acknowledges_multiword_false_positive()
+{
+  let source_path = format!(
+    "{}/src/parser_engine/validation_utilities.rs",
+    env!( "CARGO_MANIFEST_DIR" )
+  );
+  let source = std::fs::read_to_string( &source_path )
+    .unwrap_or_else( |e| panic!( "failed to read {source_path}: {e}" ) );
+
+  let heuristic_2_pos = source.find( "Heuristic 2" )
+    .expect( "Heuristic 2 marker not found in source" );
+  let heuristic_2_text = &source[ heuristic_2_pos.. ];
+
+  assert!(
+    heuristic_2_text.contains( "List(String)" ) || heuristic_2_text.contains( "multi-word" ),
+    "Heuristic 2's warning must acknowledge the legitimate multi-word positional \
+     false-positive case, not assert misuse unconditionally"
+  );
+  assert!(
+    heuristic_2_text.contains( "suppress_argv_misuse_warning" ),
+    "Heuristic 2's warning must point the user at the suppression option"
+  );
+}

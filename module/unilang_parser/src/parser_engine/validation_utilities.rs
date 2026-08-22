@@ -252,10 +252,20 @@ pub( super ) fn process_positional_argument(
 ///
 /// # Note
 ///
-/// This is a heuristic detection - false positives are possible but rare.
-/// The warning is informational only and doesnt prevent parsing.
-pub( super ) fn detect_argv_misuse( argv: &[String] )
+/// This is a heuristic detection based on token shape alone, so it cannot distinguish
+/// a re-tokenized argv from a legitimate multi-word positional argument (e.g. a
+/// `List(String)` / `multiple:true` parameter) — that shape is indistinguishable from
+/// genuine misuse without provenance information. Set
+/// `UnilangParserOptions::suppress_argv_misuse_warning` once you've confirmed your argv
+/// is unmodified `std::env::args()` input. The warning is informational only and
+/// doesn't prevent parsing either way.
+pub( super ) fn detect_argv_misuse( options: &UnilangParserOptions, argv: &[String] )
 {
+  if options.suppress_argv_misuse_warning
+  {
+    return;
+  }
+
   if argv.len() < 3
   {
     // Too short to detect patterns reliably
@@ -293,7 +303,7 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
         eprintln!( "   Re-tokenizing destroys quote handling, causing quoted paths" );
         eprintln!( "   like \"src/my project\" to be incorrectly split." );
         eprintln!();
-        eprintln!( "   See: docs/cli_integration.md for details");
+        eprintln!( "   See: https://docs.rs/unilang_parser for details");
         eprintln!();
       }
       return;
@@ -304,7 +314,6 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
   // Example: ["deploy", "to", "production", "server"] suggests re-tokenization
   // of what was originally "deploy to production server"
   let mut consecutive_short = 0;
-  let max_consecutive_short = 0;
 
   for arg in argv.iter().skip( 1 )  // Skip program name
   {
@@ -321,7 +330,9 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
         {
           eprintln!( "\n⚠️  WARNING: Potential argv misuse detected!" );
           eprintln!( "   Pattern: Multiple consecutive short tokens (3+ in a row)" );
-          eprintln!( "   This suggests arguments may have been joined and re-split" );
+          eprintln!( "   This can happen when arguments were joined and re-split — but a" );
+          eprintln!( "   legitimate multi-word positional argument (e.g. a List(String) /" );
+          eprintln!( "   multiple:true parameter) can trigger this same shape by design." );
           eprintln!();
           eprintln!( "   Common mistake:" );
           eprintln!( "     let joined = argv.join(\" \");  // ❌ Loses token boundaries");
@@ -330,7 +341,11 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
           eprintln!( "   Correct approach:" );
           eprintln!( "     parser.parse_from_argv(&argv);  // ✅ Preserves shell tokenization");
           eprintln!();
-          eprintln!( "   See: docs/cli_integration.md for complete guide");
+          eprintln!( "   If this argv is known-correct (e.g. straight from std::env::args())," );
+          eprintln!( "   set suppress_argv_misuse_warning: true in UnilangParserOptions to" );
+          eprintln!( "   silence this check." );
+          eprintln!();
+          eprintln!( "   See: https://docs.rs/unilang_parser for complete guide");
           eprintln!();
         }
         return;
@@ -341,6 +356,4 @@ pub( super ) fn detect_argv_misuse( argv: &[String] )
       consecutive_short = 0;
     }
   }
-
-  let _ = max_consecutive_short;  // Suppress unused warning
 }

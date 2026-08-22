@@ -337,18 +337,32 @@ impl< 'a > SemanticAnalyzer< 'a >
       // Handle special case: single dot "." (no path, no arguments) should show help.
       // An empty path with attached named/positional arguments is NOT a help request —
       // it means the parser excluded a `name::value` token (or bare token) from the path
-      // because it's actually an argument, and that argument is unknown (no command was
-      // resolved to validate it against). This must be rejected per FR-ARG-8, not silently
-      // routed to the help listing.
-      if instruction.command_path_slices.is_empty()
+      // because it's actually an argument. If the registry has an opt-in `default_command`
+      // configured (FR-REG-10), the argument routes to that command instead; otherwise it
+      // is unconditionally unknown (no command was resolved to validate it against) and is
+      // rejected per FR-ARG-8, not silently routed to the help listing.
+      let default_slices_storage : Vec< String >;
+      let effective_path_slices : &[ String ] = if instruction.command_path_slices.is_empty()
       {
         if instruction.named_arguments.is_empty() && instruction.positional_arguments.is_empty()
         {
           return self.generate_help_listing();
         }
 
-        return Err( Error::Execution( Self::unknown_parameter_error_for_empty_path( instruction ) ) );
+        if let Some( default_name ) = self.registry.default_command()
+        {
+          default_slices_storage = default_name.trim_start_matches( '.' ).split( '.' ).map( std::string::String::from ).collect();
+          &default_slices_storage
+        }
+        else
+        {
+          return Err( Error::Execution( Self::unknown_parameter_error_for_empty_path( instruction ) ) );
+        }
       }
+      else
+      {
+        &instruction.command_path_slices
+      };
 
       // Bare `??` mirrors bare `.`: global command listing. Only the exact,
       // argument-free form qualifies — `??` with arguments falls through to the
@@ -363,7 +377,7 @@ impl< 'a > SemanticAnalyzer< 'a >
         return self.generate_help_listing();
       }
 
-      let command_path_refs : Vec< &str > = instruction.command_path_slices.iter().map( std::string::String::as_str ).collect();
+      let command_path_refs : Vec< &str > = effective_path_slices.iter().map( std::string::String::as_str ).collect();
       let command_name = crate::interner::intern_command_name( &command_path_refs );
 
       let command_def = self.registry.command( command_name ).ok_or_else( || ErrorData::new(

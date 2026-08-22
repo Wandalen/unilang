@@ -20,6 +20,8 @@ pub struct CommandRegistry
   pub( super ) dynamic_commands : DynamicCommandMap,
   /// A map of command names to their executable routines.
   pub( super ) routines : HashMap< String, CommandRoutine >,
+  /// Opt-in fallback command name for empty-path invocations that carry arguments (FR-REG-10).
+  pub( super ) default_command : Option< String >,
   // NOTE: help_conventions_enabled field removed - help is now mandatory for all commands
 }
 
@@ -30,6 +32,7 @@ impl std::fmt::Debug for CommandRegistry
     f.debug_struct( "CommandRegistry" )
       .field( "dynamic_commands", &self.dynamic_commands )
       .field( "routines_count", &self.routines.len() ) // CommandRoutine is Box<dyn Fn>, which doesn't impl Debug
+      .field( "default_command", &self.default_command )
       .finish()
   }
 }
@@ -73,6 +76,7 @@ impl CommandRegistry
     {
       dynamic_commands : DynamicCommandMap::new(RegistryMode::default()),
       routines : HashMap::new(),
+      default_command : None,
     };
 
     // MANDATORY GLOBAL HELP COMMAND - NO FLEXIBILITY
@@ -352,6 +356,46 @@ impl CommandRegistry
   pub fn clear_cache( &mut self )
   {
     self.dynamic_commands.clear_cache();
+  }
+
+  ///
+  /// Returns the configured default command name, if any (FR-REG-10).
+  ///
+  /// The default command is the fallback an empty command path carrying at least one
+  /// argument routes to (see `set_default_command`). Returns `None` when no default has
+  /// been configured — the ordinary case, and the only case for a registry that never
+  /// calls `set_default_command`.
+  ///
+  #[ must_use ]
+  pub fn default_command( &self ) -> Option< &str >
+  {
+    self.default_command.as_deref()
+  }
+
+  ///
+  /// Configures a fallback command for empty-path invocations that carry arguments (FR-REG-10).
+  ///
+  /// When set, an invocation whose command path is empty (no dot-prefixed token resolves
+  /// into `command_path_slices`) but carries at least one named or positional argument
+  /// routes to `name` instead of failing with an unknown-parameter error. An invocation
+  /// that resolves any explicit command path is never affected. This is strictly opt-in:
+  /// a registry that never calls this method sees no behavior change.
+  ///
+  /// `name` is validated with the same rules as command registration (`CommandName::new`),
+  /// but existence is **not** checked here — `name` need not already be registered. An
+  /// invocation that falls back to an unregistered default surfaces the ordinary
+  /// `CommandNotFound` error at analysis time, not at configuration time.
+  ///
+  /// # Errors
+  ///
+  /// Returns `Error::MissingDotPrefix` or `Error::EmptyCommandName` if `name` fails
+  /// `CommandName` validation.
+  ///
+  pub fn set_default_command( &mut self, name : &str ) -> Result< (), Error >
+  {
+    let validated = crate::data::CommandName::new( name )?;
+    self.default_command = Some( validated.into_inner() );
+    Ok(())
   }
 }
 

@@ -122,8 +122,13 @@ fn generated_cargo_toml_uses_current_unilang_version()
 ///
 /// Note: This doesn't do a full `cargo build` (too slow for unit tests),
 /// but does verify dependency resolution which catches nonexistent versions.
+// DISABLED: predates permission system (discovered 2026-07-16, disabled before that)
+// REASON: requires live network access to crates.io to resolve dependencies; unsuitable for default/sandboxed/offline test runs
+// RE-ENABLE: N/A — permanent, by-design opt-in via `cargo test -- --ignored` when live network access is available
+// APPROVED: n/a (pre-existing; predates the permission workflow)
+// TRACKING: unilang task 008 (undocumented_ignore_network_dependency_test)
+#[ignore]
 #[cfg_attr(test, test)]
-#[ignore] // Requires network access to crates.io, disabled by default
 fn generated_project_dependencies_resolve()
 {
   let temp = assert_fs::TempDir::new().unwrap();

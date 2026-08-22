@@ -1,6 +1,6 @@
 [package]
 name = "unilang_help"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 readme = "readme.md"
@@ -17,15 +17,13 @@ homepage = "https://github.com/Wandalen/unilang/tree/master/module/unilang_help/
 [features]
 default = [
   "enabled",
-  "cli_fmt_backend",
 ]
-enabled = []
-# Column-aligned, color-aware rendering via cli_fmt's detail-page template.
-# Disable for a plain-text-only build with no external rendering dependency.
-cli_fmt_backend = [ "enabled", "dep:cli_fmt" ]
+# Master switch. cli_fmt's column-aligned, colour-aware detail-page template
+# is a mandatory part of this crate's renderer surface — there is no
+# plain-text-only configuration that excludes it.
+enabled = [ "dep:cli_fmt" ]
 full = [
   "enabled",
-  "cli_fmt_backend",
 ]
 
 [dependencies]

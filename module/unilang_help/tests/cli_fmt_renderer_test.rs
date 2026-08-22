@@ -20,7 +20,7 @@
 //! | C2.3 | command page, all hidden   | minimal, all `hide_*`   | facts block skipped entirely                      |
 //! | C2.4 | command page, hide_version | full, hide_version      | no Version row, Status row kept                   |
 
-#![ cfg( all( feature = "enabled", feature = "cli_fmt_backend" ) ) ]
+#![ cfg( feature = "enabled" ) ]
 
 use cli_fmt::help::CliHelpStyle;
 use unilang_help::{ CliFmtRenderer, HelpCommandData, HelpParamData, HelpDisplayOptions };

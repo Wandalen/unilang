@@ -32,13 +32,10 @@ fn main()
   println!( "\n2. Strict Configuration: " );
   let strict_options = UnilangParserOptions
   {
-  main_delimiters: vec![ " ", "." ],
-  operators: vec![ "::", " :: ", "!" ],
-  whitespace_is_separator: true,
   error_on_positional_after_named: true,
   error_on_duplicate_named_arguments: true,
-  quote_pairs: vec![ ( '"', '"' ), ( '\'', '\'' ) ],
   verbosity: 0,
+  ..UnilangParserOptions ::default()
  };
   let strict_parser = Parser ::new( strict_options );
 
@@ -111,13 +108,10 @@ fn main()
   // Only error on duplicates, allow mixed order
   let partial_strict = UnilangParserOptions
   {
-  main_delimiters: vec![ " ", "." ],
-  operators: vec![ "::", " :: ", "!" ],
-  whitespace_is_separator: true,
   error_on_duplicate_named_arguments: true,
   error_on_positional_after_named: false, // Allow mixed order
-  quote_pairs: vec![ ( '"', '"' ), ( '\'', '\'' ) ],
   verbosity: 0,
+  ..UnilangParserOptions ::default()
  };
   let partial_parser = Parser ::new( partial_strict );
 

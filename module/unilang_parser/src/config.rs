@@ -35,6 +35,12 @@ pub struct UnilangParserOptions
   pub quote_pairs: Vec< ( char, char ) >,
   /// Verbosity level for debug output (0 = quiet, 1 = normal, 2 = debug).
   pub verbosity: u8,
+  /// If `true`, suppresses the "Potential argv misuse detected!" diagnostic emitted by
+  /// `parse_from_argv`. The underlying heuristics check token shape only and cannot
+  /// distinguish a re-tokenized argv from a legitimate multi-word positional argument
+  /// (e.g. a `List(String)` / `multiple:true` parameter) — set this once you've confirmed
+  /// your argv is unmodified `std::env::args()` input and want to silence the false positive.
+  pub suppress_argv_misuse_warning: bool,
 }
 
 impl Default for UnilangParserOptions
@@ -50,6 +56,7 @@ impl Default for UnilangParserOptions
    error_on_duplicate_named_arguments: false,
    quote_pairs: vec![ ( '"', '"' ), ( '\'', '\'' ) ],
    verbosity: 1, // Default to normal verbosity
+   suppress_argv_misuse_warning: false,
  }
  }
 }

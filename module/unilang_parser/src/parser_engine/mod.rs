@@ -1158,7 +1158,7 @@ impl Parser
     }
 
     // Detect potential argv misuse (emits warning if suspicious patterns found)
-    validation_utilities::detect_argv_misuse( argv );
+    validation_utilities::detect_argv_misuse( &self.options, argv );
 
     // Process argv into a reconstructed command string with proper token boundaries
     // We need to quote values that contain spaces to preserve argv boundaries

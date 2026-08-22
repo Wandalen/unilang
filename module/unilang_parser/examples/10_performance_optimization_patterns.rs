@@ -204,13 +204,10 @@ fn main() -> Result< (), Box< dyn core ::error ::Error > >
   // For strict validation (slower but more thorough)
   let strict_parser = Parser ::new( UnilangParserOptions
   {
-  main_delimiters: vec![ " ", "." ],
-  operators: vec![ "::", " :: ", "!" ],
-  whitespace_is_separator: true,
   error_on_positional_after_named: true,
   error_on_duplicate_named_arguments: true,
-  quote_pairs: vec![ ( '"', '"' ), ( '\'', '\'' ) ],
   verbosity: 0,
+  ..UnilangParserOptions ::default()
  });
 
   let test_cmd = "test.command pos1 pos2 name ::value";

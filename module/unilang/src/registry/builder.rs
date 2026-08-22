@@ -45,6 +45,22 @@ impl CommandRegistryBuilder
   }
 
   ///
+  /// Configures a fallback command for empty-path invocations that carry arguments (FR-REG-10).
+  ///
+  /// See `CommandRegistry::set_default_command` for full behavior. Existence of `name` is
+  /// not checked — it may be registered before or after this call in the builder chain.
+  ///
+  /// # Errors
+  ///
+  /// Returns `Error::MissingDotPrefix` or `Error::EmptyCommandName` if `name` fails
+  /// `CommandName` validation.
+  pub fn default_command( mut self, name : &str ) -> Result< Self, Error >
+  {
+    self.registry.set_default_command( name )?;
+    Ok( self )
+  }
+
+  ///
   /// Loads command definitions from a YAML string and adds them to the registry.
   ///
   /// **Requires feature**: `yaml_parser` (enabled by YAML approaches)

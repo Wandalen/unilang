@@ -2,9 +2,9 @@
 
 ### Scope
 
-- **Purpose:** Verify that the seven governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time
-- **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, Consistent Help Access, Explicit Dependencies, and Explicit Command Naming
-- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`??`/`.cmd.help` identity), Single Source of Truth (no duplicate definitions), Explicit Dependencies (required argument rejection), Explicit Command Naming (dot-prefix enforcement)
+- **Purpose:** Verify that the seven governing principles defined in `docs/invariant/003_governing_principles.md` hold at runtime and at compile time, plus the bounded opt-in exception to Minimum Implicit Magic
+- **Responsibility:** Test cases exercising Minimum Implicit Magic, Single Source of Truth, Fail-Fast Validation, Make Illegal States Unrepresentable, Consistent Help Access, Explicit Dependencies, Explicit Command Naming, and the Opt-In Default Command exception
+- **In Scope:** Minimum Implicit Magic (no hidden registrations), Fail-Fast (first stage rejects bad input), Make Illegal States Unrepresentable (type-state builder, three-layer defense), Consistent Help Access (`??`/`.cmd.help` identity), Single Source of Truth (no duplicate definitions), Explicit Dependencies (required argument rejection), Explicit Command Naming (dot-prefix enforcement), Opt-In Default Command (empty-path routing stays bounded: opt-in only, never overrides an explicit path, never bypasses validation)
 - **Out of Scope:** NFR thresholds (invariant 002); specific FR behaviors (feature specs)
 
 ### IN-1: Fail-Fast — malformed command string rejected at Parse stage, not Interpret stage
@@ -49,3 +49,9 @@
 - **Given:** A command name string `"build"` (no leading dot) passed to `CommandName::new`
 - **When:** The name is validated at construction
 - **Then:** Returns `Err`, not a silently auto-corrected `".build"`; the framework never adds an implicit dot prefix or otherwise transforms the name on the caller's behalf
+
+### IN-8: Opt-In Default Command — empty-path routing only activates when explicitly configured, never overrides an explicit command path, and never bypasses argument validation
+
+- **Given:** A `CommandRegistry` with `.report` registered and, separately, a second registry with `.report` registered but no `default_command` configured
+- **When:** The first registry has `default_command` set to `.report`, then three invocations are analyzed: an empty command path carrying an argument unknown to `.report`, an explicit `.report` invocation with its own arguments, and (against the second, unconfigured registry) the identical empty-path invocation
+- **Then:** The first is rejected with `ErrorCode::UnknownParameter` — routing to `.report` happened, but FR-ARG-8 validation still ran and rejected the argument `.report` doesn't declare; the second resolves via its explicit path, entirely unaffected by the configured default; the third reproduces the pre-existing, unconfigured-registry rejection unchanged — default-command routing never activates without opt-in

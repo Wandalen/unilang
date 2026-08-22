@@ -18,3 +18,4 @@ Tests for command validation, argument binding, type checking, and typo suggesti
 | `centralized_validation.rs` | Cross-path validation: all construction paths share validation rules |
 | `auto_categorize_decoupling.rs` | Auto-categorize logic decoupled from output formatting |
 | `format_category_name_decoupling.rs` | Category name formatting decoupled from semantic model |
+| `default_command_routing.rs` | FR-REG-10: empty-path routing to configured default, FR-ARG-8 preservation, explicit-path precedence |
