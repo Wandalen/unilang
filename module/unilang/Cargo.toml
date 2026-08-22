@@ -131,7 +131,7 @@ all_runtime_approaches = [
 
 enabled = [
   "dep:serde", "dep:url", "dep:chrono", "dep:regex",
-  "dep:error_tools", "dep:mod_interface", "dep:former",
+  "dep:error_tools", "dep:thiserror", "dep:mod_interface", "dep:former",
   "dep:unilang_parser", "unilang_parser/enabled",
   "dep:log", "dep:indexmap", "dep:lru", "dep:cli_fmt",
   "dep:unilang_help",
@@ -172,6 +172,7 @@ walkdir = { workspace = true, optional = true }         # Enabled by multi_file
 
 ## internal
 error_tools = { workspace = true, features = [ "enabled", "error_typed", "error_untyped" ], optional = true }
+thiserror = { workspace = true, optional = true } # Required directly: thiserror 2 derive macros expand to absolute ::thiserror paths
 mod_interface = { workspace = true, features = [ "enabled" ], optional = true }
 former = { workspace = true, features = [ "enabled", "derive_former" ], optional = true }
 unilang_parser = { workspace = true, optional = true } # SIMD features controlled by main unilang features

@@ -45,6 +45,11 @@ toml_edit = { version = "^0.25" }
 # wTools Ecosystem
 # ========================================
 error_tools = { version = "^0.42" }
+# thiserror 2 derive macros expand to absolute `::thiserror` paths, so error_tools'
+# `error_typed` feature (thiserror ~2.0.20) requires thiserror as a direct dependency
+# of every crate deriving `thiserror::Error` — a local `error_tools::dependency::thiserror`
+# alias no longer satisfies macro-expanded paths.
+thiserror = { version = "^2.0" }
 mod_interface = { version = "^0.66" }
 former = { version = "^2.53" }
 strs_tools = { version = "^0.50" }

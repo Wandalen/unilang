@@ -47,8 +47,3 @@ default = ["console_error_panic_hook"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
-
-# Local override until cli_fmt 0.13.3 (DetailPageTemplate) is published — this
-# standalone workspace cannot see the parent workspace's [patch.crates-io].
-[patch.crates-io]
-cli_fmt = { path = "../../../../../../wtools/dev/module/core/cli_fmt" }

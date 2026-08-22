@@ -31,7 +31,6 @@ mod private
   use serde_json;
   #[ cfg( feature = "yaml_parser" ) ]
   use serde_yaml_ng;
-  use error_tools::dependency::thiserror;
 
   ///
   /// The main error type for the Unilang framework.
