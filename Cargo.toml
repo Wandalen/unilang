@@ -44,7 +44,7 @@ toml_edit = { version = "^0.25" }
 # ========================================
 # wTools Ecosystem
 # ========================================
-error_tools = { version = "^0.41" }
+error_tools = { version = "^0.42" }
 mod_interface = { version = "^0.66" }
 former = { version = "^2.53" }
 strs_tools = { version = "^0.50" }
@@ -83,10 +83,3 @@ lto = true
 opt-level = 3
 codegen-units = 1
 strip = true
-
-# Local override until this workspace's local cli_fmt changes are published
-# to crates.io (currently: DetailPageTemplate and the color_tools-backed,
-# typed CliHelpStyle color-role fields); the published crates-io release
-# lags behind the local wtools checkout unilang_help renders with.
-[patch.crates-io]
-cli_fmt = { path = "../../wtools/dev/module/core/cli_fmt" }
